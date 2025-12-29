@@ -1,0 +1,16 @@
+{
+  "name": "@outside/doc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Configure your documentation server here\"",
+    "build": "echo \"Configure your build here\"",
+    "test": "echo \"No tests yet\"",
+    "lint": "echo \"No linter configured yet\"",
+    "clean": "rm -rf dist build node_modules"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
+
