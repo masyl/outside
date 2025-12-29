@@ -1,0 +1,9 @@
+# Public Assets
+
+This folder contains static assets like images, icons, and other files that can be referenced directly in markdown.
+
+Example usage:
+```markdown
+![Logo](/logo.png)
+```
+

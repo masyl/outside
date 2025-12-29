@@ -1,0 +1,57 @@
+import { defineConfig } from 'vitepress';
+
+export default defineConfig({
+  title: 'Outside Design',
+  description: 'Design documentation and process for the Outside game',
+  
+  themeConfig: {
+    nav: [
+      { text: 'Home', link: '/' },
+      { text: 'Design Process', link: '/design-process/' },
+      { text: 'Components', link: '/components/' },
+      { text: 'Style Guide', link: '/style-guide/' }
+    ],
+    
+    sidebar: {
+      '/design-process/': [
+        {
+          text: 'Design Process',
+          items: [
+            { text: 'Overview', link: '/design-process/' },
+            { text: 'Research Phase', link: '/design-process/research' },
+            { text: 'Ideation Phase', link: '/design-process/ideation' }
+          ]
+        }
+      ],
+      '/components/': [
+        {
+          text: 'Components',
+          items: [
+            { text: 'Overview', link: '/components/' },
+            { text: 'UI Elements', link: '/components/ui-elements' },
+            { text: 'Game Components', link: '/components/game-components' }
+          ]
+        }
+      ],
+      '/style-guide/': [
+        {
+          text: 'Style Guide',
+          items: [
+            { text: 'Overview', link: '/style-guide/' },
+            { text: 'Colors', link: '/style-guide/colors' },
+            { text: 'Typography', link: '/style-guide/typography' }
+          ]
+        }
+      ]
+    },
+    
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/masyl/outside' }
+    ],
+    
+    search: {
+      provider: 'local'
+    }
+  }
+});
+

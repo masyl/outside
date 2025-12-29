@@ -2,18 +2,22 @@
   "name": "@outside/design",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "echo \"Configure your design system dev server here\"",
-    "build": "echo \"Configure your build here\"",
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs",
     "test": "echo \"No tests yet\"",
     "lint": "echo \"No linter configured yet\"",
-    "clean": "rm -rf dist build node_modules"
+    "clean": "rm -rf docs/.vitepress/dist node_modules"
   },
   "dependencies": {
     "@outside/core": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitepress": "^1.1.4",
+    "vue": "^3.4.21"
   }
 }
 
