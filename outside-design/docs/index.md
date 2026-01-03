@@ -1,4 +1,4 @@
-# Outside Design Documentation
+# Ȯutside Design Documentation
 
 Welcome to the design documentation for the **Outside** game project.
 
@@ -6,14 +6,17 @@ This documentation contains our design process, component library, and style gui
 
 ## Documentation Sections
 
+### [Questions](/questions/)
+
+Before writing a pitch, a process of asking questions, looking for possible answers and formulating hypothesis is often necessary.
+
+### [Pitches](/pitches/)
+
+Proposals for new features, game mechanics or anything that should be considered as improvements in the game.
+
 ### 🎨 [Design Process](/design-process/)
+
 Learn about our design methodology, research findings, and ideation process.
-
-### 🧩 [Components](/components/)
-Browse our UI elements and game components library.
-
-### 🎨 [Style Guide](/style-guide/)
-Reference our color palette, typography, and design tokens.
 
 ## Quick Start
 
