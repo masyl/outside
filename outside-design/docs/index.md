@@ -2,7 +2,11 @@
 
 Welcome to the design documentation for the **Outside** game project.
 
-This documentation contains our design process, component library, and style guidelines.
+## On The Meaning of "Design"
+
+Here, the word design is not limited to graphical or UI design. Rather, it is the exercise of design is the broadest sense possible, without artificial partitions.
+
+I believe this cohesive approach to documenting all aspects of the design process, without the typical departmental separations will be "a less efficient but more human way" to do things moving forward.
 
 ## Documentation Sections
 

@@ -8,7 +8,14 @@
 * Meditation/Rumination:
     Game dialogues with yourself when alone in you airarium
 
-----------------------------------------------------------------------
+* Parallel universe shadows ... bleed through
+
+    See ghostly representations of what other players are doing on the same beach. Maybe as a way to trade stuff in real time ?
+
+* You... to infinity!!!
+
+    Each player is also playing a parallel version of the same main character. Because the interdimensionnal squid existence spans multiple nearby parallell universe. As a way to be more productive in it's mission.
+
 
 
 # Messages in bottles
