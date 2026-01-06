@@ -51,20 +51,13 @@
   "frontMatter.git.enabled": true,
   "frontMatter.content.pageFolders": [
     {
-      "title": "components",
-      "path": "[[workspace]]/outside-design/docs/components"
-    },
-    {
       "title": "design-process",
       "path": "[[workspace]]/outside-design/docs/design-process"
-    },
-    {
-      "title": "style-guide",
-      "path": "[[workspace]]/outside-design/docs/style-guide"
     },
     {
       "title": "pitches",
       "path": "[[workspace]]/outside-design/docs/pitches"
     }
-  ]
+  ],
+  "frontMatter.dashboard.openOnStart": false
 }
