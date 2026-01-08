@@ -22,6 +22,10 @@ Proposals for new features, game mechanics or anything that should be considered
 
 Learn about our design methodology, research findings, and ideation process.
 
+### 📋 [Built Plans](./built-plans/)
+
+Completed implementation plans that have been archived. These documents reflect the actual work that was done, including work summaries, implementation details, and commit references.
+
 ## Quick Start
 
 This documentation is built with [VitePress](https://vitepress.dev/).
@@ -41,6 +45,7 @@ pnpm build
 ```
 outside-design/
 ├── docs/
+│   ├── built-plans/       # Completed implementation plans
 │   ├── design-process/    # Design methodology and process
 │   ├── components/        # Component library
 │   └── style-guide/       # Design tokens and guidelines

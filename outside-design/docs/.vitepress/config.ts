@@ -7,12 +7,21 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Built Plans', link: '/built-plans/' },
       { text: 'Design Process', link: '/design-process/' },
       { text: 'Components', link: '/components/' },
       { text: 'Style Guide', link: '/style-guide/' }
     ],
     
     sidebar: {
+      '/built-plans/': [
+        {
+          text: 'Built Plans',
+          items: [
+            { text: 'Overview', link: '/built-plans/' }
+          ]
+        }
+      ],
       '/design-process/': [
         {
           text: 'Design Process',
