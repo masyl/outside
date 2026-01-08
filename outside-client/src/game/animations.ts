@@ -1,6 +1,15 @@
-import { animate } from 'motion';
 import { GameObject } from '@outside/core';
 import { DISPLAY_TILE_SIZE } from '../renderer/grid';
+
+/**
+ * Cubic ease-in-out function
+ * Equivalent to CSS cubic-bezier(0.4, 0, 0.2, 1)
+ */
+function easeInOutCubic(t: number): number {
+  return t < 0.5
+    ? 4 * t * t * t
+    : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 /**
  * Animation state for objects
@@ -40,32 +49,58 @@ export function animateObjectMovement(
   const toPixelX = toX * DISPLAY_TILE_SIZE;
   const toPixelY = toY * DISPLAY_TILE_SIZE;
 
-  const animation = animate(
-    (progress) => {
-      // Interpolate between start and end pixel positions
-      // This allows smooth intermediate positions between grid tiles
-      const currentX = fromPixelX + (toPixelX - fromPixelX) * progress;
-      const currentY = fromPixelY + (toPixelY - fromPixelY) * progress;
-      
-      if (onUpdate) {
-        // Callback receives pixel coordinates, allowing sub-grid positioning
-        onUpdate(currentX, currentY);
-      }
-    },
-    {
-      duration: duration,
-      easing: [0.4, 0, 0.2, 1], // Ease-in-out cubic
-    }
-  );
+  console.log(`[animateObjectMovement] Starting animation for ${objectId}:`);
+  console.log(`  From pixel: (${fromPixelX}, ${fromPixelY})`);
+  console.log(`  To pixel: (${toPixelX}, ${toPixelY})`);
+  console.log(`  Duration: ${duration}ms`);
 
-  animation.then(() => {
-    if (onComplete) {
-      onComplete();
+  // Use requestAnimationFrame for smooth animation with motion.dev easing
+  const startTime = performance.now();
+  let animationFrameId: number | null = null;
+  let cancelled = false;
+
+  const animate = (currentTime: number) => {
+    if (cancelled) {
+      return;
     }
-  });
+
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Apply easing (cubic ease-in-out: [0.4, 0, 0.2, 1])
+    const easedProgress = easeInOutCubic(progress);
+    
+    // Interpolate between start and end pixel positions
+    const currentX = fromPixelX + (toPixelX - fromPixelX) * easedProgress;
+    const currentY = fromPixelY + (toPixelY - fromPixelY) * easedProgress;
+    
+    if (onUpdate) {
+      // Callback receives pixel coordinates, allowing sub-grid positioning
+      onUpdate(currentX, currentY);
+    }
+
+    if (progress < 1) {
+      // Continue animation
+      animationFrameId = requestAnimationFrame(animate);
+    } else {
+      // Animation complete
+      console.log(`[animateObjectMovement] Animation completed for ${objectId}`);
+      if (onComplete) {
+        onComplete();
+      }
+    }
+  };
+
+  // Start animation
+  animationFrameId = requestAnimationFrame(animate);
 
   // Return cancel function
   return () => {
-    animation.cancel();
+    console.log(`[animateObjectMovement] Cancelling animation for ${objectId}`);
+    cancelled = true;
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
   };
 }
