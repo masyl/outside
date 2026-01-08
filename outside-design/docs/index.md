@@ -10,7 +10,7 @@ I believe this cohesive approach to documenting all aspects of the design proces
 
 ## Documentation Sections
 
-### [Questions](/questions/)
+### [Questions](./questions/index.md)
 
 Before writing a pitch, a process of asking questions, looking for possible answers and formulating hypothesis is often necessary.
 
