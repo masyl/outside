@@ -7,8 +7,9 @@
 
 export const VERSION = '0.1.0';
 
-// Example export - replace with your actual core logic
-export function hello(): string {
-  return 'Hello from @outside/core!';
-}
+// Export types
+export * from './types';
+
+// Export world utilities
+export * from './world';
 

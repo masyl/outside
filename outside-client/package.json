@@ -2,18 +2,24 @@
   "name": "@outside/client",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "echo \"Configure your dev server here\"",
-    "build": "echo \"Configure your build here\"",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "test": "echo \"No tests yet\"",
     "lint": "echo \"No linter configured yet\"",
     "clean": "rm -rf dist build node_modules"
   },
   "dependencies": {
-    "@outside/core": "workspace:*"
+    "@outside/core": "workspace:*",
+    "immer": "^10.1.1",
+    "motion": "^11.11.17",
+    "pixi.js": "^8.7.3"
   },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^6.0.1"
   }
 }
 
