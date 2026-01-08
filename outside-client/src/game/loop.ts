@@ -2,6 +2,7 @@ import { Store } from '../store/store';
 import { CommandQueue } from '../commands/queue';
 import { executeCommand } from '../commands/handlers';
 import { GameRenderer } from '../renderer/renderer';
+import { DebugOverlay } from '../debug/overlay';
 
 const STATE_UPDATE_INTERVAL = 500; // 500ms
 
@@ -12,14 +13,16 @@ export class GameLoop {
   private store: Store;
   private commandQueue: CommandQueue;
   private renderer: GameRenderer;
+  private debugOverlay?: DebugOverlay;
   private stateUpdateIntervalId: number | null = null;
   private animationFrameId: number | null = null;
   private isRunning: boolean = false;
 
-  constructor(store: Store, commandQueue: CommandQueue, renderer: GameRenderer) {
+  constructor(store: Store, commandQueue: CommandQueue, renderer: GameRenderer, debugOverlay?: DebugOverlay) {
     this.store = store;
     this.commandQueue = commandQueue;
     this.renderer = renderer;
+    this.debugOverlay = debugOverlay;
   }
 
   /**
@@ -77,6 +80,10 @@ export class GameLoop {
       const command = this.commandQueue.dequeue();
       if (command) {
         executeCommand(this.store, command);
+        // Increment step counter
+        if (this.debugOverlay) {
+          this.debugOverlay.incrementStep();
+        }
         // Grid is redrawn automatically via store subscription
       }
     }, STATE_UPDATE_INTERVAL);

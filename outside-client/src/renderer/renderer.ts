@@ -1,7 +1,11 @@
-import { Application, Container, Texture } from 'pixi.js';
+import { Application, Container, Texture, Sprite } from 'pixi.js';
 import { WorldState } from '@outside/core';
 import { createGrid, getGridDimensions } from './grid';
-import { createObjectsLayer, updateObjectsLayer } from './objects';
+import {
+  createObjectsLayerWithIndex,
+  updateObjectsLayerWithIndex,
+  SpriteIndex,
+} from './objects';
 
 /**
  * Main renderer for the game
@@ -12,6 +16,7 @@ export class GameRenderer {
   private objectsContainer: Container;
   private rootContainer: Container;
   private botTexture?: Texture;
+  private spriteIndex: SpriteIndex = new Map();
 
   constructor(app: Application) {
     this.app = app;
@@ -39,10 +44,15 @@ export class GameRenderer {
     const grid = createGrid(world);
     this.gridContainer.addChild(grid);
     
-    // Create objects layer
+    // Create objects layer and sprite index
     this.objectsContainer.removeChildren();
-    const objectsLayer = createObjectsLayer(world, this.botTexture, this.app.renderer);
-    this.objectsContainer.addChild(objectsLayer);
+    const { container, spriteIndex } = createObjectsLayerWithIndex(
+      world,
+      this.botTexture,
+      this.app.renderer
+    );
+    this.objectsContainer.addChild(container);
+    this.spriteIndex = spriteIndex;
     
     // Center the viewport
     this.centerViewport(world);
@@ -52,11 +62,24 @@ export class GameRenderer {
    * Update the renderer when world state changes
    */
   update(world: WorldState): void {
-    // Update objects layer
-    updateObjectsLayer(this.objectsContainer, world, this.botTexture, this.app.renderer);
+    // Update objects layer and sprite index
+    updateObjectsLayerWithIndex(
+      this.objectsContainer,
+      world,
+      this.botTexture,
+      this.app.renderer,
+      this.spriteIndex
+    );
     
     // Ensure viewport is centered (in case window was resized)
     this.centerViewport(world);
+  }
+
+  /**
+   * Get sprite for a given object id
+   */
+  getSpriteForObject(id: string): Sprite | undefined {
+    return this.spriteIndex.get(id);
   }
 
   /**

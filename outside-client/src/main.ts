@@ -4,6 +4,8 @@ import { CommandQueue } from './commands/queue';
 import { GameRenderer } from './renderer/renderer';
 import { GameLoop } from './game/loop';
 import { MockCommandFeeder } from './mock/commandFeeder';
+import { DebugOverlay } from './debug/overlay';
+import { AnimationController } from './game/animationController';
 
 /**
  * Initialize and start the game
@@ -31,17 +33,23 @@ async function init() {
     app.renderer.resize(window.innerWidth, window.innerHeight);
   });
 
+  // Create debug overlay (FPS counter, step counter, version)
+  const debugOverlay = new DebugOverlay();
+
   // Create store
   const store = new Store();
-
-  // Create command queue
-  const commandQueue = new CommandQueue();
 
   // Create renderer
   const renderer = new GameRenderer(app);
 
-  // Create game loop
-  const gameLoop = new GameLoop(store, commandQueue, renderer);
+  // Create animation controller (subscribes to store and animates sprites)
+  const animationController = new AnimationController(store, renderer);
+
+  // Create command queue
+  const commandQueue = new CommandQueue();
+
+  // Create game loop (pass debug overlay for step counting)
+  const gameLoop = new GameLoop(store, commandQueue, renderer, debugOverlay);
 
   // Create mock command feeder
   const commandFeeder = new MockCommandFeeder(commandQueue);

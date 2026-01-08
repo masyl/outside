@@ -15,6 +15,14 @@ export interface AnimationState {
 
 /**
  * Animate an object moving from one position to another
+ * @param fromX - Starting X position in GRID coordinates
+ * @param fromY - Starting Y position in GRID coordinates
+ * @param toX - Target X position in GRID coordinates
+ * @param toY - Target Y position in GRID coordinates
+ * @param duration - Animation duration in milliseconds
+ * @param onUpdate - Callback with pixel coordinates (x, y) for each frame
+ * @param onComplete - Callback when animation completes
+ * @returns Cancel function
  */
 export function animateObjectMovement(
   objectId: string,
@@ -34,10 +42,13 @@ export function animateObjectMovement(
 
   const animation = animate(
     (progress) => {
+      // Interpolate between start and end pixel positions
+      // This allows smooth intermediate positions between grid tiles
       const currentX = fromPixelX + (toPixelX - fromPixelX) * progress;
       const currentY = fromPixelY + (toPixelY - fromPixelY) * progress;
       
       if (onUpdate) {
+        // Callback receives pixel coordinates, allowing sub-grid positioning
         onUpdate(currentX, currentY);
       }
     },
