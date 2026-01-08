@@ -6,6 +6,8 @@ import { GameLoop } from './game/loop';
 import { MockCommandFeeder } from './mock/commandFeeder';
 import { DebugOverlay } from './debug/overlay';
 import { AnimationController } from './game/animationController';
+import { SelectionManager } from './input/selection';
+import { KeyboardHandler } from './input/keyboardHandler';
 
 /**
  * Initialize and start the game
@@ -48,6 +50,9 @@ async function init() {
   // Create command queue
   const commandQueue = new CommandQueue();
 
+  // Create selection manager
+  const selectionManager = new SelectionManager();
+
   // Create game loop (pass debug overlay for step counting)
   const gameLoop = new GameLoop(store, commandQueue, renderer, debugOverlay);
 
@@ -59,6 +64,29 @@ async function init() {
 
   // Start the game loop
   gameLoop.start();
+
+  // Create keyboard handler (after game loop starts so store has initial state)
+  const keyboardHandler = new KeyboardHandler(
+    selectionManager,
+    commandQueue,
+    store,
+    renderer
+  );
+
+  // Set initial selection when bots are available
+  // Subscribe to store to detect when bots are created
+  let initialSelectionSet = false;
+  const unsubscribeSelection = store.subscribe((world) => {
+    if (!initialSelectionSet && world.objects.size >= 3) {
+      // All 3 bots should be created and placed by now
+      const firstBotId = selectionManager.cycleNext(world);
+      if (firstBotId) {
+        renderer.updateSelection(world, firstBotId);
+        initialSelectionSet = true;
+        unsubscribeSelection(); // Unsubscribe after setting initial selection
+      }
+    }
+  });
 
   console.log('Outside Game Client - POC initialized');
 }

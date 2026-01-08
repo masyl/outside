@@ -4,6 +4,7 @@ import { createGrid, getGridDimensions } from './grid';
 import {
   createObjectsLayerWithIndex,
   updateObjectsLayerWithIndex,
+  updateSpriteColors,
   SpriteIndex,
 } from './objects';
 
@@ -17,6 +18,7 @@ export class GameRenderer {
   private rootContainer: Container;
   private botTexture?: Texture;
   private spriteIndex: SpriteIndex = new Map();
+  private selectedBotId: string | null = null;
 
   constructor(app: Application) {
     this.app = app;
@@ -49,7 +51,8 @@ export class GameRenderer {
     const { container, spriteIndex } = createObjectsLayerWithIndex(
       world,
       this.botTexture,
-      this.app.renderer
+      this.app.renderer,
+      this.selectedBotId
     );
     this.objectsContainer.addChild(container);
     this.spriteIndex = spriteIndex;
@@ -68,11 +71,35 @@ export class GameRenderer {
       world,
       this.botTexture,
       this.app.renderer,
-      this.spriteIndex
+      this.spriteIndex,
+      this.selectedBotId
     );
     
     // Ensure viewport is centered (in case window was resized)
     this.centerViewport(world);
+  }
+
+  /**
+   * Update selection and refresh sprite colors
+   */
+  updateSelection(world: WorldState, selectedBotId: string | null): void {
+    if (this.selectedBotId === selectedBotId) {
+      return; // No change
+    }
+
+    this.selectedBotId = selectedBotId;
+
+    // Update sprite colors based on new selection
+    if (!this.botTexture) {
+      updateSpriteColors(
+        this.objectsContainer,
+        world,
+        this.botTexture,
+        this.app.renderer,
+        this.spriteIndex,
+        this.selectedBotId
+      );
+    }
   }
 
   /**

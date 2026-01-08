@@ -117,7 +117,7 @@ export class AnimationController {
       fromGridY,
       toPos.x,
       toPos.y,
-      500,
+      125,
       (pixelX, pixelY) => {
         // Update sprite position in pixel space
         // This allows the sprite to be at intermediate positions between grid tiles

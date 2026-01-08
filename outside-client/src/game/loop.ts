@@ -4,7 +4,7 @@ import { executeCommand } from '../commands/handlers';
 import { GameRenderer } from '../renderer/renderer';
 import { DebugOverlay } from '../debug/overlay';
 
-const STATE_UPDATE_INTERVAL = 500; // 500ms
+const STATE_UPDATE_INTERVAL = 125; // 125ms
 
 /**
  * Game loop manager
@@ -43,7 +43,7 @@ export class GameLoop {
     // Initial render
     this.renderer.setWorld(this.store.getState());
 
-    // Start state update loop (500ms intervals)
+    // Start state update loop (125ms intervals)
     this.startStateUpdateLoop();
 
     // Start animation loop (runs at 60fps)
@@ -68,7 +68,7 @@ export class GameLoop {
   }
 
   /**
-   * Start the state update loop (processes commands at 500ms intervals)
+   * Start the state update loop (processes commands at 125ms intervals)
    */
   private startStateUpdateLoop(): void {
     this.stateUpdateIntervalId = window.setInterval(() => {

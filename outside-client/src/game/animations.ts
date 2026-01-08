@@ -39,7 +39,7 @@ export function animateObjectMovement(
   fromY: number,
   toX: number,
   toY: number,
-  duration: number = 500,
+  duration: number = 125,
   onUpdate?: (x: number, y: number) => void,
   onComplete?: () => void
 ): () => void {
