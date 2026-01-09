@@ -27,6 +27,8 @@
 - [Chickens and Eggs](./chickens-and-eggs.md)
 - [Trees and Fruits](./trees-and-fruits.md)
 - Add label/ids when creating objects using commands
+- Pause State for the Game Loop
+- 
 
 ## Completed Pitches
 

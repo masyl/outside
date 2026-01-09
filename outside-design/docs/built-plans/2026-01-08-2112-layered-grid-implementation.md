@@ -3,6 +3,7 @@
 Successfully implemented a complete layered grid system with ground and surface layers. The ground layer contains terrain objects (grass, dirt, water, sand, holes) that can span multiple tiles, stack on top of each other, and determine walkability. The surface layer contains bots and other game objects. Terrain objects are rendered before the surface layer, and walkability is determined by the most recently created terrain at each position. Additionally, improved visual feedback with bot sprites changed to circles, selected bot styling (white with blue outline), and a 4x4 checkered pattern inside each grid tile.
 
 **Key Achievements:**
+
 - Complete two-layer grid system: ground layer (terrain) and surface layer (bots/objects)
 - Terrain system with 5 types: grass, dirt, water, sand, holes
 - Terrain objects can span multiple tiles and stack (top-most determines walkability)
@@ -14,6 +15,7 @@ Successfully implemented a complete layered grid system with ground and surface 
 - Comprehensive debug logging for terrain creation, walkability checks, and movement
 
 **Implementation Details:**
+
 - Ground layer uses position indexing for efficient terrain lookups
 - Terrain objects stored with creation timestamps for stacking order
 - Walkability checks integrated into movement and placement validation
