@@ -14,6 +14,13 @@ export class SelectionManager {
   }
 
   /**
+   * Set the selected bot ID (alias for selectBot for consistency)
+   */
+  setSelectedBotId(id: string | null): void {
+    this.selectedBotId = id;
+  }
+
+  /**
    * Clear the current selection
    */
   clearSelection(): void {

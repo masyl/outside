@@ -56,7 +56,6 @@ export class GameRenderer {
     this.terrainContainer.removeChildren();
     const terrainLayer = createTerrainLayer(world);
     this.terrainContainer.addChild(terrainLayer);
-    this.previousGroundLayerSize = world.groundLayer.terrainObjects.size;
     
     // Create objects layer and sprite index (surface layer, renders above terrain)
     this.objectsContainer.removeChildren();
@@ -79,10 +78,7 @@ export class GameRenderer {
   update(world: WorldState): void {
     // Always update terrain layer when world state changes
     // This ensures terrain is rendered correctly as it's added incrementally
-    const terrainCount = world.groundLayer.terrainObjects.size;
-    console.log(`[Renderer.update] Updating terrain layer. Terrain count: ${terrainCount}`);
     updateTerrainLayer(this.terrainContainer, world);
-    this.previousGroundLayerSize = terrainCount;
     
     // Update objects layer and sprite index
     updateObjectsLayerWithIndex(

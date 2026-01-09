@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outside Game Server - Status</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+    h1 {
+      color: #ffffff;
+      border-bottom: 2px solid #333;
+      padding-bottom: 10px;
+    }
+    .status-card {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .status-indicator.running {
+      background: #00ff00;
+      box-shadow: 0 0 8px #00ff00;
+    }
+    .status-indicator.stopped {
+      background: #ff0000;
+    }
+    .client-list {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0;
+    }
+    .client-list li {
+      padding: 8px;
+      background: #333;
+      margin: 4px 0;
+      border-radius: 4px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #0066ff;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 10px 0;
+      transition: background 0.2s;
+    }
+    .button:hover {
+      background: #0052cc;
+    }
+    .info {
+      color: #888;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Outside Game Server</h1>
+  
+  <div class="status-card">
+    <h2>Game Status</h2>
+    <p>
+      <span class="status-indicator" id="statusIndicator"></span>
+      <span id="statusText">Checking...</span>
+    </p>
+    <div class="info" id="statusInfo"></div>
+  </div>
+
+  <div class="status-card">
+    <h2>Connected Clients</h2>
+    <p>Count: <strong id="clientCount">0</strong></p>
+    <ul class="client-list" id="clientList"></ul>
+  </div>
+
+  <div class="status-card">
+    <h2>Actions</h2>
+    <a href="/client" class="button" target="_blank">Open Client</a>
+    <div class="info">Open the game client in a new window to join or start a game.</div>
+  </div>
+
+  <script>
+    async function updateStatus() {
+      try {
+        const response = await fetch('/api/status');
+        const data = await response.json();
+        
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const statusInfo = document.getElementById('statusInfo');
+        const clientCount = document.getElementById('clientCount');
+        const clientList = document.getElementById('clientList');
+        
+        if (data.isRunning) {
+          statusIndicator.className = 'status-indicator running';
+          statusText.textContent = 'Game Running';
+          statusInfo.textContent = `Host: ${data.hostPeerId || 'Unknown'}`;
+        } else {
+          statusIndicator.className = 'status-indicator stopped';
+          statusText.textContent = 'No Game Running';
+          statusInfo.textContent = 'Waiting for a host to start the game...';
+        }
+        
+        clientCount.textContent = data.connectedClients.length;
+        
+        clientList.innerHTML = '';
+        if (data.connectedClients.length === 0) {
+          const li = document.createElement('li');
+          li.textContent = 'No clients connected';
+          li.style.color = '#888';
+          clientList.appendChild(li);
+        } else {
+          data.connectedClients.forEach(clientId => {
+            const li = document.createElement('li');
+            li.textContent = clientId;
+            clientList.appendChild(li);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching status:', error);
+      }
+    }
+    
+    // Update status immediately and then every 2 seconds
+    updateStatus();
+    setInterval(updateStatus, 2000);
+  </script>
+</body>
+</html>

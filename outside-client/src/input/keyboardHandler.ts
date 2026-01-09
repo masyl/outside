@@ -4,27 +4,35 @@ import { CommandQueue } from '../commands/queue';
 import { parseCommand } from '../commands/parser';
 import { GameRenderer } from '../renderer/renderer';
 import { Store } from '../store/store';
+import { InputCommandType } from '../network/inputCommands';
+
+export type InputCommandSender = (command: InputCommandType, selectedBotId?: string, data?: { x?: number; y?: number }) => void;
 
 /**
  * Handles keyboard input for bot selection and movement
  */
 export class KeyboardHandler {
   private selectionManager: SelectionManager;
-  private commandQueue: CommandQueue;
+  private commandQueue: CommandQueue | null;
   private store: Store;
   private renderer: GameRenderer;
   private keyHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
+  private inputCommandSender: InputCommandSender | null = null;
+  private isClientMode: boolean = false;
 
   constructor(
     selectionManager: SelectionManager,
-    commandQueue: CommandQueue,
+    commandQueue: CommandQueue | null,
     store: Store,
-    renderer: GameRenderer
+    renderer: GameRenderer,
+    inputCommandSender?: InputCommandSender
   ) {
     this.selectionManager = selectionManager;
     this.commandQueue = commandQueue;
     this.store = store;
     this.renderer = renderer;
+    this.inputCommandSender = inputCommandSender || null;
+    this.isClientMode = inputCommandSender !== undefined;
 
     this.setupKeyHandlers();
     this.attachEventListeners();
@@ -42,6 +50,10 @@ export class KeyboardHandler {
       if (selectedId) {
         this.renderer.updateSelection(world, selectedId);
       }
+      // In client mode, notify host (optional, selection is local)
+      if (this.isClientMode && this.inputCommandSender) {
+        this.inputCommandSender('SELECT_NEXT_BOT');
+      }
     });
 
     // Shift+Tab: Cycle to previous bot
@@ -51,6 +63,10 @@ export class KeyboardHandler {
       const selectedId = this.selectionManager.cyclePrevious(world);
       if (selectedId) {
         this.renderer.updateSelection(world, selectedId);
+      }
+      // In client mode, notify host (optional, selection is local)
+      if (this.isClientMode && this.inputCommandSender) {
+        this.inputCommandSender('SELECT_PREV_BOT');
       }
     });
 
@@ -122,9 +138,33 @@ export class KeyboardHandler {
       return;
     }
 
-    // Enqueue move command (1 tile movement)
-    const command = parseCommand(`move ${selectedBotId} ${direction} 1`);
-    this.commandQueue.enqueue(command);
+    // In client mode, send input command to host with selected bot ID
+    if (this.isClientMode && this.inputCommandSender) {
+      let inputCommand: InputCommandType;
+      switch (direction) {
+        case 'up':
+          inputCommand = 'MOVE_UP';
+          break;
+        case 'down':
+          inputCommand = 'MOVE_DOWN';
+          break;
+        case 'left':
+          inputCommand = 'MOVE_LEFT';
+          break;
+        case 'right':
+          inputCommand = 'MOVE_RIGHT';
+          break;
+      }
+      // Send the selected bot ID so host knows which bot to move
+      this.inputCommandSender(inputCommand, selectedBotId);
+      return;
+    }
+
+    // In host mode, enqueue game command
+    if (this.commandQueue) {
+      const command = parseCommand(`move ${selectedBotId} ${direction} 1`);
+      this.commandQueue.enqueue(command);
+    }
   }
 
   /**

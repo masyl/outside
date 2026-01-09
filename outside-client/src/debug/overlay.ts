@@ -9,10 +9,12 @@ export class DebugOverlay {
   private fpsElement: HTMLDivElement;
   private stepElement: HTMLDivElement;
   private versionElement: HTMLDivElement;
+  private modeElement: HTMLDivElement;
   private fps: number = 0;
   private frameCount: number = 0;
   private lastFpsUpdate: number = 0;
   private stepCount: number = 0;
+  private mode: 'host' | 'client' | 'unknown' = 'unknown';
 
   constructor() {
     // Create container
@@ -36,6 +38,11 @@ export class DebugOverlay {
     this.versionElement = document.createElement('div');
     this.versionElement.textContent = `Version: ${VERSION}`;
     this.container.appendChild(this.versionElement);
+
+    // Create mode element
+    this.modeElement = document.createElement('div');
+    this.modeElement.textContent = 'Mode: unknown';
+    this.container.appendChild(this.modeElement);
 
     // Create FPS element
     this.fpsElement = document.createElement('div');
@@ -95,6 +102,21 @@ export class DebugOverlay {
    */
   getFps(): number {
     return this.fps;
+  }
+
+  /**
+   * Set the game mode (host or client)
+   */
+  setMode(mode: 'host' | 'client'): void {
+    this.mode = mode;
+    this.modeElement.textContent = `Mode: ${mode.toUpperCase()}`;
+  }
+
+  /**
+   * Get current mode
+   */
+  getMode(): 'host' | 'client' | 'unknown' {
+    return this.mode;
   }
 
   /**
