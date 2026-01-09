@@ -10,6 +10,15 @@ export function executeCommand(store: Store, command: ParsedCommand): void {
     case 'create':
       if (command.objectType === 'bot') {
         store.dispatch(actions.createBot(command.id));
+      } else if (command.objectType === 'terrain') {
+        store.dispatch(actions.createTerrain(
+          command.id,
+          command.terrainType,
+          command.x,
+          command.y,
+          command.width,
+          command.height
+        ));
       }
       break;
 

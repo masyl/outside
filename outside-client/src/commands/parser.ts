@@ -1,7 +1,8 @@
-import { Direction } from '@outside/core';
+import { Direction, TerrainType } from '@outside/core';
 
 export type ParsedCommand =
   | { type: 'create'; objectType: 'bot'; id: string }
+  | { type: 'create'; objectType: 'terrain'; id: string; terrainType: TerrainType; x: number; y: number; width: number; height: number }
   | { type: 'place'; id: string; x: number; y: number }
   | { type: 'move'; id: string; direction: Direction; distance: number }
   | { type: 'unknown'; raw: string };
@@ -26,6 +27,20 @@ export function parseCommand(commandString: string): ParsedCommand {
     // Handle create bot command: "create bot <id>"
     if (cmd === 'create' && args.length === 3 && args[1] === 'bot') {
       return { type: 'create', objectType: 'bot', id: args[2] };
+    }
+    
+    // Handle create terrain command: "create terrain <type> <id> <x> <y> <width> <height>"
+    if (cmd === 'create' && args.length === 8 && args[1] === 'terrain') {
+      const terrainType = args[2] as TerrainType;
+      const validTerrainTypes: TerrainType[] = ['grass', 'dirt', 'water', 'sand', 'hole'];
+      const id = args[3];
+      const x = parseInt(args[4], 10);
+      const y = parseInt(args[5], 10);
+      const width = parseInt(args[6], 10);
+      const height = parseInt(args[7], 10);
+      if (validTerrainTypes.includes(terrainType) && !isNaN(x) && !isNaN(y) && !isNaN(width) && !isNaN(height)) {
+        return { type: 'create', objectType: 'terrain', id, terrainType, x, y, width, height };
+      }
     }
     
     // Handle place command: "place <id> <x> <y>"

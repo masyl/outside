@@ -8,6 +8,7 @@ import { DebugOverlay } from './debug/overlay';
 import { AnimationController } from './game/animationController';
 import { SelectionManager } from './input/selection';
 import { KeyboardHandler } from './input/keyboardHandler';
+import { executeCommand } from './commands/handlers';
 
 /**
  * Initialize and start the game
@@ -59,8 +60,20 @@ async function init() {
   // Create mock command feeder
   const commandFeeder = new MockCommandFeeder(commandQueue);
 
-  // Feed initial commands
-  commandFeeder.feedInitialCommands();
+  // Process all initial terrain commands immediately before game loop starts
+  // This ensures terrain appears instantly when the game loads
+  console.log('[Init] Processing initial terrain commands...');
+  const terrainCommands = commandFeeder.getInitialTerrainCommands();
+  for (const command of terrainCommands) {
+    executeCommand(store, command);
+  }
+  console.log(`[Init] Processed ${terrainCommands.length} terrain commands. Terrain should now be visible.`);
+  
+  // Initial render to show terrain
+  renderer.setWorld(store.getState());
+
+  // Feed bot commands to the queue (will be processed by game loop at 125ms intervals)
+  commandFeeder.feedBotCommands();
 
   // Start the game loop
   gameLoop.start();

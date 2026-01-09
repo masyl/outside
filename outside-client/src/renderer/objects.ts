@@ -4,17 +4,46 @@ import { DISPLAY_TILE_SIZE } from './grid';
 
 /**
  * Create a placeholder sprite for a bot (until PNG is provided)
- * @param color - Color in hex format (e.g., '#00ff00' for green, '#ffffff' for white)
+ * Draws an 8px circle (32px diameter) centered in a 64px tile
+ * Selected bots: white circle with blue outline
+ * Unselected bots: white circle with grey border for contrast
+ * @param isSelected - Whether this bot is currently selected
  */
-function createBotPlaceholder(renderer?: Renderer, color: string = '#00ff00'): Sprite {
+function createBotPlaceholder(renderer?: Renderer, isSelected: boolean = false): Sprite {
   // Use canvas fallback for simplicity and reliability
-  // Create a simple colored sprite using a canvas
+  // Create a circle sprite using a canvas
   const canvas = document.createElement('canvas');
   canvas.width = DISPLAY_TILE_SIZE;
   canvas.height = DISPLAY_TILE_SIZE;
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE);
+  
+  // Draw circle centered in the 64px canvas
+  // Circle radius: 16px (DISPLAY_TILE_SIZE / 4), diameter: 32px
+  // Center: 32px, 32px
+  const centerX = DISPLAY_TILE_SIZE / 2; // 32px
+  const centerY = DISPLAY_TILE_SIZE / 2; // 32px
+  const radius = DISPLAY_TILE_SIZE / 4; // 16px
+  
+  if (isSelected) {
+    // Selected bot: white circle with blue outline
+    ctx.fillStyle = '#ffffff'; // White fill
+    ctx.strokeStyle = '#0000ff'; // Blue outline
+    ctx.lineWidth = 3; // 3px outline width
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    // Unselected bot: white circle with grey border for contrast
+    ctx.fillStyle = '#ffffff'; // White fill
+    ctx.strokeStyle = '#808080'; // Grey border
+    ctx.lineWidth = 2; // 2px border width
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+  
   const texture = Texture.from(canvas);
   return new Sprite(texture);
 }
@@ -51,9 +80,9 @@ export function createObjectsLayerWithIndex(
       if (botTexture) {
         sprite = createBotSprite(botTexture);
       } else {
-        // Use green for selected bot, white for others
-        const color = object.id === selectedBotId ? '#00ff00' : '#ffffff';
-        sprite = createBotPlaceholder(renderer, color);
+        // Selected bot: white with blue outline, unselected: light gray
+        const isSelected = object.id === selectedBotId;
+        sprite = createBotPlaceholder(renderer, isSelected);
       }
 
       // Position sprite at object's grid position
@@ -96,9 +125,9 @@ export function updateObjectsLayerWithIndex(
         if (botTexture) {
           sprite = createBotSprite(botTexture);
         } else {
-          // Use green for selected bot, white for others
-          const color = object.id === selectedBotId ? '#00ff00' : '#ffffff';
-          sprite = createBotPlaceholder(renderer, color);
+          // Selected bot: white with blue outline, unselected: light gray
+          const isSelected = object.id === selectedBotId;
+          sprite = createBotPlaceholder(renderer, isSelected);
         }
 
         // Only set initial position when creating - AnimationController handles updates
@@ -138,15 +167,15 @@ export function updateSpriteColors(
     if (object.type === 'bot') {
       const sprite = spriteIndex.get(object.id);
       if (sprite) {
-        // Only update color if using placeholder (not texture)
+        // Only update appearance if using placeholder (not texture)
         if (!botTexture) {
-          const color = object.id === selectedBotId ? '#00ff00' : '#ffffff';
+          const isSelected = object.id === selectedBotId;
           
           // Remove old sprite
           container.removeChild(sprite);
           
-          // Create new sprite with correct color
-          const newSprite = createBotPlaceholder(renderer, color);
+          // Create new sprite with correct selection state
+          const newSprite = createBotPlaceholder(renderer, isSelected);
           newSprite.x = sprite.x;
           newSprite.y = sprite.y;
           

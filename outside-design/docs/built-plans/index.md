@@ -33,6 +33,12 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ## Completed Plans
 
+### 2026-01-08 15:29 - Player Input and Game Loop Optimization
+
+Implemented complete player input system with bot selection and keyboard controls. Added SelectionManager and KeyboardHandler for Tab/Shift+Tab cycling and arrow key movement. Renderer updated to show selected bot in green, others in white. Game loop optimized from 500ms to 125ms for 4x faster command processing. Animation duration synchronized with new game loop speed.
+
+[View full plan →](./2026-01-08-1529-player-input-and-game-loop-optimization.md)
+
 ### 2026-01-08 14:57 - Smooth Animations
 
 Implemented smooth bot movement animations with pixel-based interpolation. Animation system operates independently from the 500ms command loop, using manual `requestAnimationFrame` with cubic easing. Renderer updated to preserve sprites during state updates.

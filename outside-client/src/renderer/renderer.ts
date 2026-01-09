@@ -7,6 +7,7 @@ import {
   updateSpriteColors,
   SpriteIndex,
 } from './objects';
+import { createTerrainLayer, updateTerrainLayer } from './terrain';
 
 /**
  * Main renderer for the game
@@ -14,11 +15,13 @@ import {
 export class GameRenderer {
   private app: Application;
   private gridContainer: Container;
+  private terrainContainer: Container;
   private objectsContainer: Container;
   private rootContainer: Container;
   private botTexture?: Texture;
   private spriteIndex: SpriteIndex = new Map();
   private selectedBotId: string | null = null;
+  private previousGroundLayerSize: number = 0;
 
   constructor(app: Application) {
     this.app = app;
@@ -27,11 +30,14 @@ export class GameRenderer {
     this.rootContainer = new Container();
     this.app.stage.addChild(this.rootContainer);
     
-    // Create grid container (will be initialized in setWorld)
+    // Create containers for each layer (rendered in order: grid, terrain, objects)
     this.gridContainer = new Container();
+    this.terrainContainer = new Container();
     this.objectsContainer = new Container();
     
+    // Add containers in render order: grid (bottom), terrain (middle), objects (top)
     this.rootContainer.addChild(this.gridContainer);
+    this.rootContainer.addChild(this.terrainContainer);
     this.rootContainer.addChild(this.objectsContainer);
   }
 
@@ -42,11 +48,17 @@ export class GameRenderer {
     // Clear existing grid
     this.gridContainer.removeChildren();
     
-    // Create new grid
+    // Create new grid (checkered background, renders at bottom)
     const grid = createGrid(world);
     this.gridContainer.addChild(grid);
     
-    // Create objects layer and sprite index
+    // Create terrain layer (ground layer, renders above grid)
+    this.terrainContainer.removeChildren();
+    const terrainLayer = createTerrainLayer(world);
+    this.terrainContainer.addChild(terrainLayer);
+    this.previousGroundLayerSize = world.groundLayer.terrainObjects.size;
+    
+    // Create objects layer and sprite index (surface layer, renders above terrain)
     this.objectsContainer.removeChildren();
     const { container, spriteIndex } = createObjectsLayerWithIndex(
       world,
@@ -65,6 +77,13 @@ export class GameRenderer {
    * Update the renderer when world state changes
    */
   update(world: WorldState): void {
+    // Always update terrain layer when world state changes
+    // This ensures terrain is rendered correctly as it's added incrementally
+    const terrainCount = world.groundLayer.terrainObjects.size;
+    console.log(`[Renderer.update] Updating terrain layer. Terrain count: ${terrainCount}`);
+    updateTerrainLayer(this.terrainContainer, world);
+    this.previousGroundLayerSize = terrainCount;
+    
     // Update objects layer and sprite index
     updateObjectsLayerWithIndex(
       this.objectsContainer,

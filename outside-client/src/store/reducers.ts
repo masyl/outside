@@ -1,5 +1,5 @@
 import { produce } from 'immer';
-import { WorldState, Bot, Position, Direction, isValidPosition, isPositionOccupied, placeObjectInGrid, removeObjectFromGrid } from '@outside/core';
+import { WorldState, Bot, Position, Direction, TerrainObject, isValidPosition, isPositionOccupied, placeObjectInGrid, removeObjectFromGrid, addTerrainObject, isWalkable, getTopMostTerrainAtPosition } from '@outside/core';
 import { Action } from './actions';
 
 /**
@@ -28,6 +28,47 @@ export function reducer(state: WorldState, action: Action): WorldState {
         break;
       }
 
+      case 'CREATE_TERRAIN': {
+        const { id, terrainType, x, y, width, height } = action.payload;
+        
+        // Check if terrain already exists
+        if (draft.groundLayer.terrainObjects.has(id)) {
+          console.warn(`Terrain with id "${id}" already exists`);
+          return state;
+        }
+
+        // Validate terrain bounds
+        // Terrain must be fully within the grid: x + width <= width, y + height <= height
+        if (x < 0 || y < 0 || x + width > draft.width || y + height > draft.height) {
+          console.warn(`Terrain extends outside world bounds: (${x}, ${y}) ${width}x${height}, world size: ${draft.width}x${draft.height}`);
+          return state;
+        }
+        
+        // Additional validation: ensure width and height are positive
+        if (width <= 0 || height <= 0) {
+          console.warn(`Terrain has invalid dimensions: ${width}x${height}`);
+          return state;
+        }
+
+        // Create new terrain object with current timestamp
+        const terrain: TerrainObject = {
+          id,
+          type: terrainType,
+          position: { x, y },
+          width,
+          height,
+          createdAt: Date.now(),
+        };
+
+        console.log(`[CREATE_TERRAIN] Creating terrain: ${id} (${terrainType}) at (${x}, ${y}) size ${width}x${height}`);
+        
+        // Add to ground layer
+        addTerrainObject(draft.groundLayer, terrain);
+        
+        console.log(`[CREATE_TERRAIN] Terrain added. Total terrain objects: ${draft.groundLayer.terrainObjects.size}`);
+        break;
+      }
+
       case 'PLACE_OBJECT': {
         const { id, position } = action.payload;
         
@@ -39,6 +80,31 @@ export function reducer(state: WorldState, action: Action): WorldState {
 
         if (!isValidPosition(draft, position)) {
           console.warn(`Invalid position: (${position.x}, ${position.y})`);
+          return state;
+        }
+
+        // Check walkability - bots can only be placed on walkable terrain
+        console.log(`[PLACE_OBJECT] Trying to place ${id} at (${position.x}, ${position.y})`);
+        if (!isWalkable(draft, position)) {
+          const topMostTerrain = getTopMostTerrainAtPosition(draft.groundLayer, position);
+          if (topMostTerrain) {
+            console.warn(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is not walkable - terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
+          } else {
+            console.warn(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is not walkable - NO TERRAIN at this position`);
+          }
+          return state;
+        }
+        
+        const topMostTerrain = getTopMostTerrainAtPosition(draft.groundLayer, position);
+        if (topMostTerrain) {
+          console.log(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is walkable - terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
+        } else {
+          console.log(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is walkable - NO TERRAIN (should not happen)`);
+        }
+
+        // Check if target position is occupied by another object
+        if (isPositionOccupied(draft, position)) {
+          console.warn(`Position (${position.x}, ${position.y}) is occupied`);
           return state;
         }
 
@@ -83,11 +149,39 @@ export function reducer(state: WorldState, action: Action): WorldState {
 
         // Validate new position
         if (!isValidPosition(draft, newPosition)) {
-          console.warn(`Invalid move position: (${newPosition.x}, ${newPosition.y})`);
+          console.warn(`[MOVE_OBJECT] Invalid move position: (${newPosition.x}, ${newPosition.y})`);
           return state;
         }
 
-        // Check if target position is occupied
+        // Check walkability - bots can only move to walkable positions
+        console.log(`[MOVE_OBJECT] Bot ${id} trying to move from (${currentPos.x}, ${currentPos.y}) to (${newPosition.x}, ${newPosition.y})`);
+        
+        // Debug: Check what terrain is at the target position
+        const topMostTerrain = getTopMostTerrainAtPosition(draft.groundLayer, newPosition);
+        if (topMostTerrain) {
+          console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) has terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
+        } else {
+          console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) has NO TERRAIN`);
+        }
+        
+        // Check all terrain objects at this position (for debugging)
+        const allTerrainAtPosition = draft.groundLayer.terrainObjectsByPosition.get(`${newPosition.x},${newPosition.y}`);
+        if (allTerrainAtPosition && allTerrainAtPosition.length > 0) {
+          console.log(`[MOVE_OBJECT] All terrain at (${newPosition.x}, ${newPosition.y}):`, allTerrainAtPosition.map(t => `${t.type}(${t.id})`).join(', '));
+        }
+        
+        if (!isWalkable(draft, newPosition)) {
+          if (topMostTerrain) {
+            console.warn(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is not walkable - terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
+          } else {
+            console.warn(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is not walkable - NO TERRAIN at this position`);
+          }
+          return state;
+        }
+        
+        console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is walkable, allowing movement`);
+
+        // Check if target position is occupied by another object
         if (isPositionOccupied(draft, newPosition)) {
           console.warn(`Position (${newPosition.x}, ${newPosition.y}) is occupied`);
           return state;

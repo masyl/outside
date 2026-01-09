@@ -10,23 +10,36 @@ const DARKER_GREY = 0x1a1a1a;
 
 /**
  * Create and render the checkered grid background
+ * Each tile has a 4x4 checkered pattern inside it using the same two tones
  */
 export function createGrid(world: WorldState): Container {
   const container = new Container();
   const graphics = new Graphics();
 
-  // Draw checkered pattern using beginPath/rect/fill pattern
-  for (let y = 0; y < world.height; y++) {
-    for (let x = 0; x < world.width; x++) {
-      const isDark = (x + y) % 2 === 0;
-      const color = isDark ? DARK_GREY : DARKER_GREY;
-      
-      const xPos = x * DISPLAY_TILE_SIZE;
-      const yPos = y * DISPLAY_TILE_SIZE;
-      
-      graphics
-        .rect(xPos, yPos, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE)
-        .fill(color);
+  // Size of each small square in the 4x4 pattern
+  const PATTERN_SIZE = DISPLAY_TILE_SIZE / 4; // 16px per square (64px / 4 = 16px)
+
+  // Draw each tile with a 4x4 checkered pattern inside
+  for (let tileY = 0; tileY < world.height; tileY++) {
+    for (let tileX = 0; tileX < world.width; tileX++) {
+      const tileXPos = tileX * DISPLAY_TILE_SIZE;
+      const tileYPos = tileY * DISPLAY_TILE_SIZE;
+
+      // Draw 4x4 pattern inside this tile
+      for (let patternY = 0; patternY < 4; patternY++) {
+        for (let patternX = 0; patternX < 4; patternX++) {
+          // Alternate colors in a checkered pattern
+          const isDark = (patternX + patternY) % 2 === 0;
+          const color = isDark ? DARK_GREY : DARKER_GREY;
+          
+          const squareX = tileXPos + patternX * PATTERN_SIZE;
+          const squareY = tileYPos + patternY * PATTERN_SIZE;
+          
+          graphics
+            .rect(squareX, squareY, PATTERN_SIZE, PATTERN_SIZE)
+            .fill(color);
+        }
+      }
     }
   }
 

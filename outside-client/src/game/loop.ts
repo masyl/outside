@@ -40,8 +40,8 @@ export class GameLoop {
       this.renderer.update(state);
     });
 
-    // Initial render
-    this.renderer.setWorld(this.store.getState());
+    // Note: Initial render is now handled in main.ts after terrain is loaded
+    // This ensures terrain is visible before the game loop starts
 
     // Start state update loop (125ms intervals)
     this.startStateUpdateLoop();
