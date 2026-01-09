@@ -77,13 +77,10 @@ export class GameLoop {
       }
 
       // Process one command per step
+      // Note: Step count is now managed by HostMode's step counter, not here
       const command = this.commandQueue.dequeue();
       if (command) {
         executeCommand(this.store, command);
-        // Increment step counter
-        if (this.debugOverlay) {
-          this.debugOverlay.incrementStep();
-        }
         // Grid is redrawn automatically via store subscription
       }
     }, STATE_UPDATE_INTERVAL);

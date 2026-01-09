@@ -28,3 +28,6 @@
 - [Trees and Fruits](./trees-and-fruits.md)
 - Add label/ids when creating objects using commands
 
+## Completed Pitches
+
+- [Outside Game Server](./outside-game-server.md)

@@ -2,6 +2,7 @@ import { Action } from './actions';
 import { Store } from './store';
 
 const STORAGE_KEY = 'outside-game-events';
+const STEP_COUNT_KEY = 'outside-game-step-count';
 
 /**
  * Event logger for persisting game state changes to localStorage
@@ -80,8 +81,36 @@ export class EventLogger {
   clearEvents(): void {
     try {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STEP_COUNT_KEY);
     } catch (error) {
       console.warn('[EventLogger] Failed to clear events:', error);
+    }
+  }
+
+  /**
+   * Save step count to localStorage
+   */
+  saveStepCount(step: number): void {
+    try {
+      localStorage.setItem(STEP_COUNT_KEY, step.toString());
+    } catch (error) {
+      console.warn('[EventLogger] Failed to save step count:', error);
+    }
+  }
+
+  /**
+   * Load step count from localStorage
+   */
+  loadStepCount(): number {
+    try {
+      const stored = localStorage.getItem(STEP_COUNT_KEY);
+      if (!stored) {
+        return 0;
+      }
+      return parseInt(stored, 10) || 0;
+    } catch (error) {
+      console.warn('[EventLogger] Failed to load step count:', error);
+      return 0;
     }
   }
 

@@ -33,7 +33,6 @@ export class AnimationController {
    */
   resetPreviousState(): void {
     this.previousState = this.store.getState();
-    console.log('[AnimationController] Previous state reset to current state');
   }
 
   /**
@@ -51,7 +50,6 @@ export class AnimationController {
 
   private handleStateChange(currentState: WorldState): void {
     if (!this.previousState) {
-      console.log('[AnimationController] Initial state set, no animations yet');
       this.previousState = currentState;
       return;
     }
@@ -63,7 +61,6 @@ export class AnimationController {
       const prevObj = prevObjects.get(id);
       if (!prevObj) {
         // New object – no movement animation needed yet
-        console.log(`[AnimationController] New object ${id} created, no animation`);
         return;
       }
 
@@ -74,7 +71,7 @@ export class AnimationController {
         return;
       }
 
-      console.log(`[AnimationController] Position change detected for ${id}: (${fromPos.x}, ${fromPos.y}) -> (${toPos.x}, ${toPos.y})`);
+      // Position changed - animate movement (no logging to avoid console spam)
       this.animateMovement(id, fromPos, toPos);
     });
 
@@ -95,7 +92,6 @@ export class AnimationController {
     // Cancel any existing animation for this object
     const existing = this.activeAnimations.get(id);
     if (existing) {
-      console.log(`[AnimationController] Cancelling existing animation for ${id}`);
       existing();
       this.activeAnimations.delete(id);
     }
@@ -110,13 +106,6 @@ export class AnimationController {
     const fromGridX = currentPixelX / DISPLAY_TILE_SIZE;
     const fromGridY = currentPixelY / DISPLAY_TILE_SIZE;
 
-    console.log(`[AnimationController] Starting animation for ${id}:`);
-    console.log(`  Current pixel: (${currentPixelX}, ${currentPixelY})`);
-    console.log(`  Current grid: (${fromGridX}, ${fromGridY})`);
-    console.log(`  Target grid: (${toPos.x}, ${toPos.y})`);
-    console.log(`  Target pixel: (${toPos.x * DISPLAY_TILE_SIZE}, ${toPos.y * DISPLAY_TILE_SIZE})`);
-
-    let updateCount = 0;
     // Animate from current position (in grid coords) to target position (in grid coords)
     // The animation function will handle pixel interpolation, allowing smooth sub-grid movement
     const cancel = animateObjectMovement(
@@ -129,16 +118,11 @@ export class AnimationController {
       (pixelX, pixelY) => {
         // Update sprite position in pixel space
         // This allows the sprite to be at intermediate positions between grid tiles
-        updateCount++;
-        if (updateCount % 10 === 0) {
-          console.log(`[AnimationController] Animation update ${updateCount} for ${id}: sprite at (${pixelX.toFixed(1)}, ${pixelY.toFixed(1)})`);
-        }
         sprite.x = pixelX;
         sprite.y = pixelY;
       },
       () => {
         // Animation complete - ensure sprite is exactly at target grid position
-        console.log(`[AnimationController] Animation complete for ${id} after ${updateCount} updates`);
         sprite.x = toPos.x * DISPLAY_TILE_SIZE;
         sprite.y = toPos.y * DISPLAY_TILE_SIZE;
         this.activeAnimations.delete(id);
@@ -146,7 +130,6 @@ export class AnimationController {
     );
 
     this.activeAnimations.set(id, cancel);
-    console.log(`[AnimationController] Animation started for ${id}, cancel function stored`);
   }
 }
 

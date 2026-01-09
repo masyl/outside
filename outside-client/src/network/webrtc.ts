@@ -27,7 +27,10 @@ export class WebRTCPeer {
 
     // Handle connection state changes
     this.pc.onconnectionstatechange = () => {
-      console.log(`[WebRTC] Connection state: ${this.pc.connectionState}`);
+      // Only log significant state changes (not every intermediate state)
+      if (this.pc.connectionState === 'connected' || this.pc.connectionState === 'failed' || this.pc.connectionState === 'disconnected') {
+        console.log(`[WebRTC] Connection state: ${this.pc.connectionState}`);
+      }
     };
   }
 
@@ -57,7 +60,6 @@ export class WebRTCPeer {
    */
   setupIncomingDataChannel(): void {
     this.pc.ondatachannel = (event) => {
-      console.log('[WebRTC] Incoming data channel received:', event.channel.label);
       this.dataChannel = event.channel;
       this.setupDataChannel(this.dataChannel);
     };
@@ -65,14 +67,14 @@ export class WebRTCPeer {
 
   private setupDataChannel(channel: RTCDataChannel): void {
     channel.onopen = () => {
-      console.log(`[WebRTC] Data channel opened: ${channel.label}, readyState: ${channel.readyState}`);
+      // Only log once when channel opens (not on every message)
+      console.log(`[WebRTC] Data channel opened: ${channel.label}`);
       if (this.onDataChannelOpen) {
         this.onDataChannelOpen();
       }
     };
 
     channel.onclose = () => {
-      console.log(`[WebRTC] Data channel closed: ${channel.label}`);
       if (this.onDataChannelClose) {
         this.onDataChannelClose();
       }
@@ -83,7 +85,6 @@ export class WebRTCPeer {
     };
 
     channel.onmessage = (event) => {
-      console.log(`[WebRTC] Data channel message received on ${channel.label}:`, typeof event.data, event.data.length || 'N/A');
       if (this.onDataChannelMessage) {
         this.onDataChannelMessage(event.data);
       } else {

@@ -11,6 +11,7 @@ export interface ClientCallbacks {
   onConnected?: () => void;
   onDisconnected?: () => void;
   onBotAssigned?: (botId: string | null) => void;
+  onStepUpdate?: (step: number) => void;
 }
 
 /**
@@ -40,11 +41,14 @@ export class ClientMode {
 
   /**
    * Initialize client mode and connect to host
+   * Note: Signaling client should already be connected before calling this
    */
   async initialize(): Promise<void> {
-    // Connect to signaling server
-    await this.signalingClient.connect();
-    this.signalingClient.registerClient();
+    // Register as client (signaling should already be connected)
+    // Only register if not already registered
+    if (this.signalingClient.getPeerId()) {
+      this.signalingClient.registerClient();
+    }
 
     // Listen for host status
     this.signalingClient.onHostStatusUpdate((isRunning, hostPeerId) => {
@@ -119,18 +123,7 @@ export class ClientMode {
       }
     });
 
-    // Log connection state changes
-    const checkConnectionState = () => {
-      if (this.hostPeer) {
-        const state = this.hostPeer.getConnectionState();
-        console.log(`[Client] WebRTC connection state: ${state}`);
-        if (state === 'connected' || state === 'connecting') {
-          // Check again in a bit
-          setTimeout(checkConnectionState, 1000);
-        }
-      }
-    };
-    setTimeout(checkConnectionState, 500);
+    // Connection state is monitored by WebRTC callbacks
 
     // Create data channel first (as the offerer)
     this.hostPeer.createDataChannel('game-data');
@@ -202,6 +195,10 @@ export class ClientMode {
 
       case 'STATE_CHANGE_EVENT':
         this.handleStateChangeEvent(message);
+        // Update step count from host
+        if (this.callbacks.onStepUpdate) {
+          this.callbacks.onStepUpdate(message.step);
+        }
         break;
 
       case 'BOT_ASSIGNMENT':
@@ -245,7 +242,15 @@ export class ClientMode {
 
     // Set world state
     this.store.dispatch(actions.setWorldState(worldState));
-    this.lastStep = 0;
+    
+    // Update step count from initial state
+    const initialStep = message.step || 0;
+    this.lastStep = initialStep;
+    
+    // Update debug overlay with step count from host
+    if (this.callbacks.onStepUpdate) {
+      this.callbacks.onStepUpdate(initialStep);
+    }
     
     // If we have an assigned bot, set it as selected
     if (this.assignedBotId && worldState.objects.has(this.assignedBotId)) {

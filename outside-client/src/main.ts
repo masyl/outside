@@ -220,6 +220,16 @@ async function init() {
         },
       });
 
+      // Set debug overlay for step count updates
+      hostMode.setDebugOverlay(debugOverlay);
+
+      // Restore step count from persisted state if available
+      const restoredStep = eventLogger.loadStepCount();
+      if (restoredStep > 0) {
+        hostMode.setCurrentStep(restoredStep);
+        debugOverlay.setStepCount(restoredStep);
+      }
+
       await hostMode.initialize();
       
       // Update client count initially
@@ -253,6 +263,10 @@ async function init() {
         },
         onBotAssigned: (botId) => {
           console.log(`[Client] Bot assigned: ${botId || 'none'}`);
+        },
+        onStepUpdate: (step) => {
+          // Update debug overlay with step count from host
+          debugOverlay.setStepCount(step);
         },
       });
 

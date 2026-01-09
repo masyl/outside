@@ -44,16 +44,10 @@ function createTerrainSprite(terrain: TerrainObject): Sprite {
   const color = getTerrainColor(terrain.type);
   // Convert number to hex string with leading zeros
   const hexColor = `#${color.toString(16).padStart(6, '0')}`;
-  console.log(`[createTerrainSprite] Creating sprite for ${terrain.type} (${terrain.id}) at (${terrain.position.x}, ${terrain.position.y}) size ${terrain.width}x${terrain.height} with color ${hexColor} (${color})`);
   
   // Fill the canvas with the terrain color
   ctx.fillStyle = hexColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  // Debug: Verify canvas was filled
-  const imageData = ctx.getImageData(0, 0, 1, 1);
-  const actualColor = `rgb(${imageData.data[0]}, ${imageData.data[1]}, ${imageData.data[2]})`;
-  console.log(`[createTerrainSprite] Canvas filled. Actual pixel color: ${actualColor}`);
   
   const texture = Texture.from(canvas);
   const sprite = new Sprite(texture);
@@ -61,8 +55,6 @@ function createTerrainSprite(terrain: TerrainObject): Sprite {
   // Ensure sprite is visible
   sprite.visible = true;
   sprite.alpha = 1.0;
-  
-  console.log(`[createTerrainSprite] Created sprite: width=${sprite.width}, height=${sprite.height}, visible=${sprite.visible}, alpha=${sprite.alpha}`);
   
   return sprite;
 }
@@ -78,7 +70,6 @@ export function createTerrainLayer(
   const container = new Container();
   
   const terrainCount = world.groundLayer.terrainObjects.size;
-  console.log(`[createTerrainLayer] Creating terrain layer with ${terrainCount} terrain objects`);
   
   // Sort terrain objects by createdAt ascending (oldest first, newest last)
   // In Pixi.js, sprites added later render on top, so newest terrain will appear on top
@@ -87,20 +78,15 @@ export function createTerrainLayer(
   
   // Render all terrain objects
   for (const terrain of sortedTerrains) {
-    console.log(`[createTerrainLayer] Rendering terrain: ${terrain.id} (${terrain.type}) at (${terrain.position.x}, ${terrain.position.y}) size ${terrain.width}x${terrain.height}`);
     const sprite = createTerrainSprite(terrain);
     sprite.x = terrain.position.x * DISPLAY_TILE_SIZE;
     sprite.y = terrain.position.y * DISPLAY_TILE_SIZE;
     
-    console.log(`[createTerrainLayer] Sprite positioned at (${sprite.x}, ${sprite.y}), size: ${sprite.width}x${sprite.height}, visible: ${sprite.visible}`);
-    
     container.addChild(sprite);
   }
   
-  console.log(`[createTerrainLayer] Created terrain layer with ${container.children.length} sprites`);
-  
-  // Debug: Check if container has children
-  if (container.children.length === 0) {
+  // Debug: Check if container has children (only warn if there's an actual issue)
+  if (container.children.length === 0 && terrainCount > 0) {
     console.warn(`[createTerrainLayer] WARNING: Terrain layer has no children even though ${terrainCount} terrain objects exist!`);
   }
   
@@ -115,7 +101,7 @@ export function updateTerrainLayer(
   container: Container,
   world: WorldState
 ): void {
-  console.log(`[updateTerrainLayer] Updating terrain layer. Current children: ${container.children.length}`);
+  // Updating terrain layer (no logging to avoid console spam)
   
   // Clear existing terrain - destroy children properly
   container.children.forEach(child => {
@@ -132,7 +118,7 @@ export function updateTerrainLayer(
     container.addChild(child);
   }
   
-  console.log(`[updateTerrainLayer] Terrain layer updated. New children count: ${container.children.length}`);
+  // Terrain layer updated
   
   // Clean up the temporary container (but not its children since we moved them)
   newLayer.destroy({ children: false });

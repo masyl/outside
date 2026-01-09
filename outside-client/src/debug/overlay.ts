@@ -103,7 +103,15 @@ export class DebugOverlay {
   }
 
   /**
-   * Increment step counter (called when a command is processed)
+   * Set step count (called by host or when receiving step updates)
+   */
+  setStepCount(count: number): void {
+    this.stepCount = count;
+    this.stepElement.textContent = `Step: ${count}`;
+  }
+
+  /**
+   * Increment step counter (deprecated - use setStepCount instead)
    */
   incrementStep(): void {
     this.stepCount++;

@@ -22,7 +22,9 @@ export class HostMode {
   private peerConnections: Map<string, WebRTCPeer> = new Map(); // clientId -> peer
   private botOwnership: BotOwnershipTracker;
   private currentStep: number = 0;
+  private stepIntervalId: number | null = null;
   private callbacks: HostCallbacks;
+  private debugOverlay?: any; // DebugOverlay - will be set via setter
 
   constructor(
     store: Store,
@@ -36,10 +38,32 @@ export class HostMode {
     this.botOwnership = new BotOwnershipTracker();
     this.callbacks = callbacks;
 
-    // Subscribe to store changes to broadcast state change events
-    this.store.subscribe((world) => {
-      this.broadcastStateChange(world);
-    });
+    // Note: State changes are now broadcast by the step counter at regular intervals
+    // No need to subscribe to every store change - step counter handles it
+  }
+
+  /**
+   * Set debug overlay for step count updates
+   */
+  setDebugOverlay(debugOverlay: any): void {
+    this.debugOverlay = debugOverlay;
+  }
+
+  /**
+   * Get current step count
+   */
+  getCurrentStep(): number {
+    return this.currentStep;
+  }
+
+  /**
+   * Set current step count (for restoring from persisted state)
+   */
+  setCurrentStep(step: number): void {
+    this.currentStep = step;
+    if (this.debugOverlay) {
+      this.debugOverlay.setStepCount(step);
+    }
   }
 
   /**
@@ -74,7 +98,59 @@ export class HostMode {
       }
     });
 
+    // Start step counter that increments at regular intervals (125ms)
+    this.startStepCounter();
+
     console.log('[Host] Initialized, waiting for clients...');
+  }
+
+  /**
+   * Start step counter that increments at regular intervals
+   */
+  private startStepCounter(): void {
+    const STEP_INTERVAL = 125; // 125ms, same as game loop
+    
+    this.stepIntervalId = window.setInterval(() => {
+      this.currentStep++;
+      
+      // Persist step count
+      this.store.getEventLogger().saveStepCount(this.currentStep);
+      
+      // Update debug overlay if available
+      if (this.debugOverlay) {
+        this.debugOverlay.setStepCount(this.currentStep);
+      }
+      
+      // Broadcast step update to all clients (even if no state change)
+      this.broadcastStepUpdate();
+    }, STEP_INTERVAL);
+  }
+
+  /**
+   * Broadcast step update to all clients
+   */
+  private broadcastStepUpdate(): void {
+    const world = this.store.getState();
+    const gridData = {
+      width: world.width,
+      height: world.height,
+      objects: Array.from(world.objects.values()),
+    };
+
+    const event: StateChangeEvent = {
+      type: 'STATE_CHANGE_EVENT',
+      step: this.currentStep,
+      gridData,
+    };
+
+    const message = serializeNetworkMessage(event);
+
+    // Send to all connected clients
+    this.peerConnections.forEach((peer, clientId) => {
+      if (peer.getConnectionState() === 'connected') {
+        peer.send(message);
+      }
+    });
   }
 
   /**
@@ -326,30 +402,11 @@ export class HostMode {
 
   /**
    * Broadcast state change event to all connected clients
+   * Note: Step count is now incremented by step counter, not here
    */
   private broadcastStateChange(world: WorldState): void {
-    this.currentStep++;
-
-    const gridData = {
-      width: world.width,
-      height: world.height,
-      objects: Array.from(world.objects.values()),
-    };
-
-    const event: StateChangeEvent = {
-      type: 'STATE_CHANGE_EVENT',
-      step: this.currentStep,
-      gridData,
-    };
-
-    const message = serializeNetworkMessage(event);
-
-    // Send to all connected clients
-    this.peerConnections.forEach((peer, clientId) => {
-      if (peer.getConnectionState() === 'connected') {
-        peer.send(message);
-      }
-    });
+    // Step count is now handled by step counter, just broadcast current state
+    this.broadcastStepUpdate();
   }
 
   /**
@@ -367,11 +424,12 @@ export class HostMode {
     const initialState: InitialState = {
       type: 'INITIAL_STATE',
       gridData,
+      step: this.currentStep, // Include current step count
     };
 
     const peer = this.peerConnections.get(clientId);
     if (peer) {
-      console.log(`[Host] Sending initial state to client ${clientId} (${gridData.objects.length} objects, ${gridData.terrain.length} terrain)`);
+      console.log(`[Host] Sending initial state to client ${clientId} (${gridData.objects.length} objects, ${gridData.terrain.length} terrain, step: ${this.currentStep})`);
       peer.send(serializeNetworkMessage(initialState));
     }
   }
@@ -417,6 +475,10 @@ export class HostMode {
    * Cleanup
    */
   cleanup(): void {
+    if (this.stepIntervalId !== null) {
+      clearInterval(this.stepIntervalId);
+      this.stepIntervalId = null;
+    }
     this.peerConnections.forEach((peer) => peer.close());
     this.peerConnections.clear();
     this.signalingClient.disconnect();
