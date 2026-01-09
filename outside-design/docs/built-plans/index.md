@@ -33,6 +33,12 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ## Completed Plans
 
+### 2026-01-09 10:45 - Bot Autonomy
+
+Implemented seeded, autonomous movement for bots. Bots now randomly explore the map (or wait) based on a deterministic random number generator. The master seed is persisted in the world state, ensuring consistent behavior across reloads. Also includes fixes for legacy save states and console log cleanup.
+
+[View full plan →](./2026-01-09-1045-bot-autonomy.md)
+
 ### 2026-01-09 10:20 - Client Reconnection Stability
 
 Implemented a progressive reconnection system for clients. Features a smart backoff strategy (silent retry after 1s, visible warning after 2s, then 5s loop) to handle network interruptions gracefully. Includes a new `ConnectionOverlay` UI component to keep users informed during outages.
