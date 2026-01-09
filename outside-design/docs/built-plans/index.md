@@ -33,6 +33,12 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ## Completed Plans
 
+### 2026-01-08 21:12 - Layered Grid Implementation
+
+Implemented complete two-layer grid system with ground layer (terrain) and surface layer (bots/objects). Terrain objects can span multiple tiles, stack on top of each other, and determine walkability. Added 5 terrain types (grass, dirt, water, sand, holes) with color-coded rendering. Walkability system prevents bots from moving to or being placed on non-walkable terrain. Initial terrain loading processes all terrain commands synchronously before game loop starts. Visual improvements: bot sprites changed to circles, selected bot has white fill with blue outline, unselected bots have grey border, and each grid tile has 4x4 checkered pattern inside.
+
+[View full plan →](./2026-01-08-2112-layered-grid-implementation.md)
+
 ### 2026-01-08 15:29 - Player Input and Game Loop Optimization
 
 Implemented complete player input system with bot selection and keyboard controls. Added SelectionManager and KeyboardHandler for Tab/Shift+Tab cycling and arrow key movement. Renderer updated to show selected bot in green, others in white. Game loop optimized from 500ms to 125ms for 4x faster command processing. Animation duration synchronized with new game loop speed.
