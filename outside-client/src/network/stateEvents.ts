@@ -26,6 +26,7 @@ export interface InitialState {
   type: 'INITIAL_STATE';
   gridData: PartialGridData;
   step?: number; // Current step count
+  seed?: number; // Master seed
 }
 
 /**

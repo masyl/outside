@@ -13,7 +13,7 @@ export function createGroundLayer(): GroundLayer {
 /**
  * Creates an empty world state with a 20x10 grid
  */
-export function createWorldState(): WorldState {
+export function createWorldState(seed?: number): WorldState {
   const width = 20;
   const height = 10;
   
@@ -27,6 +27,7 @@ export function createWorldState(): WorldState {
     groundLayer: createGroundLayer(),
     width,
     height,
+    seed: seed ?? Math.floor(Math.random() * 2147483647), // Generate random seed if not provided
   };
 }
 

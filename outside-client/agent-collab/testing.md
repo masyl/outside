@@ -15,6 +15,8 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 [x] Add the status of the peer-to-peer to the debug panel
 [x] Show both counts: Ground objects and Surface objects. (related to bug below)
 [x] When the connection is lost, try silent reconnect (1s), then show popup and retry (2s), then loop (5s).
+[x] Bots should move on their own randomly (Bot Autonomy).
+[x] Implement basic bot autonomy (random movement)
 
 ### Confirmed Problems
 

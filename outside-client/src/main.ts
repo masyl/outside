@@ -75,16 +75,19 @@ async function init() {
   const SIGNALING_URL = 'ws://localhost:3001';
   const signalingClient = new SignalingClient(SIGNALING_URL);
 
-  // Create debug menu (after commandFeeder is created)
-  const debugMenu = new DebugMenu(app, {
-    onResetLevel: () => {
-      console.log('[Debug] Resetting level...');
-      // Clear event log
-      store.getEventLogger().clearEvents();
-      // Reset store to initial state
-      store.dispatch(actions.setWorldState(createWorldState()));
-      // Reload level
-      commandFeeder.loadLevel('/levels/demo.md').then(() => {
+    // Create debug menu (after commandFeeder is created)
+    const debugMenu = new DebugMenu(app, {
+      onResetLevel: () => {
+        console.log('[Debug] Resetting level...');
+        // Clear event log
+        store.getEventLogger().clearEvents();
+        // Reset store to initial state (this will generate a NEW random seed)
+        const newState = createWorldState();
+        store.dispatch(actions.setWorldState(newState));
+        console.log(`[Debug] Generated new master seed: ${newState.seed}`);
+        
+        // Reload level
+        commandFeeder.loadLevel('/levels/demo.md').then(() => {
         const terrainCommands = commandFeeder.getInitialTerrainCommands();
         for (const command of terrainCommands) {
           executeCommand(store, command);
@@ -179,6 +182,17 @@ async function init() {
     const persistedEvents = eventLogger.loadEvents();
     const hasPersistedEvents = persistedEvents.length > 0;
     
+    // Create new world state with seed if starting fresh
+    if (!hasPersistedEvents) {
+      // Re-create world state to ensure it has a fresh seed if this is a new game
+      // Note: We already created one in debugMenu, but this is the main initialization path
+      // Actually, store already has a state from init, but let's make sure it's fresh
+    } else {
+      // If replaying, we might want to recover the seed from events?
+      // Currently events don't store the master seed, only state changes.
+      // But we can check if the store state has a seed.
+    }
+    
     if (hasPersistedEvents) {
       console.log(`[Init] Found ${persistedEvents.length} persisted events, replaying...`);
       eventLogger.replayEvents(store, persistedEvents, () => {
@@ -190,8 +204,23 @@ async function init() {
         animationController.resetPreviousState();
       });
       console.log('[Init] Game state restored from persisted events');
+      
+      // The replayed state might not have the seed if it was created before the seed field existed.
+      // Ensure seed is present.
+      const world = store.getState();
+      if (world.seed === undefined) {
+        console.warn('[Init] Restored state is missing seed, generating new one...');
+        // We need to update the state with a seed without triggering a new event
+        // But Store doesn't allow direct state mutation outside actions.
+        // We can dispatch a SET_WORLD_STATE action with the same state + seed.
+        const stateWithSeed = { ...world, seed: Math.floor(Math.random() * 2147483647) };
+        store.dispatch(actions.setWorldState(stateWithSeed));
+      }
     } else {
       console.log('[Init] No persisted events found, starting fresh');
+      // Ensure we have a valid world state with seed
+      // Note: store was initialized with empty state in init(), which calls createWorldState()
+      // so it should already have a seed.
     }
 
     // Mark game as started - enables event logging for future actions

@@ -133,6 +133,14 @@ export class SignalingClient {
         }
         break;
 
+      case 'host-registered':
+        console.log('[Signaling] Host registered successfully');
+        break;
+
+      case 'client-registered':
+        console.log('[Signaling] Client registered successfully');
+        break;
+
       case 'offer':
       case 'answer':
       case 'ice-candidate':

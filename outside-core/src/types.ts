@@ -45,4 +45,5 @@ export interface WorldState {
   groundLayer: GroundLayer; // New ground layer
   width: number;
   height: number;
+  seed: number; // Master seed for RNG
 }

@@ -2,12 +2,11 @@
 
 ## Next Logical Pitches
 
-- [Client Connection Stability](./host-and-client-reconnection.md)
+- [Bot Autonomy](./bot-autonomy.md)
 
 ## Core features
 
 - [Player Nicknames](./player-nicknames.md)
-- [Bot Autonomy](./bot-autonomy.md)
 - [Debug Mode](./debug-mode.md)
 - [Basic PixelArt Visuals](./basic-pixelart-visuals.md)
 - [Sound Effects](./sound-effects.md)
@@ -32,3 +31,4 @@
 
 - [Outside Game Server](./outside-game-server.md)
 - [Persistent Game State](./persistent-game-state.md)
+- [Client Connection Stability](./host-and-client-reconnection.md)
