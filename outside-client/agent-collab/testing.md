@@ -13,7 +13,7 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 ### Needed improvement
 
 [x] Add the status of the peer-to-peer to the debug panel
-[ ] Show both counts: Ground objects and Surface objects. (related to bug below)
+[x] Show both counts: Ground objects and Surface objects. (related to bug below)
 
 ### Confirmed Problems
 
@@ -22,7 +22,7 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 [ ] Host has logs regarding missing sprite:
     animationController.ts:88 [AnimationController] Sprite not found for object bob
 [ ] TO FIX: When resetting the game, the step count should also reset. It is the main game clock.
-[ ] TO FIX: The object count is not accurate, it should include the terrain objects.
+[x] TO FIX: The object count is not accurate, it should include the terrain objects.
 
 ### Suspected Problems
 

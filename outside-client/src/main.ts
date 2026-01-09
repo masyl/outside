@@ -303,7 +303,10 @@ async function init() {
 
   // Update debug overlay with object count
   store.subscribe((world) => {
-    debugOverlay.setObjectCount(world.objects.size);
+    debugOverlay.setObjectCounts(
+      world.objects.size,
+      world.groundLayer.terrainObjects.size
+    );
   });
 
   // Update debug overlay with event count periodically

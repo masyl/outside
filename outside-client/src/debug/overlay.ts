@@ -19,7 +19,8 @@ export class DebugOverlay {
   private lastFpsUpdate: number = 0;
   private stepCount: number = 0;
   private mode: 'host' | 'client' | 'unknown' = 'unknown';
-  private objectCount: number = 0;
+  private surfaceCount: number = 0;
+  private groundCount: number = 0;
   private clientCount: number = 0;
   private eventCount: number = 0;
 
@@ -63,7 +64,7 @@ export class DebugOverlay {
 
     // Create object count element
     this.objectCountElement = document.createElement('div');
-    this.objectCountElement.textContent = 'Objects: 0';
+    this.objectCountElement.textContent = 'Objects: 0 (Surf) / 0 (Gnd)';
     this.container.appendChild(this.objectCountElement);
 
     // Create client count element
@@ -155,11 +156,12 @@ export class DebugOverlay {
   }
 
   /**
-   * Update object count
+   * Update object counts (surface and ground)
    */
-  setObjectCount(count: number): void {
-    this.objectCount = count;
-    this.objectCountElement.textContent = `Objects: ${count}`;
+  setObjectCounts(surface: number, ground: number): void {
+    this.surfaceCount = surface;
+    this.groundCount = ground;
+    this.objectCountElement.textContent = `Objects: ${surface} (Surf) / ${ground} (Gnd)`;
   }
 
   /**

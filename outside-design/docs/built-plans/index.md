@@ -33,6 +33,12 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ## Completed Plans
 
+### 2026-01-09 10:05 - Debug Overlay Object Counts
+
+Updated the Debug Overlay to display separate counts for Surface objects (bots) and Ground objects (terrain). Resolved an issue where object counts were inaccurate. The overlay now displays `Objects: X (Surf) / Y (Gnd)`.
+
+[View full plan →](./2026-01-09-1005-debug-overlay-counts.md)
+
 ### 2026-01-09 10:00 - P2P Status in Debug Overlay
 
 Implemented a real-time P2P connection status indicator in the debug overlay. Exposed WebRTC connection state changes from the low-level peer connection up to the UI through a callback chain. Works for both Host and Client modes, providing immediate visibility into connection health (connected, disconnected, failed).
