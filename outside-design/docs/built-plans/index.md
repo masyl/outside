@@ -33,6 +33,12 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ## Completed Plans
 
+### 2026-01-09 10:20 - Client Reconnection Stability
+
+Implemented a progressive reconnection system for clients. Features a smart backoff strategy (silent retry after 1s, visible warning after 2s, then 5s loop) to handle network interruptions gracefully. Includes a new `ConnectionOverlay` UI component to keep users informed during outages.
+
+[View full plan →](./2026-01-09-1020-client-reconnection.md)
+
 ### 2026-01-09 10:05 - Debug Overlay Object Counts
 
 Updated the Debug Overlay to display separate counts for Surface objects (bots) and Ground objects (terrain). Resolved an issue where object counts were inaccurate. The overlay now displays `Objects: X (Surf) / Y (Gnd)`.

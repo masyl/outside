@@ -73,6 +73,22 @@ export class ClientMode {
   }
 
   /**
+   * Reconnect to host
+   */
+  async reconnect(): Promise<void> {
+    console.log('[Client] Attempting to reconnect...');
+    
+    // Close existing connection if any
+    if (this.hostPeer) {
+      this.hostPeer.close();
+      this.hostPeer = null;
+    }
+
+    // Initiate new connection
+    await this.initiateConnection();
+  }
+
+  /**
    * Initiate WebRTC connection to host
    */
   private async initiateConnection(): Promise<void> {

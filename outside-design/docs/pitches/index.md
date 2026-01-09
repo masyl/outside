@@ -2,7 +2,7 @@
 
 ## Next Logical Pitches
 
-- [Host and Client Reconnection](./host-and-client-reconnection.md)
+- [Client Connection Stability](./host-and-client-reconnection.md)
 
 ## Core features
 

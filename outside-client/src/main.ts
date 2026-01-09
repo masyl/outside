@@ -6,6 +6,7 @@ import { GameLoop } from './game/loop';
 import { MockCommandFeeder } from './mock/commandFeeder';
 import { DebugOverlay } from './debug/overlay';
 import { DebugMenu } from './debug/menu';
+import { ConnectionOverlay } from './debug/connectionOverlay';
 import { AnimationController } from './game/animationController';
 import { SelectionManager } from './input/selection';
 import { KeyboardHandler } from './input/keyboardHandler';
@@ -45,6 +46,9 @@ async function init() {
 
   // Create debug overlay (FPS counter, step counter, version)
   const debugOverlay = new DebugOverlay();
+  
+  // Create connection overlay for disconnection warnings
+  const connectionOverlay = new ConnectionOverlay();
 
   // Create store
   const store = new Store();
@@ -257,13 +261,80 @@ async function init() {
       const initialWorld = store.getState();
       renderer.setWorld(initialWorld);
 
+      let isReconnecting = false;
+      let reconnectionAttempt = 0;
+
+      const handleReconnection = () => {
+        if (isReconnecting) return;
+        isReconnecting = true;
+        reconnectionAttempt++;
+
+        let delay = 1000;
+        let showPopup = false;
+
+        if (reconnectionAttempt === 1) {
+          // First attempt: 1s delay, silent
+          delay = 1000;
+          console.log('[Client] Connection lost, attempting silent reconnect in 1s...');
+        } else if (reconnectionAttempt === 2) {
+          // Second attempt: 2s delay, show popup
+          delay = 2000;
+          showPopup = true;
+          console.log('[Client] Silent reconnect failed, showing popup and retrying in 2s...');
+        } else {
+          // Subsequent attempts: 5s delay, keep popup
+          delay = 5000;
+          showPopup = true;
+          console.log(`[Client] Reconnect attempt ${reconnectionAttempt}, retrying in 5s...`);
+        }
+
+        if (showPopup) {
+          connectionOverlay.show(`Connection lost! Trying to reconnect in ${delay / 1000}s...`);
+        }
+        
+        // Wait before reconnecting
+        setTimeout(async () => {
+          if (clientMode) {
+            try {
+              await clientMode.reconnect();
+              // Note: isReconnecting flag is NOT reset here.
+              // It will be reset in onConnected if successful,
+              // or handleReconnection will be called again by onDisconnected/onConnectionStateChange if failed.
+              // However, since initiateConnection is async and might not trigger state changes immediately if it fails silently (e.g. no host),
+              // we need to make sure we can try again.
+              // But WebRTCPeer + Signaling will trigger events.
+              
+              // If reconnect() throws immediately, we need to schedule next attempt
+              // But initiateConnection mostly sets up listeners and sends offer via signaling.
+              
+              // Key point: We need to reset isReconnecting so the NEXT failure event triggers this again.
+              // But if we reset it too early, we might get multiple triggers for the same failure sequence.
+              // Let's reset it after a short delay to allow for state transition events to fire?
+              // Actually, better strategy:
+              // The `reconnect` call initiates a NEW connection. The OLD connection is closed.
+              // Events from the new connection will drive the loop.
+              isReconnecting = false; 
+            } catch (error) {
+              console.error('[Client] Reconnection attempt failed:', error);
+              isReconnecting = false;
+              // If it fails synchronously, trigger next attempt immediately (which will handle the delay)
+              handleReconnection();
+            }
+          }
+        }, delay);
+      };
+
       // Initialize client mode
       clientMode = new ClientMode(store, signalingClient, {
         onConnected: () => {
           console.log('[Client] Connected to host');
+          connectionOverlay.hide();
+          isReconnecting = false;
+          reconnectionAttempt = 0; // Reset attempts on success
         },
         onDisconnected: () => {
           console.log('[Client] Disconnected from host');
+          handleReconnection();
         },
         onBotAssigned: (botId) => {
           console.log(`[Client] Bot assigned: ${botId || 'none'}`);
@@ -275,6 +346,10 @@ async function init() {
         onConnectionStateChange: (state) => {
           console.log(`[Client] Host connection state: ${state}`);
           debugOverlay.setP2pStatus(state);
+          
+          if (state === 'failed' || state === 'disconnected') {
+            handleReconnection();
+          }
         },
       });
 
