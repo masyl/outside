@@ -13,6 +13,7 @@ export class DebugOverlay {
   private objectCountElement: HTMLDivElement;
   private clientCountElement: HTMLDivElement;
   private eventCountElement: HTMLDivElement;
+  private p2pStatusElement: HTMLDivElement;
   private fps: number = 0;
   private frameCount: number = 0;
   private lastFpsUpdate: number = 0;
@@ -74,6 +75,11 @@ export class DebugOverlay {
     this.eventCountElement = document.createElement('div');
     this.eventCountElement.textContent = 'Events: 0';
     this.container.appendChild(this.eventCountElement);
+
+    // Create P2P status element
+    this.p2pStatusElement = document.createElement('div');
+    this.p2pStatusElement.textContent = 'P2P: unknown';
+    this.container.appendChild(this.p2pStatusElement);
 
     // Append to body
     document.body.appendChild(this.container);
@@ -170,6 +176,13 @@ export class DebugOverlay {
   setEventCount(count: number): void {
     this.eventCount = count;
     this.eventCountElement.textContent = `Events: ${count}`;
+  }
+
+  /**
+   * Update P2P connection status
+   */
+  setP2pStatus(status: string): void {
+    this.p2pStatusElement.textContent = `P2P: ${status}`;
   }
 
   /**

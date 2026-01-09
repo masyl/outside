@@ -12,6 +12,7 @@ export interface ClientCallbacks {
   onDisconnected?: () => void;
   onBotAssigned?: (botId: string | null) => void;
   onStepUpdate?: (step: number) => void;
+  onConnectionStateChange?: (state: RTCPeerConnectionState) => void;
 }
 
 /**
@@ -105,6 +106,13 @@ export class ClientMode {
           type: 'ice-candidate',
           data: candidate,
         });
+      }
+    });
+
+    // Set up connection state change handler
+    this.hostPeer.onConnectionStateChangeHandler((state) => {
+      if (this.callbacks.onConnectionStateChange) {
+        this.callbacks.onConnectionStateChange(state);
       }
     });
 

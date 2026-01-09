@@ -33,6 +33,12 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ## Completed Plans
 
+### 2026-01-09 10:00 - P2P Status in Debug Overlay
+
+Implemented a real-time P2P connection status indicator in the debug overlay. Exposed WebRTC connection state changes from the low-level peer connection up to the UI through a callback chain. Works for both Host and Client modes, providing immediate visibility into connection health (connected, disconnected, failed).
+
+[View full plan →](./2026-01-09-1000-p2p-status-debug-overlay.md)
+
 ### 2026-01-08 21:12 - Layered Grid Implementation
 
 Implemented complete two-layer grid system with ground layer (terrain) and surface layer (bots/objects). Terrain objects can span multiple tiles, stack on top of each other, and determine walkability. Added 5 terrain types (grass, dirt, water, sand, holes) with color-coded rendering. Walkability system prevents bots from moving to or being placed on non-walkable terrain. Initial terrain loading processes all terrain commands synchronously before game loop starts. Visual improvements: bot sprites changed to circles, selected bot has white fill with blue outline, unselected bots have grey border, and each grid tile has 4x4 checkered pattern inside.

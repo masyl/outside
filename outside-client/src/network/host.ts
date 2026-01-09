@@ -10,6 +10,7 @@ import { WorldState } from '@outside/core';
 export interface HostCallbacks {
   onClientConnected?: (clientId: string) => void;
   onClientDisconnected?: (clientId: string) => void;
+  onConnectionStateChange?: (clientId: string, state: RTCPeerConnectionState) => void;
 }
 
 /**
@@ -190,6 +191,13 @@ export class HostMode {
         type: 'ice-candidate',
         data: candidate,
       });
+    });
+
+    // Set up connection state change handler
+    peer.onConnectionStateChangeHandler((state) => {
+      if (this.callbacks.onConnectionStateChange) {
+        this.callbacks.onConnectionStateChange(clientId, state);
+      }
     });
 
     // Set up data channel handler (client will create the data channel)

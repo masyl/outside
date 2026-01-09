@@ -31,16 +31,28 @@ export class WebRTCPeer {
       if (this.pc.connectionState === 'connected' || this.pc.connectionState === 'failed' || this.pc.connectionState === 'disconnected') {
         console.log(`[WebRTC] Connection state: ${this.pc.connectionState}`);
       }
+
+      if (this.onConnectionStateChange) {
+        this.onConnectionStateChange(this.pc.connectionState);
+      }
     };
   }
 
   private onIceCandidate: ((candidate: RTCIceCandidate) => void) | null = null;
+  private onConnectionStateChange: ((state: RTCPeerConnectionState) => void) | null = null;
 
   /**
    * Set handler for ICE candidates
    */
   onIceCandidateHandler(handler: (candidate: RTCIceCandidate) => void): void {
     this.onIceCandidate = handler;
+  }
+
+  /**
+   * Set handler for connection state changes
+   */
+  onConnectionStateChangeHandler(handler: (state: RTCPeerConnectionState) => void): void {
+    this.onConnectionStateChange = handler;
   }
 
   /**

@@ -218,6 +218,10 @@ async function init() {
             debugOverlay.setClientCount(hostMode.getConnectedClientCount());
           }
         },
+        onConnectionStateChange: (clientId, state) => {
+          console.log(`[Host] Client ${clientId} connection state: ${state}`);
+          debugOverlay.setP2pStatus(state);
+        },
       });
 
       // Set debug overlay for step count updates
@@ -267,6 +271,10 @@ async function init() {
         onStepUpdate: (step) => {
           // Update debug overlay with step count from host
           debugOverlay.setStepCount(step);
+        },
+        onConnectionStateChange: (state) => {
+          console.log(`[Client] Host connection state: ${state}`);
+          debugOverlay.setP2pStatus(state);
         },
       });
 
