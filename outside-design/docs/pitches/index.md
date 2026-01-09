@@ -26,5 +26,5 @@
 - [Inventory and Pickable Objects](./inventory-and-pickable-objects.md)
 - [Chickens and Eggs](./chickens-and-eggs.md)
 - [Trees and Fruits](./trees-and-fruits.md)
-
+- Add label/ids when creating objects using commands
 

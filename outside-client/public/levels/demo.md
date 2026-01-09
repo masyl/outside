@@ -10,8 +10,8 @@ create terrain grass grass1 2 0 6 10
 create terrain grass grass2 8 0 10 1
 create terrain grass grass3 0 8 5 2
 create terrain sand sand1 2 6 3 2
-create terrain sand sand2 5 4 8 6
-create terrain hole hole1 8 6 2 2
+create terrain sand sand2 5 4 6 5
+create terrain hole hole1 7 5 2 2
 
 ## Bots
 

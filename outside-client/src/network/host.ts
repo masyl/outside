@@ -407,6 +407,13 @@ export class HostMode {
   }
 
   /**
+   * Get number of connected clients
+   */
+  getConnectedClientCount(): number {
+    return this.peerConnections.size;
+  }
+
+  /**
    * Cleanup
    */
   cleanup(): void {

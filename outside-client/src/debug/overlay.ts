@@ -10,11 +10,17 @@ export class DebugOverlay {
   private stepElement: HTMLDivElement;
   private versionElement: HTMLDivElement;
   private modeElement: HTMLDivElement;
+  private objectCountElement: HTMLDivElement;
+  private clientCountElement: HTMLDivElement;
+  private eventCountElement: HTMLDivElement;
   private fps: number = 0;
   private frameCount: number = 0;
   private lastFpsUpdate: number = 0;
   private stepCount: number = 0;
   private mode: 'host' | 'client' | 'unknown' = 'unknown';
+  private objectCount: number = 0;
+  private clientCount: number = 0;
+  private eventCount: number = 0;
 
   constructor() {
     // Create container
@@ -53,6 +59,21 @@ export class DebugOverlay {
     this.stepElement = document.createElement('div');
     this.stepElement.textContent = 'Step: 0';
     this.container.appendChild(this.stepElement);
+
+    // Create object count element
+    this.objectCountElement = document.createElement('div');
+    this.objectCountElement.textContent = 'Objects: 0';
+    this.container.appendChild(this.objectCountElement);
+
+    // Create client count element
+    this.clientCountElement = document.createElement('div');
+    this.clientCountElement.textContent = 'Clients: 0';
+    this.container.appendChild(this.clientCountElement);
+
+    // Create event count element
+    this.eventCountElement = document.createElement('div');
+    this.eventCountElement.textContent = 'Events: 0';
+    this.container.appendChild(this.eventCountElement);
 
     // Append to body
     document.body.appendChild(this.container);
@@ -117,6 +138,30 @@ export class DebugOverlay {
    */
   getMode(): 'host' | 'client' | 'unknown' {
     return this.mode;
+  }
+
+  /**
+   * Update object count
+   */
+  setObjectCount(count: number): void {
+    this.objectCount = count;
+    this.objectCountElement.textContent = `Objects: ${count}`;
+  }
+
+  /**
+   * Update connected client count
+   */
+  setClientCount(count: number): void {
+    this.clientCount = count;
+    this.clientCountElement.textContent = `Clients: ${count}`;
+  }
+
+  /**
+   * Update event log count
+   */
+  setEventCount(count: number): void {
+    this.eventCount = count;
+    this.eventCountElement.textContent = `Events: ${count}`;
   }
 
   /**

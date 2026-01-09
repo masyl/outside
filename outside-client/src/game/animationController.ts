@@ -29,6 +29,14 @@ export class AnimationController {
   }
 
   /**
+   * Reset the previous state (useful after replaying events to avoid animating restoration)
+   */
+  resetPreviousState(): void {
+    this.previousState = this.store.getState();
+    console.log('[AnimationController] Previous state reset to current state');
+  }
+
+  /**
    * Stop listening to store updates and cancel all animations.
    */
   dispose(): void {

@@ -23,6 +23,9 @@ importers:
       '@outside/core':
         specifier: workspace:*
         version: link:../outside-core
+      '@pixi/ui':
+        specifier: ^2.3.2
+        version: 2.3.2(pixi.js@8.15.0)
       immer:
         specifier: ^10.1.1
         version: 10.2.0
@@ -672,6 +675,11 @@ packages:
 
   '@pixi/colord@2.9.6':
     resolution: {integrity: sha512-nezytU2pw587fQstUu1AsJZDVEynjskwOL+kibwcdxsMBFqPsFFNA7xl0ii/gXuDi6M0xj3mfRJj8pBSc2jCfA==}
+
+  '@pixi/ui@2.3.2':
+    resolution: {integrity: sha512-HHQtAHxzirfl6bg9HgzyGGLIHqM/q3i0R+raQ9Wmp3VxLJTUviF655Syf9PWYC690xbS9uo0mRkXykoJNkHKhA==}
+    peerDependencies:
+      pixi.js: ^8.6.2
 
   '@rollup/rollup-android-arm-eabi@4.54.0':
     resolution: {integrity: sha512-OywsdRHrFvCdvsewAInDKCNyR3laPA2mc9bRYJ6LBp5IyvF3fvXbbNR0bSzHlZVFtn6E0xw2oZlyjg4rKCVcng==}
@@ -1544,9 +1552,15 @@ packages:
     resolution: {integrity: sha512-5JIA5aYBAJSAhrhbyag1ZuMSgUZnHtI+Sq3H8D3an4fL8PeF+L1yYvbEJg47akP1PFfATMf5ehkqFnxfkmuwZQ==}
     hasBin: true
 
+  tweedle.js@2.1.0:
+    resolution: {integrity: sha512-0ReQgVjepoZkE6t0upWNgCRbplHkQJQYk1LStXugwSR728GLFmGDRuaQJlxeC/iBlxud6+P1RdODjaO25vHAqw==}
+
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
     engines: {node: '>= 0.6'}
+
+  typed-signals@2.5.0:
+    resolution: {integrity: sha512-m9lHc3eBCJerXYdx+G0uWZihyUXdqTzzgOdqiDDsoUo75WjhFJH6vP5/6w/xhyu04zoxHUqgYhf9FEt85dk/Ng==}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -2080,6 +2094,12 @@ snapshots:
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
   '@pixi/colord@2.9.6': {}
+
+  '@pixi/ui@2.3.2(pixi.js@8.15.0)':
+    dependencies:
+      pixi.js: 8.15.0
+      tweedle.js: 2.1.0
+      typed-signals: 2.5.0
 
   '@rollup/rollup-android-arm-eabi@4.54.0':
     optional: true
@@ -3062,10 +3082,14 @@ snapshots:
       turbo-windows-64: 2.7.2
       turbo-windows-arm64: 2.7.2
 
+  tweedle.js@2.1.0: {}
+
   type-is@1.6.18:
     dependencies:
       media-typer: 0.3.0
       mime-types: 2.1.35
+
+  typed-signals@2.5.0: {}
 
   typescript@5.9.3: {}
 

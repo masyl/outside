@@ -2,6 +2,7 @@ import { enableMapSet } from 'immer';
 import { WorldState, createWorldState } from '@outside/core';
 import { Action } from './actions';
 import { reducer } from './reducers';
+import { EventLogger } from './persistence';
 
 // Enable MapSet plugin for Immer to support Map in state
 enableMapSet();
@@ -14,9 +15,12 @@ type Subscriber = (state: WorldState) => void;
 export class Store {
   private state: WorldState;
   private subscribers: Set<Subscriber> = new Set();
+  private isStartedFlag: boolean = false;
+  private eventLogger: EventLogger;
 
   constructor(initialState?: WorldState) {
     this.state = initialState || createWorldState();
+    this.eventLogger = new EventLogger();
   }
 
   /**
@@ -35,6 +39,12 @@ export class Store {
     // Only update if state actually changed
     if (newState !== this.state) {
       this.state = newState;
+      
+      // Log event if game has started
+      if (this.isStartedFlag) {
+        this.eventLogger.logEvent(action);
+      }
+      
       this.notifySubscribers();
     }
   }
@@ -58,5 +68,33 @@ export class Store {
     this.subscribers.forEach((subscriber) => {
       subscriber(this.state);
     });
+  }
+
+  /**
+   * Mark game as started - enables event logging
+   */
+  start(): void {
+    this.isStartedFlag = true;
+  }
+
+  /**
+   * Stop event logging (used during replay to prevent infinite loops)
+   */
+  stop(): void {
+    this.isStartedFlag = false;
+  }
+
+  /**
+   * Check if game has started
+   */
+  isStarted(): boolean {
+    return this.isStartedFlag;
+  }
+
+  /**
+   * Get event logger instance (for loading/replaying events)
+   */
+  getEventLogger(): EventLogger {
+    return this.eventLogger;
   }
 }
