@@ -2,7 +2,6 @@
 
 ## Next Logical Pitches
 
-- [Persistent Game State](./persistent-game-state.md)
 - [Host and Client Reconnection](./host-and-client-reconnection.md)
 
 ## Core features
@@ -28,8 +27,8 @@
 - [Trees and Fruits](./trees-and-fruits.md)
 - Add label/ids when creating objects using commands
 - Pause State for the Game Loop
-- 
 
 ## Completed Pitches
 
 - [Outside Game Server](./outside-game-server.md)
+- [Persistent Game State](./persistent-game-state.md)
