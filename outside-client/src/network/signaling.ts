@@ -22,7 +22,7 @@ export class SignalingClient {
         this.ws = new WebSocket(this.signalingUrl);
 
         this.ws.onopen = () => {
-          console.log('[Signaling] Connected to signaling server');
+          // console.log('[Signaling] Connected to signaling server');
         };
 
         this.ws.onmessage = (event) => {
@@ -40,7 +40,7 @@ export class SignalingClient {
         };
 
         this.ws.onclose = () => {
-          console.log('[Signaling] Connection closed');
+          // console.log('[Signaling] Connection closed');
           this.ws = null;
         };
 
@@ -134,11 +134,11 @@ export class SignalingClient {
         break;
 
       case 'host-registered':
-        console.log('[Signaling] Host registered successfully');
+        // console.log('[Signaling] Host registered successfully');
         break;
 
       case 'client-registered':
-        console.log('[Signaling] Client registered successfully');
+        // console.log('[Signaling] Client registered successfully');
         break;
 
       case 'offer':

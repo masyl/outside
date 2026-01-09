@@ -57,7 +57,7 @@ export class ClientMode {
         // Only initiate connection if we don't already have this host or a connection
         if (this.hostPeerId !== hostPeerId || !this.hostPeer) {
           this.hostPeerId = hostPeerId;
-          console.log(`[Client] Host found: ${hostPeerId}`);
+          // console.log(`[Client] Host found: ${hostPeerId}`);
           // Initiate WebRTC connection
           this.initiateConnection();
         }
@@ -103,7 +103,7 @@ export class ClientMode {
       return;
     }
 
-    console.log('[Client] Initiating WebRTC connection to host...');
+    // console.log('[Client] Initiating WebRTC connection to host...');
 
     this.hostPeer = new WebRTCPeer();
     
@@ -177,7 +177,7 @@ export class ClientMode {
             return;
           }
           await this.hostPeer.setRemoteDescription(message.data);
-          console.log('[Client] Set remote description (answer from host)');
+          // console.log('[Client] Set remote description (answer from host)');
         } catch (error) {
           console.error('[Client] Error setting remote description:', error);
         }
@@ -238,7 +238,7 @@ export class ClientMode {
    * Handle initial state snapshot
    */
   private handleInitialState(message: InitialState): void {
-    console.log('[Client] Received initial state');
+    // console.log('[Client] Received initial state');
     
     // Create new world state from initial state
     const worldState = createWorldState();
@@ -344,7 +344,7 @@ export class ClientMode {
   private handleBotAssignment(message: BotAssignment): void {
     if (message.clientId === this.clientId) {
       this.assignedBotId = message.botId;
-      console.log(`[Client] Assigned bot: ${message.botId || 'none'}`);
+      // console.log(`[Client] Assigned bot: ${message.botId || 'none'}`);
       if (this.callbacks.onBotAssigned) {
         this.callbacks.onBotAssigned(message.botId);
       }
@@ -374,7 +374,7 @@ export class ClientMode {
       data,
     };
 
-    console.log(`[Client] Sending input command: ${command}${selectedBotId ? ` (bot: ${selectedBotId})` : ''}`);
+    // console.log(`[Client] Sending input command: ${command}${selectedBotId ? ` (bot: ${selectedBotId})` : ''}`);
     this.hostPeer.send(serializeInputCommand(inputCommand));
   }
 

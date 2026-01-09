@@ -49,10 +49,10 @@ export function animateObjectMovement(
   const toPixelX = toX * DISPLAY_TILE_SIZE;
   const toPixelY = toY * DISPLAY_TILE_SIZE;
 
-  console.log(`[animateObjectMovement] Starting animation for ${objectId}:`);
-  console.log(`  From pixel: (${fromPixelX}, ${fromPixelY})`);
-  console.log(`  To pixel: (${toPixelX}, ${toPixelY})`);
-  console.log(`  Duration: ${duration}ms`);
+  // console.log(`[animateObjectMovement] Starting animation for ${objectId}:`);
+  // console.log(`  From pixel: (${fromPixelX}, ${fromPixelY})`);
+  // console.log(`  To pixel: (${toPixelX}, ${toPixelY})`);
+  // console.log(`  Duration: ${duration}ms`);
 
   // Use requestAnimationFrame for smooth animation with motion.dev easing
   const startTime = performance.now();
@@ -84,7 +84,7 @@ export function animateObjectMovement(
       animationFrameId = requestAnimationFrame(animate);
     } else {
       // Animation complete
-      console.log(`[animateObjectMovement] Animation completed for ${objectId}`);
+      // console.log(`[animateObjectMovement] Animation completed for ${objectId}`);
       if (onComplete) {
         onComplete();
       }
@@ -96,7 +96,7 @@ export function animateObjectMovement(
 
   // Return cancel function
   return () => {
-    console.log(`[animateObjectMovement] Cancelling animation for ${objectId}`);
+    // console.log(`[animateObjectMovement] Cancelling animation for ${objectId}`);
     cancelled = true;
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);

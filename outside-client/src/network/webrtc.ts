@@ -29,9 +29,9 @@ export class WebRTCPeer {
     this.pc.onconnectionstatechange = () => {
       // Only log significant state changes (not every intermediate state)
       if (this.pc.connectionState === 'connected' || this.pc.connectionState === 'failed' || this.pc.connectionState === 'disconnected') {
-        console.log(`[WebRTC] Connection state: ${this.pc.connectionState}`);
+        // console.log(`[WebRTC] Connection state: ${this.pc.connectionState}`);
       }
-
+      
       if (this.onConnectionStateChange) {
         this.onConnectionStateChange(this.pc.connectionState);
       }
@@ -80,7 +80,7 @@ export class WebRTCPeer {
   private setupDataChannel(channel: RTCDataChannel): void {
     channel.onopen = () => {
       // Only log once when channel opens (not on every message)
-      console.log(`[WebRTC] Data channel opened: ${channel.label}`);
+      // console.log(`[WebRTC] Data channel opened: ${channel.label}`);
       if (this.onDataChannelOpen) {
         this.onDataChannelOpen();
       }

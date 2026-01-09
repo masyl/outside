@@ -60,12 +60,12 @@ export function reducer(state: WorldState, action: Action): WorldState {
           createdAt: Date.now(),
         };
 
-        console.log(`[CREATE_TERRAIN] Creating terrain: ${id} (${terrainType}) at (${x}, ${y}) size ${width}x${height}`);
+        // console.log(`[CREATE_TERRAIN] Creating terrain: ${id} (${terrainType}) at (${x}, ${y}) size ${width}x${height}`);
         
         // Add to ground layer
         addTerrainObject(draft.groundLayer, terrain);
         
-        console.log(`[CREATE_TERRAIN] Terrain added. Total terrain objects: ${draft.groundLayer.terrainObjects.size}`);
+        // console.log(`[CREATE_TERRAIN] Terrain added. Total terrain objects: ${draft.groundLayer.terrainObjects.size}`);
         break;
       }
 
@@ -84,7 +84,7 @@ export function reducer(state: WorldState, action: Action): WorldState {
         }
 
         // Check walkability - bots can only be placed on walkable terrain
-        console.log(`[PLACE_OBJECT] Trying to place ${id} at (${position.x}, ${position.y})`);
+        // console.log(`[PLACE_OBJECT] Trying to place ${id} at (${position.x}, ${position.y})`);
         if (!isWalkable(draft, position)) {
           const topMostTerrain = getTopMostTerrainAtPosition(draft.groundLayer, position);
           if (topMostTerrain) {
@@ -97,9 +97,9 @@ export function reducer(state: WorldState, action: Action): WorldState {
         
         const topMostTerrain = getTopMostTerrainAtPosition(draft.groundLayer, position);
         if (topMostTerrain) {
-          console.log(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is walkable - terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
+          // console.log(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is walkable - terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
         } else {
-          console.log(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is walkable - NO TERRAIN (should not happen)`);
+          // console.log(`[PLACE_OBJECT] Position (${position.x}, ${position.y}) is walkable - NO TERRAIN (should not happen)`);
         }
 
         // Check if target position is occupied by another object
@@ -149,37 +149,37 @@ export function reducer(state: WorldState, action: Action): WorldState {
 
         // Validate new position
         if (!isValidPosition(draft, newPosition)) {
-          console.warn(`[MOVE_OBJECT] Invalid move position: (${newPosition.x}, ${newPosition.y})`);
+          // console.warn(`[MOVE_OBJECT] Invalid move position: (${newPosition.x}, ${newPosition.y})`);
           return state;
         }
 
         // Check walkability - bots can only move to walkable positions
-        console.log(`[MOVE_OBJECT] Bot ${id} trying to move from (${currentPos.x}, ${currentPos.y}) to (${newPosition.x}, ${newPosition.y})`);
+        // console.log(`[MOVE_OBJECT] Bot ${id} trying to move from (${currentPos.x}, ${currentPos.y}) to (${newPosition.x}, ${newPosition.y})`);
         
         // Debug: Check what terrain is at the target position
         const topMostTerrain = getTopMostTerrainAtPosition(draft.groundLayer, newPosition);
         if (topMostTerrain) {
-          console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) has terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
+          // console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) has terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
         } else {
-          console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) has NO TERRAIN`);
+          // console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) has NO TERRAIN`);
         }
         
         // Check all terrain objects at this position (for debugging)
         const allTerrainAtPosition = draft.groundLayer.terrainObjectsByPosition.get(`${newPosition.x},${newPosition.y}`);
         if (allTerrainAtPosition && allTerrainAtPosition.length > 0) {
-          console.log(`[MOVE_OBJECT] All terrain at (${newPosition.x}, ${newPosition.y}):`, allTerrainAtPosition.map(t => `${t.type}(${t.id})`).join(', '));
+          // console.log(`[MOVE_OBJECT] All terrain at (${newPosition.x}, ${newPosition.y}):`, allTerrainAtPosition.map(t => `${t.type}(${t.id})`).join(', '));
         }
         
         if (!isWalkable(draft, newPosition)) {
           if (topMostTerrain) {
-            console.warn(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is not walkable - terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
+            // console.warn(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is not walkable - terrain: ${topMostTerrain.type} (${topMostTerrain.id})`);
           } else {
-            console.warn(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is not walkable - NO TERRAIN at this position`);
+            // console.warn(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is not walkable - NO TERRAIN at this position`);
           }
           return state;
         }
         
-        console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is walkable, allowing movement`);
+        // console.log(`[MOVE_OBJECT] Position (${newPosition.x}, ${newPosition.y}) is walkable, allowing movement`);
 
         // Check if target position is occupied by another object
         if (isPositionOccupied(draft, newPosition)) {

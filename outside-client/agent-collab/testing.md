@@ -12,20 +12,20 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Needed improvement
 
-[x] Add the status of the peer-to-peer to the debug panel
-[x] Show both counts: Ground objects and Surface objects. (related to bug below)
-[x] When the connection is lost, try silent reconnect (1s), then show popup and retry (2s), then loop (5s).
-[x] Bots should move on their own randomly (Bot Autonomy).
-[x] Implement basic bot autonomy (random movement)
+- None yet
 
-### Confirmed Problems
+### Problems of current build
 
-[ ] TO FIX: Host console logs has a warning:
+[ ] One bots seems to move at a much faster frequency than the others. And one seems to move a lot less.
+[x] Too much logging is poluting the moves and the console is spammed. Remove old logs.
+
+### Other Confirmed Problems
+
+[ ] Host console logs has a warning:
     signaling.ts:147 [Signaling] Unknown message type: host-registered
 [ ] Host has logs regarding missing sprite:
     animationController.ts:88 [AnimationController] Sprite not found for object bob
-[ ] TO FIX: When resetting the game, the step count should also reset. It is the main game clock.
-[x] TO FIX: The object count is not accurate, it should include the terrain objects.
+[ ] When resetting the game, the step count should also reset. It is the main game clock.
 
 ### Suspected Problems
 

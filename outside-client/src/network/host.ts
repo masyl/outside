@@ -108,7 +108,7 @@ export class HostMode {
     const world = this.store.getState();
     if (world.seed !== undefined) {
       this.autonomy = new BotAutonomy(world.seed);
-      console.log(`[Host] Initialized bot autonomy with seed: ${world.seed}`);
+      // console.log(`[Host] Initialized bot autonomy with seed: ${world.seed}`);
     } else {
       console.warn('[Host] World has no seed, bot autonomy disabled');
     }
@@ -245,7 +245,7 @@ export class HostMode {
       .filter((obj) => obj.type === 'bot')
       .map((obj) => obj.id);
     this.botOwnership.setAvailableBots(botIds);
-    console.log(`[Host] Updated available bots: ${botIds.join(', ')}`);
+    // console.log(`[Host] Updated available bots: ${botIds.join(', ')}`);
   }
 
   /**
@@ -392,7 +392,7 @@ export class HostMode {
    * Handle input command from client
    */
   private handleInputCommand(clientId: string, inputCommand: InputCommand): void {
-    console.log(`[Host] Processing input command from ${clientId}: ${inputCommand.command}`);
+    // console.log(`[Host] Processing input command from ${clientId}: ${inputCommand.command}`);
     
     // Update available bots before checking (bots might have been created after initialization)
     this.updateAvailableBots();
@@ -484,7 +484,7 @@ export class HostMode {
     }
 
     if (gameCommand) {
-      console.log(`[Host] Enqueueing game command:`, gameCommand);
+      // console.log(`[Host] Enqueueing game command:`, gameCommand);
       // Enqueue game command
       this.commandQueue.enqueue(gameCommand);
     }
@@ -520,7 +520,7 @@ export class HostMode {
 
     const peer = this.peerConnections.get(clientId);
     if (peer) {
-      console.log(`[Host] Sending initial state to client ${clientId} (${gridData.objects.length} objects, ${gridData.terrain.length} terrain, step: ${this.currentStep})`);
+      // console.log(`[Host] Sending initial state to client ${clientId} (${gridData.objects.length} objects, ${gridData.terrain.length} terrain, step: ${this.currentStep})`);
       peer.send(serializeNetworkMessage(initialState));
     }
   }
