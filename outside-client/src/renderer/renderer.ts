@@ -25,6 +25,7 @@ export class GameRenderer {
   private spriteIndex: SpriteIndex = new Map();
   private selectedBotId: string | null = null;
   private previousGroundLayerSize: number = 0;
+  private currentWorld: WorldState | null = null;
 
   constructor(app: Application) {
     this.app = app;
@@ -85,6 +86,9 @@ export class GameRenderer {
    * Set the world state and initialize rendering
    */
   setWorld(world: WorldState): void {
+    // Store current world state for resize handler
+    this.currentWorld = world;
+    
     // Clear existing grid
     this.gridContainer.removeChildren();
     
@@ -152,6 +156,9 @@ export class GameRenderer {
    * Update the renderer when world state changes
    */
   update(world: WorldState): void {
+    // Store current world state for resize handler
+    this.currentWorld = world;
+    
     // Always update terrain layer when world state changes
     // This ensures terrain is rendered correctly as it's added incrementally
     if (this.terrainTexture) {
@@ -263,6 +270,11 @@ export class GameRenderer {
    */
   resize(): void {
     this.app.renderer.resize(window.innerWidth, window.innerHeight);
+    
+    // Recenter the viewport after resize if we have a world state
+    if (this.currentWorld) {
+      this.centerViewport(this.currentWorld);
+    }
   }
 
   /**

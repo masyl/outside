@@ -128,6 +128,7 @@ async function init() {
   // Handle window resize (moved after debugMenu initialization to avoid ReferenceError)
   window.addEventListener('resize', () => {
     app.renderer.resize(window.innerWidth, window.innerHeight);
+    renderer.resize(); // This will recenter the viewport
     debugMenu.onResize();
   });
 
