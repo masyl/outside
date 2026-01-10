@@ -45,7 +45,9 @@ export class GameRenderer {
     // Initialize asset loading
     // Set scale mode to nearest neighbor for pixel art look
     // Using explicit string 'nearest' which PixiJS v8 supports
-    Texture.defaultOptions.scaleMode = 'nearest';
+    // Note: In PixiJS v8, we set this on the textures themselves or AbstractRenderer
+    // Texture.defaultOptions might not be available or correct in all environments
+    // We will set it on loaded textures individually as a safer fallback
     this.loadAssets();
   }
 
@@ -56,9 +58,15 @@ export class GameRenderer {
     try {
       // Load terrain sprite sheet
       this.terrainTexture = await Assets.load('/sprites/nature-pixels-v2/Tiles/Nature.png');
+      if (this.terrainTexture) {
+        this.terrainTexture.source.scaleMode = 'nearest';
+      }
       
       // Load bot sprite sheet
       this.botTexture = await Assets.load('/sprites/eris-esra-character-template-4/16x16/16x16 Idle-Sheet.png');
+      if (this.botTexture) {
+        this.botTexture.source.scaleMode = 'nearest';
+      }
       
       console.log('[GameRenderer] Assets loaded successfully');
     } catch (error) {

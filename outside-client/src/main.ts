@@ -38,14 +38,6 @@ async function init() {
   }
   appElement.appendChild(app.canvas);
 
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    app.renderer.resize(window.innerWidth, window.innerHeight);
-    if (typeof debugMenu !== 'undefined') {
-      debugMenu.onResize();
-    }
-  });
-
   // Create debug overlay (FPS counter, step counter, version)
   const debugOverlay = new DebugOverlay();
   
@@ -101,6 +93,12 @@ async function init() {
         console.log('[Debug] Level reset complete');
       });
     },
+  });
+
+  // Handle window resize (moved after debugMenu initialization to avoid ReferenceError)
+  window.addEventListener('resize', () => {
+    app.renderer.resize(window.innerWidth, window.innerHeight);
+    debugMenu.onResize();
   });
 
   // Determine host/client mode and initialize game
