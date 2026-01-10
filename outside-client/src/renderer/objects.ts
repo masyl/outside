@@ -171,22 +171,16 @@ export function updateSpriteColors(
         if (!botTexture) {
           const isSelected = object.id === selectedBotId;
           
-          // Preserve current position
-          const currentX = sprite.x;
-          const currentY = sprite.y;
+          // Remove old sprite
+          container.removeChild(sprite);
           
           // Create new sprite with correct selection state
           const newSprite = createBotPlaceholder(renderer, isSelected);
-          newSprite.x = currentX;
-          newSprite.y = currentY;
+          newSprite.x = sprite.x;
+          newSprite.y = sprite.y;
           
-          // Update spriteIndex atomically BEFORE removing old sprite
-          // This prevents AnimationController from seeing a missing sprite
-          spriteIndex.set(object.id, newSprite);
-          
-          // Remove old sprite and add new one
-          container.removeChild(sprite);
           container.addChild(newSprite);
+          spriteIndex.set(object.id, newSprite);
         }
       }
     }
