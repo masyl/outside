@@ -1,4 +1,4 @@
-import { Sprite, Container, Texture, Renderer } from 'pixi.js';
+import { Sprite, Container, Texture, Renderer, Rectangle } from 'pixi.js';
 import { WorldState, GameObject } from '@outside/core';
 import { DISPLAY_TILE_SIZE } from './grid';
 
@@ -52,9 +52,25 @@ export function createBotPlaceholder(renderer?: Renderer, isSelected: boolean = 
  * Create a sprite from a PNG texture (for when sprite is provided)
  */
 export function createBotSprite(texture: Texture): Sprite {
-  const sprite = new Sprite(texture);
+  // If texture is a spritesheet (large image), slice the first 16x16 tile
+  // Sheet: /sprites/eris-esra-character-template-4/16x16/16x16 Idle-Sheet.png
+  // Default bot: (0, 0) -> x=0, y=0, w=16, h=16
+  
+  // Check if texture is likely the full sheet (width > 16)
+  // Or just always slice the first tile for now since we know the asset
+  
+  // Create a new texture that references the source but with the correct frame
+  const tileTexture = new Texture({
+    source: texture.source,
+    frame: new Rectangle(0, 0, 16, 16)
+  });
+
+  const sprite = new Sprite(tileTexture);
+  
+  // Scale 16x16 sprite to 64x64 tile size (4x scale)
   sprite.width = DISPLAY_TILE_SIZE;
   sprite.height = DISPLAY_TILE_SIZE;
+  
   return sprite;
 }
 

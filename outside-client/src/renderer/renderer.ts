@@ -1,4 +1,4 @@
-import { Application, Container, Texture, Sprite } from 'pixi.js';
+import { Application, Container, Texture, Sprite, Assets } from 'pixi.js';
 import { GameObject, WorldState } from '@outside/core';
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import {
@@ -20,6 +20,7 @@ export class GameRenderer {
   private objectsContainer: Container;
   private rootContainer: Container;
   private botTexture?: Texture;
+  private terrainTexture?: Texture;
   private spriteIndex: SpriteIndex = new Map();
   private selectedBotId: string | null = null;
   private previousGroundLayerSize: number = 0;
@@ -40,6 +41,26 @@ export class GameRenderer {
     this.rootContainer.addChild(this.gridContainer);
     this.rootContainer.addChild(this.terrainContainer);
     this.rootContainer.addChild(this.objectsContainer);
+
+    // Initialize asset loading
+    this.loadAssets();
+  }
+
+  /**
+   * Load sprite sheet assets
+   */
+  private async loadAssets(): Promise<void> {
+    try {
+      // Load terrain sprite sheet
+      this.terrainTexture = await Assets.load('/sprites/nature-pixels-v2/Tiles/Nature.png');
+      
+      // Load bot sprite sheet
+      this.botTexture = await Assets.load('/sprites/eris-esra-character-template-4/16x16/16x16 Idle-Sheet.png');
+      
+      console.log('[GameRenderer] Assets loaded successfully');
+    } catch (error) {
+      console.error('[GameRenderer] Failed to load assets:', error);
+    }
   }
 
   /**
@@ -55,8 +76,14 @@ export class GameRenderer {
     
     // Create terrain layer (ground layer, renders above grid)
     this.terrainContainer.removeChildren();
-    const terrainLayer = createTerrainLayer(world);
-    this.terrainContainer.addChild(terrainLayer);
+    if (this.terrainTexture) {
+      const terrainLayer = createTerrainLayer(world, this.terrainTexture);
+      this.terrainContainer.addChild(terrainLayer);
+    } else {
+      // Fallback if textures not loaded yet (or failed)
+      const terrainLayer = createTerrainLayer(world);
+      this.terrainContainer.addChild(terrainLayer);
+    }
     
     // Create objects layer and sprite index (surface layer, renders above terrain)
     this.objectsContainer.removeChildren();
@@ -79,7 +106,11 @@ export class GameRenderer {
   update(world: WorldState): void {
     // Always update terrain layer when world state changes
     // This ensures terrain is rendered correctly as it's added incrementally
-    updateTerrainLayer(this.terrainContainer, world);
+    if (this.terrainTexture) {
+      updateTerrainLayer(this.terrainContainer, world, this.terrainTexture);
+    } else {
+      updateTerrainLayer(this.terrainContainer, world);
+    }
     
     // Update objects layer and sprite index
     updateObjectsLayerWithIndex(

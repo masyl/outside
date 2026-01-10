@@ -1,4 +1,4 @@
-import { Sprite, Container, Texture, Graphics } from 'pixi.js';
+import { Sprite, Container, Texture, Graphics, Rectangle, TilingSprite } from 'pixi.js';
 import { WorldState, TerrainObject } from '@outside/core';
 import { DISPLAY_TILE_SIZE } from './grid';
 
@@ -23,9 +23,52 @@ function getTerrainColor(terrainType: string): number {
 }
 
 /**
- * Create a sprite for a terrain object (solid color)
+ * Create a sprite for a terrain object (solid color or sprite sheet)
  */
-function createTerrainSprite(terrain: TerrainObject): Sprite {
+function createTerrainSprite(terrain: TerrainObject, terrainTexture?: Texture): Sprite | TilingSprite {
+  // Try to use sprite sheet if available and supported terrain type
+  if (terrainTexture) {
+    let tileX = -1;
+    let tileY = -1;
+
+    // Map terrain types to sprite sheet coordinates (16x16 tiles)
+    // Sheet: /sprites/nature-pixels-v2/Tiles/Nature.png
+    if (terrain.type === 'grass') {
+      // Grass: 1, 1 (x=16, y=16)
+      tileX = 16;
+      tileY = 16;
+    } else if (terrain.type === 'water') {
+      // Water: 4, 1 (x=64, y=16)
+      tileX = 64;
+      tileY = 16;
+    }
+
+    if (tileX >= 0 && tileY >= 0) {
+      // Create a texture for the specific 16x16 tile
+      const tileTexture = new Texture({
+        source: terrainTexture.source,
+        frame: new Rectangle(tileX, tileY, 16, 16)
+      });
+
+      // Use TilingSprite to repeat the texture across the terrain area
+      // Display size: terrain width * 64px
+      const width = terrain.width * DISPLAY_TILE_SIZE;
+      const height = terrain.height * DISPLAY_TILE_SIZE;
+      
+      const sprite = new TilingSprite({
+        texture: tileTexture,
+        width,
+        height
+      });
+
+      // Scale the 16x16 texture up to 64x64 (4x scale)
+      sprite.tileScale.set(4, 4);
+      
+      return sprite;
+    }
+  }
+
+  // Fallback to solid color rendering
   const canvas = document.createElement('canvas');
   canvas.width = terrain.width * DISPLAY_TILE_SIZE;
   canvas.height = terrain.height * DISPLAY_TILE_SIZE;
@@ -65,7 +108,8 @@ function createTerrainSprite(terrain: TerrainObject): Sprite {
  * so that overlapping terrain correctly shows the newest (top-most) one
  */
 export function createTerrainLayer(
-  world: WorldState
+  world: WorldState,
+  terrainTexture?: Texture
 ): Container {
   const container = new Container();
   
@@ -78,7 +122,7 @@ export function createTerrainLayer(
   
   // Render all terrain objects
   for (const terrain of sortedTerrains) {
-    const sprite = createTerrainSprite(terrain);
+    const sprite = createTerrainSprite(terrain, terrainTexture);
     sprite.x = terrain.position.x * DISPLAY_TILE_SIZE;
     sprite.y = terrain.position.y * DISPLAY_TILE_SIZE;
     
@@ -99,7 +143,8 @@ export function createTerrainLayer(
  */
 export function updateTerrainLayer(
   container: Container,
-  world: WorldState
+  world: WorldState,
+  terrainTexture?: Texture
 ): void {
   // Updating terrain layer (no logging to avoid console spam)
   
@@ -110,7 +155,7 @@ export function updateTerrainLayer(
   container.removeChildren();
   
   // Recreate terrain layer
-  const newLayer = createTerrainLayer(world);
+  const newLayer = createTerrainLayer(world, terrainTexture);
   
   // Add all children from new layer to existing container
   const childrenToAdd = [...newLayer.children]; // Copy array before moving
