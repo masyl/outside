@@ -1,5 +1,5 @@
 import { Application, Container, Texture, Sprite, Assets, SCALE_MODES } from 'pixi.js';
-import { GameObject, WorldState } from '@outside/core';
+import { GameObject, WorldState, Direction } from '@outside/core';
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import {
   createBotPlaceholder,
@@ -20,6 +20,7 @@ export class GameRenderer {
   private objectsContainer: Container;
   private rootContainer: Container;
   private botTexture?: Texture;
+  private botWalkTexture?: Texture;
   private terrainTexture?: Texture;
   private spriteIndex: SpriteIndex = new Map();
   private selectedBotId: string | null = null;
@@ -67,6 +68,12 @@ export class GameRenderer {
       if (this.botTexture) {
         this.botTexture.source.scaleMode = 'nearest';
       }
+
+      // Load walk animation sprite sheet
+      this.botWalkTexture = await Assets.load('/sprites/eris-esra-character-template-4/16x16/16x16 Walk-Sheet.png');
+      if (this.botWalkTexture) {
+        this.botWalkTexture.source.scaleMode = 'nearest';
+      }
       
       console.log('[GameRenderer] Assets loaded successfully');
     } catch (error) {
@@ -109,6 +116,36 @@ export class GameRenderer {
     
     // Center the viewport
     this.centerViewport(world);
+
+    // Start animation loop for sprites
+    this.startSpriteAnimationLoop();
+  }
+
+  private animationFrameId: number | null = null;
+
+  private startSpriteAnimationLoop(): void {
+    const loop = () => {
+      const now = Date.now();
+      
+      this.botAnimationStates.forEach((state, id) => {
+        // Update frame every 125ms
+        if (now - state.lastUpdate >= 125) {
+          state.frame = (state.frame + 1) % 4; // 4 frames per animation
+          state.lastUpdate = now;
+          
+          // Update sprite texture
+          const sprite = this.spriteIndex.get(id);
+          if (sprite && this.botTexture && this.botWalkTexture) {
+            import('./objects').then(({ updateBotSpriteFrame }) => {
+              updateBotSpriteFrame(sprite, this.botTexture!, this.botWalkTexture!, state.direction, state.isMoving, state.frame);
+            });
+          }
+        }
+      });
+      
+      this.animationFrameId = requestAnimationFrame(loop);
+    };
+    loop();
   }
 
   /**
@@ -193,6 +230,33 @@ export class GameRenderer {
   getApp(): Application {
     return this.app;
   }
+
+  /**
+   * Update bot visual state (direction and animation)
+   */
+  updateBotDirection(id: string, direction: Direction, isMoving: boolean): void {
+    // This will be implemented in objects.ts or handled by updating sprite textures
+    // We need to pass this state to a helper that updates the specific sprite
+    const sprite = this.spriteIndex.get(id);
+    if (sprite && this.botTexture && this.botWalkTexture) {
+      // We need to import updateBotSpriteAnimation from objects.ts
+      // But for now, let's just expose a method or forward the call
+      // Ideally objects.ts logic handles this.
+      
+      // Since we can't easily add imports without reading file content again to find imports section,
+      // let's assume we can add a method here or rely on the fact we will update objects.ts soon.
+      
+      // Let's store the state on the sprite or a map?
+      // Better: objects.ts exports a function updateBotAnimation(sprite, texture, walkTexture, direction, isMoving, frame)
+      
+      // For now, let's create a placeholder or update the logic.
+      // We need to track animation frame state.
+      // GameRenderer will hold a map of bot animation states?
+      this.botAnimationStates.set(id, { direction, isMoving, frame: 0, lastUpdate: Date.now() });
+    }
+  }
+
+  private botAnimationStates: Map<string, { direction: Direction, isMoving: boolean, frame: number, lastUpdate: number }> = new Map();
 
   /**
    * Resize handler (call when window resizes)

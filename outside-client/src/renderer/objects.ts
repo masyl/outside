@@ -1,5 +1,5 @@
 import { Sprite, Container, Texture, Renderer, Rectangle } from 'pixi.js';
-import { WorldState, GameObject } from '@outside/core';
+import { WorldState, GameObject, Direction } from '@outside/core';
 import { DISPLAY_TILE_SIZE } from './grid';
 
 /**
@@ -187,6 +187,72 @@ export function updateObjectsLayerWithIndex(
       spriteIndex.delete(id);
     }
   });
+}
+
+/**
+ * Update a bot sprite's texture frame based on direction and animation state
+ */
+export function updateBotSpriteFrame(
+  sprite: Sprite,
+  idleTexture: Texture,
+  walkTexture: Texture,
+  direction: Direction,
+  isMoving: boolean,
+  frameIndex: number
+): void {
+  // Determine row based on direction
+  // Row 0: Down
+  // Row 1: Down-Right (Flip for Down-Left)
+  // Row 2: Right (Flip for Left)
+  // Row 3: Up-Right (Flip for Up-Left)
+  // Row 4: Up
+  
+  let row = 0;
+  let flipX = false;
+  
+  switch (direction) {
+    case 'down': row = 0; break;
+    case 'down-right': row = 1; break;
+    case 'down-left': row = 1; flipX = true; break;
+    case 'right': row = 2; break;
+    case 'left': row = 2; flipX = true; break;
+    case 'up-right': row = 3; break;
+    case 'up-left': row = 3; flipX = true; break;
+    case 'up': row = 4; break;
+  }
+  
+  // Select texture based on state
+  const sourceTexture = isMoving ? walkTexture : idleTexture;
+  
+  // Calculate frame position
+  // 16x16 frames with 4px padding between rows/columns?
+  // User mentions 4px padding between rows and columns.
+  // Assuming 16px sprite + 4px gap = 20px stride
+  const SPRITE_SIZE = 16;
+  const GAP = 4;
+  const STRIDE = SPRITE_SIZE + GAP;
+  
+  const frameX = frameIndex * STRIDE;
+  const frameY = row * STRIDE;
+  
+  // Update texture frame
+  const newTexture = new Texture({
+    source: sourceTexture.source,
+    frame: new Rectangle(frameX, frameY, SPRITE_SIZE, SPRITE_SIZE)
+  });
+  
+  sprite.texture = newTexture;
+  
+  // Handle flipping: anchor.x=1 + negative scale effectively flips in place for top-left origin
+  if (flipX) {
+    sprite.scale.x = -1 * (DISPLAY_TILE_SIZE / 16);
+    sprite.anchor.x = 1; 
+  } else {
+    sprite.scale.x = 1 * (DISPLAY_TILE_SIZE / 16);
+    sprite.anchor.x = 0;
+  }
+  // Ensure Y scale is correct
+  sprite.scale.y = DISPLAY_TILE_SIZE / 16;
 }
 
 /**

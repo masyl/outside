@@ -3,6 +3,7 @@
 ## Next Logical Pitches
 
 - [Basic PixelArt Visuals](./basic-pixelart-visuals.md)
+- [Animated Directionnal Bots](./animated-directional-bots.md)
 
 ## Core features
 

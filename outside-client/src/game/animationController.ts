@@ -1,4 +1,4 @@
-import { WorldState, GameObject, Position } from '@outside/core';
+import { WorldState, GameObject, Position, Direction } from '@outside/core';
 import { Store } from '../store/store';
 import { GameRenderer } from '../renderer/renderer';
 import { animateObjectMovement } from './animations';
@@ -105,6 +105,33 @@ export class AnimationController {
       this.activeAnimations.delete(id);
     }
 
+    // Determine direction
+    const dx = toPos.x - fromPos.x;
+    const dy = toPos.y - fromPos.y;
+    let direction: Direction = 'down';
+
+    if (dx === 0 && dy === -1) direction = 'up';
+    else if (dx === 0 && dy === 1) direction = 'down';
+    else if (dx === -1 && dy === 0) direction = 'left';
+    else if (dx === 1 && dy === 0) direction = 'right';
+    else if (dx === 1 && dy === -1) direction = 'up-right';
+    else if (dx === -1 && dy === -1) direction = 'up-left';
+    else if (dx === 1 && dy === 1) direction = 'down-right';
+    else if (dx === -1 && dy === 1) direction = 'down-left';
+
+    // Update facing direction in store
+    // Note: This dispatches an action which might trigger another state update,
+    // but we're in the middle of handling a state update.
+    // Ideally, the game logic (HostMode) should update facing, but AnimationController is client-side visual logic.
+    // For now, we'll let the renderer handle the visual update based on direction if we can pass it.
+    // But AnimationController is about position interpolation.
+    
+    // We can update the sprite's texture frame directly in the renderer based on direction
+    // But we need to persist "facing" state for idle animations.
+    
+    // Let's call a method on renderer to set the facing direction for this bot
+    this.renderer.updateBotDirection(id, direction, true); // true = moving
+
     // Always start from the sprite's CURRENT pixel position (which may be mid-animation)
     // This allows smooth continuation if an animation is interrupted
     const currentPixelX = sprite.x;
@@ -135,6 +162,9 @@ export class AnimationController {
         sprite.x = toPos.x * DISPLAY_TILE_SIZE;
         sprite.y = toPos.y * DISPLAY_TILE_SIZE;
         this.activeAnimations.delete(id);
+        
+        // Update state to idle
+        this.renderer.updateBotDirection(id, direction, false); // false = idle
       }
     );
 
