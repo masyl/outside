@@ -88,7 +88,7 @@ export class GameLoop {
         const command = this.commandQueue.dequeue();
         if (command) {
           // #region agent log
-          fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'loop.ts:startStateUpdateLoop',message:'Executing command',data:{command, step: currentStep, processedCount: processed},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
+          // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'loop.ts:startStateUpdateLoop',message:'Executing command',data:{command, step: currentStep, processedCount: processed},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
           // #endregion
           executeCommand(this.store, command, currentStep);
           processed++;

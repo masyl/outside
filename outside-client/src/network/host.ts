@@ -198,7 +198,7 @@ export class HostMode {
     const bots = Array.from(world.objects.values()).filter(obj => obj.type === 'bot');
 
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Autonomy check start',data:{botCount:bots.length,queueLength:this.commandQueue.length(),step:this.currentStep},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+    // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Autonomy check start',data:{botCount:bots.length,queueLength:this.commandQueue.length(),step:this.currentStep},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
 
     for (const bot of bots) {
@@ -213,7 +213,7 @@ export class HostMode {
       // Increased buffer since GameLoop now drains faster
       if (this.commandQueue.length() > bots.length * 4) {
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Queue full, skipping bot',data:{botId:bot.id,queueLength:this.commandQueue.length()},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+        // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Queue full, skipping bot',data:{botId:bot.id,queueLength:this.commandQueue.length()},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         continue;
       }
@@ -221,7 +221,7 @@ export class HostMode {
       const command = this.autonomy.decideAction(bot, world);
       if (command) {
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Bot action decided',data:{botId:bot.id,action:command.type},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+        // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Bot action decided',data:{botId:bot.id,action:command.type},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
         // #endregion
         this.commandQueue.enqueue(command);
         

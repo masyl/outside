@@ -36,7 +36,7 @@ export class EventLogger {
     }
 
     // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'persistence.ts:logEvent',message:'Logging event',data:{type:action.type,hasStep:step !== undefined,stepValue:step},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+    // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'persistence.ts:logEvent',message:'Logging event',data:{type:action.type,hasStep:step !== undefined,stepValue:step},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
     // #endregion
 
     try {
