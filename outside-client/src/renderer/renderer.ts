@@ -43,6 +43,8 @@ export class GameRenderer {
     this.rootContainer.addChild(this.objectsContainer);
 
     // Initialize asset loading
+    // Set scale mode to nearest neighbor for pixel art look
+    Texture.defaultOptions.scaleMode = 'nearest';
     this.loadAssets();
   }
 

@@ -71,6 +71,8 @@ export function createBotSprite(texture: Texture): Sprite {
   sprite.width = DISPLAY_TILE_SIZE;
   sprite.height = DISPLAY_TILE_SIZE;
   
+  // Anchor point is top-left by default, which matches our grid system
+  
   return sprite;
 }
 
