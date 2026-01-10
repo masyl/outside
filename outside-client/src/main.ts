@@ -69,6 +69,12 @@ async function init() {
   // Create renderer
   const renderer = new GameRenderer(app);
 
+  // Pre-load all assets before starting the game
+  // This ensures spritesheets are ready and prevents default placeholder sprites
+  console.log('[Init] Loading assets...');
+  await renderer.loadAssets();
+  console.log('[Init] Assets loaded, starting game...');
+
   // Create animation controller (subscribes to store and animates sprites)
   const animationController = new AnimationController(store, renderer);
 

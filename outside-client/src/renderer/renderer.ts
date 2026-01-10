@@ -43,20 +43,13 @@ export class GameRenderer {
     this.rootContainer.addChild(this.gridContainer);
     this.rootContainer.addChild(this.terrainContainer);
     this.rootContainer.addChild(this.objectsContainer);
-
-    // Initialize asset loading
-    // Set scale mode to nearest neighbor for pixel art look
-    // Using explicit string 'nearest' which PixiJS v8 supports
-    // Note: In PixiJS v8, we set this on the textures themselves or AbstractRenderer
-    // Texture.defaultOptions might not be available or correct in all environments
-    // We will set it on loaded textures individually as a safer fallback
-    this.loadAssets();
   }
 
   /**
    * Load sprite sheet assets
+   * This should be called before the game starts to ensure sprites are ready
    */
-  private async loadAssets(): Promise<void> {
+  async loadAssets(): Promise<void> {
     try {
       // Load terrain sprite sheet
       this.terrainTexture = await Assets.load('/sprites/nature-pixels-v2/Tiles/Nature.png');
@@ -79,7 +72,15 @@ export class GameRenderer {
       console.log('[GameRenderer] Assets loaded successfully');
     } catch (error) {
       console.error('[GameRenderer] Failed to load assets:', error);
+      // Assets failed to load, but game can continue with placeholders
     }
+  }
+
+  /**
+   * Check if assets are loaded
+   */
+  areAssetsLoaded(): boolean {
+    return !!(this.botTexture && this.botWalkTexture && this.terrainTexture);
   }
 
   /**

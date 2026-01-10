@@ -16,6 +16,8 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Problems of current build
 
+[ ] After reloading the browser window, bots are drawned at the step 0 location instead of the updated position of the real game state.
+
 - None
 
 ### Other Confirmed Problems
@@ -26,6 +28,8 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 [ ] Host has logs regarding missing sprite:
     animationController.ts:88 [AnimationController] Sprite not found for object bob
 [ ] When resetting the game, the step count should also reset. It is the main game clock.
+[ ] Openning the console in chrome messes up the rendering of the sprites and creates needless pixel doubling during animations.
+[ ] Favicon is missing and causing a 404 error in the console.
 
 ### Hard to Reproduce Problems
 
