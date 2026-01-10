@@ -40,8 +40,8 @@ export function parseLevelMarkdown(markdown: string): LevelCommands {
     const heading = lines[0].trim().toLowerCase();
     const content = lines.slice(1).join('\n');
 
-    // Extract commands from code blocks or plain text after heading
-    const commands = extractCommands(content);
+  // Extract commands from code blocks or plain text after heading
+  const commands = extractCommands(content);
 
     if (heading === 'terrain') {
       result.terrain.push(...commands);
@@ -68,8 +68,8 @@ function extractCommands(content: string): ParsedCommand[] {
     const codeBlockContent = match[1];
     const lines = codeBlockContent.split('\n');
     for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith('//') && !trimmed.startsWith('#')) {
+      const trimmed = stripInlineComment(line);
+      if (trimmed && !trimmed.startsWith('#')) {
         const parsed = parseCommand(trimmed);
         if (parsed.type !== 'unknown') {
           commands.push(parsed);
@@ -82,11 +82,10 @@ function extractCommands(content: string): ParsedCommand[] {
   if (commands.length === 0) {
     const lines = content.split('\n');
     for (const line of lines) {
-      const trimmed = line.trim();
-      // Skip empty lines, comments, and markdown syntax
+      const trimmed = stripInlineComment(line);
+      // Skip empty lines and markdown syntax
       if (
         trimmed &&
-        !trimmed.startsWith('//') &&
         !trimmed.startsWith('#') &&
         !trimmed.startsWith('```') &&
         !trimmed.startsWith('*') &&
@@ -102,4 +101,12 @@ function extractCommands(content: string): ParsedCommand[] {
   }
 
   return commands;
+}
+
+/**
+ * Strip inline `//` comments from a line while preserving otherwise valid text.
+ */
+function stripInlineComment(line: string): string {
+  const withoutComment = line.split('//')[0];
+  return withoutComment.trim();
 }
