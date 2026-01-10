@@ -7,7 +7,15 @@ export type Position = {
   y: number;
 };
 
-export type Direction = 'left' | 'right' | 'up' | 'down';
+export type Direction = 
+  | 'left' 
+  | 'right' 
+  | 'up' 
+  | 'down'
+  | 'up-left'
+  | 'up-right'
+  | 'down-left'
+  | 'down-right';
 
 export type ObjectType = 'bot';
 
@@ -15,6 +23,7 @@ export interface GameObject {
   id: string;
   type: ObjectType;
   position: Position;
+  facing?: Direction; // Optional facing direction
 }
 
 export interface Bot extends GameObject {
