@@ -152,6 +152,25 @@ export function updateObjectsLayerWithIndex(
 
         container.addChild(sprite);
         spriteIndex.set(object.id, sprite);
+      } else {
+        // Sprite exists, check if we need to upgrade it from placeholder to texture
+        if (botTexture) {
+          // Check if current sprite is using the bot texture
+          // We can check if the sprite's texture source matches the bot texture source
+          if (sprite.texture.source !== botTexture.source) {
+            // Replace placeholder with textured sprite
+            const newSprite = createBotSprite(botTexture);
+            
+            // Preserve position
+            newSprite.x = sprite.x;
+            newSprite.y = sprite.y;
+            
+            // Swap sprites
+            container.removeChild(sprite);
+            container.addChild(newSprite);
+            spriteIndex.set(object.id, newSprite);
+          }
+        }
       }
       // If sprite exists, DO NOT update its position here
       // AnimationController will handle position updates via animations
