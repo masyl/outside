@@ -1,6 +1,6 @@
 import { Application, Container, Texture, Sprite } from 'pixi.js';
 import { GameObject, WorldState } from '@outside/core';
-import { createGrid, getGridDimensions } from './grid';
+import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import {
   createBotPlaceholder,
   createObjectsLayerWithIndex,
