@@ -26,9 +26,9 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
     animationController.ts:88 [AnimationController] Sprite not found for object bob
 [ ] When resetting the game, the step count should also reset. It is the main game clock.
 
-### Suspected Problems
+### Hard to Reproduce Problems
 
-[ ] After a game reset from the host, clients turn all white, but not completelly crashed. And it sometimes flashes white and the level renders again... in a loop.
+[ ] Intermitent: Screen goes white, game keeps running even if nothing renders and this message is in the console: "WebGL: CONTEXT_LOST_WEBGL: loseContext: context lost"
 
 ### Design or usability Problems
 
