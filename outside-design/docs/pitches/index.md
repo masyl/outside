@@ -2,13 +2,12 @@
 
 ## Next Logical Pitches
 
-- [Bot Autonomy](./bot-autonomy.md)
+- [Basic PixelArt Visuals](./basic-pixelart-visuals.md)
 
 ## Core features
 
 - [Player Nicknames](./player-nicknames.md)
 - [Debug Mode](./debug-mode.md)
-- [Basic PixelArt Visuals](./basic-pixelart-visuals.md)
 - [Sound Effects](./sound-effects.md)
 - [Spawning Bots](./spawning-bots.md)
 - [Keystrokes](./keystrokes.md)
@@ -21,6 +20,10 @@
 
 ## One-line Pitch Ideas
 
+- Proper scaling and centering of the viewport
+- Make the game full screen
+- Draw an dotted outline boundary for the grid
+- Check if capping the framerate at 60 would reduce CPU load
 - [Inventory and Pickable Objects](./inventory-and-pickable-objects.md)
 - [Chickens and Eggs](./chickens-and-eggs.md)
 - [Trees and Fruits](./trees-and-fruits.md)
@@ -32,3 +35,4 @@
 - [Outside Game Server](./outside-game-server.md)
 - [Persistent Game State](./persistent-game-state.md)
 - [Client Connection Stability](./host-and-client-reconnection.md)
+- [Bot Autonomy](./bot-autonomy.md)

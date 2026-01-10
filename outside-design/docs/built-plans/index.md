@@ -33,6 +33,12 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ## Completed Plans
 
+### 2026-01-09 12:30 - Pixel Art Visuals
+
+Replaced geometric placeholders with pixel art assets. Implemented asynchronous sprite sheet loading and rendering for terrain (grass, water) and bots. Includes tiling support for terrain and automatic placeholder-to-sprite upgrading.
+
+[View full plan →](./2026-01-09-1230-pixel-art-visuals.md)
+
 ### 2026-01-09 10:45 - Bot Autonomy
 
 Implemented seeded, autonomous movement for bots. Bots now randomly explore the map (or wait) based on a deterministic random number generator. The master seed is persisted in the world state, ensuring consistent behavior across reloads. Also includes fixes for legacy save states and console log cleanup.
