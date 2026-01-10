@@ -33,7 +33,7 @@ export class Store {
   /**
    * Dispatch an action to update state
    */
-  dispatch(action: Action): void {
+  dispatch(action: Action, step?: number): void {
     const newState = reducer(this.state, action);
     
     // Only update if state actually changed
@@ -42,7 +42,7 @@ export class Store {
       
       // Log event if game has started
       if (this.isStartedFlag) {
-        this.eventLogger.logEvent(action);
+        this.eventLogger.logEvent(action, undefined, step);
       }
       
       this.notifySubscribers();

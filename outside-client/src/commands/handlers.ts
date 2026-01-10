@@ -5,11 +5,11 @@ import { ParsedCommand } from './parser';
 /**
  * Execute a parsed command by dispatching appropriate actions
  */
-export function executeCommand(store: Store, command: ParsedCommand): void {
+export function executeCommand(store: Store, command: ParsedCommand, step?: number): void {
   switch (command.type) {
     case 'create':
       if (command.objectType === 'bot') {
-        store.dispatch(actions.createBot(command.id));
+        store.dispatch(actions.createBot(command.id), step);
       } else if (command.objectType === 'terrain') {
         store.dispatch(actions.createTerrain(
           command.id,
@@ -18,16 +18,16 @@ export function executeCommand(store: Store, command: ParsedCommand): void {
           command.y,
           command.width,
           command.height
-        ));
+        ), step);
       }
       break;
 
     case 'place':
-      store.dispatch(actions.placeObject(command.id, { x: command.x, y: command.y }));
+      store.dispatch(actions.placeObject(command.id, { x: command.x, y: command.y }), step);
       break;
 
     case 'move':
-      store.dispatch(actions.moveObject(command.id, command.direction, command.distance));
+      store.dispatch(actions.moveObject(command.id, command.direction, command.distance), step);
       break;
 
     case 'unknown':

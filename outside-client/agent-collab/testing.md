@@ -16,8 +16,7 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Problems of current build
 
-[ ] One bots seems to move at a much faster frequency than the others. And one seems to move a lot less.
-[x] Too much logging is poluting the moves and the console is spammed. Remove old logs.
+- None
 
 ### Other Confirmed Problems
 

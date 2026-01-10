@@ -28,6 +28,7 @@ export class HostMode {
   private callbacks: HostCallbacks;
   private debugOverlay?: any; // DebugOverlay - will be set via setter
   private autonomy?: BotAutonomy;
+  private botLastMovedStep: Map<string, number> = new Map();
 
   constructor(
     store: Store,
@@ -196,15 +197,38 @@ export class HostMode {
     const world = this.store.getState();
     const bots = Array.from(world.objects.values()).filter(obj => obj.type === 'bot');
 
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Autonomy check start',data:{botCount:bots.length,queueLength:this.commandQueue.length(),step:this.currentStep},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+
     for (const bot of bots) {
-      // Simple heuristic: Only enqueue if queue isn't backed up
-      if (this.commandQueue.length() > bots.length * 2) {
+      // Velocity check: ensure bot hasn't moved recently
+      // Rule: 1 move per 2 steps at most
+      const lastMoved = this.botLastMovedStep.get(bot.id) || -1;
+      if (this.currentStep - lastMoved < 2) {
+        continue;
+      }
+
+      // Simple heuristic: Only enqueue if queue isn't backed up significantly
+      // Increased buffer since GameLoop now drains faster
+      if (this.commandQueue.length() > bots.length * 4) {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Queue full, skipping bot',data:{botId:bot.id,queueLength:this.commandQueue.length()},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         continue;
       }
 
       const command = this.autonomy.decideAction(bot, world);
       if (command) {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Bot action decided',data:{botId:bot.id,action:command.type},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         this.commandQueue.enqueue(command);
+        
+        // Update last moved step if it's a move command
+        if (command.type === 'move') {
+          this.botLastMovedStep.set(bot.id, this.currentStep);
+        }
       }
     }
   }

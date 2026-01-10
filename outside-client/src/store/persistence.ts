@@ -30,16 +30,21 @@ export class EventLogger {
   /**
    * Log an event to localStorage
    */
-  logEvent(action: Action, timestamp: number = Date.now()): void {
+  logEvent(action: Action, timestamp: number = Date.now(), step?: number): void {
     if (!this.shouldPersistAction(action)) {
       return;
     }
+
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'persistence.ts:logEvent',message:'Logging event',data:{type:action.type,hasStep:step !== undefined,stepValue:step},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
 
     try {
       const events = this.loadEvents();
       events.push({
         action,
         timestamp,
+        step, // Save optional step number
       });
       
       // Store events array in localStorage
