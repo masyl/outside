@@ -229,11 +229,11 @@ export function updateBotSpriteFrame(
   // User mentions 4px padding between rows and columns.
   // Assuming 16px sprite + 4px gap = 20px stride
   const SPRITE_SIZE = 16;
-  const GAP = 4;
-  const STRIDE = SPRITE_SIZE + GAP;
+  const PADDING = 2;
+  const STRIDE = SPRITE_SIZE + PADDING * 2;
   
-  const frameX = frameIndex * STRIDE;
-  const frameY = row * STRIDE;
+  const frameX = frameIndex * STRIDE + PADDING;
+  const frameY = row * STRIDE + PADDING;
   
   // Update texture frame
   const newTexture = new Texture({
