@@ -1,7 +1,8 @@
 import { Application, Container, Texture, Sprite } from 'pixi.js';
-import { WorldState } from '@outside/core';
+import { GameObject, WorldState } from '@outside/core';
 import { createGrid, getGridDimensions } from './grid';
 import {
+  createBotPlaceholder,
   createObjectsLayerWithIndex,
   updateObjectsLayerWithIndex,
   updateSpriteColors,
@@ -156,5 +157,27 @@ export class GameRenderer {
    */
   resize(): void {
     this.app.renderer.resize(window.innerWidth, window.innerHeight);
+  }
+
+  /**
+   * Ensure a sprite exists for the given object, creating a placeholder if needed.
+   */
+  ensureSpriteForObject(object: GameObject): Sprite | undefined {
+    if (object.type !== 'bot') {
+      return undefined;
+    }
+
+    let sprite = this.spriteIndex.get(object.id);
+    if (sprite) {
+      return sprite;
+    }
+
+    sprite = createBotPlaceholder(this.app.renderer, false);
+    sprite.x = object.position.x * DISPLAY_TILE_SIZE;
+    sprite.y = object.position.y * DISPLAY_TILE_SIZE;
+    this.objectsContainer.addChild(sprite);
+    this.spriteIndex.set(object.id, sprite);
+
+    return sprite;
   }
 }

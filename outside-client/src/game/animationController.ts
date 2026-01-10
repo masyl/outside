@@ -83,7 +83,16 @@ export class AnimationController {
   }
 
   private animateMovement(id: string, fromPos: Position, toPos: Position): void {
-    const sprite = this.renderer.getSpriteForObject(id);
+    let sprite = this.renderer.getSpriteForObject(id);
+    if (!sprite) {
+      const world = this.store.getState();
+      // Try to force-creation for missing sprite (race condition between color swap + animation)
+      const object = world.objects.get(id);
+      if (object) {
+        sprite = this.renderer.ensureSpriteForObject(object);
+      }
+    }
+
     if (!sprite) {
       console.warn(`[AnimationController] Sprite not found for object ${id}`);
       return;

@@ -9,7 +9,7 @@ import { DISPLAY_TILE_SIZE } from './grid';
  * Unselected bots: white circle with grey border for contrast
  * @param isSelected - Whether this bot is currently selected
  */
-function createBotPlaceholder(renderer?: Renderer, isSelected: boolean = false): Sprite {
+export function createBotPlaceholder(renderer?: Renderer, isSelected: boolean = false): Sprite {
   // Use canvas fallback for simplicity and reliability
   // Create a circle sprite using a canvas
   const canvas = document.createElement('canvas');
@@ -51,7 +51,7 @@ function createBotPlaceholder(renderer?: Renderer, isSelected: boolean = false):
 /**
  * Create a sprite from a PNG texture (for when sprite is provided)
  */
-function createBotSprite(texture: Texture): Sprite {
+export function createBotSprite(texture: Texture): Sprite {
   const sprite = new Sprite(texture);
   sprite.width = DISPLAY_TILE_SIZE;
   sprite.height = DISPLAY_TILE_SIZE;
