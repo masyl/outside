@@ -1,4 +1,4 @@
-import { Application, Container, Texture, Sprite, Assets } from 'pixi.js';
+import { Application, Container, Texture, Sprite, Assets, SCALE_MODES } from 'pixi.js';
 import { GameObject, WorldState } from '@outside/core';
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import {
@@ -44,6 +44,7 @@ export class GameRenderer {
 
     // Initialize asset loading
     // Set scale mode to nearest neighbor for pixel art look
+    // Using explicit string 'nearest' which PixiJS v8 supports
     Texture.defaultOptions.scaleMode = 'nearest';
     this.loadAssets();
   }

@@ -41,7 +41,9 @@ async function init() {
   // Handle window resize
   window.addEventListener('resize', () => {
     app.renderer.resize(window.innerWidth, window.innerHeight);
-    debugMenu.onResize();
+    if (typeof debugMenu !== 'undefined') {
+      debugMenu.onResize();
+    }
   });
 
   // Create debug overlay (FPS counter, step counter, version)
