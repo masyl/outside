@@ -62,12 +62,13 @@ export function createBotSprite(texture: Texture): Sprite {
   // Create a new texture that references the source but with the correct frame
   const tileTexture = new Texture({
     source: texture.source,
-    frame: new Rectangle(0, 0, 16, 16)
+    frame: new Rectangle(4, 4, 16, 16)
+    //frame: new Rectangle(0, 0, 16, 16)
   });
 
   const sprite = new Sprite(tileTexture);
   
-  // Scale 16x16 sprite to 64x64 tile size (4x scale)
+  // Scale 16x16 sprite to the needed ratio
   sprite.width = DISPLAY_TILE_SIZE;
   sprite.height = DISPLAY_TILE_SIZE;
   

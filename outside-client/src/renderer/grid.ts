@@ -2,7 +2,7 @@ import { Graphics, Container } from 'pixi.js';
 import { WorldState } from '@outside/core';
 
 const TILE_SIZE = 16;
-const PIXEL_RATIO = 4;
+const PIXEL_RATIO = 2;
 const DISPLAY_TILE_SIZE = TILE_SIZE * PIXEL_RATIO; // 64px
 
 const DARK_GREY = 0x2a2a2a;

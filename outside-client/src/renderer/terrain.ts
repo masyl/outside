@@ -40,7 +40,7 @@ function createTerrainSprite(terrain: TerrainObject, terrainTexture?: Texture): 
     } else if (terrain.type === 'water') {
       // Water: 4, 1 (x=64, y=16)
       tileX = 64;
-      tileY = 16;
+      tileY = 48;
     }
 
     if (tileX >= 0 && tileY >= 0) {
