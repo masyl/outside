@@ -129,7 +129,7 @@ export class HostMode {
       
       // Handle autonomous bot movement
       this.processAutonomy();
-
+      
       // Persist step count
       this.store.getEventLogger().saveStepCount(this.currentStep);
       

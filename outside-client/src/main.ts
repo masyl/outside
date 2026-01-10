@@ -127,8 +127,9 @@ async function init() {
 
   // Handle window resize (moved after debugMenu initialization to avoid ReferenceError)
   window.addEventListener('resize', () => {
-    app.renderer.resize(window.innerWidth, window.innerHeight);
-    renderer.resize(); // This will recenter the viewport
+    // renderer.resize() handles both app renderer resize and viewport centering
+    // It also ensures resolution stays at 1 for pixel-perfect rendering
+    renderer.resize();
     debugMenu.onResize();
   });
 

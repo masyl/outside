@@ -27,12 +27,12 @@ export class BotAutonomy {
     const direction = this.random.choice(directions);
 
     if (direction) {
-      return {
-        type: 'move',
-        id: bot.id,
-        direction,
-        distance: 1,
-      };
+    return {
+      type: 'move',
+      id: bot.id,
+      direction,
+      distance: 1,
+    };
     }
 
     return null;

@@ -85,8 +85,8 @@ export class GameLoop {
       let processed = 0;
 
       while (this.commandQueue.length() > 0 && processed < MAX_COMMANDS_PER_TICK) {
-        const command = this.commandQueue.dequeue();
-        if (command) {
+      const command = this.commandQueue.dequeue();
+      if (command) {
           // #region agent log
           // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'loop.ts:startStateUpdateLoop',message:'Executing command',data:{command, step: currentStep, processedCount: processed},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
           // #endregion

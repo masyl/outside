@@ -40,8 +40,8 @@ export function parseLevelMarkdown(markdown: string): LevelCommands {
     const heading = lines[0].trim().toLowerCase();
     const content = lines.slice(1).join('\n');
 
-  // Extract commands from code blocks or plain text after heading
-  const commands = extractCommands(content);
+    // Extract commands from code blocks or plain text after heading
+    const commands = extractCommands(content);
 
     if (heading === 'terrain') {
       result.terrain.push(...commands);

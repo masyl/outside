@@ -269,7 +269,14 @@ export class GameRenderer {
    * Resize handler (call when window resizes)
    */
   resize(): void {
+    // Resize the renderer, but ensure resolution stays at 1 for pixel-perfect rendering
+    // This prevents PixiJS from recalculating resolution based on devicePixelRatio
+    // which would make pixel art look blurry when console opens/closes
     this.app.renderer.resize(window.innerWidth, window.innerHeight);
+    
+    // Force resolution to stay at 1 (pixel-perfect, no devicePixelRatio scaling)
+    // This is critical for pixel art rendering to remain crisp
+    this.app.renderer.resolution = 1;
     
     // Recenter the viewport after resize if we have a world state
     if (this.currentWorld) {
