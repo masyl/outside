@@ -29,6 +29,7 @@ export class HostMode {
   private debugOverlay?: any; // DebugOverlay - will be set via setter
   private autonomy?: BotAutonomy;
   private botLastMovedStep: Map<string, number> = new Map();
+  private autonomyEnabled: boolean = false; // Default to disabled for manual control
 
   constructor(
     store: Store,
@@ -143,56 +144,25 @@ export class HostMode {
   }
 
   /**
-   * Process autonomous bot behavior
+   * Toggle bot autonomy on/off
    */
-  private processAutonomy(): void {
-    if (!this.autonomy) return;
+  toggleAutonomy(): void {
+    this.autonomyEnabled = !this.autonomyEnabled;
+    console.log(`[Host] Bot autonomy ${this.autonomyEnabled ? 'enabled' : 'disabled'}`);
+  }
 
-    const world = this.store.getState();
-    const bots = Array.from(world.objects.values()).filter(obj => obj.type === 'bot');
-
-    for (const bot of bots) {
-      // Check if bot already has a pending command for this step
-      // Ideally, we'd check the command queue, but it doesn't expose a "peek by ID" easily.
-      // However, we can check if the bot is "busy" or just assume autonomy fills the gap.
-      // Since CommandQueue processes sequentially, if we enqueue now, it will be processed in the next flush.
-      // But wait, CommandQueue is processed by GameLoop separate from this step counter?
-      // No, GameLoop processes the queue. HostMode just drives the step count and potentially feeds commands.
-      
-      // We need to be careful not to spam commands if the queue is backing up.
-      // For now, let's just generate a command. The conflict resolution strategy is:
-      // Player commands are enqueued via handleInputCommand.
-      // Autonomy commands are enqueued here.
-      // Both go into the queue.
-      
-      // To properly give precedence to player commands, we should only enqueue if the queue is empty for this bot.
-      // But we don't have easy access to queue contents per bot.
-      // A simple heuristic: Only enqueue if the bot is not currently moving?
-      // Or just let them interleave.
-      
-      // Pitch says: "Bots are give the chance to issue commands at each step... if no commands are issued"
-      // Implementing strict "if no command" requires queue inspection.
-      // For this MVP, let's just add the autonomous command.
-      // If a player spams keys, both will be in queue.
-      
-      // Actually, let's try to check the queue length roughly.
-      if (this.commandQueue.size() > bots.length * 2) {
-        // Queue is backing up, skip autonomy to let it drain
-        continue;
-      }
-
-      const command = this.autonomy.decideAction(bot, world);
-      if (command) {
-        this.commandQueue.enqueue(command);
-      }
-    }
+  /**
+   * Get current autonomy state
+   */
+  isAutonomyEnabled(): boolean {
+    return this.autonomyEnabled;
   }
 
   /**
    * Process autonomous bot behavior
    */
   private processAutonomy(): void {
-    if (!this.autonomy) return;
+    if (!this.autonomy || !this.autonomyEnabled) return;
 
     const world = this.store.getState();
     const bots = Array.from(world.objects.values()).filter(obj => obj.type === 'bot');

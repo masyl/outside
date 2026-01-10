@@ -269,6 +269,7 @@ export class GameRenderer {
    * Ensure a sprite exists for the given object, creating a placeholder if needed.
    */
   ensureSpriteForObject(object: GameObject): Sprite | undefined {
+    const VERTICAL_OFFSET = -8;
     if (object.type !== 'bot') {
       return undefined;
     }
@@ -280,7 +281,7 @@ export class GameRenderer {
 
     sprite = createBotPlaceholder(this.app.renderer, false);
     sprite.x = object.position.x * DISPLAY_TILE_SIZE;
-    sprite.y = object.position.y * DISPLAY_TILE_SIZE;
+    sprite.y = (object.position.y * DISPLAY_TILE_SIZE) + VERTICAL_OFFSET;
     this.objectsContainer.addChild(sprite);
     this.spriteIndex.set(object.id, sprite);
 

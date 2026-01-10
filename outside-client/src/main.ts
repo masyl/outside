@@ -70,6 +70,9 @@ async function init() {
   const signalingClient = new SignalingClient(SIGNALING_URL);
 
     // Create debug menu (after commandFeeder is created)
+    // Note: hostMode will be set later, so we use a variable that gets updated
+    let hostModeRef: HostMode | null = null;
+    
     const debugMenu = new DebugMenu(app, {
       onResetLevel: () => {
         console.log('[Debug] Resetting level...');
@@ -82,18 +85,26 @@ async function init() {
         
         // Reload level
         commandFeeder.loadLevel('/levels/demo.md').then(() => {
-        const terrainCommands = commandFeeder.getInitialTerrainCommands();
-        for (const command of terrainCommands) {
-          executeCommand(store, command);
+          const terrainCommands = commandFeeder.getInitialTerrainCommands();
+          for (const command of terrainCommands) {
+            executeCommand(store, command);
+          }
+          commandFeeder.feedBotCommands();
+          renderer.setWorld(store.getState());
+          // Mark game as started after reset
+          store.start();
+          console.log('[Debug] Level reset complete');
+        });
+      },
+      onToggleAutonomy: () => {
+        if (hostModeRef) {
+          hostModeRef.toggleAutonomy();
         }
-        commandFeeder.feedBotCommands();
-        renderer.setWorld(store.getState());
-        // Mark game as started after reset
-        store.start();
-        console.log('[Debug] Level reset complete');
-      });
-    },
-  });
+      },
+      isAutonomyEnabled: () => {
+        return hostModeRef ? hostModeRef.isAutonomyEnabled() : false;
+      },
+    });
 
   // Handle window resize (moved after debugMenu initialization to avoid ReferenceError)
   window.addEventListener('resize', () => {
@@ -256,6 +267,9 @@ async function init() {
           debugOverlay.setP2pStatus(state);
         },
       });
+
+      // Update reference for debug menu
+      hostModeRef = hostMode;
 
       // Set debug overlay for step count updates
       hostMode.setDebugOverlay(debugOverlay);

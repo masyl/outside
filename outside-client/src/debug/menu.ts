@@ -4,6 +4,8 @@ import { Application } from 'pixi.js';
 
 export interface DebugMenuCallbacks {
   onResetLevel?: () => void;
+  onToggleAutonomy?: () => void;
+  isAutonomyEnabled?: () => boolean;
 }
 
 /**
@@ -15,6 +17,8 @@ export class DebugMenu {
   private isOpen: boolean = false;
   private callbacks: DebugMenuCallbacks;
   private resetButton: Button | null = null;
+  private autonomyButton: Button | null = null;
+  private autonomyButtonText: Text | null = null;
 
   constructor(app: Application, callbacks: DebugMenuCallbacks = {}) {
     this.app = app;
@@ -84,6 +88,53 @@ export class DebugMenu {
     this.resetButton.x = 100;
     this.resetButton.y = 100;
     this.container.addChild(this.resetButton.view);
+
+    // Create toggle autonomy button
+    const autonomyButtonBackground = new Graphics();
+    autonomyButtonBackground.rect(0, 0, 200, 40);
+    autonomyButtonBackground.fill(0x333333);
+    autonomyButtonBackground.stroke({ width: 1, color: 0x00ff00 });
+
+    this.autonomyButtonText = new Text({ 
+      text: this.getAutonomyButtonText(), 
+      style: new TextStyle({
+        fontFamily: 'Courier New',
+        fontSize: 14,
+        fill: 0x00ff00,
+      })
+    });
+    this.autonomyButtonText.x = 10;
+    this.autonomyButtonText.y = 10;
+
+    const autonomyButtonView = new Container();
+    autonomyButtonView.addChild(autonomyButtonBackground);
+    autonomyButtonView.addChild(this.autonomyButtonText);
+
+    this.autonomyButton = new Button(autonomyButtonView);
+    this.autonomyButton.onPress.connect(() => {
+      if (this.callbacks.onToggleAutonomy) {
+        this.callbacks.onToggleAutonomy();
+        this.updateAutonomyButtonText();
+      }
+    });
+
+    autonomyButtonView.eventMode = 'static';
+    autonomyButtonView.cursor = 'pointer';
+
+    this.autonomyButton.x = 100;
+    this.autonomyButton.y = 160;
+    this.container.addChild(this.autonomyButton.view);
+  }
+
+  private getAutonomyButtonText(): string {
+    const isEnabled = this.callbacks.isAutonomyEnabled ? this.callbacks.isAutonomyEnabled() : false;
+    return `Bot Autonomy: ${isEnabled ? 'ON (A)' : 'OFF (A)'}`;
+  }
+
+  private updateAutonomyButtonText(): void {
+    if (this.autonomyButtonText) {
+      this.autonomyButtonText.text = this.getAutonomyButtonText();
+    }
   }
 
   private setupKeyboardHandlers(): void {
@@ -102,6 +153,12 @@ export class DebugMenu {
         if (this.callbacks.onResetLevel) {
           this.callbacks.onResetLevel();
         }
+      } else if (this.isOpen && event.key === 'a' && !event.metaKey && !event.ctrlKey) {
+        event.preventDefault();
+        if (this.callbacks.onToggleAutonomy) {
+          this.callbacks.onToggleAutonomy();
+          this.updateAutonomyButtonText();
+        }
       }
     });
   }
@@ -110,6 +167,7 @@ export class DebugMenu {
     this.isOpen = true;
     this.container.visible = true;
     this.updatePosition();
+    this.updateAutonomyButtonText();
   }
 
   close(): void {

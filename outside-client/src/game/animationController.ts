@@ -83,6 +83,10 @@ export class AnimationController {
   }
 
   private animateMovement(id: string, fromPos: Position, toPos: Position): void {
+    // The vertical offset should be the equivalent of four virtual pixels.
+    // This is to account for the placement of the bots to "look" like they are
+    // at the center of a tile instead of "inside" the tile.
+    const VERTICAL_OFFSET = -8;
     let sprite = this.renderer.getSpriteForObject(id);
     if (!sprite) {
       const world = this.store.getState();
@@ -150,7 +154,7 @@ export class AnimationController {
       fromGridY,
       toPos.x,
       toPos.y,
-      125,
+      375,
       (pixelX, pixelY) => {
         // Update sprite position in pixel space
         // This allows the sprite to be at intermediate positions between grid tiles
@@ -160,7 +164,7 @@ export class AnimationController {
       () => {
         // Animation complete - ensure sprite is exactly at target grid position
         sprite.x = toPos.x * DISPLAY_TILE_SIZE;
-        sprite.y = toPos.y * DISPLAY_TILE_SIZE;
+        sprite.y = (toPos.y * DISPLAY_TILE_SIZE) + VERTICAL_OFFSET;
         this.activeAnimations.delete(id);
         
         // Update state to idle

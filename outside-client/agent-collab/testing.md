@@ -20,6 +20,7 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Other Confirmed Problems
 
+[ ] The game does not wait for sprites to load, this causes sprites to revers to basic shapes for a moment when the game reloads.
 [ ] Host console logs has a warning:
     signaling.ts:147 [Signaling] Unknown message type: host-registered
 [ ] Host has logs regarding missing sprite:

@@ -233,7 +233,7 @@ export function updateBotSpriteFrame(
   const STRIDE = SPRITE_SIZE + PADDING * 2;
   
   const frameX = frameIndex * STRIDE + PADDING;
-  const frameY = row * STRIDE + PADDING;
+  const frameY = row * STRIDE + PADDING + 2;
   
   // Update texture frame
   const newTexture = new Texture({
@@ -243,16 +243,26 @@ export function updateBotSpriteFrame(
   
   sprite.texture = newTexture;
   
-  // Handle flipping: anchor.x=1 + negative scale effectively flips in place for top-left origin
+  // Handle flipping: when flipping horizontally, we need to keep the sprite in the same grid position
+  // Standard approach: anchor at right edge (1, 0) with negative scale should flip around the right edge
+  // But this was causing the sprite to shift left, so there might be an issue with how anchor is calculated
+  // 
+  // Alternative: Keep anchor at (0, 0) and use pivot property instead
+  // Pivot is the local point in the texture that will be placed at sprite.x, sprite.y
+  // To flip around the right edge of a 16px texture: pivot.x = 16
+  sprite.anchor.set(0, 0);
+  
   if (flipX) {
     sprite.scale.x = -1 * (DISPLAY_TILE_SIZE / 16);
-    sprite.anchor.x = 1; 
+    // Use pivot to flip around the right edge (16px = texture width)
+    sprite.pivot.x = 16;
   } else {
     sprite.scale.x = 1 * (DISPLAY_TILE_SIZE / 16);
-    sprite.anchor.x = 0;
+    sprite.pivot.x = 0;
   }
-  // Ensure Y scale is correct
+  
   sprite.scale.y = DISPLAY_TILE_SIZE / 16;
+  sprite.pivot.y = 0;
 }
 
 /**

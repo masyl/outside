@@ -20,8 +20,8 @@ create terrain hole hole1 7 5 2 2
 ```cmd
 create bot fido
 place fido 2 2
-//create bot alice
-//place alice 7 2
-//create bot bob
-//place bob 2 7
+create bot alice
+place alice 7 2
+create bot bob
+place bob 2 7
 ```
