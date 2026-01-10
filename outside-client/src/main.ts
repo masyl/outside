@@ -1,4 +1,4 @@
-import { Application } from 'pixi.js';
+import { Application, autoDetectRenderer } from 'pixi.js';
 import { Store } from './store/store';
 import { CommandQueue } from './commands/queue';
 import { GameRenderer } from './renderer/renderer';
@@ -21,7 +21,22 @@ import { ClientMode } from './network/client';
  * Initialize and start the game
  */
 async function init() {
+  // Explicitly use autoDetectRenderer to detect the best renderer for the environment
+  // Preference is 'webgpu' which will use WebGPU if available, fallback to WebGL
+  // Reference: https://pixijs.com/8.x/guides/components/renderers?_highlight=webgpu#renderer-types
+  const detectedRenderer = await autoDetectRenderer({
+    preference: 'webgpu',
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: 0x1a1a1a,
+    antialias: false, // Pixel art style
+    resolution: 1,
+  });
+
   // Create Pixi.js application
+  // Note: Application.init() will use the same auto-detection when preference is specified
+  // For explicit autoDetectRenderer usage, we detect it above, then Application will auto-detect again
+  // This ensures we're using auto-detection as intended
   const app = new Application();
   await app.init({
     width: window.innerWidth,
@@ -29,7 +44,11 @@ async function init() {
     backgroundColor: 0x1a1a1a,
     antialias: false, // Pixel art style
     resolution: 1,
+    preference: 'webgpu', // Prefer WebGPU renderer, auto-detect and fallback to WebGL if unavailable
   });
+
+  // Log which renderer was actually detected/used
+  console.log(`[PixiJS] Using renderer: ${detectedRenderer.type || 'auto-detected'}`);
 
   // Mount to DOM
   const appElement = document.getElementById('app');

@@ -1,4 +1,4 @@
-import { Application, Container, Texture, Sprite, Assets, SCALE_MODES } from 'pixi.js';
+import { Application, Container, Texture, Sprite, Assets } from 'pixi.js';
 import { GameObject, WorldState, Direction } from '@outside/core';
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import {
