@@ -87,11 +87,82 @@ pnpm --filter outside-core build
 3. Run `pnpm dev` to start all projects
 4. Each project can be developed independently or together
 
+## Git Workflow: Trunk-Based Development with Squash Merge
+
+This project follows **Trunk-Based Development with Squash Merge** to enable frequent production deployments and maintain a clean git history.
+
+### Core Principles
+
+- **Main branch is always production-ready**: Every commit on `main` can be deployed
+- **Short-lived feature branches**: Branches exist for hours/days, not weeks
+- **Single commit per feature**: Use squash merge to collapse all work into one clean commit
+- **Continuous integration**: All changes integrate frequently to minimize conflicts
+
+### Branching Strategy
+
+```
+main (production-ready, auto-deployed)
+├── feature/add-user-authentication
+├── bugfix/login-validation-error
+└── refactor/database-connection
+```
+
+### Workflow
+
+1. **Start New Work**
+
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Development**
+   - Commit frequently with descriptive messages
+   - Keep changes focused and atomic
+   - Run tests and linting locally
+
+3. **Merge to Main**
+   - Create pull request targeting `main`
+   - Ensure CI/CD checks pass
+   - Use **Squash and Merge** to create single commit
+   - Delete feature branch after merge
+
+### Branch Naming
+
+- `feature/feature-name` - New features
+- `bugfix/issue-description` - Bug fixes
+- `refactor/component-name` - Code refactoring
+- `hotfix/critical-fix` - Production hotfixes
+
+### Commit Guidelines
+
+- Feature branches: Frequent, detailed commits
+- Main branch: Clean, atomic commits via squash merge
+- PR title should be the final commit message
+
+### AI Agent Instructions
+
+When working with AI agents (Cursor, GitHub Copilot, etc.):
+
+**Starting New Work:**
+
+- AI agents should always propose creating a new branch when starting a new feature or significant change
+- Use the branch naming conventions above
+- Example: "Would you like me to create a feature branch for this work?"
+
+**Completing Work:**
+
+- AI agents should propose a merge after completing the "wrapup" step
+- Include a summary of changes and suggest PR title
+- Example: "This feature is complete. Would you like me to create a pull request with squash merge?"
+
 ## AI/Cursor Context
 
 This monorepo is optimized for AI-assisted development:
+
 - Each project has clear boundaries
 - Shared code is in `outside-core`
 - Projects can be worked on independently
 - `.cursorignore` reduces unnecessary context
-
+- Follows trunk-based development workflow with AI agent guidance

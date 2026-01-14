@@ -1,9 +1,11 @@
 import { defineConfig } from 'vitepress';
-import { withMermaid } from 'vitepress-plugin-mermaid';
 
-export default withMermaid({
+export default defineConfig({
   title: 'Outside Design',
   description: 'Design documentation and process for the Outside game',
+
+  // Enable Mermaid diagram support
+  mermaid: true,
 
   markdown: {
     theme: {
