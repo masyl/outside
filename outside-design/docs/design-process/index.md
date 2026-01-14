@@ -6,6 +6,21 @@ This section documents our design process for the Outside game project.
 
 We follow a user-centered design process that emphasizes research, ideation, and iteration.
 
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e1f5fe', 'primaryBorderColor': '#0288d1', 'lineColor': '#666', 'primaryTextColor': '#333'}}}%%
+flowchart LR
+    A[Research Phase] --> B[Ideation Phase]
+    B --> C[Pitch Phase]
+    C --> D[Implementation]
+    D --> E[Wrapup]
+    E --> F[Deliveries]
+
+    click A "/design-process/research"
+    click B "/design-process/ideation"
+    click C "/design-process/pitch-phase"
+    click F "/deliveries/"
+```
+
 ## Process Stages
 
 ### 1. Research Phase
