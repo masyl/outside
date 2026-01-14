@@ -3,24 +3,22 @@ import { defineConfig } from 'vitepress';
 export default defineConfig({
   title: 'Outside Design',
   description: 'Design documentation and process for the Outside game',
-  
+
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Built Plans', link: '/built-plans/' },
+      { text: 'Deliveries', link: '/deliveries/' },
       { text: 'Design Process', link: '/design-process/' },
       { text: 'Components', link: '/components/' },
-      { text: 'Style Guide', link: '/style-guide/' }
+      { text: 'Style Guide', link: '/style-guide/' },
     ],
-    
+
     sidebar: {
-      '/built-plans/': [
+      '/deliveries/': [
         {
-          text: 'Built Plans',
-          items: [
-            { text: 'Overview', link: '/built-plans/' }
-          ]
-        }
+          text: 'Deliveries',
+          items: [{ text: 'Overview', link: '/deliveries/' }],
+        },
       ],
       '/design-process/': [
         {
@@ -28,9 +26,9 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/design-process/' },
             { text: 'Research Phase', link: '/design-process/research' },
-            { text: 'Ideation Phase', link: '/design-process/ideation' }
-          ]
-        }
+            { text: 'Ideation Phase', link: '/design-process/ideation' },
+          ],
+        },
       ],
       '/components/': [
         {
@@ -38,9 +36,9 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/components/' },
             { text: 'UI Elements', link: '/components/ui-elements' },
-            { text: 'Game Components', link: '/components/game-components' }
-          ]
-        }
+            { text: 'Game Components', link: '/components/game-components' },
+          ],
+        },
       ],
       '/style-guide/': [
         {
@@ -48,19 +46,16 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/style-guide/' },
             { text: 'Colors', link: '/style-guide/colors' },
-            { text: 'Typography', link: '/style-guide/typography' }
-          ]
-        }
-      ]
+            { text: 'Typography', link: '/style-guide/typography' },
+          ],
+        },
+      ],
     },
-    
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/masyl/outside' }
-    ],
-    
-    search: {
-      provider: 'local'
-    }
-  }
-});
 
+    socialLinks: [{ icon: 'github', link: 'https://github.com/masyl/outside' }],
+
+    search: {
+      provider: 'local',
+    },
+  },
+});

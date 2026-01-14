@@ -56,13 +56,13 @@ When a plan has been completed and the user requests a "wrapup", follow this pro
      - Brief description of what the commit contains
 
 4. **Save the Plan**
-   - Create a new file in `outside-design/docs/built-plans/`
+   - Create a new file in `outside-design/docs/deliveries/`
    - Use format: `{YYYY-MM-DD-HHMM}-{descriptive-name}.md`
    - Example: `2024-01-08-1409-game-client-poc.md`
    - Copy the updated plan content to this file
 
 5. **Update the Index**
-   - Edit `outside-design/docs/built-plans/index.md`
+   - Edit `outside-design/docs/deliveries/index.md`
    - Add a new entry in the "Completed Plans" section
    - Include:
      - Date and time of completion

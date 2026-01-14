@@ -16,7 +16,7 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Problems of current build
 
-[ ] After reloading the browser window, bots are drawned at the step 0 location instead of the updated position of the real game state.
+[ ] Regression: After reloading the browser window, bots are drawned at the step 0 location instead of the updated position of the real game state.
 
 - None
 

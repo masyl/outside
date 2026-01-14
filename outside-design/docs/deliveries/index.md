@@ -1,16 +1,16 @@
-# Built Plans
+# Deliveries
 
 This section contains plans that have been completed and implemented. Each plan document reflects the actual work that was done, including a work summary, implementation details, and references to the commits where the work was completed.
 
-## What are Built Plans?
+## What are Deliveries?
 
-Built Plans are completed implementation plans that have been archived in the design documentation. They serve as:
+Deliveries are completed implementation plans that have been archived in the design documentation. They serve as:
 
 - **Historical Record**: Documentation of what was built and how
 - **Reference Material**: Examples of implementation approaches and decisions
 - **Learning Resource**: Insights into the development process and outcomes
 
-Each built plan includes:
+Each delivery includes:
 
 - **Work Summary**: High-level overview of what was accomplished
 - **Implementation Details**: The actual work that was done (updated from the original plan)
@@ -31,7 +31,7 @@ When a plan is completed, it goes through a "wrapup" process:
 
 ---
 
-## Completed Plans
+## Completed Deliveries
 
 ### 2026-01-09 12:30 - Pixel Art Visuals
 
@@ -96,6 +96,7 @@ Added debug overlay with FPS counter, step counter, and version tracking. Implem
 ---
 
 Plans are listed in reverse chronological order (most recent first) with:
+
 - Date and time of completion
 - Brief description
 - Link to the full plan document
