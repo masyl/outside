@@ -4,6 +4,13 @@ export default defineConfig({
   title: 'Outside Design',
   description: 'Design documentation and process for the Outside game',
 
+  markdown: {
+    theme: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  },
+
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
