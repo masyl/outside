@@ -9,14 +9,22 @@ We follow a user-centered design process that emphasizes research, ideation, and
 ## Process Stages
 
 ### 1. Research Phase
+
 Understanding the problem space, user needs, and constraints.
 
 [Learn more about our research →](/design-process/research)
 
 ### 2. Ideation Phase
+
 Generating creative concepts and exploring design possibilities.
 
 [Learn more about ideation →](/design-process/ideation)
+
+### 3. Pitch Phase
+
+Framing scope of development work through structured work orders.
+
+[Learn more about the Pitch Phase →](/design-process/pitch-phase)
 
 ## Key Principles
 
@@ -36,4 +44,3 @@ Generating creative concepts and exploring design possibilities.
 ---
 
 [← Back to Home](/)
-

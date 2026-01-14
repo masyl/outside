@@ -2,7 +2,26 @@
 
 This document contains instructions for AI agents working on the Outside project.
 
-## Wrapup Process
+## Pitch Phase
+
+When proposing new features or system changes, create a pitch to frame the scope of development work.
+
+### When to Create a Pitch
+
+- After ideation is complete and we have a worthwhile idea
+- Before beginning implementation work
+- As the first step in planning work for any system modification
+
+### Pitch Creation Process
+
+1. Draft the pitch using the standard template and format requirements
+2. Review the pitch in conversation with an AI agent using the review criteria
+3. Refine based on feedback to achieve appropriate scope and clarity
+4. Move to implementation planning
+
+[Complete Pitch Phase documentation →](/design-process/pitch-phase)
+
+## Wrapup Phase
 
 When a plan has been completed and the user requests a "wrapup", follow this process:
 
