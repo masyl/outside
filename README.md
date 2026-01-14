@@ -157,12 +157,39 @@ When working with AI agents (Cursor, GitHub Copilot, etc.):
 - Include a summary of changes and suggest PR title
 - Example: "This feature is complete. Would you like me to create a pull request with squash merge?"
 
+## Development Guidelines for AI Agents
+
+### File Context Management
+
+When working with this monorepo, focus on relevant files and exclude:
+
+- `node_modules/` directories
+- Build outputs: `dist/`, `build/`, `.next/`, `out/`, `.turbo/`, `coverage/`
+- Lock files: `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`
+- Log files: `*.log`, `logs/`
+
+This reduces AI context and improves response quality.
+
+### Project Boundaries
+
+- **outside-client/**: Client application code
+- **outside-core/**: Core game logic and shared code
+- **outside-design/**: Design system and UI components
+- **outside-doc/**: Documentation
+- **outside-server/**: Server/backend code
+
+AI agents should respect these boundaries and only modify files within the appropriate project scope unless cross-project changes are explicitly required.
+
+### AI Agent Workflow Integration
+
+This monorepo follows trunk-based development workflow:
+
+- Each project has clear boundaries for focused development
+- Shared code is centralized in `outside-core`
+- Projects can be developed independently or together
+- File context optimization reduces unnecessary AI overhead
+- Follows the branching workflow documented above
+
 ## AI/Cursor Context
 
-This monorepo is optimized for AI-assisted development:
-
-- Each project has clear boundaries
-- Shared code is in `outside-core`
-- Projects can be worked on independently
-- `.cursorignore` reduces unnecessary context
-- Follows trunk-based development workflow with AI agent guidance
+This monorepo is optimized for AI-assisted development with clear project structure and workflow guidelines.
