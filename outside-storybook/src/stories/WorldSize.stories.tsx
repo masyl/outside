@@ -6,10 +6,11 @@ import { parseCommand } from '@outside/client/src/commands/parser';
 
 const WorldPreview = ({ width, height }: { width: number; height: number }) => {
   const store = useMemo(() => new Store(), []);
-  const [state, setState] = useState(store.getState());
+  const initialState = store.getState();
+  const [currentState, setCurrentState] = useState(initialState);
 
   useEffect(() => {
-    const unsubscribe = store.subscribe(setState);
+    const unsubscribe = store.subscribe(setCurrentState);
     return () => unsubscribe();
   }, [store]);
 
@@ -33,20 +34,20 @@ const WorldPreview = ({ width, height }: { width: number; height: number }) => {
       }}
     >
       <div style={{ marginBottom: '8px', fontSize: '12px', color: '#444' }}>
-        World size: {state.width} × {state.height}
+        World size: {currentState.width} × {currentState.height}
       </div>
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${state.width}, 24px)`,
-          gridTemplateRows: `repeat(${state.height}, 24px)`,
+          gridTemplateColumns: `repeat(${currentState.width}, 24px)`,
+          gridTemplateRows: `repeat(${currentState.height}, 24px)`,
           gap: '2px',
           background: '#f5f5f5',
           padding: '8px',
           borderRadius: '6px',
         }}
       >
-        {Array.from({ length: state.width * state.height }).map((_, index) => (
+        {Array.from({ length: currentState.width * currentState.height }).map((_, index) => (
           <div
             key={index}
             style={{
@@ -63,42 +64,9 @@ const WorldPreview = ({ width, height }: { width: number; height: number }) => {
   );
 };
 
-const WorldControlPanel = ({ width, height }: { width: number; height: number }) => {
-  const [currentWidth, setCurrentWidth] = useState(width);
-  const [currentHeight, setCurrentHeight] = useState(height);
-
-  return (
-    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-      <label style={{ fontSize: '12px' }}>
-        Width
-        <input
-          type="number"
-          min={1}
-          max={20}
-          value={currentWidth}
-          onChange={(event) => setCurrentWidth(Number(event.target.value))}
-          style={{ marginLeft: '6px', width: '60px' }}
-        />
-      </label>
-      <label style={{ fontSize: '12px' }}>
-        Height
-        <input
-          type="number"
-          min={1}
-          max={20}
-          value={currentHeight}
-          onChange={(event) => setCurrentHeight(Number(event.target.value))}
-          style={{ marginLeft: '6px', width: '60px' }}
-        />
-      </label>
-      <WorldPreview width={currentWidth} height={currentHeight} />
-    </div>
-  );
-};
-
-const meta: Meta<typeof WorldControlPanel> = {
+const meta: Meta<typeof WorldPreview> = {
   title: 'World/Empty Worlds',
-  component: WorldControlPanel,
+  component: WorldPreview,
   parameters: {
     layout: 'centered',
   },
@@ -114,28 +82,28 @@ const meta: Meta<typeof WorldControlPanel> = {
 
 export default meta;
 
-export const Small: StoryObj<typeof WorldControlPanel> = {
+export const Small: StoryObj<typeof WorldPreview> = {
   args: {
     width: 4,
     height: 3,
   },
 };
 
-export const Medium: StoryObj<typeof WorldControlPanel> = {
+export const Medium: StoryObj<typeof WorldPreview> = {
   args: {
     width: 8,
     height: 5,
   },
 };
 
-export const Large: StoryObj<typeof WorldControlPanel> = {
+export const Large: StoryObj<typeof WorldPreview> = {
   args: {
     width: 12,
     height: 8,
   },
 };
 
-export const Controls: StoryObj<typeof WorldControlPanel> = {
+export const Controls: StoryObj<typeof WorldPreview> = {
   args: {
     width: 6,
     height: 4,

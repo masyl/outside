@@ -19,7 +19,7 @@ This implementation plan details the step-by-step approach to add Storybook as a
 - [x] Configure `package.json` with Storybook dependencies
 - [x] Add Storybook scripts (`storybook`, `build-storybook`)
 - [x] Update monorepo configuration for new workspace (covered by `outside-*`)
-- [ ] Configure `turbo.json` with Storybook tasks
+- [x] Configure `turbo.json` with Storybook tasks
 - [x] Add `tsconfig.json` and `tsconfig.node.json`
 
 ## Phase 2: Command System Extensions
@@ -65,7 +65,7 @@ This implementation plan details the step-by-step approach to add Storybook as a
 - [ ] Connection overlay stories (status variants)
 - [ ] Bot sprite stories (directions, selection, animations)
 - [ ] Terrain stories (types + combinations)
-- [ ] World configuration examples (small grids)
+- [x] World configuration examples (small grids)
 - [ ] Interactive command sequences (movement, placement)
 
 ## Phase 6: Development Workflow
