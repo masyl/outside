@@ -52,11 +52,32 @@ pnpm build
 pnpm --filter outside-core build
 ```
 
+### Run tests
+
+```bash
+pnpm test
+```
+
+### Run tests with coverage
+
+```bash
+pnpm test:coverage
+```
+
+### Run tests for a specific project
+
+```bash
+cd outside-core && pnpm test
+# or
+pnpm --filter outside-core test
+```
+
 ## Available Scripts
 
 - `pnpm dev` - Start all projects in development mode
 - `pnpm build` - Build all projects
 - `pnpm test` - Run tests for all projects
+- `pnpm test:coverage` - Run tests with coverage reports
 - `pnpm lint` - Lint all projects
 - `pnpm clean` - Clean all build artifacts and node_modules
 - `pnpm format` - Format code with Prettier
@@ -79,13 +100,47 @@ pnpm --filter outside-core build
 - **Build System**: Turborepo
 - **Language**: TypeScript
 - **Node.js**: >= 18.0.0
+- **Testing**: Vitest with v8 coverage provider
+- **Test Environment**: jsdom for browser API mocking
 
-## Development Workflow
+## Testing
+
+### Test Framework
+
+This project uses **Vitest** as the primary testing framework with the following features:
+
+- **TypeScript Support**: Zero configuration for TypeScript projects
+- **Monorepo Integration**: Parallel test execution across all packages via Turbo
+- **Code Coverage**: v8 provider with configurable thresholds (80%+ for critical paths)
+- **Browser Environment**: jsdom with Canvas API mocking for client-side tests
+- **Fast Execution**: Core package tests run in under 1 second
+
+### Test Structure
+
+Each package includes its own test configuration and test files:
+
+- **outside-core/**: Core game logic and utilities tests (node environment)
+- **outside-client/**: Client application tests with browser API mocking
+- **outside-\***: Other packages follow the same pattern
+
+### Coverage Reports
+
+Coverage reports are generated in multiple formats:
+
+- Text output in terminal
+- HTML reports for detailed viewing
+- LCOV format for CI/CD integration
+
+Coverage thresholds are enforced at 80%+ for statements, branches, functions, and lines.
+
+### Development Workflow
 
 1. Clone the repository
 2. Run `pnpm install` to install all dependencies
 3. Run `pnpm dev` to start all projects
-4. Each project can be developed independently or together
+4. Run `pnpm test` to execute the test suite
+5. Each project can be developed independently or together
+6. Check coverage with `pnpm test:coverage` before commits
 
 ## Git Workflow: Trunk-Based Development with Squash Merge
 
@@ -201,6 +256,33 @@ When proposing new features or system changes, AI agents should follow the docum
 
 AI agents must use the standard pitch template before implementing new features or system modifications.
 
+## Testing Guidelines for AI Agents
+
+When working with this codebase, AI agents should follow these testing practices:
+
+### Writing Tests
+
+- **Core Logic**: Test all utility functions and game logic with edge cases
+- **Deterministic Behavior**: Use seeded random generators for reproducible tests
+- **Browser APIs**: Mock Canvas, WebGL, and other browser APIs as needed
+- **Coverage**: Maintain 80%+ coverage for new code
+- **Performance**: Keep test execution fast (< 1 second for unit tests)
+
+### Test Files Location
+
+- Place test files alongside source files with `.test.ts` extension
+- Example: `src/utils/random.test.ts` tests `src/utils/random.ts`
+- Integration tests can be placed in `test/` directories
+
+### Running Tests
+
+Before committing changes:
+
+1. Run `pnpm test` to ensure all tests pass
+2. Run `pnpm test:coverage` to verify coverage
+3. Fix any failing tests or coverage gaps
+4. Commit with descriptive messages including test improvements
+
 ## AI/Cursor Context
 
-This monorepo is optimized for AI-assisted development with clear project structure and workflow guidelines.
+This monorepo is optimized for AI-assisted development with clear project structure, comprehensive testing infrastructure, and workflow guidelines.

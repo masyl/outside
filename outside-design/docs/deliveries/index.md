@@ -4,30 +4,72 @@ This section contains plans that have been completed and implemented. Each plan 
 
 ## What are Deliveries?
 
-Deliveries are completed implementation plans that have been archived in the design documentation. They serve as:
+Deliveries are implementation plans archived in design documentation. They serve as:
 
 - **Historical Record**: Documentation of what was built and how
 - **Reference Material**: Examples of implementation approaches and decisions
-- **Learning Resource**: Insights into the development process and outcomes
+- **Learning Resource**: Insights into development process and outcomes
 
-Each delivery includes:
+### Delivery Folder Structure (New Format)
 
-- **Work Summary**: High-level overview of what was accomplished
-- **Implementation Details**: The actual work that was done (updated from the original plan)
-- **Commit Reference**: Link to the GitHub commit where the work was completed
-- **Date & Time**: When the plan was completed
+**New deliveries (2026-01-14 and later)** use a folder structure:
+
+```
+{YYYY-MM-DD-HHMM}-{descriptive-name}/
+├── pitch.md      # Original pitch for this delivery
+├── commit.md     # Prepared commit message for merging to main
+├── plan.md       # Implementation plan (completed or ongoing)
+└── README.md     # Optional additional context
+```
+
+**Legacy deliveries (before 2026-01-14)** are single markdown files.
 
 ## Process
 
-When a plan is completed, it goes through a "wrapup" process:
+When a plan is ready for delivery, it goes through a "wrapup" process:
 
-1. The plan is updated to reflect the actual work done (not just the original plan)
-2. A work summary is added as the first section
-3. A commit reference and GitHub link are added
-4. The plan is saved with a descriptive filename and date/time prefix
-5. The plan is added to this index with dates and descriptions
+1. A delivery folder is created with the new structure
+2. The pitch is copied to `pitch.md`
+3. A commit message is prepared in `commit.md`
+4. The plan is updated and saved to `plan.md` with cross-references
+5. The delivery is added to this index
 
 **Note**: The wrapup process is only initiated when explicitly requested. Plans are not automatically wrapped up.
+
+---
+
+## Ongoing Deliveries
+
+### 2026-01-15 00:31 - Basic Unit Testing Setup
+
+Implemented comprehensive unit testing infrastructure across all workspace packages with code coverage reporting and TypeScript support. Achieved 100% statement coverage for core package and 97.95% branch coverage focusing on all conditional paths.
+
+**Key Achievements:**
+
+- **Core Package**: 100% statement, 97.95% branch coverage with 46 tests
+- **Client Foundation**: 37 tests covering store management, reducers, command parsing, and environment setup
+- **Real Dependencies**: Tests use actual @outside/core for realistic integration testing
+- **Fast Execution**: All tests run in under 2 seconds
+- **Branch Coverage Focus**: Comprehensive testing of all conditional paths
+- **Bug Discovery**: Tests revealed actual implementation issues to improve
+
+**Technical Features:**
+
+- Vitest with v8 coverage provider
+- Zero-configuration TypeScript support
+- Browser API mocking for PIXI.js environment
+- Monorepo integration with Turbo scripts
+- Comprehensive edge case and error handling tests
+
+[View delivery folder →](./2026-01-15-0031-basic-unit-testing-setup/)
+
+---
+
+### 2026-01-14 22:58 - Basic Unit Testing Setup
+
+Setting up comprehensive unit testing framework across all workspace packages with code coverage reporting and TypeScript support. Currently implementing Vitest configuration and test infrastructure.
+
+[View delivery folder →](./2026-01-14-2258-basic-unit-testing-setup/)
 
 ---
 

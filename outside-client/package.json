@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "echo \"No tests yet\"",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
     "lint": "echo \"No linter configured yet\"",
     "clean": "rm -rf dist build node_modules"
   },
@@ -20,6 +21,8 @@
   },
   "devDependencies": {
     "typescript": "^5.3.3",
-    "vite": "^6.0.1"
+    "vite": "^6.0.1",
+    "vitest": "^4.0.17",
+    "jsdom": "^25.0.1"
   }
 }
