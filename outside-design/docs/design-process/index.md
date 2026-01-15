@@ -8,11 +8,11 @@ We follow a user-centered design process that emphasizes research, ideation, and
 
 ```mermaid
 graph LR
-    A[Research Phase] --> B[Ideation Phase]
-    B --> C[Pitch Phase]
-    C --> D[Implementation]
-    D --> E[Wrapup]
-    E --> F[Deliveries]
+    A["Research Phase"] --> B["Ideation Phase"]
+    B --> C["Pitch Phase"]
+    C --> D["Implementation"]
+    D --> E["Wrapup"]
+    E --> F["Deliveries"]
 
     click A "/design-process/research"
     click B "/design-process/ideation"
