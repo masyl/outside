@@ -190,6 +190,17 @@ This monorepo follows trunk-based development workflow:
 - File context optimization reduces unnecessary AI overhead
 - Follows the branching workflow documented above
 
+### Design Process and Pitch Documentation
+
+When proposing new features or system changes, AI agents should follow the documented design process:
+
+- **Design Process Documentation**: See `outside-design/docs/design-process/` for complete methodology
+- **Pitch Phase**: See `outside-design/docs/design-process/pitch-phase.md` for pitch format requirements
+- **AI Agent Instructions**: See `outside-design/docs/ai-agent-instructions.md` for detailed workflow guidance
+- **Existing Pitches**: Reference `outside-design/docs/pitches/` for format examples
+
+AI agents must use the standard pitch template before implementing new features or system modifications.
+
 ## AI/Cursor Context
 
 This monorepo is optimized for AI-assisted development with clear project structure and workflow guidelines.

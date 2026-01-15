@@ -2,18 +2,24 @@
 
 ## Motivation
 
-There is no unit testing in the project yet, which would be required to implement a proper CI/CD pipeline.
+There is no unit testing in the project yet, which would be required to implement a proper CI/CD pipeline. Testing ensures code quality, prevents regressions, and enables confident refactoring of game logic and utilities.
 
 ## Solution
 
-Evaluate a good solution for basic unit testing
+Set up a comprehensive unit testing framework that provides fast feedback during development and enables continuous integration. The solution should focus on testing core game logic, utilities, and data structures while maintaining compatibility with the existing monorepo structure.
 
 ## Inclusions
 
-- Test of core functionalitities, utilities and reusable components
-- Capabilities for code coverage reporting
-- Emphasis on fast testing
+- Testing framework setup for all workspace packages
+- Unit tests for core game logic and utilities
+- Code coverage reporting with configurable thresholds
+- Integration with existing turbo build system
+- TypeScript support with zero configuration
+- Fast test execution suitable for development workflow
 
 ## Exclusion
 
-- Visual testing of game rendering with canvas (later)
+- Visual testing of game rendering with canvas
+- End-to-end browser automation tests
+- Performance benchmarking tests
+- Manual testing procedures
