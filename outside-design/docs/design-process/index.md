@@ -7,17 +7,17 @@ This section documents our design process for the Outside game project.
 We follow a user-centered design process that emphasizes research, ideation, and iteration.
 
 ```mermaid
-graph LR
-    A["Research Phase"] --> B["Ideation Phase"]
-    B --> C["Pitch Phase"]
-    C --> D["Implementation"]
-    D --> E["Wrapup"]
-    E --> F["Deliveries"]
+graph LR;
+    A["Research Phase"] --> B["Ideation Phase"];
+    B --> C["Pitch Phase"];
+    C --> D["Implementation"];
+    D --> E["Wrapup"];
+    E --> F["Deliveries"];
 
-    click A "/design-process/research"
-    click B "/design-process/ideation"
-    click C "/design-process/pitch-phase"
-    click F "/deliveries/"
+    click A "/design-process/research";
+    click B "/design-process/ideation";
+    click C "/design-process/pitch-phase";
+    click F "/deliveries/";
 ```
 
 ## Process Stages
