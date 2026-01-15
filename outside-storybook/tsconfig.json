@@ -21,6 +21,5 @@
       "@outside/client": ["../outside-client/src"]
     }
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
 }

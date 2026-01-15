@@ -11,129 +11,71 @@ This implementation plan details the step-by-step approach to add Storybook as a
 3. **Separation of Concerns**: Storybook wrappers never bleed into game code
 4. **Deterministic Stories**: Use commands and seeds for reproducible states
 
-## Phase 1: Workspace Setup (Day 1)
+## Phase 1: Workspace Setup
 
-### 1.1 Create Storybook Package
+### Checklist
 
-- Create `outside-storybook` workspace package
-- Configure package.json with Storybook dependencies
-- Update monorepo configuration for new workspace
-- Configure turbo.json with Storybook tasks
+- [x] Create `outside-storybook` workspace package
+- [x] Configure `package.json` with Storybook dependencies
+- [x] Add Storybook scripts (`storybook`, `build-storybook`)
+- [x] Update monorepo configuration for new workspace (covered by `outside-*`)
+- [ ] Configure `turbo.json` with Storybook tasks
+- [x] Add `tsconfig.json` and `tsconfig.node.json`
 
-### 1.2 Basic Storybook Configuration
+## Phase 2: Command System Extensions
 
-- Set up Storybook with Vite preset
-- Configure TypeScript integration
-- Set up essential addons (essentials, interactions, docs)
+### Checklist
 
-## Phase 2: Command System Extensions (Day 1-2)
+- [x] Add `set-world-size` command to parser
+- [x] Add `set-seed` command to parser
+- [x] Add `reset-world` command to parser
+- [x] Add new actions for world configuration
+- [x] Add reducer cases for new commands
+- [x] Ensure grid rebuild happens via commands only
 
-### 2.1 New Commands for World Configuration
-
-```typescript
-// Add to command parser
-| { type: 'set-world-size'; width: number; height: number }
-
-// Add to command handlers
-function handleSetWorldSize(state: WorldState, action: SetWorldSizeAction): WorldState {
-  return {
-    ...state,
-    width: action.width,
-    height: action.height,
-    grid: createGrid(action.width, action.height)
-  };
-}
-```
-
-### 2.2 World Creation Commands
+### Reference Commands
 
 - `set-world-size <width> <height>` - Configure world dimensions
 - `set-seed <seed>` - Set deterministic seed
 - `reset-world` - Create fresh world with current settings
 
-## Phase 3: DOM Wrapper Architecture (Day 2-3)
+## Phase 3: DOM/Canvas Wrapper Architecture
 
-### 3.1 PIXI.js Container Wrapper
+### Checklist
 
-```typescript
-// Creates isolated PIXI.js application for each story
-interface PixiContainerWrapperProps {
-  children: (app: Application) => void;
-  width?: number;
-  height?: number;
-  backgroundColor?: number;
-}
-```
+- [x] Implement `PixiContainerWrapper` (isolated PIXI application)
+- [x] Implement `StoreWrapper` (command-driven initialization)
+- [ ] Implement `CommandExecutionWrapper` (sequenced commands)
 
-### 3.2 Store Integration Wrapper
+## Phase 4: Asset Management
 
-```typescript
-// Manages game store with command-driven state
-interface StoreWrapperProps {
-  children: (store: Store) => ReactNode;
-  initialCommands?: string[];
-}
-```
+### Checklist
 
-### 3.3 Command Execution Wrapper
+- [ ] Create Storybook asset loader singleton
+- [ ] Add graceful fallback rendering
+- [ ] Add global asset-loading decorator
+- [ ] Document asset usage conventions
 
-```typescript
-// Executes commands sequentially with optional delays
-interface CommandExecutionWrapperProps {
-  store: Store;
-  commands: string[];
-  delay?: number;
-  children: ReactNode;
-}
-```
+## Phase 5: Component Stories Implementation
 
-## Phase 4: Asset Management (Day 3)
+### Checklist
 
-### 4.1 Storybook Asset Manager
+- [ ] Debug overlay stories (default + variants)
+- [ ] Debug menu stories (controls + interactions)
+- [ ] Connection overlay stories (status variants)
+- [ ] Bot sprite stories (directions, selection, animations)
+- [ ] Terrain stories (types + combinations)
+- [ ] World configuration examples (small grids)
+- [ ] Interactive command sequences (movement, placement)
 
-- Singleton pattern for asset loading
-- Graceful fallback to placeholder rendering
-- Integration with existing PIXI.js asset system
+## Phase 6: Development Workflow
 
-### 4.2 Asset Loading Decorator
+### Checklist
 
-- Global decorator for asset preloading
-- Loading states and error handling
-- Performance optimization for story switching
-
-## Phase 5: Component Stories Implementation (Day 3-5)
-
-### 5.1 Debug Components (DOM-based)
-
-- DebugOverlay stories with various stats
-- DebugMenu interaction stories
-- ConnectionOverlay status variations
-
-### 5.2 Game Components (PIXI.js-based)
-
-- Bot sprite stories (directions, states, animations)
-- Terrain component stories (all types, combinations)
-- World configuration examples
-
-### 5.3 Interactive Stories
-
-- Command execution sequences
-- Bot movement demonstrations
-- Terrain placement scenarios
-
-## Phase 6: Development Workflow (Day 5)
-
-### 6.1 Story Creation Templates
-
-- Bot component story template
-- Terrain component story template
-- Interactive scenario template
-
-### 6.2 Documentation
-
-- Developer workflow guide
-- Story creation best practices
-- Asset usage guidelines
+- [ ] Add “how to run Storybook” instructions
+- [ ] Add story creation templates
+- [ ] Document command-driven story setup
+- [ ] Add best practices for assets and performance
 
 ## Implementation Details
 
@@ -190,13 +132,6 @@ outside-storybook/
 - Clean separation between Storybook and game code
 - Reproducible story states
 - Component coverage > 90%
-
-## Timeline
-
-- **Day 1**: Workspace setup, command extensions, basic configuration
-- **Day 2-3**: DOM wrapper architecture, asset management
-- **Day 3-5**: Component stories implementation
-- **Day 5**: Documentation and workflow finalization
 
 ## Next Steps After Implementation
 
