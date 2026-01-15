@@ -2,9 +2,21 @@ import { Direction, TerrainType } from '@outside/core';
 
 export type ParsedCommand =
   | { type: 'create'; objectType: 'bot'; id: string }
-  | { type: 'create'; objectType: 'terrain'; id: string; terrainType: TerrainType; x: number; y: number; width: number; height: number }
+  | {
+      type: 'create';
+      objectType: 'terrain';
+      id: string;
+      terrainType: TerrainType;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }
   | { type: 'place'; id: string; x: number; y: number }
   | { type: 'move'; id: string; direction: Direction; distance: number }
+  | { type: 'set-world-size'; width: number; height: number }
+  | { type: 'set-seed'; seed: number }
+  | { type: 'reset-world' }
   | { type: 'unknown'; raw: string };
 
 /**
@@ -14,7 +26,7 @@ export type ParsedCommand =
 export function parseCommand(commandString: string): ParsedCommand {
   // Remove leading/trailing whitespace
   const trimmed = commandString.trim();
-  
+
   if (!trimmed) {
     return { type: 'unknown', raw: trimmed };
   }
@@ -23,12 +35,12 @@ export function parseCommand(commandString: string): ParsedCommand {
     // Parse the command
     const args = trimmed.split(/\s+/);
     const cmd = args[0];
-    
+
     // Handle create bot command: "create bot <id>"
     if (cmd === 'create' && args.length === 3 && args[1] === 'bot') {
       return { type: 'create', objectType: 'bot', id: args[2] };
     }
-    
+
     // Handle create terrain command: "create terrain <type> <id> <x> <y> <width> <height>"
     if (cmd === 'create' && args.length === 8 && args[1] === 'terrain') {
       const terrainType = args[2] as TerrainType;
@@ -38,11 +50,17 @@ export function parseCommand(commandString: string): ParsedCommand {
       const y = parseInt(args[5], 10);
       const width = parseInt(args[6], 10);
       const height = parseInt(args[7], 10);
-      if (validTerrainTypes.includes(terrainType) && !isNaN(x) && !isNaN(y) && !isNaN(width) && !isNaN(height)) {
+      if (
+        validTerrainTypes.includes(terrainType) &&
+        !isNaN(x) &&
+        !isNaN(y) &&
+        !isNaN(width) &&
+        !isNaN(height)
+      ) {
         return { type: 'create', objectType: 'terrain', id, terrainType, x, y, width, height };
       }
     }
-    
+
     // Handle place command: "place <id> <x> <y>"
     if (cmd === 'place' && args.length === 4) {
       const x = parseInt(args[2], 10);
@@ -51,7 +69,7 @@ export function parseCommand(commandString: string): ParsedCommand {
         return { type: 'place', id: args[1], x, y };
       }
     }
-    
+
     // Handle move command: "move <id> <direction> <distance>"
     if (cmd === 'move' && args.length === 4) {
       const direction = args[2] as Direction;
@@ -61,7 +79,29 @@ export function parseCommand(commandString: string): ParsedCommand {
         return { type: 'move', id: args[1], direction, distance };
       }
     }
-    
+
+    // Handle set-world-size command: "set-world-size <width> <height>"
+    if (cmd === 'set-world-size' && args.length === 3) {
+      const width = parseInt(args[1], 10);
+      const height = parseInt(args[2], 10);
+      if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+        return { type: 'set-world-size', width, height };
+      }
+    }
+
+    // Handle set-seed command: "set-seed <seed>"
+    if (cmd === 'set-seed' && args.length === 2) {
+      const seed = parseInt(args[1], 10);
+      if (!isNaN(seed)) {
+        return { type: 'set-seed', seed };
+      }
+    }
+
+    // Handle reset-world command: "reset-world"
+    if (cmd === 'reset-world' && args.length === 1) {
+      return { type: 'reset-world' };
+    }
+
     return { type: 'unknown', raw: trimmed };
   } catch (error) {
     console.error('Error parsing command:', error);

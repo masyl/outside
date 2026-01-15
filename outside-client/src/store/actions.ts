@@ -1,13 +1,26 @@
 import { WorldState, GameObject, Position, Direction, TerrainType } from '@outside/core';
 
 /**
- * Action types for the Flux store
+ * Action types for Flux store
  */
 export type Action =
   | { type: 'CREATE_BOT'; payload: { id: string } }
-  | { type: 'CREATE_TERRAIN'; payload: { id: string; terrainType: TerrainType; x: number; y: number; width: number; height: number } }
+  | {
+      type: 'CREATE_TERRAIN';
+      payload: {
+        id: string;
+        terrainType: TerrainType;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      };
+    }
   | { type: 'PLACE_OBJECT'; payload: { id: string; position: Position } }
   | { type: 'MOVE_OBJECT'; payload: { id: string; direction: Direction; distance: number } }
+  | { type: 'SET_WORLD_SIZE'; payload: { width: number; height: number } }
+  | { type: 'SET_SEED'; payload: { seed: number } }
+  | { type: 'RESET_WORLD' }
   | { type: 'SET_WORLD_STATE'; payload: { worldState: WorldState } };
 
 /**
@@ -19,7 +32,14 @@ export const actions = {
     payload: { id },
   }),
 
-  createTerrain: (id: string, terrainType: TerrainType, x: number, y: number, width: number, height: number): Action => ({
+  createTerrain: (
+    id: string,
+    terrainType: TerrainType,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): Action => ({
     type: 'CREATE_TERRAIN',
     payload: { id, terrainType, x, y, width, height },
   }),
@@ -32,6 +52,20 @@ export const actions = {
   moveObject: (id: string, direction: Direction, distance: number): Action => ({
     type: 'MOVE_OBJECT',
     payload: { id, direction, distance },
+  }),
+
+  setWorldSize: (width: number, height: number): Action => ({
+    type: 'SET_WORLD_SIZE',
+    payload: { width, height },
+  }),
+
+  setSeed: (seed: number): Action => ({
+    type: 'SET_SEED',
+    payload: { seed },
+  }),
+
+  resetWorld: (): Action => ({
+    type: 'RESET_WORLD',
   }),
 
   setWorldState: (worldState: WorldState): Action => ({
