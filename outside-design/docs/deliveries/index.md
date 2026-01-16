@@ -40,17 +40,6 @@ When a plan is ready for delivery, it goes through a "wrapup" process:
 
 ## Ongoing Deliveries
 
-### Timeline Controls Series (2026-01-16)
-
-A series of 6 deliverables implementing complete timeline controls for time travel through event history.
-
-- [Keystroke Help Menu (Timeline series: 1)](./2026-01-16-1000-keystroke-help-menu/plan.md) - DOM-based help overlay for all keyboard shortcuts
-- [Timeline Engine Core (Timeline series: 2)](./2026-01-16-1000-timeline-engine-core/plan.md) - Core engine for time navigation with event reconstruction
-- [Playback Controls & Game Loop Integration (Timeline series: 3)](./2026-01-16-1000-timeline-playback-controls/plan.md) - Pause/resume and step-by-step execution
-- [Timeline UI Components (Timeline series: 4)](./2026-01-16-1000-timeline-ui-components/plan.md) - Timeline bar and status indicator
-- [Timeline Keystrokes Integration (Timeline series: 5)](./2026-01-16-1000-timeline-keystrokes-integration/plan.md) - Keyboard controls for all timeline features
-- [Timeline Network Synchronization (Timeline series: 6)](./2026-01-16-1000-timeline-network-synchronization/plan.md) - Multiplayer timeline synchronization
-
 ### Adding Storybook to the project for component testing (2026-01-15)
 
 This implementation plan details() step-by-step approach to add Storybook as a separate workspace package in the monorepo. The key architectural decision is to use commands for all state manipulation, including world size configuration, following the existing game's command-driven architecture.
@@ -58,6 +47,12 @@ This implementation plan details() step-by-step approach to add Storybook as a s
 [Delivery →](./2026-01-15-storybook-implementation/plan.md)
 
 ## Completed Deliveries
+
+### Keystroke Help Menu (Timeline series: 1) (2026-01-16 14:30)
+
+Implemented DOM-based help overlay displaying all available keyboard shortcuts. All planned functionality was completed including KeystrokeOverlay class with table format display, keyboard integration with "?" and ESC keys, comprehensive keystroke documentation, and styling matching debug aesthetic. The overlay provides accessible keyboard shortcut reference and establishes the modifier key pattern (Option/Alt) that will be used throughout the timeline controls series.
+
+[Delivery →](./2026-01-16-1430-keystroke-help-menu/plan.md)
 
 ### Basic Unit Testing Setup (2026-01-15)
 
