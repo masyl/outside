@@ -1,4 +1,4 @@
-# Implementation Plan: Adding Storybook to the project for component testing
+# Adding Storybook to the project for component testing
 
 ## Overview
 
@@ -11,7 +11,7 @@ This implementation plan details the step-by-step approach to add Storybook as a
 3. **Separation of Concerns**: Storybook wrappers never bleed into game code
 4. **Deterministic Stories**: Use commands and seeds for reproducible states
 
-## Phase 1: Workspace Setup
+## Workspace Setup
 
 ### Checklist
 
@@ -22,7 +22,7 @@ This implementation plan details the step-by-step approach to add Storybook as a
 - [x] Configure `turbo.json` with Storybook tasks
 - [x] Add `tsconfig.json` and `tsconfig.node.json`
 
-## Phase 2: Command System Extensions
+## Command System Extensions
 
 ### Checklist
 
@@ -39,15 +39,15 @@ This implementation plan details the step-by-step approach to add Storybook as a
 - `set-seed <seed>` - Set deterministic seed
 - `reset-world` - Create fresh world with current settings
 
-## Phase 3: DOM/Canvas Wrapper Architecture
+## DOM/Canvas Wrapper Architecture
 
 ### Checklist
 
 - [x] Implement `PixiContainerWrapper` (isolated PIXI application)
 - [x] Implement `StoreWrapper` (command-driven initialization)
-- [ ] Implement `CommandExecutionWrapper` (sequenced commands)
+- [x] Implement `CommandExecutionWrapper` (sequenced commands)
 
-## Phase 4: Asset Management
+## Asset Management
 
 ### Checklist
 
@@ -56,7 +56,7 @@ This implementation plan details the step-by-step approach to add Storybook as a
 - [ ] Add global asset-loading decorator
 - [ ] Document asset usage conventions
 
-## Phase 5: Component Stories Implementation
+## Component Stories Implementation
 
 ### Checklist
 
@@ -68,14 +68,12 @@ This implementation plan details the step-by-step approach to add Storybook as a
 - [x] World configuration examples (small grids)
 - [ ] Interactive command sequences (movement, placement)
 
-## Phase 6: Development Workflow
+## Development Workflow
 
 ### Checklist
 
 - [ ] Add “how to run Storybook” instructions
-- [ ] Add story creation templates
 - [ ] Document command-driven story setup
-- [ ] Add best practices for assets and performance
 
 ## Implementation Details
 
