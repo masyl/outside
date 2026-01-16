@@ -1,70 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Store } from '@outside/client/src/store/store';
-import { executeCommand } from '@outside/client/src/commands/handlers';
-import { parseCommand } from '@outside/client/src/commands/parser';
-
-import { WorldState } from '@outside/core';
+import React from 'react';
+import { StoreWrapper } from '../components/wrappers/StoreWrapper';
+import { GameRendererWrapper } from '../components/wrappers/GameRendererWrapper';
 
 const WorldPreview = ({ width, height }: { width: number; height: number }) => {
-  const store = useMemo(() => new Store(), []);
-  const [currentState, setCurrentState] = useState<WorldState>(() => store.getState());
-
-  useEffect(() => {
-    const unsubscribe = store.subscribe((state: WorldState) => {
-      setCurrentState(state);
-    });
-    return () => unsubscribe();
-  }, [store]);
-
-  useEffect(() => {
-    const commands = [`set-world-size ${width} ${height}`, 'reset-world'];
-    for (const command of commands) {
-      const parsed = parseCommand(command);
-      if (parsed.type !== 'unknown') {
-        executeCommand(store, parsed);
-      }
-    }
-  }, [store, width, height]);
+  const initialCommands = [`set-world-size ${width} ${height}`, 'reset-world'];
 
   return (
-    <div
-      style={{
-        display: 'inline-block',
-        padding: '12px',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-      }}
-    >
-      <div style={{ marginBottom: '8px', fontSize: '12px', color: '#444' }}>
-        World size: {currentState.width} × {currentState.height}
-      </div>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${currentState.width}, 24px)`,
-          gridTemplateRows: `repeat(${currentState.height}, 24px)`,
-          gap: '2px',
-          background: '#f5f5f5',
-          padding: '8px',
-          borderRadius: '6px',
-        }}
-      >
-        {Array.from({ length: currentState.width * currentState.height }).map((_, index) => (
-          <div
-            key={index}
-            style={{
-              width: '24px',
-              height: '24px',
-              background: '#ffffff',
-              border: '1px solid #e0e0e0',
-              boxSizing: 'border-box',
-            }}
-          />
-        ))}
-      </div>
-    </div>
+    <StoreWrapper initialCommands={initialCommands}>
+      {(store) => <GameRendererWrapper width={width * 64} height={height * 64} store={store} />}
+    </StoreWrapper>
   );
 };
 
