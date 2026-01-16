@@ -1,0 +1,33 @@
+{
+  "name": "outside-storybook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "storybook": "storybook dev --port 6007",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@outside/client": "workspace:*",
+    "@outside/core": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "9.0.0-alpha.12",
+    "@storybook/react": "10.2.0-beta.0",
+    "@storybook/react-vite": "10.2.0-beta.0",
+    "@storybook/test": "9.0.0-alpha.2",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "esbuild": "0.25.12",
+    "pixi.js": "^8.0.0",
+    "storybook": "10.2.0-beta.0",
+    "typescript": "^5.3.3",
+    "vite": "^6.0.1"
+  }
+}

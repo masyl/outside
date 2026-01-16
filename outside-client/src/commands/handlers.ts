@@ -11,14 +11,17 @@ export function executeCommand(store: Store, command: ParsedCommand, step?: numb
       if (command.objectType === 'bot') {
         store.dispatch(actions.createBot(command.id), step);
       } else if (command.objectType === 'terrain') {
-        store.dispatch(actions.createTerrain(
-          command.id,
-          command.terrainType,
-          command.x,
-          command.y,
-          command.width,
-          command.height
-        ), step);
+        store.dispatch(
+          actions.createTerrain(
+            command.id,
+            command.terrainType,
+            command.x,
+            command.y,
+            command.width,
+            command.height
+          ),
+          step
+        );
       }
       break;
 
@@ -28,6 +31,18 @@ export function executeCommand(store: Store, command: ParsedCommand, step?: numb
 
     case 'move':
       store.dispatch(actions.moveObject(command.id, command.direction, command.distance), step);
+      break;
+
+    case 'set-world-size':
+      store.dispatch(actions.setWorldSize(command.width, command.height), step);
+      break;
+
+    case 'set-seed':
+      store.dispatch(actions.setSeed(command.seed), step);
+      break;
+
+    case 'reset-world':
+      store.dispatch(actions.resetWorld(), step);
       break;
 
     case 'unknown':

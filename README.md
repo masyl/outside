@@ -133,6 +133,18 @@ Coverage reports are generated in multiple formats:
 
 Coverage thresholds are enforced at 80%+ for statements, branches, functions, and lines.
 
+## Component Testing
+
+### Storybook
+
+This project includes **Storybook** for component testing and documentation. Storybook enables isolated development and testing of UI components with real game states.
+
+- **Pixi.js Integration**: Game components use Pixi.js rendering wrapped in React for testability
+- **Command-Driven Testing**: Components are tested using the game's command system for deterministic states
+- **Real Game Logic**: No artificial mocking - all test states are created through actual game commands
+
+[**Storybook Documentation**](./outside-design/docs/storybook.md) - Complete setup and development guide
+
 ### Development Workflow
 
 1. Clone the repository

@@ -3,7 +3,12 @@ import { CommandQueue } from '../commands/queue';
 import { WebRTCPeer } from './webrtc';
 import { SignalingClient } from './signaling';
 import { BotOwnershipTracker } from './botOwnership';
-import { serializeNetworkMessage, deserializeNetworkMessage, InitialState, StateChangeEvent } from './stateEvents';
+import {
+  serializeNetworkMessage,
+  deserializeNetworkMessage,
+  InitialState,
+  StateChangeEvent,
+} from './stateEvents';
 import { deserializeInputCommand, InputCommand } from './inputCommands';
 import { WorldState } from '@outside/core';
 import { BotAutonomy } from '../game/autonomy';
@@ -74,14 +79,16 @@ export class HostMode {
   /**
    * Initialize host mode
    */
-  async initialize(): Promise<void> {
-    // Connect to signaling server
-    await this.signalingClient.connect();
-    this.signalingClient.registerHost();
+  async initialize(options?: { local?: boolean }): Promise<void> {
+    if (!options?.local) {
+      // Connect to signaling server
+      await this.signalingClient.connect();
+      this.signalingClient.registerHost();
+    }
 
     // Set up available bots from current world state
     this.updateAvailableBots();
-    
+
     // Also subscribe to store changes to update available bots when new bots are created
     this.store.subscribe(() => {
       this.updateAvailableBots();
@@ -123,21 +130,21 @@ export class HostMode {
    */
   private startStepCounter(): void {
     const STEP_INTERVAL = 125; // 125ms, same as game loop
-    
+
     this.stepIntervalId = window.setInterval(() => {
       this.currentStep++;
-      
+
       // Handle autonomous bot movement
       this.processAutonomy();
-      
+
       // Persist step count
       this.store.getEventLogger().saveStepCount(this.currentStep);
-      
+
       // Update debug overlay if available
       if (this.debugOverlay) {
         this.debugOverlay.setStepCount(this.currentStep);
       }
-      
+
       // Broadcast step update to all clients (even if no state change)
       this.broadcastStepUpdate();
     }, STEP_INTERVAL);
@@ -165,7 +172,7 @@ export class HostMode {
     if (!this.autonomy || !this.autonomyEnabled) return;
 
     const world = this.store.getState();
-    const bots = Array.from(world.objects.values()).filter(obj => obj.type === 'bot');
+    const bots = Array.from(world.objects.values()).filter((obj) => obj.type === 'bot');
 
     // #region agent log
     // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Autonomy check start',data:{botCount:bots.length,queueLength:this.commandQueue.length(),step:this.currentStep},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
@@ -194,7 +201,7 @@ export class HostMode {
         // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'host.ts:processAutonomy',message:'Bot action decided',data:{botId:bot.id,action:command.type},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
         // #endregion
         this.commandQueue.enqueue(command);
-        
+
         // Update last moved step if it's a move command
         if (command.type === 'move') {
           this.botLastMovedStep.set(bot.id, this.currentStep);
@@ -250,12 +257,14 @@ export class HostMode {
 
     // Check if we already have a connection for this client
     if (this.peerConnections.has(clientId)) {
-      console.warn(`[Host] Already have connection for client ${clientId}, ignoring duplicate offer`);
+      console.warn(
+        `[Host] Already have connection for client ${clientId}, ignoring duplicate offer`
+      );
       return;
     }
 
     const peer = new WebRTCPeer();
-    
+
     // Set up message handler (before creating data channel)
     peer.onMessage((data) => {
       this.handleClientMessage(clientId, data);
@@ -281,7 +290,7 @@ export class HostMode {
 
     // Set remote description first (the offer from client)
     await peer.setRemoteDescription(offer);
-    
+
     // Create answer
     const answer = await peer.createAnswer();
 
@@ -316,12 +325,12 @@ export class HostMode {
         setTimeout(waitForDataChannel, 100);
       }
     };
-    
+
     // Also set up handler for when data channel opens
     peer.onOpen(() => {
       // Update available bots before assigning (in case bots were created after initialization)
       this.updateAvailableBots();
-      
+
       this.sendInitialState(clientId);
       const botId = this.botOwnership.assignBot(clientId);
       if (botId) {
@@ -330,7 +339,9 @@ export class HostMode {
       if (this.callbacks.onClientConnected) {
         this.callbacks.onClientConnected(clientId);
       }
-      console.log(`[Host] Client ${clientId} data channel opened, assigned bot: ${botId || 'none'}`);
+      console.log(
+        `[Host] Client ${clientId} data channel opened, assigned bot: ${botId || 'none'}`
+      );
     });
   }
 
@@ -349,17 +360,23 @@ export class HostMode {
    */
   private handleClientMessage(connectionClientId: string, data: string): void {
     try {
-      console.log(`[Host] Received message from connection ${connectionClientId}:`, data.substring(0, 100));
+      console.log(
+        `[Host] Received message from connection ${connectionClientId}:`,
+        data.substring(0, 100)
+      );
       const message = deserializeInputCommand(data);
       console.log(`[Host] Parsed input command:`, message);
-      
+
       // Use the clientId from the message, but also try connectionClientId as fallback
       // The message clientId is what the client thinks its ID is
       const messageClientId = message.clientId || connectionClientId;
-      
+
       // Check if we have a bot assigned for either clientId
       let effectiveClientId = messageClientId;
-      if (!this.botOwnership.getBotId(messageClientId) && this.botOwnership.getBotId(connectionClientId)) {
+      if (
+        !this.botOwnership.getBotId(messageClientId) &&
+        this.botOwnership.getBotId(connectionClientId)
+      ) {
         // Bot is assigned to connectionClientId but message uses messageClientId
         // Update the assignment to use messageClientId
         const botId = this.botOwnership.getBotId(connectionClientId);
@@ -367,14 +384,16 @@ export class HostMode {
           this.botOwnership.unassignBot(connectionClientId);
           this.botOwnership.assignBot(messageClientId, botId);
           this.sendBotAssignment(messageClientId, botId);
-          console.log(`[Host] Migrated bot assignment from ${connectionClientId} to ${messageClientId}`);
+          console.log(
+            `[Host] Migrated bot assignment from ${connectionClientId} to ${messageClientId}`
+          );
         }
         effectiveClientId = messageClientId;
       } else if (!this.botOwnership.getBotId(messageClientId)) {
         // No bot assigned for either, use messageClientId
         effectiveClientId = messageClientId;
       }
-      
+
       this.handleInputCommand(effectiveClientId, message);
     } catch (error) {
       console.error(`[Host] Error handling message from ${connectionClientId}:`, error);
@@ -387,22 +406,26 @@ export class HostMode {
    */
   private handleInputCommand(clientId: string, inputCommand: InputCommand): void {
     // console.log(`[Host] Processing input command from ${clientId}: ${inputCommand.command}`);
-    
+
     // Update available bots before checking (bots might have been created after initialization)
     this.updateAvailableBots();
-    
+
     // Determine which bot to use
     let botId: string | null = null;
-    
+
     // For movement commands, use the selected bot ID from the client if provided
-    if (inputCommand.selectedBotId && ['MOVE_UP', 'MOVE_DOWN', 'MOVE_LEFT', 'MOVE_RIGHT'].includes(inputCommand.command)) {
+    if (
+      inputCommand.selectedBotId &&
+      ['MOVE_UP', 'MOVE_DOWN', 'MOVE_LEFT', 'MOVE_RIGHT'].includes(inputCommand.command)
+    ) {
       const world = this.store.getState();
       // Verify the selected bot exists
       if (world.objects.has(inputCommand.selectedBotId)) {
         // Check if this bot is available (not assigned to another client, or assigned to this client)
-        const currentOwner = Array.from(this.botOwnership.getAllOwnership().entries())
-          .find(([cid, bid]) => bid === inputCommand.selectedBotId)?.[0];
-        
+        const currentOwner = Array.from(this.botOwnership.getAllOwnership().entries()).find(
+          ([cid, bid]) => bid === inputCommand.selectedBotId
+        )?.[0];
+
         if (!currentOwner || currentOwner === clientId) {
           // Bot is available or already assigned to this client
           botId = inputCommand.selectedBotId;
@@ -414,19 +437,27 @@ export class HostMode {
             console.log(`[Host] Updated bot ownership: client ${clientId} now controls ${botId}`);
           }
         } else {
-          console.warn(`[Host] Client ${clientId} selected bot ${inputCommand.selectedBotId} but it's controlled by ${currentOwner}`);
+          console.warn(
+            `[Host] Client ${clientId} selected bot ${inputCommand.selectedBotId} but it's controlled by ${currentOwner}`
+          );
         }
       } else {
-        console.warn(`[Host] Client ${clientId} selected bot ${inputCommand.selectedBotId} but it doesn't exist`);
+        console.warn(
+          `[Host] Client ${clientId} selected bot ${inputCommand.selectedBotId} but it doesn't exist`
+        );
       }
     }
-    
+
     // Fallback to assigned bot if no selected bot ID or selection failed
     if (!botId) {
       botId = this.botOwnership.getBotId(clientId);
       if (!botId) {
-        console.warn(`[Host] Client ${clientId} has no assigned bot. Current ownership:`, 
-          Array.from(this.botOwnership.getAllOwnership().entries()).map(([cid, bid]) => `${cid.substring(0, 20)}... -> ${bid}`));
+        console.warn(
+          `[Host] Client ${clientId} has no assigned bot. Current ownership:`,
+          Array.from(this.botOwnership.getAllOwnership().entries()).map(
+            ([cid, bid]) => `${cid.substring(0, 20)}... -> ${bid}`
+          )
+        );
         // Try to assign a bot if none is assigned
         const assignedBotId = this.botOwnership.assignBot(clientId);
         if (assignedBotId) {
@@ -437,8 +468,11 @@ export class HostMode {
           console.error(`[Host] No available bots to assign to client ${clientId}`);
           // Log current world state for debugging
           const world = this.store.getState();
-          const allBots = Array.from(world.objects.values()).filter(obj => obj.type === 'bot');
-          console.error(`[Host] World has ${allBots.length} bots:`, allBots.map(b => b.id));
+          const allBots = Array.from(world.objects.values()).filter((obj) => obj.type === 'bot');
+          console.error(
+            `[Host] World has ${allBots.length} bots:`,
+            allBots.map((b) => b.id)
+          );
           return;
         }
       }
@@ -466,11 +500,15 @@ export class HostMode {
       case 'SELECT_PREV_BOT':
         // Bot selection is handled client-side, but we could implement bot switching here
         // For now, just log it
-        console.log(`[Host] Client ${clientId} selected ${inputCommand.command} (client-side only)`);
+        console.log(
+          `[Host] Client ${clientId} selected ${inputCommand.command} (client-side only)`
+        );
         return;
       case 'CLICK_TILE':
         // Future: handle tile clicks
-        console.log(`[Host] Client ${clientId} clicked tile at (${inputCommand.data?.x}, ${inputCommand.data?.y})`);
+        console.log(
+          `[Host] Client ${clientId} clicked tile at (${inputCommand.data?.x}, ${inputCommand.data?.y})`
+        );
         return;
       default:
         console.warn(`[Host] Unknown input command: ${inputCommand.command}`);
@@ -525,11 +563,13 @@ export class HostMode {
   private sendBotAssignment(clientId: string, botId: string): void {
     const peer = this.peerConnections.get(clientId);
     if (peer) {
-      peer.send(serializeNetworkMessage({
-        type: 'BOT_ASSIGNMENT',
-        clientId,
-        botId,
-      }));
+      peer.send(
+        serializeNetworkMessage({
+          type: 'BOT_ASSIGNMENT',
+          clientId,
+          botId,
+        })
+      );
     }
   }
 
