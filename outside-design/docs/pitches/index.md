@@ -22,17 +22,25 @@
 ## One-line Pitch Ideas
 
 - Default terrain object
-  - Add a default terrain type for the level.
-  - Use this default terrain as a first object added to the ground layer.
-  - The default terrain should be added to cover the level boundaries and an additionnal 100 tiles on each sides.
-  - Use this default terrain to fill the space beyond the boundaries of the level.
+  - Add a default terrain type for level.
+  - Use this default terrain as a first object added to ground layer.
+  - The default terrain should be added to cover level boundaries and an additionnal 100 tiles on each sides.
+  - Use this default terrain to fill up space beyond boundaries of level.
   - Draw a thick dashed white line around the level boundaries.
   - Allow adding objects outside the level boundaries
-- [Timeline controls](./timeline-controls.md)
 - Timeline Graphical Interface
   - Timeline
   - Time in hours, minutes, seconds
   - Command buttons
+
+## Timeline Controls Series
+
+- [Keystroke Help Menu (Timeline series: 1)](./keystroke-help-menu.md)
+- [Timeline Engine Core (Timeline series: 2)](./timeline-engine-core.md)
+- [Playback Controls & Game Loop Integration (Timeline series: 3)](./timeline-playback-controls.md)
+- [Timeline UI Components (Timeline series: 4)](./timeline-ui-components.md)
+- [Timeline Keystrokes Integration (Timeline series: 5)](./timeline-keystrokes-integration.md)
+- [Timeline Network Synchronization (Timeline series: 6)](./timeline-network-synchronization.md)
 - Add a corner Logo
 - Draw an dotted outline boundary for the grid
 - Check if capping the framerate at 60 would reduce CPU load
