@@ -1,16 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Store } from '@outside/client/src/store/store';
 import { executeCommand } from '@outside/client/src/commands/handlers';
 import { parseCommand } from '@outside/client/src/commands/parser';
 
+import { WorldState } from '@outside/core';
+
 const WorldPreview = ({ width, height }: { width: number; height: number }) => {
   const store = useMemo(() => new Store(), []);
-  const initialState = store.getState();
-  const [currentState, setCurrentState] = useState(initialState);
+  const [currentState, setCurrentState] = useState<WorldState>(() => store.getState());
 
   useEffect(() => {
-    const unsubscribe = store.subscribe(setCurrentState);
+    const unsubscribe = store.subscribe((state: WorldState) => {
+      setCurrentState(state);
+    });
     return () => unsubscribe();
   }, [store]);
 
@@ -31,6 +34,7 @@ const WorldPreview = ({ width, height }: { width: number; height: number }) => {
         padding: '12px',
         border: '1px solid #ddd',
         borderRadius: '8px',
+        fontFamily: 'monospace',
       }}
     >
       <div style={{ marginBottom: '8px', fontSize: '12px', color: '#444' }}>
