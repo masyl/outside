@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { StoreWrapper } from '../components/wrappers/StoreWrapper';
-import { GameRendererWrapper } from '../components/wrappers/GameRendererWrapper';
+import { GameWrapper } from '../components/wrappers/GameRendererWrapper';
 
 const WorldPreview = ({ width, height }: { width: number; height: number }) => {
   const initialCommands = [`set-world-size ${width} ${height}`, 'reset-world'];
 
   return (
     <StoreWrapper initialCommands={initialCommands}>
-      {(store) => <GameRendererWrapper width={width * 64} height={height * 64} store={store} />}
+      {(store) => <GameWrapper width={width * 64} height={height * 64} store={store} />}
     </StoreWrapper>
   );
 };

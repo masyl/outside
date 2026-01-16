@@ -20,18 +20,12 @@ import { ClientMode } from './network/client';
 /**
  * Initialize and start the game
  */
-async function init() {
-  // Explicitly use autoDetectRenderer to detect the best renderer for the environment
-  // Preference is 'webgpu' which will use WebGPU if available, fallback to WebGL
-  // Reference: https://pixijs.com/8.x/guides/components/renderers?_highlight=webgpu#renderer-types
-  const detectedRenderer = await autoDetectRenderer({
-    preference: 'webgpu',
-    width: window.innerWidth,
-    height: window.innerHeight,
-    backgroundColor: 0x1a1a1a,
-    antialias: false, // Pixel art style
-    resolution: 1,
-  });
+async function init(options?: { container?: HTMLElement; store?: any }) {
+  // Mount to DOM
+  const appElement = options?.container || document.getElementById('app');
+  if (!appElement) {
+    throw new Error('App element not found');
+  }
 
   // Create Pixi.js application
   // Note: Application.init() will use the same auto-detection when preference is specified
@@ -39,8 +33,8 @@ async function init() {
   // This ensures we're using auto-detection as intended
   const app = new Application();
   await app.init({
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: appElement.clientWidth || window.innerWidth,
+    height: appElement.clientHeight || window.innerHeight,
     backgroundColor: 0x1a1a1a,
     antialias: false, // Pixel art style
     resolution: 1,
@@ -48,23 +42,17 @@ async function init() {
   });
 
   // Log which renderer was actually detected/used
-  console.log(`[PixiJS] Using renderer: ${detectedRenderer.type || 'auto-detected'}`);
-
-  // Mount to DOM
-  const appElement = document.getElementById('app');
-  if (!appElement) {
-    throw new Error('App element not found');
-  }
+  console.log(`[PixiJS] Using renderer: ${app.renderer.type || 'auto-detected'}`);
   appElement.appendChild(app.canvas);
 
   // Create debug overlay (FPS counter, step counter, version)
   const debugOverlay = new DebugOverlay();
-  
+
   // Create connection overlay for disconnection warnings
   const connectionOverlay = new ConnectionOverlay();
 
   // Create store
-  const store = new Store();
+  const store = options?.store || new Store();
 
   // Create renderer
   const renderer = new GameRenderer(app);
@@ -94,42 +82,42 @@ async function init() {
   const SIGNALING_URL = 'ws://localhost:3001';
   const signalingClient = new SignalingClient(SIGNALING_URL);
 
-    // Create debug menu (after commandFeeder is created)
-    // Note: hostMode will be set later, so we use a variable that gets updated
-    let hostModeRef: HostMode | null = null;
-    
-    const debugMenu = new DebugMenu(app, {
-      onResetLevel: () => {
-        console.log('[Debug] Resetting level...');
-        // Clear event log
-        store.getEventLogger().clearEvents();
-        // Reset store to initial state (this will generate a NEW random seed)
-        const newState = createWorldState();
-        store.dispatch(actions.setWorldState(newState));
-        console.log(`[Debug] Generated new master seed: ${newState.seed}`);
-        
-        // Reload level
-        commandFeeder.loadLevel('/levels/demo.md').then(() => {
-          const terrainCommands = commandFeeder.getInitialTerrainCommands();
-          for (const command of terrainCommands) {
-            executeCommand(store, command);
-          }
-          commandFeeder.feedBotCommands();
-          renderer.setWorld(store.getState());
-          // Mark game as started after reset
-          store.start();
-          console.log('[Debug] Level reset complete');
-        });
-      },
-      onToggleAutonomy: () => {
-        if (hostModeRef) {
-          hostModeRef.toggleAutonomy();
+  // Create debug menu (after commandFeeder is created)
+  // Note: hostMode will be set later, so we use a variable that gets updated
+  let hostModeRef: HostMode | null = null;
+
+  const debugMenu = new DebugMenu(app, {
+    onResetLevel: () => {
+      console.log('[Debug] Resetting level...');
+      // Clear event log
+      store.getEventLogger().clearEvents();
+      // Reset store to initial state (this will generate a NEW random seed)
+      const newState = createWorldState();
+      store.dispatch(actions.setWorldState(newState));
+      console.log(`[Debug] Generated new master seed: ${newState.seed}`);
+
+      // Reload level
+      commandFeeder.loadLevel('/levels/demo.md').then(() => {
+        const terrainCommands = commandFeeder.getInitialTerrainCommands();
+        for (const command of terrainCommands) {
+          executeCommand(store, command);
         }
-      },
-      isAutonomyEnabled: () => {
-        return hostModeRef ? hostModeRef.isAutonomyEnabled() : false;
-      },
-    });
+        commandFeeder.feedBotCommands();
+        renderer.setWorld(store.getState());
+        // Mark game as started after reset
+        store.start();
+        console.log('[Debug] Level reset complete');
+      });
+    },
+    onToggleAutonomy: () => {
+      if (hostModeRef) {
+        hostModeRef.toggleAutonomy();
+      }
+    },
+    isAutonomyEnabled: () => {
+      return hostModeRef ? hostModeRef.isAutonomyEnabled() : false;
+    },
+  });
 
   // Handle window resize (moved after debugMenu initialization to avoid ReferenceError)
   window.addEventListener('resize', () => {
@@ -147,28 +135,30 @@ async function init() {
 
     try {
       await signalingClient.connect();
-      
+
       // Check host status
       let hostStatusResolved = false;
-      const hostStatusPromise = new Promise<{ isRunning: boolean; hostPeerId?: string }>((resolve) => {
-        signalingClient.onHostStatusUpdate((isRunning, hostPeerId) => {
-          if (!hostStatusResolved) {
-            hostStatusResolved = true;
-            resolve({ isRunning, hostPeerId });
-          }
-        });
-        
-        // Register as client first to get status
-        signalingClient.registerClient();
-        
-        // Timeout after 1 second if no response
-        setTimeout(() => {
-          if (!hostStatusResolved) {
-            hostStatusResolved = true;
-            resolve({ isRunning: false });
-          }
-        }, 1000);
-      });
+      const hostStatusPromise = new Promise<{ isRunning: boolean; hostPeerId?: string }>(
+        (resolve) => {
+          signalingClient.onHostStatusUpdate((isRunning, hostPeerId) => {
+            if (!hostStatusResolved) {
+              hostStatusResolved = true;
+              resolve({ isRunning, hostPeerId });
+            }
+          });
+
+          // Register as client first to get status
+          signalingClient.registerClient();
+
+          // Timeout after 1 second if no response
+          setTimeout(() => {
+            if (!hostStatusResolved) {
+              hostStatusResolved = true;
+              resolve({ isRunning: false });
+            }
+          }, 1000);
+        }
+      );
 
       const hostStatus = await hostStatusPromise;
       isHost = !hostStatus.isRunning;
@@ -203,66 +193,68 @@ async function init() {
       console.log('[Init] Loading level file...');
       await commandFeeder.loadLevel('/levels/demo.md');
 
-    // Process all initial terrain commands immediately before game loop starts
-    console.log('[Init] Processing initial terrain commands...');
-    const terrainCommands = commandFeeder.getInitialTerrainCommands();
-    for (const command of terrainCommands) {
-      executeCommand(store, command);
-    }
-    console.log(`[Init] Processed ${terrainCommands.length} terrain commands. Terrain should now be visible.`);
-
-    // Initial render to show terrain
-    renderer.setWorld(store.getState());
-
-    // Load and replay persisted events to restore runtime state
-    console.log('[Init] Loading persisted game state...');
-    const eventLogger = store.getEventLogger();
-    const persistedEvents = eventLogger.loadEvents();
-    const hasPersistedEvents = persistedEvents.length > 0;
-    
-    // Create new world state with seed if starting fresh
-    if (!hasPersistedEvents) {
-      // Re-create world state to ensure it has a fresh seed if this is a new game
-      // Note: We already created one in debugMenu, but this is the main initialization path
-      // Actually, store already has a state from init, but let's make sure it's fresh
-    } else {
-      // If replaying, we might want to recover the seed from events?
-      // Currently events don't store the master seed, only state changes.
-      // But we can check if the store state has a seed.
-    }
-    
-    if (hasPersistedEvents) {
-      console.log(`[Init] Found ${persistedEvents.length} persisted events, replaying...`);
-      eventLogger.replayEvents(store, persistedEvents, () => {
-        // After replay completes, update renderer to create sprites for all objects
-        // This ensures sprites exist before animation controller tries to animate them
-        renderer.update(store.getState());
-        // Reset animation controller's previous state so it doesn't try to animate the restoration
-        // (The animation controller will see the final state as the "previous" state)
-        animationController.resetPreviousState();
-      });
-      console.log('[Init] Game state restored from persisted events');
-      
-      // The replayed state might not have the seed if it was created before the seed field existed.
-      // Ensure seed is present.
-      const world = store.getState();
-      if (world.seed === undefined) {
-        console.warn('[Init] Restored state is missing seed, generating new one...');
-        // We need to update the state with a seed without triggering a new event
-        // But Store doesn't allow direct state mutation outside actions.
-        // We can dispatch a SET_WORLD_STATE action with the same state + seed.
-        const stateWithSeed = { ...world, seed: Math.floor(Math.random() * 2147483647) };
-        store.dispatch(actions.setWorldState(stateWithSeed));
+      // Process all initial terrain commands immediately before game loop starts
+      console.log('[Init] Processing initial terrain commands...');
+      const terrainCommands = commandFeeder.getInitialTerrainCommands();
+      for (const command of terrainCommands) {
+        executeCommand(store, command);
       }
-    } else {
-      console.log('[Init] No persisted events found, starting fresh');
-      // Ensure we have a valid world state with seed
-      // Note: store was initialized with empty state in init(), which calls createWorldState()
-      // so it should already have a seed.
-    }
+      console.log(
+        `[Init] Processed ${terrainCommands.length} terrain commands. Terrain should now be visible.`
+      );
 
-    // Mark game as started - enables event logging for future actions
-    store.start();
+      // Initial render to show terrain
+      renderer.setWorld(store.getState());
+
+      // Load and replay persisted events to restore runtime state
+      console.log('[Init] Loading persisted game state...');
+      const eventLogger = store.getEventLogger();
+      const persistedEvents = eventLogger.loadEvents();
+      const hasPersistedEvents = persistedEvents.length > 0;
+
+      // Create new world state with seed if starting fresh
+      if (!hasPersistedEvents) {
+        // Re-create world state to ensure it has a fresh seed if this is a new game
+        // Note: We already created one in debugMenu, but this is the main initialization path
+        // Actually, store already has a state from init, but let's make sure it's fresh
+      } else {
+        // If replaying, we might want to recover the seed from events?
+        // Currently events don't store the master seed, only state changes.
+        // But we can check if the store state has a seed.
+      }
+
+      if (hasPersistedEvents) {
+        console.log(`[Init] Found ${persistedEvents.length} persisted events, replaying...`);
+        eventLogger.replayEvents(store, persistedEvents, () => {
+          // After replay completes, update renderer to create sprites for all objects
+          // This ensures sprites exist before animation controller tries to animate them
+          renderer.update(store.getState());
+          // Reset animation controller's previous state so it doesn't try to animate the restoration
+          // (The animation controller will see the final state as the "previous" state)
+          animationController.resetPreviousState();
+        });
+        console.log('[Init] Game state restored from persisted events');
+
+        // The replayed state might not have the seed if it was created before the seed field existed.
+        // Ensure seed is present.
+        const world = store.getState();
+        if (world.seed === undefined) {
+          console.warn('[Init] Restored state is missing seed, generating new one...');
+          // We need to update the state with a seed without triggering a new event
+          // But Store doesn't allow direct state mutation outside actions.
+          // We can dispatch a SET_WORLD_STATE action with the same state + seed.
+          const stateWithSeed = { ...world, seed: Math.floor(Math.random() * 2147483647) };
+          store.dispatch(actions.setWorldState(stateWithSeed));
+        }
+      } else {
+        console.log('[Init] No persisted events found, starting fresh');
+        // Ensure we have a valid world state with seed
+        // Note: store was initialized with empty state in init(), which calls createWorldState()
+        // so it should already have a seed.
+      }
+
+      // Mark game as started - enables event logging for future actions
+      store.start();
 
       // Only feed bot commands if we didn't restore from persisted events
       // (persisted events already contain bot creation/placement commands)
@@ -270,7 +262,9 @@ async function init() {
         console.log('[Init] Feeding bot commands from level file...');
         commandFeeder.feedBotCommands();
       } else {
-        console.log('[Init] Skipping bot commands from level file (bots already restored from events)');
+        console.log(
+          '[Init] Skipping bot commands from level file (bots already restored from events)'
+        );
       }
 
       // Initialize host mode
@@ -309,17 +303,12 @@ async function init() {
       }
 
       await hostMode.initialize();
-      
+
       // Update client count initially
       debugOverlay.setClientCount(hostMode.getConnectedClientCount());
 
       // Create keyboard handler (host mode - commands go to local queue)
-      const keyboardHandler = new KeyboardHandler(
-        selectionManager,
-        commandQueue,
-        store,
-        renderer
-      );
+      const keyboardHandler = new KeyboardHandler(selectionManager, commandQueue, store, renderer);
 
       // Start the game loop
       gameLoop.start();
@@ -361,7 +350,7 @@ async function init() {
         if (showPopup) {
           connectionOverlay.show(`Connection lost! Trying to reconnect in ${delay / 1000}s...`);
         }
-        
+
         // Wait before reconnecting
         setTimeout(async () => {
           if (clientMode) {
@@ -373,17 +362,17 @@ async function init() {
               // However, since initiateConnection is async and might not trigger state changes immediately if it fails silently (e.g. no host),
               // we need to make sure we can try again.
               // But WebRTCPeer + Signaling will trigger events.
-              
+
               // If reconnect() throws immediately, we need to schedule next attempt
               // But initiateConnection mostly sets up listeners and sends offer via signaling.
-              
+
               // Key point: We need to reset isReconnecting so the NEXT failure event triggers this again.
               // But if we reset it too early, we might get multiple triggers for the same failure sequence.
               // Let's reset it after a short delay to allow for state transition events to fire?
               // Actually, better strategy:
               // The `reconnect` call initiates a NEW connection. The OLD connection is closed.
               // Events from the new connection will drive the loop.
-              isReconnecting = false; 
+              isReconnecting = false;
             } catch (error) {
               console.error('[Client] Reconnection attempt failed:', error);
               isReconnecting = false;
@@ -416,7 +405,7 @@ async function init() {
         onConnectionStateChange: (state) => {
           console.log(`[Client] Host connection state: ${state}`);
           debugOverlay.setP2pStatus(state);
-          
+
           if (state === 'failed' || state === 'disconnected') {
             handleReconnection();
           }
@@ -448,10 +437,7 @@ async function init() {
 
   // Update debug overlay with object count
   store.subscribe((world) => {
-    debugOverlay.setObjectCounts(
-      world.objects.size,
-      world.groundLayer.terrainObjects.size
-    );
+    debugOverlay.setObjectCounts(world.objects.size, world.groundLayer.terrainObjects.size);
   });
 
   // Update debug overlay with event count periodically
@@ -460,7 +446,7 @@ async function init() {
     const events = eventLogger.loadEvents();
     debugOverlay.setEventCount(events.length);
   };
-  
+
   // Update immediately and then periodically (every 500ms)
   updateEventCount();
   setInterval(updateEventCount, 500);
@@ -487,3 +473,5 @@ async function init() {
 init().catch((error) => {
   console.error('Failed to initialize game:', error);
 });
+
+export { init };

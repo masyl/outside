@@ -1,65 +1,39 @@
 import React, { useEffect, useRef } from 'react';
-import { Application } from 'pixi.js';
-import { Store } from '@outside/client/src/store/store';
-import { GameRenderer } from '@outside/client/src/renderer/renderer';
+import { init } from '@outside/client/src/main';
 
-interface GameRendererWrapperProps {
+interface GameWrapperProps {
   width: number;
   height: number;
-  store: Store;
+  store: any;
 }
 
-export const GameRendererWrapper: React.FC<GameRendererWrapperProps> = ({
-  width,
-  height,
-  store,
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rendererRef = useRef<GameRenderer | null>(null);
+export const GameWrapper: React.FC<GameWrapperProps> = ({ width, height, store }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!containerRef.current) return;
 
-    const app = new Application({
-      canvas: canvasRef.current,
-      width,
-      height,
-      backgroundColor: 0x000000,
-      antialias: false, // Pixel perfect
+    // Set the container size
+    containerRef.current.style.width = `${width}px`;
+    containerRef.current.style.height = `${height}px`;
+
+    // Initialize the game in this container
+    init({ container: containerRef.current, store }).catch((error) => {
+      console.error('Failed to initialize game in story:', error);
     });
 
-    const gameRenderer = new GameRenderer(app);
-    rendererRef.current = gameRenderer;
-
-    // Load assets and set initial world
-    const initializeRenderer = async () => {
-      await gameRenderer.loadAssets();
-      gameRenderer.setWorld(store.getState());
-    };
-
-    initializeRenderer();
-
-    // Subscribe to store changes
-    const unsubscribe = store.subscribe((newState) => {
-      gameRenderer.update(newState);
-    });
-
-    return () => {
-      unsubscribe();
-      app.destroy(true);
-    };
-  }, [width, height, store]);
+    // No cleanup, as the game manages its own lifecycle
+  }, [width, height]);
 
   return (
     <div
+      ref={containerRef}
       style={{
         display: 'inline-block',
         border: '1px solid #ddd',
         borderRadius: '8px',
         overflow: 'hidden',
       }}
-    >
-      <canvas ref={canvasRef} />
-    </div>
+    />
   );
 };
