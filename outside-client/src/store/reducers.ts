@@ -246,20 +246,22 @@ export function reducer(state: WorldState, action: Action): WorldState {
       }
 
       case 'RESET_WORLD': {
-        const newState = createWorldState(draft.seed);
-        // Preserve dimensions if they've been customized
-        newState.width = draft.width;
-        newState.height = draft.height;
-        newState.grid = Array(draft.height)
-          .fill(null)
-          .map(() => Array(draft.width).fill(null));
+         const newState = createWorldState(draft.seed);
+         // Preserve dimensions if they've been customized
+         newState.width = draft.width;
+         newState.height = draft.height;
+         newState.grid = Array(draft.height)
+           .fill(null);
 
-        // Replace all properties
-        draft.grid = newState.grid;
-        draft.objects = newState.objects;
-        draft.groundLayer = newState.groundLayer;
-        break;
-      }
+         break;
+       }
+       case 'SET_WORLD_STATE':
+         return action.payload.worldState;
+       case 'APPLY_ORIGINAL_VALUE':
+         return { ...state, ...(action.value as any) };
+       default:
+         return state;
+    }
 
       case 'SET_WORLD_STATE': {
         // Replace entire state

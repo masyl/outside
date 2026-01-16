@@ -10,7 +10,16 @@ import { ConnectionOverlay } from './debug/connectionOverlay';
 import { KeystrokeOverlay } from './debug/keystrokeOverlay';
 import { AnimationController } from './game/animationController';
 import { SelectionManager } from './input/selection';
+import { CommandQueue } from './commands/queue';
+import { GameRenderer } from './renderer/renderer';
+import { GameLoop } from './game/loop';
+import { MockCommandFeeder } from './mock/commandFeeder';
+import { DebugOverlay } from './debug/overlay';
+import { DebugMenu } from './debug/menu';
+import { ConnectionOverlay } from './debug/connectionOverlay';
+import { AnimationController } from './game/animationController';
 import { KeyboardHandler } from './input/keyboardHandler';
+import { TimelineManager } from './timeline/manager';
 import { executeCommand } from './commands/handlers';
 import { parseCommand } from './commands/parser';
 import { createWorldState } from '@outside/core';
@@ -354,6 +363,9 @@ async function init(options?: {
 
       // Create keyboard handler (host mode - commands go to local queue)
       const keyboardHandler = new KeyboardHandler(selectionManager, commandQueue, store, renderer);
+
+      // Initialize Timeline Manager for time travel support
+      const timelineManager = new TimelineManager(store, eventLogger);
 
       // Start the game loop
       gameLoop.start();
