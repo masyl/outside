@@ -7,6 +7,7 @@ import { MockCommandFeeder } from './mock/commandFeeder';
 import { DebugOverlay } from './debug/overlay';
 import { DebugMenu } from './debug/menu';
 import { ConnectionOverlay } from './debug/connectionOverlay';
+import { KeystrokeOverlay } from './debug/keystrokeOverlay';
 import { AnimationController } from './game/animationController';
 import { SelectionManager } from './input/selection';
 import { KeyboardHandler } from './input/keyboardHandler';
@@ -56,6 +57,9 @@ async function init(options?: {
 
   // Create connection overlay for disconnection warnings
   const connectionOverlay = new ConnectionOverlay();
+
+  // Create keystroke overlay for keyboard shortcuts
+  const keystrokeOverlay = new KeystrokeOverlay();
 
   // Create store
   const store = options?.store || new Store();

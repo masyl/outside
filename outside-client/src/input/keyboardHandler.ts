@@ -5,8 +5,13 @@ import { parseCommand } from '../commands/parser';
 import { GameRenderer } from '../renderer/renderer';
 import { Store } from '../store/store';
 import { InputCommandType } from '../network/inputCommands';
+import { KeystrokeOverlay } from '../debug/keystrokeOverlay';
 
-export type InputCommandSender = (command: InputCommandType, selectedBotId?: string, data?: { x?: number; y?: number }) => void;
+export type InputCommandSender = (
+  command: InputCommandType,
+  selectedBotId?: string,
+  data?: { x?: number; y?: number }
+) => void;
 
 /**
  * Handles keyboard input for bot selection and movement
@@ -19,6 +24,7 @@ export class KeyboardHandler {
   private keyHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
   private inputCommandSender: InputCommandSender | null = null;
   private isClientMode: boolean = false;
+  private keystrokeOverlay: KeystrokeOverlay;
 
   constructor(
     selectionManager: SelectionManager,
@@ -33,6 +39,7 @@ export class KeyboardHandler {
     this.renderer = renderer;
     this.inputCommandSender = inputCommandSender || null;
     this.isClientMode = inputCommandSender !== undefined;
+    this.keystrokeOverlay = new KeystrokeOverlay();
 
     this.setupKeyHandlers();
     this.attachEventListeners();
@@ -89,6 +96,20 @@ export class KeyboardHandler {
     this.keyHandlers.set('ArrowRight', (event) => {
       event.preventDefault();
       this.handleArrowKey('right');
+    });
+
+    // ?: Toggle keystroke overlay
+    this.keyHandlers.set('?', (event) => {
+      event.preventDefault();
+      this.keystrokeOverlay.toggle();
+    });
+
+    // ESC: Hide keystroke overlay (when visible)
+    this.keyHandlers.set('Escape', (event) => {
+      if (this.keystrokeOverlay['isVisible']) {
+        event.preventDefault();
+        this.keystrokeOverlay.hide();
+      }
     });
   }
 
@@ -154,6 +175,8 @@ export class KeyboardHandler {
         case 'right':
           inputCommand = 'MOVE_RIGHT';
           break;
+        default:
+          throw new Error(`Unexpected direction: ${direction}`);
       }
       // Send the selected bot ID so host knows which bot to move
       this.inputCommandSender(inputCommand, selectedBotId);
