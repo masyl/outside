@@ -370,6 +370,9 @@ async function init(options?: {
       // Initialize Timeline Manager for time travel support
       const timelineManager = new TimelineManager(store, eventLogger);
 
+      // Initialize Timeline Manager for time travel support
+      const timelineManager = new TimelineManager(store, eventLogger);
+
       // Start the game loop
       gameLoop.start();
     }
