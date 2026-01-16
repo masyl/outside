@@ -6,6 +6,7 @@ import { GameRenderer } from '../renderer/renderer';
 import { Store } from '../store/store';
 import { InputCommandType } from '../network/inputCommands';
 import { KeystrokeOverlay } from '../debug/keystrokeOverlay';
+import { TimelineManager } from '../timeline/manager';
 
 export type InputCommandSender = (
   command: InputCommandType,
@@ -31,7 +32,8 @@ export class KeyboardHandler {
     commandQueue: CommandQueue | null,
     store: Store,
     renderer: GameRenderer,
-    inputCommandSender?: InputCommandSender
+    inputCommandSender?: InputCommandSender,
+    timelineManager?: any
   ) {
     this.selectionManager = selectionManager;
     this.commandQueue = commandQueue;
@@ -39,10 +41,15 @@ export class KeyboardHandler {
     this.renderer = renderer;
     this.inputCommandSender = inputCommandSender || null;
     this.isClientMode = inputCommandSender !== undefined;
+    this.timelineManager = timelineManager || null;
     this.keystrokeOverlay = new KeystrokeOverlay();
 
     this.setupKeyHandlers();
     this.attachEventListeners();
+  }
+
+  setTimelineManager(manager: any): void {
+    this.timelineManager = manager;
   }
 
   /**
