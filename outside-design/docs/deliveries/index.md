@@ -40,40 +40,22 @@ When a plan is ready for delivery, it goes through a "wrapup" process:
 
 ## Ongoing Deliveries
 
-### 2026-01-15 00:31 - Basic Unit Testing Setup
+
+### Adding Storybook to the project for component testing (2026-01-15)
+
+This implementation plan details the step-by-step approach to add Storybook as a separate workspace package in the monorepo. The key architectural decision is to use commands for all state manipulation, including world size configuration, following the existing game's command-driven architecture.
+
+[Delivery →](./2026-01-15-storybook-implementation/plan.md)
+
+
+## Completed Deliveries
+
+
+### Basic Unit Testing Setup (2026-01-15)
 
 Implemented comprehensive unit testing infrastructure across all workspace packages with code coverage reporting and TypeScript support. Achieved 100% statement coverage for core package and 97.95% branch coverage focusing on all conditional paths.
 
-**Key Achievements:**
-
-- **Core Package**: 100% statement, 97.95% branch coverage with 46 tests
-- **Client Foundation**: 37 tests covering store management, reducers, command parsing, and environment setup
-- **Real Dependencies**: Tests use actual @outside/core for realistic integration testing
-- **Fast Execution**: All tests run in under 2 seconds
-- **Branch Coverage Focus**: Comprehensive testing of all conditional paths
-- **Bug Discovery**: Tests revealed actual implementation issues to improve
-
-**Technical Features:**
-
-- Vitest with v8 coverage provider
-- Zero-configuration TypeScript support
-- Browser API mocking for PIXI.js environment
-- Monorepo integration with Turbo scripts
-- Comprehensive edge case and error handling tests
-
-[View delivery folder →](./2026-01-15-0031-basic-unit-testing-setup/)
-
----
-
-### 2026-01-14 22:58 - Basic Unit Testing Setup
-
-Setting up comprehensive unit testing framework across all workspace packages with code coverage reporting and TypeScript support. Currently implementing Vitest configuration and test infrastructure.
-
-[View delivery folder →](./2026-01-14-2258-basic-unit-testing-setup/)
-
----
-
-## Completed Deliveries
+[Delivery →](./2026-01-15-0031-basic-unit-testing-setup/plan.md)
 
 ### 2026-01-09 12:30 - Pixel Art Visuals
 

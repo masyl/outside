@@ -10,7 +10,7 @@ interface StoreWrapperProps {
 
 export const StoreWrapper: React.FC<StoreWrapperProps> = ({ children, initialCommands = [] }) => {
   const [store] = useState(() => new Store());
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [renderKey, setRenderKey] = useState(0);
 
   useEffect(() => {
     // Execute initial commands to set up the world
@@ -20,12 +20,8 @@ export const StoreWrapper: React.FC<StoreWrapperProps> = ({ children, initialCom
         executeCommand(store, parsedCommand);
       }
     }
-    setIsInitialized(true);
+    setRenderKey((prev) => prev + 1);
   }, [store, initialCommands]);
 
-  if (!isInitialized) {
-    return <div>Initializing story...</div>;
-  }
-
-  return <>{children(store)}</>;
+  return <React.Fragment key={renderKey}>{children(store)}</React.Fragment>;
 };

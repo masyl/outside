@@ -11,6 +11,7 @@ import { AnimationController } from './game/animationController';
 import { SelectionManager } from './input/selection';
 import { KeyboardHandler } from './input/keyboardHandler';
 import { executeCommand } from './commands/handlers';
+import { parseCommand } from './commands/parser';
 import { createWorldState } from '@outside/core';
 import { actions } from './store/actions';
 import { SignalingClient } from './network/signaling';
@@ -20,7 +21,12 @@ import { ClientMode } from './network/client';
 /**
  * Initialize and start the game
  */
-async function init(options?: { container?: HTMLElement; store?: any }) {
+async function init(options?: {
+  container?: HTMLElement;
+  store?: any;
+  mode?: 'auto' | 'host' | 'client' | 'local';
+  startupCommands?: string[];
+}) {
   // Mount to DOM
   const appElement = options?.container || document.getElementById('app');
   if (!appElement) {
@@ -132,8 +138,31 @@ async function init(options?: { container?: HTMLElement; store?: any }) {
     let isHost = false;
     let hostMode: HostMode | null = null;
     let clientMode: ClientMode | null = null;
+    const requestedMode = options?.mode ?? 'auto';
 
     try {
+      if (requestedMode === 'local') {
+        console.log('[Init] Starting in local mode (no signaling).');
+        debugOverlay.setMode('host');
+        await initializeHostMode({ local: true, startupCommands: options?.startupCommands });
+        return;
+      }
+
+      if (requestedMode === 'host') {
+        console.log('[Init] Forcing host mode.');
+        debugOverlay.setMode('host');
+        signalingClient.registerHost();
+        await initializeHostMode({ startupCommands: options?.startupCommands });
+        return;
+      }
+
+      if (requestedMode === 'client') {
+        console.log('[Init] Forcing client mode.');
+        debugOverlay.setMode('client');
+        await initializeClientMode();
+        return;
+      }
+
       await signalingClient.connect();
 
       // Check host status
@@ -167,7 +196,7 @@ async function init(options?: { container?: HTMLElement; store?: any }) {
         console.log('[Init] No host found, becoming host...');
         debugOverlay.setMode('host');
         signalingClient.registerHost();
-        await initializeHostMode();
+        await initializeHostMode({ startupCommands: options?.startupCommands });
       } else {
         console.log('[Init] Host found, connecting as client...');
         debugOverlay.setMode('client');
@@ -179,7 +208,7 @@ async function init(options?: { container?: HTMLElement; store?: any }) {
       debugOverlay.setMode('host');
       try {
         signalingClient.registerHost();
-        await initializeHostMode();
+        await initializeHostMode({ startupCommands: options?.startupCommands });
       } catch (hostError) {
         console.error('[Init] Failed to initialize as host:', hostError);
         // Fallback: initialize as client with empty state
@@ -188,20 +217,32 @@ async function init(options?: { container?: HTMLElement; store?: any }) {
       }
     }
 
-    async function initializeHostMode() {
-      // Load level file
-      console.log('[Init] Loading level file...');
-      await commandFeeder.loadLevel('/levels/demo.md');
+    async function initializeHostMode(options?: { local?: boolean; startupCommands?: string[] }) {
+      const isLocal = options?.local ?? false;
 
-      // Process all initial terrain commands immediately before game loop starts
-      console.log('[Init] Processing initial terrain commands...');
-      const terrainCommands = commandFeeder.getInitialTerrainCommands();
-      for (const command of terrainCommands) {
-        executeCommand(store, command);
+      if (options?.startupCommands && options.startupCommands.length > 0) {
+        console.log('[Init] Applying startup commands...');
+        for (const commandString of options.startupCommands) {
+          const parsedCommand = parseCommand(commandString);
+          if (parsedCommand.type !== 'unknown') {
+            executeCommand(store, parsedCommand);
+          }
+        }
+      } else if (!isLocal) {
+        // Load level file
+        console.log('[Init] Loading level file...');
+        await commandFeeder.loadLevel('/levels/demo.md');
+
+        // Process all initial terrain commands immediately before game loop starts
+        console.log('[Init] Processing initial terrain commands...');
+        const terrainCommands = commandFeeder.getInitialTerrainCommands();
+        for (const command of terrainCommands) {
+          executeCommand(store, command);
+        }
+        console.log(
+          `[Init] Processed ${terrainCommands.length} terrain commands. Terrain should now be visible.`
+        );
       }
-      console.log(
-        `[Init] Processed ${terrainCommands.length} terrain commands. Terrain should now be visible.`
-      );
 
       // Initial render to show terrain
       renderer.setWorld(store.getState());
@@ -302,7 +343,7 @@ async function init(options?: { container?: HTMLElement; store?: any }) {
         debugOverlay.setStepCount(restoredStep);
       }
 
-      await hostMode.initialize();
+      await hostMode.initialize({ local: isLocal });
 
       // Update client count initially
       debugOverlay.setClientCount(hostMode.getConnectedClientCount());
