@@ -20,6 +20,11 @@ import { Action } from './actions';
  * Reducer function that handles state updates using Immer
  */
 export function reducer(state: WorldState, action: Action): WorldState {
+  // Special case for SET_WORLD_STATE - bypass immer
+  if (action.type === 'SET_WORLD_STATE') {
+    return action.payload.worldState || state;
+  }
+
   return produce(state, (draft) => {
     switch (action.type) {
       case 'CREATE_BOT': {
@@ -254,16 +259,8 @@ export function reducer(state: WorldState, action: Action): WorldState {
           .fill(null)
           .map(() => Array(draft.width).fill(null));
 
-        // Replace all properties
-        draft.grid = newState.grid;
-        draft.objects = newState.objects;
-        draft.groundLayer = newState.groundLayer;
-        break;
-      }
-
-      case 'SET_WORLD_STATE': {
         // Replace entire state
-        return action.payload.worldState;
+        return newState;
       }
 
       default:

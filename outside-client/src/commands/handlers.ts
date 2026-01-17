@@ -29,9 +29,21 @@ export function executeCommand(store: Store, command: ParsedCommand, step?: numb
       store.dispatch(actions.placeObject(command.id, { x: command.x, y: command.y }), step);
       break;
 
-    case 'move':
-      store.dispatch(actions.moveObject(command.id, command.direction, command.distance), step);
+    case 'move': {
+      const world = store.getState();
+      const bot = world.objects.get(command.id);
+      if (!bot) {
+        console.warn(`Bot with id "${command.id}" not found`);
+        return;
+      }
+
+      const originalValue = { x: bot.position.x, y: bot.position.y };
+      store.dispatch(
+        actions.moveObject(command.id, command.direction, command.distance, originalValue),
+        step
+      );
       break;
+    }
 
     case 'set-world-size':
       store.dispatch(actions.setWorldSize(command.width, command.height), step);

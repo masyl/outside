@@ -17,12 +17,13 @@ export class EventLogger {
     if (action.type === 'SET_WORLD_STATE') {
       return false;
     }
-    
+
     // Don't persist CREATE_TERRAIN (initial terrain setup)
-    if (action.type === 'CREATE_TERRAIN') {
-      return false;
-    }
-    
+    // Update: We DO want to persist CREATE_TERRAIN for timeline reconstruction
+    // if (action.type === 'CREATE_TERRAIN') {
+    //   return false;
+    // }
+
     // Persist all other actions (CREATE_BOT, PLACE_OBJECT, MOVE_OBJECT)
     return true;
   }
@@ -46,7 +47,7 @@ export class EventLogger {
         timestamp,
         step, // Save optional step number
       });
-      
+
       // Store events array in localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
     } catch (error) {
@@ -58,13 +59,13 @@ export class EventLogger {
   /**
    * Load all events from localStorage
    */
-  loadEvents(): Array<{ action: Action; timestamp: number }> {
+  loadEvents(): Array<{ action: Action; timestamp: number; step?: number }> {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
         return [];
       }
-      
+
       const events = JSON.parse(stored);
       // Validate that it's an array
       if (!Array.isArray(events)) {
@@ -72,11 +73,33 @@ export class EventLogger {
         this.clearEvents();
         return [];
       }
-      
+
       return events;
     } catch (error) {
       console.warn('[EventLogger] Failed to load events:', error);
       return [];
+    }
+  }
+
+  /**
+   * Get events up to a specific step (for timeline navigation)
+   */
+  getEventsUpTo(step: number): Array<{ action: Action; timestamp: number; step?: number }> {
+    const allEvents = this.loadEvents();
+    return allEvents.filter((event) => {
+      const eventStep = (event as any).step;
+      return eventStep !== undefined && eventStep <= step;
+    });
+  }
+
+  /**
+   * Set events array (for timeline history truncation)
+   */
+  setEvents(events: Array<{ action: Action; timestamp: number; step?: number }>): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    } catch (error) {
+      console.warn('[EventLogger] Failed to set events:', error);
     }
   }
 
@@ -122,24 +145,24 @@ export class EventLogger {
   /**
    * Replay events to rebuild state
    * This dispatches events to the store without logging them again
-   * 
+   *
    * @param store The store to replay events into
    * @param events The events to replay
    * @param onReplayComplete Optional callback called after replay completes
    */
   replayEvents(
-    store: Store, 
+    store: Store,
     events: Array<{ action: Action; timestamp: number }>,
     onReplayComplete?: () => void
   ): void {
     console.log(`[EventLogger] Replaying ${events.length} events to restore state`);
-    
+
     // Temporarily disable logging during replay to prevent infinite loops
     const wasStarted = store.isStarted();
     if (wasStarted) {
       store.stop(); // Stop logging during replay
     }
-    
+
     try {
       for (const { action } of events) {
         store.dispatch(action);
@@ -150,9 +173,9 @@ export class EventLogger {
         store.start();
       }
     }
-    
+
     console.log('[EventLogger] Event replay complete');
-    
+
     // Call completion callback if provided
     if (onReplayComplete) {
       onReplayComplete();

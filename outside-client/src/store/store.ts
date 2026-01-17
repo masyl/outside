@@ -9,9 +9,6 @@ enableMapSet();
 
 type Subscriber = (state: WorldState) => void;
 
-/**
- * Flux store for managing game state
- */
 export class Store {
   private state: WorldState;
   private subscribers: Set<Subscriber> = new Set();
@@ -21,6 +18,12 @@ export class Store {
   constructor(initialState?: WorldState) {
     this.state = initialState || createWorldState();
     this.eventLogger = new EventLogger();
+  }
+
+  setTimelineManager(manager: any): void {
+    // Timeline manager will be stored for later access
+    // This is a temporary storage - proper dependency injection would be better
+    (this as any).timelineManager = manager;
   }
 
   /**
@@ -35,16 +38,17 @@ export class Store {
    */
   dispatch(action: Action, step?: number): void {
     const newState = reducer(this.state, action);
-    
+
     // Only update if state actually changed
     if (newState !== this.state) {
       this.state = newState;
-      
+
       // Log event if game has started
       if (this.isStartedFlag) {
         this.eventLogger.logEvent(action, undefined, step);
       }
-      
+
+      // Notify all subscribers
       this.notifySubscribers();
     }
   }
@@ -54,7 +58,7 @@ export class Store {
    */
   subscribe(subscriber: Subscriber): () => void {
     this.subscribers.add(subscriber);
-    
+
     // Return unsubscribe function
     return () => {
       this.subscribers.delete(subscriber);
