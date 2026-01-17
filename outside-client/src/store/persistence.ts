@@ -19,9 +19,10 @@ export class EventLogger {
     }
 
     // Don't persist CREATE_TERRAIN (initial terrain setup)
-    if (action.type === 'CREATE_TERRAIN') {
-      return false;
-    }
+    // Update: We DO want to persist CREATE_TERRAIN for timeline reconstruction
+    // if (action.type === 'CREATE_TERRAIN') {
+    //   return false;
+    // }
 
     // Persist all other actions (CREATE_BOT, PLACE_OBJECT, MOVE_OBJECT)
     return true;

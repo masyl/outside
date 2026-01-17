@@ -1,6 +1,8 @@
 import { Store } from '../store/store';
 import { EventLogger } from '../store/persistence';
 import { TimelineEvent, TimelineConfig, PlaybackState, TimelineManagerState } from './types';
+import { reducer as storeReducer } from '../store/reducers';
+import { createWorldState } from '@outside/core';
 
 export class TimelineManager {
   private store: Store;
@@ -21,12 +23,21 @@ export class TimelineManager {
   }
 
   getState(): TimelineManagerState {
-    const events = this.eventLogger.loadEvents();
-    return {
-      currentStep: this.pointer,
-      mode: this.playbackState === PlaybackState.PLAYING ? 'normal' : 'timeline',
-      totalSteps: events.length,
-    };
+    try {
+      const events = this.eventLogger.loadEvents();
+      return {
+        currentStep: this.pointer,
+        mode: this.playbackState === PlaybackState.PLAYING ? 'normal' : 'timeline',
+        totalSteps: events.length,
+      };
+    } catch (e) {
+      console.error('Error loading events for state:', e);
+      return {
+        currentStep: this.pointer,
+        mode: 'normal',
+        totalSteps: 0,
+      };
+    }
   }
 
   getPlaybackState(): PlaybackState {
@@ -55,20 +66,30 @@ export class TimelineManager {
   }
 
   goToStep(stepNumber: number): void {
-    const events = this.eventLogger.loadEvents();
-    if (stepNumber < 0 || stepNumber >= events.length) return;
+    try {
+      const events = this.eventLogger.loadEvents();
+      if (events.length === 0) {
+        this.pointer = 0;
+        return;
+      }
 
-    if (!this.endStateCache) {
-      this.endStateCache = this.store.getState();
+      // Clamp step number
+      const targetStep = Math.max(0, Math.min(stepNumber, events.length - 1));
+
+      if (!this.endStateCache) {
+        this.endStateCache = this.store.getState();
+      }
+
+      this.pointer = targetStep;
+      this.setPlaybackState(PlaybackState.TRAVELING);
+
+      const stateAtStep = this.reconstructState(targetStep);
+      this.store.dispatch({ type: 'SET_WORLD_STATE', payload: { worldState: stateAtStep } });
+
+      this.notifyPositionChange();
+    } catch (e) {
+      console.error('Error in goToStep:', e);
     }
-
-    this.pointer = stepNumber;
-    this.setPlaybackState(PlaybackState.TRAVELING);
-
-    const stateAtStep = this.reconstructState(stepNumber);
-    this.store.dispatch({ type: 'SET_WORLD_STATE', payload: { worldState: stateAtStep } });
-
-    this.notifyPositionChange();
   }
 
   stepForward(): void {
@@ -89,44 +110,36 @@ export class TimelineManager {
   }
 
   private reconstructState(targetStep: number): any {
-    const events = this.eventLogger.loadEvents();
-    let state = this.getInitialState();
+    try {
+      const events = this.eventLogger.loadEvents();
+      let state = this.getInitialState();
 
-    for (let i = 0; i <= targetStep; i++) {
-      const event = events[i];
+      for (let i = 0; i <= targetStep; i++) {
+        const event = events[i];
+        if (!event || !event.action) continue;
 
-      if ((event.step ?? i) > targetStep) continue;
+        if ((event.step ?? i) > targetStep) continue;
 
-      state = this.reducer(state, event.action);
+        try {
+          state = this.reducer(state, event.action);
+        } catch (e) {
+          console.error('Error applying action during reconstruction:', e);
+        }
+      }
+
+      return state;
+    } catch (e) {
+      console.error('Error reconstructing state:', e);
+      return this.getInitialState();
     }
-
-    return state;
   }
 
   private getInitialState(): any {
-    // For now, reconstruct from the current state shape. A dedicated initial-state factory can be introduced later.
-    return this.store.getState();
+    return createWorldState();
   }
 
   private reducer(state: any, action: any): any {
-    switch (action.type) {
-      case 'MOVE_OBJECT':
-      case 'CREATE_BOT':
-      case 'CREATE_TERRAIN':
-      case 'PLACE_OBJECT':
-      case 'SET_WORLD_SIZE':
-      case 'SET_SEED':
-      case 'RESET_WORLD':
-        return this.handleGameAction(state, action);
-      case 'SET_WORLD_STATE':
-        return action.payload;
-      default:
-        return state;
-    }
-  }
-
-  private handleGameAction(state: any, action: any): any {
-    return state;
+    return storeReducer(state, action);
   }
 
   truncateHistory(currentStep: number): void {
