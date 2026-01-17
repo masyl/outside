@@ -21,7 +21,7 @@ export type Action =
   | { type: 'SET_WORLD_SIZE'; payload: { width: number; height: number } }
   | { type: 'SET_SEED'; payload: { seed: number } }
   | { type: 'RESET_WORLD' }
-  | { type: 'SET_WORLD_STATE'; payload: { worldState: WorldState } };
+  | { type: 'SET_WORLD_STATE'; payload: { worldState: WorldState | null } };
 
 export const actions = {
   createBot: (id: string): Action => ({

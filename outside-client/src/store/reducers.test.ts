@@ -80,7 +80,7 @@ describe('Reducer Logic', () => {
 
       // Move bot to new position
       const moveAction: Action = {
-        type: 'MOVE_BOT',
+        type: 'MOVE_OBJECT',
         payload: { id: 'bot-1', direction: 'right', distance: 2 },
       };
       const newState = reducer(stateWithPlacedBot, moveAction);
@@ -92,7 +92,7 @@ describe('Reducer Logic', () => {
 
     it('should handle move of non-existent bot', () => {
       const action: Action = {
-        type: 'MOVE_BOT',
+        type: 'MOVE_OBJECT',
         payload: { id: 'non-existent-bot', direction: 'right', distance: 1 },
       };
 
@@ -111,7 +111,7 @@ describe('Reducer Logic', () => {
 
       // Test valid move
       const validAction: Action = {
-        type: 'MOVE_BOT',
+        type: 'MOVE_OBJECT',
         payload: { id: 'bot-1', direction: 'up', distance: 1 },
       };
       const validState = reducer(stateWithBot, validAction);
@@ -130,7 +130,7 @@ describe('Reducer Logic', () => {
 
       directions.forEach(({ dir, expected }) => {
         const action: Action = {
-          type: 'MOVE_BOT',
+          type: 'MOVE_OBJECT',
           payload: { id: 'bot-1', direction: dir as any, distance: 1 },
         };
         const resultState = reducer(stateWithBot, action);
@@ -147,7 +147,7 @@ describe('Reducer Logic', () => {
       const stateWithBot = reducer(initialState, placeAction);
 
       const action: Action = {
-        type: 'MOVE_BOT',
+        type: 'MOVE_OBJECT',
         payload: { id: 'bot-1', direction: 'right', distance: 0 },
       };
       const newState = reducer(stateWithBot, action);
@@ -161,7 +161,7 @@ describe('Reducer Logic', () => {
   describe('PLACE_TERRAIN Action', () => {
     it('should add terrain to ground layer', () => {
       const action: Action = {
-        type: 'PLACE_TERRAIN',
+        type: 'CREATE_TERRAIN',
         payload: {
           id: 'terrain-1',
           terrainType: 'grass',
@@ -188,7 +188,7 @@ describe('Reducer Logic', () => {
 
     it('should handle terrain placement validation', () => {
       const validAction: Action = {
-        type: 'PLACE_TERRAIN',
+        type: 'CREATE_TERRAIN',
         payload: {
           id: 'terrain-1',
           terrainType: 'grass',
@@ -210,7 +210,7 @@ describe('Reducer Logic', () => {
 
     it('should handle invalid terrain placement', () => {
       const action: Action = {
-        type: 'PLACE_TERRAIN',
+        type: 'CREATE_TERRAIN',
         payload: {
           id: 'terrain-1',
           terrainType: 'invalid' as any,
@@ -280,7 +280,7 @@ describe('Reducer Logic', () => {
       const newWorldState = createWorldState(999);
       const action: Action = {
         type: 'SET_WORLD_STATE',
-        payload: newWorldState,
+        payload: { worldState: newWorldState },
       };
 
       const newState = reducer(initialState, action);
@@ -293,7 +293,7 @@ describe('Reducer Logic', () => {
     it('should handle empty world state replacement', () => {
       const action: Action = {
         type: 'SET_WORLD_STATE',
-        payload: null,
+        payload: { worldState: null },
       };
 
       const newState = reducer(initialState, action);
@@ -305,8 +305,8 @@ describe('Reducer Logic', () => {
   describe('Unknown Actions', () => {
     it('should return unchanged state for unknown action types', () => {
       const unknownAction: Action = {
-        type: 'UNKNOWN_ACTION' as any,
-        payload: {},
+        type: 'SET_WORLD_STATE',
+        payload: { worldState: createWorldState() },
       };
 
       const newState = reducer(initialState, unknownAction);
@@ -382,18 +382,18 @@ describe('Reducer Logic', () => {
     it('should handle all conditional paths in MOVE_BOT', () => {
       // Test non-existent bot path
       const moveNonExistentAction: Action = {
-        type: 'MOVE_BOT',
+        type: 'MOVE_OBJECT',
         payload: { id: 'ghost-bot', direction: 'right', distance: 1 },
       };
       const unchangedState1 = reducer(initialState, moveNonExistentAction);
       expect(unchangedState1).toEqual(initialState);
 
       // Test zero distance path
-      const createAction = {
+      const createAction: Action = {
         type: 'CREATE_BOT',
         payload: { id: 'bot-1' },
       };
-      const placeAction = {
+      const placeAction: Action = {
         type: 'PLACE_OBJECT',
         payload: { id: 'bot-1', position: { x: 5, y: 3 } },
       };
@@ -401,7 +401,7 @@ describe('Reducer Logic', () => {
       const stateWithPlacedBot = reducer(stateWithBot, placeAction);
 
       const zeroDistanceAction: Action = {
-        type: 'MOVE_BOT',
+        type: 'MOVE_OBJECT',
         payload: { id: 'bot-1', direction: 'right', distance: 0 },
       };
       const unchangedState2 = reducer(stateWithPlacedBot, zeroDistanceAction);

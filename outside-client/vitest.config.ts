@@ -7,6 +7,6 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: ['node_modules', 'dist', 'build'],
-    setupFiles: ['../test/setup.ts'],
+    setupFiles: ['./src/test-setup.ts'],
   },
 });

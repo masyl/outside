@@ -222,25 +222,25 @@ describe('Command Parser', () => {
 
       // Create bot should have id
       expect(createResult).toHaveProperty('objectType');
-      expect(createResult.objectType).toBe('bot');
+      expect((createResult as any).objectType).toBe('bot');
       expect(createResult).toHaveProperty('id');
-      expect(createResult.id).toBe('test-bot');
+      expect((createResult as any).id).toBe('test-bot');
 
       // Place should have id and coordinates
       expect(placeResult).toHaveProperty('id');
       expect(placeResult).toHaveProperty('x');
       expect(placeResult).toHaveProperty('y');
-      expect(placeResult.id).toBe('test-bot');
-      expect(placeResult.x).toBe(5);
-      expect(placeResult.y).toBe(3);
+      expect((placeResult as any).id).toBe('test-bot');
+      expect((placeResult as any).x).toBe(5);
+      expect((placeResult as any).y).toBe(3);
 
       // Move should have id, direction, and distance
       expect(moveResult).toHaveProperty('id');
       expect(moveResult).toHaveProperty('direction');
       expect(moveResult).toHaveProperty('distance');
-      expect(moveResult.id).toBe('test-bot');
-      expect(moveResult.direction).toBe('up');
-      expect(moveResult.distance).toBe(2);
+      expect((moveResult as any).id).toBe('test-bot');
+      expect((moveResult as any).direction).toBe('up');
+      expect((moveResult as any).distance).toBe(2);
     });
   });
 
@@ -256,8 +256,8 @@ describe('Command Parser', () => {
       commands.forEach((cmd) => {
         const result = parseCommand(cmd);
         expect(result.type).toBe('create');
-        expect(result.objectType).toBe('bot');
-        expect(result.id).toBe('TEST-BOT');
+        expect((result as any).objectType).toBe('bot');
+        expect((result as any).id).toBe('TEST-BOT');
       });
     });
 

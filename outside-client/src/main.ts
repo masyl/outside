@@ -1,5 +1,6 @@
 import { Application, autoDetectRenderer } from 'pixi.js';
 import { Store } from './store/store';
+import { WorldState } from '@outside/core';
 import { CommandQueue } from './commands/queue';
 import { GameRenderer } from './renderer/renderer';
 import { GameLoop } from './game/loop';
@@ -475,7 +476,7 @@ async function init(options?: {
       );
 
       // Subscribe to store for rendering (client receives state from host)
-      store.subscribe((world) => {
+      store.subscribe((world: WorldState) => {
         renderer.update(world);
       });
     }
@@ -485,7 +486,7 @@ async function init(options?: {
   initializeGame();
 
   // Update debug overlay with object count
-  store.subscribe((world) => {
+  store.subscribe((world: WorldState) => {
     debugOverlay.setObjectCounts(world.objects.size, world.groundLayer.terrainObjects.size);
   });
 
@@ -503,7 +504,7 @@ async function init(options?: {
   // Set initial selection when bots are available
   // Subscribe to store to detect when bots are created
   let initialSelectionSet = false;
-  const unsubscribeSelection = store.subscribe((world) => {
+  const unsubscribeSelection = store.subscribe((world: WorldState) => {
     if (!initialSelectionSet && world.objects.size >= 3) {
       // All 3 bots should be created and placed by now
       const firstBotId = selectionManager.cycleNext(world);

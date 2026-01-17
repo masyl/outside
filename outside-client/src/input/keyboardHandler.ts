@@ -26,6 +26,7 @@ export class KeyboardHandler {
   private inputCommandSender: InputCommandSender | null = null;
   private isClientMode: boolean = false;
   private keystrokeOverlay: KeystrokeOverlay;
+  private timelineManager: TimelineManager | null;
 
   constructor(
     selectionManager: SelectionManager,
@@ -33,7 +34,7 @@ export class KeyboardHandler {
     store: Store,
     renderer: GameRenderer,
     inputCommandSender?: InputCommandSender,
-    timelineManager?: any
+    timelineManager?: TimelineManager | null
   ) {
     this.selectionManager = selectionManager;
     this.commandQueue = commandQueue;
