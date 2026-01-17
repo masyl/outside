@@ -349,12 +349,27 @@ async function init(options?: {
       // Set debug overlay for step count updates
       hostMode.setDebugOverlay(debugOverlay);
 
-      // Restore step count from persisted state if available
+       // Restore step count from persisted state if available
       const restoredStep = eventLogger.loadStepCount();
       if (restoredStep > 0) {
         hostMode.setCurrentStep(restoredStep);
         debugOverlay.setStepCount(restoredStep);
       }
+
+      await hostMode.initialize({ local: isLocal });
+
+      // Update client count initially
+      debugOverlay.setClientCount(hostMode.getConnectedClientCount());
+
+      // Create keyboard handler (host mode - commands go to local queue)
+      const keyboardHandler = new KeyboardHandler(selectionManager, commandQueue, store, renderer);
+
+      // Initialize Timeline Manager for time travel support
+      const timelineManager = new TimelineManager(store, eventLogger);
+
+      // Start the game loop
+      gameLoop.start();
+    }
 
       await hostMode.initialize({ local: isLocal });
 
