@@ -17,3 +17,9 @@ export interface TimelineManagerState {
   mode: 'normal' | 'timeline';
   totalSteps: number;
 }
+
+export enum PlaybackState {
+  PLAYING = 'PLAYING',
+  PAUSED = 'PAUSED',
+  TRAVELING = 'TRAVELING',
+}

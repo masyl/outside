@@ -54,32 +54,6 @@ export class Store {
   }
 
   /**
-   * Get current state
-   */
-  getState(): WorldState {
-    return this.state;
-  }
-
-  /**
-   * Dispatch an action to update state
-   */
-  dispatch(action: Action, step?: number): void {
-    const newState = reducer(this.state, action);
-
-    // Only update if state actually changed
-    if (newState !== this.state) {
-      this.state = newState;
-
-      // Log event if game has started
-      if (this.isStartedFlag) {
-        this.eventLogger.logEvent(action, undefined, step);
-      }
-
-      this.notifySubscribers();
-    }
-  }
-
-  /**
    * Subscribe to state changes
    */
   subscribe(subscriber: Subscriber): () => void {

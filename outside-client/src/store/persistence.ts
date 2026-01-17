@@ -58,7 +58,7 @@ export class EventLogger {
   /**
    * Load all events from localStorage
    */
-  loadEvents(): Array<{ action: Action; timestamp: number }> {
+  loadEvents(): Array<{ action: Action; timestamp: number; step?: number }> {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
@@ -83,7 +83,7 @@ export class EventLogger {
   /**
    * Get events up to a specific step (for timeline navigation)
    */
-  getEventsUpTo(step: number): Array<{ action: Action; timestamp: number }> {
+  getEventsUpTo(step: number): Array<{ action: Action; timestamp: number; step?: number }> {
     const allEvents = this.loadEvents();
     return allEvents.filter((event) => {
       const eventStep = (event as any).step;
@@ -94,7 +94,7 @@ export class EventLogger {
   /**
    * Set events array (for timeline history truncation)
    */
-  setEvents(events: Array<{ action: Action; timestamp: number }>): void {
+  setEvents(events: Array<{ action: Action; timestamp: number; step?: number }>): void {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
     } catch (error) {

@@ -2,6 +2,9 @@ import { Store } from '../store/store';
 import { actions } from '../store/actions';
 import { ParsedCommand } from './parser';
 
+/**
+ * Execute a parsed command by dispatching appropriate actions
+ */
 export function executeCommand(store: Store, command: ParsedCommand, step?: number): void {
   switch (command.type) {
     case 'create':
@@ -21,10 +24,12 @@ export function executeCommand(store: Store, command: ParsedCommand, step?: numb
         );
       }
       break;
+
     case 'place':
       store.dispatch(actions.placeObject(command.id, { x: command.x, y: command.y }), step);
       break;
-    case 'move':
+
+    case 'move': {
       const world = store.getState();
       const bot = world.objects.get(command.id);
       if (!bot) {
@@ -32,41 +37,13 @@ export function executeCommand(store: Store, command: ParsedCommand, step?: numb
         return;
       }
 
-      // Extract original value for timeline support
-      const world = store.getState();
-      const bot = world.objects.get(command.id);
-      if (!bot) {
-        console.warn(`Bot with id "${command.id}" not found`);
-        return;
-      }
-
-      const originalValue = bot.position ? { x: bot.position.x, y: bot.position.y } : null;
-
-      store.dispatch(actions.moveObject(command.id, command.direction, command.distance, originalValue), step);
+      const originalValue = { x: bot.position.x, y: bot.position.y };
+      store.dispatch(
+        actions.moveObject(command.id, command.direction, command.distance, originalValue),
+        step
+      );
       break;
-    case 'set-world-size':
-      store.dispatch(actions.setWorldSize(command.width, command.height), step);
-      break;
-    case 'set-seed':
-      store.dispatch(actions.setSeed(command.seed), step);
-      break;
-    case 'reset-world':
-      store.dispatch(actions.resetWorld(), step);
-      break;
-    case 'unknown':
-      console.warn(`Unknown command: ${command.raw}`);
-      break;
-  }
-}
-      break;
-
-    case 'place':
-      store.dispatch(actions.placeObject(command.id, { x: command.x, y: command.y }), step);
-      break;
-
-    case 'move':
-      store.dispatch(actions.moveObject(command.id, command.direction, command.distance), step);
-      break;
+    }
 
     case 'set-world-size':
       store.dispatch(actions.setWorldSize(command.width, command.height), step);

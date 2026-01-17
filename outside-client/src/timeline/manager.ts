@@ -1,7 +1,6 @@
 import { Store } from '../store/store';
 import { EventLogger } from '../store/persistence';
 import { TimelineEvent, TimelineConfig, PlaybackState, TimelineManagerState } from './types';
-import { PlaybackState as PlaybackStateType } from './types';
 
 export class TimelineManager {
   private store: Store;
@@ -9,8 +8,8 @@ export class TimelineManager {
   private config: TimelineConfig;
   private endStateCache: any = null;
   private pointer: number = 0;
-  private playbackState: PlaybackStateType = PlaybackState.PLAYING;
-  private stateChangeCallbacks: ((state: PlaybackStateType) => void)[] = [];
+  private playbackState: PlaybackState = PlaybackState.PLAYING;
+  private stateChangeCallbacks: ((state: PlaybackState) => void)[] = [];
 
   constructor(store: Store, eventLogger: EventLogger, config?: Partial<TimelineConfig>) {
     this.store = store;
@@ -25,12 +24,12 @@ export class TimelineManager {
     const events = this.eventLogger.loadEvents();
     return {
       currentStep: this.pointer,
-      mode: this.playbackState,
+      mode: this.playbackState === PlaybackState.PLAYING ? 'normal' : 'timeline',
       totalSteps: events.length,
     };
   }
 
-  getPlaybackState(): PlaybackStateType {
+  getPlaybackState(): PlaybackState {
     return this.playbackState;
   }
 
@@ -38,7 +37,7 @@ export class TimelineManager {
     return this.pointer;
   }
 
-  onStateChange(callback: (state: PlaybackStateType) => void): void {
+  onStateChange(callback: (state: PlaybackState) => void): void {
     this.stateChangeCallbacks.push(callback);
   }
 
@@ -67,7 +66,7 @@ export class TimelineManager {
     this.setPlaybackState(PlaybackState.TRAVELING);
 
     const stateAtStep = this.reconstructState(stepNumber);
-    this.store.dispatch({ type: 'SET_WORLD_STATE', state: stateAtStep });
+    this.store.dispatch({ type: 'SET_WORLD_STATE', payload: { worldState: stateAtStep } });
 
     this.notifyPositionChange();
   }
@@ -96,7 +95,7 @@ export class TimelineManager {
     for (let i = 0; i <= targetStep; i++) {
       const event = events[i];
 
-      if (event.step > targetStep) continue;
+      if ((event.step ?? i) > targetStep) continue;
 
       state = this.reducer(state, event.action);
     }
@@ -105,7 +104,8 @@ export class TimelineManager {
   }
 
   private getInitialState(): any {
-    return this.store.getInitialState?.() || {};
+    // For now, reconstruct from the current state shape. A dedicated initial-state factory can be introduced later.
+    return this.store.getState();
   }
 
   private reducer(state: any, action: any): any {
@@ -132,12 +132,7 @@ export class TimelineManager {
   truncateHistory(currentStep: number): void {
     const events = this.eventLogger.loadEvents();
     const eventsToKeep = events.slice(0, currentStep + 1);
-    const filteredEvents = this.eventLogger.loadEvents().filter((e: TimelineEvent) => {
-      const eventStep = (e as any).step;
-      return eventStep <= currentStep + 1;
-    });
-
-    this.eventLogger.setEvents(filteredEvents);
+    this.eventLogger.setEvents(eventsToKeep);
   }
 
   enforceLimit(): void {
@@ -146,8 +141,8 @@ export class TimelineManager {
       const eventsToCollapse = events.slice(0, this.config.collapseThreshold);
       const collapsedState = this.reconstructState(this.config.collapseThreshold - 1);
 
-      const collapsedEvent = {
-        action: { type: 'SET_WORLD_STATE', state: collapsedState },
+      const collapsedEvent: { action: any; timestamp: number; step: number } = {
+        action: { type: 'SET_WORLD_STATE', payload: { worldState: collapsedState } },
         timestamp: eventsToCollapse[0].timestamp,
         step: 0,
       };
@@ -159,13 +154,13 @@ export class TimelineManager {
 
   restoreEndState(): void {
     if (this.endStateCache) {
-      this.store.dispatch({ type: 'SET_WORLD_STATE', state: this.endStateCache });
+      this.store.dispatch({ type: 'SET_WORLD_STATE', payload: { worldState: this.endStateCache } });
       this.endStateCache = null;
       this.setPlaybackState(PlaybackState.PLAYING);
     }
   }
 
-  setPlaybackState(state: PlaybackStateType): void {
+  setPlaybackState(state: PlaybackState): void {
     this.playbackState = state;
     this.notifyStateChange();
   }
