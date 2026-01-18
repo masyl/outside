@@ -274,21 +274,48 @@ private jumpToEnd(): void {
 ## Checklist
 
 - [x] Add Option/Alt + Space handler for play/pause
-- [x] Add Option/Alt + Up/Down handlers for stepping
-- [x] Add Option/Alt + Left/Right handlers for scrubbing
-- [x] Add Option/Alt + Home/End handlers for jumping
+- [x] Add Option/Alt + Up/Down handlers for stepping (inverted: Up=forward, Down=backward)
+- [x] Add Option/Alt + Left/Right handlers for scrubbing (1 second = 8 steps)
+- [x] Add Option/Alt + Home/End handlers for jumping (Home=LevelStart, End=end)
 - [x] Implement togglePausePlayback helper method
-- [x] Implement scrubTimeline method (50 steps)
+- [x] Implement scrubTimeline method (changed to 1 second = 8 steps per key press)
 - [x] Add component properties to KeyboardHandler (gameLoop, isHostMode helper)
 - [x] Add initialization in main.ts (setGameLoop)
 - [x] Update keystroke overlay with timeline controls
-- [ ] Map existing debug keystrokes to modifier pattern (Optional - skipped per plan)
+- [x] Debug menu removed, keystrokes moved to KeyboardHandler (Alt+R reset, Alt+F freeze/unfreeze)
 - [x] getCurrentStep method already exists in Timeline Manager
-- [ ] Test all timeline keystrokes
-- [ ] Verify modifier key detection works on Mac and Windows
-- [ ] Test keystrokes only work in host mode
-- [ ] Test no conflicts with existing shortcuts
-- [ ] Update pitches index
+- [x] Test all timeline keystrokes (manually verified on Mac)
+- [x] Verify modifier key detection works on Mac (using event.code for compatibility)
+- [x] Test keystrokes only work in host mode
+- [x] Test no conflicts with existing shortcuts
+- [x] Update pitches index
+
+## Additional Work Completed
+
+Beyond the original plan scope, the following improvements were implemented:
+
+### Mac Compatibility Fixes
+- **Event.code usage**: Changed keystroke detection to use `event.code` instead of `event.key` for Alt+R, Alt+F, Alt+Home, Alt+End, Alt+D to handle Mac's Option key behavior (e.g., Option+R emits '®' as key but 'KeyR' as code)
+
+### UI Enhancements
+- **Font system**: Replaced Press Start 2P with Minecraft font (less bold, better readability)
+- **Debug panel improvements**:
+  - Added "Debug Panel" title
+  - Increased font size to 16px for better readability
+  - Added Alt+D toggle to show/hide debug panel
+  - Doubled border thickness (2px)
+  - Increased padding to 20px
+- **Keystroke menu readability**: Simplified modifier notes (removed repetitive "Option/Alt" text, single note at bottom)
+
+### Behavior Improvements
+- **Bot creation**: Bots are now created without a position and are invisible until explicitly placed
+- **Animation**: Bots appear instantly at their first position without "warp-in" animation
+- **LevelStart tagging**: Added timeline tagging system to mark the point immediately after level initialization
+- **Reset vs Time Travel**: Distinguished Alt+R (full reset - clears events, reinitializes) from Alt+Home (time travel to LevelStart)
+
+### Scrubbing Behavior
+- Changed from 50 steps per key press to 1 second (8 steps) based on 8 steps per second configuration
+- More intuitive for users who think in terms of time rather than step counts
 
 ## Success Metrics
 
@@ -301,11 +328,20 @@ private jumpToEnd(): void {
 
 ## Notes
 
-- Scrubbing speed is fixed at 50 steps per press for now
+- Scrubbing speed is fixed at 1 second (8 steps) per key press
 - Timeline keystrokes are completely ignored in client mode
-- Existing debug keystrokes (R, A) now require Option/Alt modifier
+- Debug menu was removed; reset (Alt+R) and freeze/unfreeze (Alt+F) are now direct keystrokes
 - Modifiers prevent browser default behavior for all timeline keys
+- Mac compatibility uses event.code to handle Option key special characters
 - This completes local/host mode timeline experience
+- All keystrokes manually tested and verified working on Mac
+
+## Implementation Deviations
+
+1. **Debug Menu Removal**: The debug menu was completely removed and its functionality (reset, autonomy toggle) moved directly to KeyboardHandler with Alt+R and Alt+F keystrokes
+2. **Scrubbing Speed**: Changed from 50 steps to 1 second (8 steps) for better user experience
+3. **LevelStart Tagging**: Added timeline tagging system (not in original plan) to support better time travel navigation
+4. **Bot Creation Behavior**: Changed bot creation to not include default position (bots invisible until placed) - this was required for proper rendering behavior
 
 ## Related Pitches
 

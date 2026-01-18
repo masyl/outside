@@ -28,7 +28,7 @@ describe('Reducer Logic', () => {
       expect(bot).toEqual({
         id: 'bot-1',
         type: 'bot',
-        position: { x: 0, y: 0 },
+        // Bots are created without a position and are invisible until placed
       });
     });
 
@@ -51,7 +51,7 @@ describe('Reducer Logic', () => {
       expect(unchangedState.objects.size).toBe(1);
     });
 
-    it('should create bot with default position', () => {
+    it('should create bot without position (invisible until placed)', () => {
       const action: Action = {
         type: 'CREATE_BOT',
         payload: { id: 'test-bot' },
@@ -60,7 +60,10 @@ describe('Reducer Logic', () => {
       const newState = reducer(initialState, action);
       const bot = newState.objects.get('test-bot');
 
-      expect(bot?.position).toEqual({ x: 0, y: 0 });
+      // Bots are created without a position and are invisible until placed
+      expect(bot?.position).toBeUndefined();
+      expect(bot?.id).toBe('test-bot');
+      expect(bot?.type).toBe('bot');
     });
   });
 

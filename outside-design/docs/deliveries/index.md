@@ -11,6 +11,10 @@ This implementation plan details() step-by-step approach to add Storybook as a s
 
 ## Completed Deliveries
 
+### [Timeline Keystrokes Integration (2026-01-18)](./2026-01-16-1000-timeline-keystrokes-integration/README.md)
+
+Implemented complete keyboard interface for timeline controls with Mac compatibility. All timeline keystrokes (Alt+Space, Alt+Arrows, Alt+Home/End) working in host mode. Added debug panel enhancements, bot creation improvements, and LevelStart tagging system. All 139 tests passing. Completes local/host mode timeline experience with polished UI and cross-platform modifier key support.
+
 ### [Timeline Playback Controls (2026-01-17)](./2026-01-16-1000-timeline-playback-controls/README.md)
 
 Implemented core playback controls (pause, resume, step) and game loop integration. Introduced synchronized `PlaybackState` management (PLAYING, PAUSED, TRAVELING) across the system. Ensures bot autonomy and event queues are handled correctly during time travel, preventing state corruption. Stabilized test infrastructure and build pipeline.

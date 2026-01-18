@@ -11,6 +11,11 @@ const KEYSTROKES: KeystrokeEntry[] = [
     description: 'Toggle this help menu',
   },
   {
+    keys: ['Alt + D'],
+    description: 'Toggle debug panel',
+    category: 'Debug',
+  },
+  {
     keys: ['Tab', 'Shift+Tab'],
     description: 'Cycle to next/previous bot',
     category: 'Bot Selection',
@@ -21,45 +26,38 @@ const KEYSTROKES: KeystrokeEntry[] = [
     category: 'Bot Movement',
   },
   {
-    keys: ['Option/Alt + R'],
+    keys: ['Alt + R'],
     description: 'Full reset (clear events, reset step count, reinitialize level)',
-    modifier: 'Option on Mac, Alt on Windows',
     category: 'Debug',
   },
   {
-    keys: ['Option/Alt + F'],
+    keys: ['Alt + F'],
     description: 'Freeze/Unfreeze bots',
-    modifier: 'Option on Mac, Alt on Windows',
     category: 'Debug',
   },
   {
-    keys: ['Option/Alt + Space'],
+    keys: ['Alt + Space'],
     description: 'Toggle play/pause',
-    modifier: 'Option on Mac, Alt on Windows',
     category: 'Timeline',
   },
   {
-    keys: ['Option/Alt + ↑', 'Option/Alt + ↓'],
+    keys: ['Alt + ↑', 'Alt + ↓'],
     description: 'Step forward/backward one event',
-    modifier: 'Option on Mac, Alt on Windows',
     category: 'Timeline',
   },
   {
-    keys: ['Option/Alt + ←', 'Option/Alt + →'],
+    keys: ['Alt + ←', 'Alt + →'],
     description: 'Scrub timeline (1 second)',
-    modifier: 'Option on Mac, Alt on Windows',
     category: 'Timeline',
   },
   {
-    keys: ['Option/Alt + Home'],
+    keys: ['Alt + Home'],
     description: 'Time travel to level start (after initialization)',
-    modifier: 'Option on Mac, Alt on Windows',
     category: 'Timeline',
   },
   {
-    keys: ['Option/Alt + End'],
+    keys: ['Alt + End'],
     description: 'Time travel to end of history',
-    modifier: 'Option on Mac, Alt on Windows',
     category: 'Timeline',
   },
 ];
@@ -81,8 +79,10 @@ export class KeystrokeOverlay {
       transform: translate(-50%, -50%);
       background: rgba(0, 0, 0, 0.95);
       color: #00ff00;
-      font-family: 'Courier New', monospace;
+      font-family: 'Minecraft', monospace;
+      font-size: 16px;
       padding: 20px;
+      border: 2px solid #00ff00;
       border-radius: 8px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
       z-index: 10002;
@@ -109,7 +109,15 @@ export class KeystrokeOverlay {
 
     const modifierNote = document.createElement('div');
     modifierNote.className = 'modifier-note';
-    modifierNote.textContent = 'Use Option on Mac or Alt on Windows for advanced controls';
+    modifierNote.style.cssText = `
+      font-size: 16px;
+      color: #888;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #00ff00;
+      font-style: italic;
+    `;
+    modifierNote.textContent = 'Note: On Mac, use Option key instead of Alt for the shortcuts above';
     this.container.appendChild(modifierNote);
   }
 
@@ -157,17 +165,7 @@ export class KeystrokeOverlay {
       border-bottom: 1px solid #00ff00;
     `;
     descCell.textContent = keystroke.description;
-    if (keystroke.modifier) {
-      const modifier = document.createElement('div');
-      modifier.style.cssText = `
-        font-size: 12px;
-        color: #888;
-        margin-top: 4px;
-        font-style: italic;
-      `;
-      modifier.textContent = keystroke.modifier;
-      descCell.appendChild(modifier);
-    }
+    // Note: Modifier info is now shown at the bottom of the overlay instead of per-item
     row.appendChild(descCell);
 
     return row;

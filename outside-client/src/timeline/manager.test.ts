@@ -247,7 +247,7 @@ describe('TimelineManager', () => {
       timelineManager.goToStep(3); // Place1 (Index 3). (0:Terrain, 1:Bot1, 2:Bot2, 3:Place1)
       let state = store.getState();
       expect(state.objects.get('bot-1')?.position).toEqual({ x: 2, y: 2 });
-      expect(state.objects.get('bot-2')?.position).toEqual({ x: 0, y: 0 }); // Default
+      expect(state.objects.get('bot-2')?.position).toBeUndefined(); // Bot-2 not placed yet
 
       timelineManager.goToStep(5); // Move1 (Index 5)
       state = store.getState();

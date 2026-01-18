@@ -262,10 +262,11 @@ describe('Timeline Integration Tests', () => {
       // Create events
       store.dispatch(actions.createTerrain('ground', 'grass', 0, 0, 20, 10), 0);
       store.dispatch(actions.createBot('bot-1'), 0);
-      store.dispatch(actions.moveObject('bot-1', 'right', 2, { x: 0, y: 0 }), 1); // This Move assumes bot is at 0,0. And move right 2 to 2,0.
+      store.dispatch(actions.placeObject('bot-1', { x: 0, y: 0 }), 1); // Place bot first
+      store.dispatch(actions.moveObject('bot-1', 'right', 2, { x: 0, y: 0 }), 2); // Then move right 2 to 2,0.
 
       // Navigate timeline (should trigger store update)
-      timelineManager.goToStep(2);
+      timelineManager.goToStep(3); // Navigate to after the move
 
       expect(mockSubscriber).toHaveBeenCalled();
 

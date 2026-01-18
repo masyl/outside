@@ -38,14 +38,26 @@ export class DebugOverlay {
       left: 10px;
       background: rgba(0, 0, 0, 0.7);
       color: #00ff00;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      padding: 10px;
-      border: 1px solid #00ff00;
+      font-family: 'Minecraft', monospace;
+      font-size: 16px;
+      padding: 20px;
+      border: 2px solid #00ff00;
       z-index: 10000;
       pointer-events: none;
       user-select: none;
+      display: block;
     `;
+
+    // Create title element
+    const titleElement = document.createElement('div');
+    titleElement.textContent = 'Debug Panel';
+    titleElement.style.cssText = `
+      font-size: 16px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #00ff00;
+    `;
+    this.container.appendChild(titleElement);
 
     // Create version element
     this.versionElement = document.createElement('div');
@@ -217,6 +229,31 @@ export class DebugOverlay {
     this.timelineCursor = current;
     this.timelineTotal = total;
     this.timelineCursorElement.textContent = `Timeline: ${current} / ${total}`;
+  }
+
+  /**
+   * Show debug overlay
+   */
+  show(): void {
+    this.container.style.display = 'block';
+  }
+
+  /**
+   * Hide debug overlay
+   */
+  hide(): void {
+    this.container.style.display = 'none';
+  }
+
+  /**
+   * Toggle debug overlay visibility
+   */
+  toggle(): void {
+    if (this.container.style.display === 'none') {
+      this.show();
+    } else {
+      this.hide();
+    }
   }
 
   /**

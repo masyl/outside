@@ -1,4 +1,4 @@
-import { WorldState, Direction, isValidPosition } from '@outside/core';
+import { WorldState, Direction, Position, isValidPosition } from '@outside/core';
 import { SelectionManager } from './selection';
 import { CommandQueue } from '../commands/queue';
 import { parseCommand } from '../commands/parser';
@@ -287,9 +287,15 @@ export class KeyboardHandler {
       return; // Bot doesn't exist
     }
 
+    // Bot must have a position to be moved
+    if (!bot.position) {
+      console.log(`Cannot move bot ${selectedBotId}: bot has no position`);
+      return;
+    }
+
     // Calculate new position
     const currentPos = bot.position;
-    let newPosition = { ...currentPos };
+    let newPosition: Position = { ...currentPos };
 
     switch (direction) {
       case 'up':
@@ -454,6 +460,18 @@ export class KeyboardHandler {
           console.log('[Timeline] Jump to end (Alt+End)');
           this.timelineManager.goToEnd();
           this.updateTimelineCursor();
+        }
+        return;
+      }
+
+      // Handle Alt+D using event.code (for Mac compatibility)
+      // Alt+D = Toggle debug panel visibility
+      if (event.altKey && event.code === 'KeyD') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.debugOverlay && typeof this.debugOverlay.toggle === 'function') {
+          console.log('[Debug] Toggle debug panel (Alt+D)');
+          this.debugOverlay.toggle();
         }
         return;
       }
