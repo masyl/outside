@@ -4,6 +4,7 @@
 
 - [Basic PixelArt Visuals](./basic-pixelart-visuals.md)
 - [Animated Directionnal Bots](./animated-directional-bots.md)
+- [Multiple Character Skins](./multiple-character-skins.md)
 
 ## Core features
 
