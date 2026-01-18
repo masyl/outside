@@ -13,6 +13,7 @@ import { AnimationController } from './game/animationController';
 import { SelectionManager } from './input/selection';
 import { KeyboardHandler } from './input/keyboardHandler';
 import { TimelineManager } from './timeline/manager';
+import { TimelineBar } from './ui/timelineBar';
 import { executeCommand } from './commands/handlers';
 import { parseCommand } from './commands/parser';
 import { createWorldState } from '@outside/core';
@@ -101,21 +102,23 @@ async function init(options?: {
 
   // Reset level function - Full reset: clear events, reset step count, reinitialize level
   const resetLevel = () => {
-    console.log('[Debug] Resetting level (full reset: clear events, reset step count, reinitialize)...');
-    
+    console.log(
+      '[Debug] Resetting level (full reset: clear events, reset step count, reinitialize)...'
+    );
+
     // Clear event log and step count
     const eventLogger = store.getEventLogger();
     eventLogger.clearEvents(); // This also clears STEP_COUNT_KEY
-    
+
     // Reset step count explicitly (in case it's stored elsewhere)
     eventLogger.saveStepCount(0);
-    
+
     // Reset timeline manager pointer to 0 if it exists
     if (timelineManagerRef) {
       // Reset the internal pointer by going to step 0
       timelineManagerRef.goToStep(0);
     }
-    
+
     // Reset store to initial state (this will generate a NEW random seed)
     const newState = createWorldState();
     store.dispatch(actions.setWorldState(newState));
@@ -131,7 +134,7 @@ async function init(options?: {
       renderer.setWorld(store.getState());
       // Mark game as started after reset
       store.start();
-      
+
       // Tag the current step as "LevelStart" (right after level initialization)
       setTimeout(() => {
         const events = eventLogger.loadEvents();
@@ -141,7 +144,7 @@ async function init(options?: {
           console.log(`[Debug] Tagged step ${lastStep} as LevelStart (reset)`);
         }
       }, 0);
-      
+
       console.log('[Debug] Level reset complete');
     });
   };
@@ -332,7 +335,7 @@ async function init(options?: {
       if (!hasPersistedEvents) {
         console.log('[Init] Feeding bot commands from level file...');
         commandFeeder.feedBotCommands();
-        
+
         // Tag the current step as "LevelStart" (right after initial level initialization)
         setTimeout(() => {
           const eventLogger = store.getEventLogger();
@@ -347,7 +350,7 @@ async function init(options?: {
         console.log(
           '[Init] Skipping bot commands from level file (bots already restored from events)'
         );
-        
+
         // Still tag LevelStart even when restoring from events (at step 0)
         setTimeout(() => {
           const eventLogger = store.getEventLogger();
@@ -418,7 +421,14 @@ async function init(options?: {
 
       // Create keyboard handler (host mode - commands go to local queue)
       // Inject timeline manager for playback controls
-      const keyboardHandler = new KeyboardHandler(selectionManager, commandQueue, store, renderer, undefined, timelineManager);
+      const keyboardHandler = new KeyboardHandler(
+        selectionManager,
+        commandQueue,
+        store,
+        renderer,
+        undefined,
+        timelineManager
+      );
 
       // Connect GameLoop, DebugOverlay, and callbacks to KeyboardHandler for timeline controls
       keyboardHandler.setGameLoop(gameLoop);
@@ -428,6 +438,16 @@ async function init(options?: {
 
       // Set timeline manager on game loop
       gameLoop.setTimelineManager(timelineManager);
+
+      // Create and initialize Timeline Bar
+      const timelineBar = new TimelineBar(app, timelineManager);
+      app.stage.addChild(timelineBar);
+
+      // Add resize handler for timeline bar
+      const resizeTimelineBar = () => {
+        timelineBar.onResize();
+      };
+      window.addEventListener('resize', resizeTimelineBar);
 
       // Initial playback state
       timelineManager.setPlaybackState(PlaybackState.PLAYING);

@@ -12,6 +12,7 @@ export class TimelineManager {
   private pointer: number = 0;
   private playbackState: PlaybackState = PlaybackState.PLAYING;
   private stateChangeCallbacks: ((state: PlaybackState) => void)[] = [];
+  private positionChangeCallbacks: ((step: number, total: number) => void)[] = [];
 
   constructor(store: Store, eventLogger: EventLogger, config?: Partial<TimelineConfig>) {
     this.store = store;
@@ -52,16 +53,18 @@ export class TimelineManager {
     this.stateChangeCallbacks.push(callback);
   }
 
+  onPositionChange(callback: (step: number, total: number) => void): void {
+    this.positionChangeCallbacks.push(callback);
+  }
+
   private notifyStateChange(): void {
     this.stateChangeCallbacks.forEach((callback) => callback(this.playbackState));
   }
 
   private notifyPositionChange(): void {
     const events = this.eventLogger.loadEvents();
-    this.stateChangeCallbacks.forEach((callback) => {
-      if ('onPositionChange' in callback) {
-        (callback as any).onPositionChange(this.pointer, events.length);
-      }
+    this.positionChangeCallbacks.forEach((callback) => {
+      callback(this.pointer, events.length);
     });
   }
 
