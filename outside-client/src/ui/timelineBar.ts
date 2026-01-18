@@ -37,10 +37,12 @@ export class TimelineBar extends Container {
 
   // Configuration
   private readonly config = {
-    barHeight: 24,
-    padding: 8,
+    barHeight: 12, // Half as thick (was 24)
+    padding: 12, // Increased by 50% (was 8)
+    sideOffset: 12, // Same as padding for side spacing
     bottomOffset: 50,
     markerWidth: 2,
+    cornerRadius: 8, // Same as debug menu
     colors: {
       background: 0x000000,
       bar: 0x00ff00,
@@ -130,9 +132,8 @@ export class TimelineBar extends Container {
     const playbackState = this.timelineManager.getPlaybackState();
     const state = this.timelineManager.getState();
 
-    // Show when not in normal PLAY mode or when in PLAY but not at head
-    const shouldShow =
-      playbackState !== PlaybackState.PLAYING || state.currentStep < state.totalSteps - 1;
+    // Show only when TRAVELING (not when PLAYING)
+    const shouldShow = playbackState === PlaybackState.TRAVELING;
 
     this.setVisible(shouldShow);
   }
@@ -166,12 +167,10 @@ export class TimelineBar extends Container {
   }
 
   private calculateTargetStep(mouseX: number): number {
-    // Get the bar bounds in global coordinates
-    const barBounds = this.bar.getBounds();
-
-    // Calculate relative position within the bar
-    const relativeX = mouseX - barBounds.x;
-    const barWidth = barBounds.width;
+    // Account for side offset and get relative position within bar
+    const relativeX = mouseX - this.x;
+    const screenWidth = this.app.screen.width;
+    const barWidth = screenWidth - this.config.sideOffset * 2;
 
     // Convert to step number
     const targetStep = Math.floor((relativeX / barWidth) * this.totalSteps);
@@ -184,18 +183,26 @@ export class TimelineBar extends Container {
     const screenWidth = this.app.screen.width;
     const totalHeight = this.config.barHeight + this.config.padding * 2;
 
-    // Position at bottom of screen
-    this.x = 0;
+    // Position at bottom of screen with side padding
+    this.x = this.config.sideOffset;
     this.y = this.app.screen.height - this.config.bottomOffset - totalHeight;
 
-    // Draw background (black padding)
+    const barWidth = screenWidth - this.config.sideOffset * 2;
+
+    // Draw background (black padding) with rounded corners
     this.background.clear();
-    this.background.rect(0, 0, screenWidth, totalHeight);
+    this.background.roundRect(0, 0, barWidth, totalHeight, this.config.cornerRadius);
     this.background.fill({ color: this.config.colors.background, alpha: 1.0 });
 
-    // Draw green bar (centered within padding)
+    // Draw green bar (centered within padding) with rounded corners
     this.bar.clear();
-    this.bar.rect(0, this.config.padding, screenWidth, this.config.barHeight);
+    this.bar.roundRect(
+      0,
+      this.config.padding,
+      barWidth,
+      this.config.barHeight,
+      this.config.cornerRadius
+    );
     this.bar.fill({ color: this.config.colors.bar });
 
     // Update marker position
@@ -209,7 +216,8 @@ export class TimelineBar extends Container {
     }
 
     this.positionMarker.visible = true;
-    const barWidth = this.app.screen.width;
+    const screenWidth = this.app.screen.width;
+    const barWidth = screenWidth - this.config.sideOffset * 2;
     const markerX = (this.currentStep / (this.totalSteps - 1)) * barWidth;
 
     this.positionMarker.clear();
@@ -224,10 +232,11 @@ export class TimelineBar extends Container {
 
   private updateVisuals(isHovered: boolean = false): void {
     const screenWidth = this.app.screen.width;
+    const barWidth = screenWidth - this.config.sideOffset * 2;
     const totalHeight = this.config.barHeight + this.config.padding * 2;
 
     this.background.clear();
-    this.background.rect(0, 0, screenWidth, totalHeight);
+    this.background.roundRect(0, 0, barWidth, totalHeight, this.config.cornerRadius);
     this.background.fill({ color: this.config.colors.background, alpha: 1.0 });
 
     // Add border with hover effect

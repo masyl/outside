@@ -26,17 +26,17 @@ export class DebugMenu {
     this.container = new Container();
     this.container.visible = false;
     this.container.zIndex = 10000;
-    
+
     this.setupMenu();
     this.setupKeyboardHandlers();
-    
+
     app.stage.addChild(this.container);
   }
 
   private setupMenu(): void {
-    // Create background
+    // Create background with rounded corners
     const background = new Graphics();
-    background.rect(0, 0, 400, 300);
+    background.roundRect(0, 0, 400, 300, 8); // 8px corner radius
     background.fill(0x1a1a1a);
     background.stroke({ width: 2, color: 0x00ff00 });
     this.container.addChild(background);
@@ -53,19 +53,19 @@ export class DebugMenu {
     title.y = 20;
     this.container.addChild(title);
 
-    // Create reset level button
+    // Create reset level button with rounded corners
     const buttonBackground = new Graphics();
-    buttonBackground.rect(0, 0, 200, 40);
+    buttonBackground.roundRect(0, 0, 200, 40, 6); // 6px corner radius for buttons
     buttonBackground.fill(0x333333);
     buttonBackground.stroke({ width: 1, color: 0x00ff00 });
 
-    const buttonText = new Text({ 
-      text: 'Reset Level (Alt+R)', 
+    const buttonText = new Text({
+      text: 'Reset Level (Alt+R)',
       style: new TextStyle({
         fontFamily: 'Courier New',
         fontSize: 14,
         fill: 0x00ff00,
-      })
+      }),
     });
     buttonText.x = 10;
     buttonText.y = 10;
@@ -89,19 +89,19 @@ export class DebugMenu {
     buttonView.y = 100;
     this.container.addChild(buttonView);
 
-    // Create toggle autonomy button
+    // Create toggle autonomy button with rounded corners
     const autonomyButtonBackground = new Graphics();
-    autonomyButtonBackground.rect(0, 0, 200, 40);
+    autonomyButtonBackground.roundRect(0, 0, 200, 40, 6); // 6px corner radius for buttons
     autonomyButtonBackground.fill(0x333333);
     autonomyButtonBackground.stroke({ width: 1, color: 0x00ff00 });
 
-    this.autonomyButtonText = new Text({ 
-      text: this.getAutonomyButtonText(), 
+    this.autonomyButtonText = new Text({
+      text: this.getAutonomyButtonText(),
       style: new TextStyle({
         fontFamily: 'Courier New',
         fontSize: 14,
         fill: 0x00ff00,
-      })
+      }),
     });
     this.autonomyButtonText.x = 10;
     this.autonomyButtonText.y = 10;
@@ -141,7 +141,7 @@ export class DebugMenu {
     window.addEventListener('keydown', (event) => {
       // CMD+ESC (Mac) or CTRL+ESC (Windows/Linux) to open
       const isModifierPressed = event.metaKey || event.ctrlKey;
-      
+
       if (isModifierPressed && event.key === 'Escape') {
         event.preventDefault();
         this.open();
@@ -154,7 +154,12 @@ export class DebugMenu {
           console.log('[Debug] Reset level (Alt+R)');
           this.callbacks.onResetLevel();
         }
-      } else if (this.isOpen && (event.key === 'a' || event.key === 'A') && !event.metaKey && !event.ctrlKey) {
+      } else if (
+        this.isOpen &&
+        (event.key === 'a' || event.key === 'A') &&
+        !event.metaKey &&
+        !event.ctrlKey
+      ) {
         event.preventDefault();
         if (this.callbacks.onToggleAutonomy) {
           this.callbacks.onToggleAutonomy();
