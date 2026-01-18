@@ -2,21 +2,18 @@
 
 ## Next Logical Pitches
 
-- [Basic PixelArt Visuals](./basic-pixelart-visuals.md)
-- [Animated Directionnal Bots](./animated-directional-bots.md)
 - [Multiple Character Skins](./multiple-character-skins.md)
 
 ## Core features
 
 - [Player Nicknames](./player-nicknames.md)
-- [Debug Mode](./debug-mode.md)
 - [Sound Effects](./sound-effects.md)
 - [Spawning Bots](./spawning-bots.md)
-- [Keystrokes](./keystrokes.md)
 - [Diegetic Welcome Screen](./diegetic-welcome-screen.md)
 
 ## Mini Games
 
+- Dingle Brawl (aka Calvin Ball animated by a faux fairy from Hyrule)
 - [Mini Game: Chess](./mini-game-chess.md)
 - [Mini Game: Beach Sweeper](./mini-game-beach-sweeper.md)
 
@@ -42,6 +39,7 @@
 - [Timeline UI Components (Timeline series: 4)](./timeline-ui-components.md)
 - [Timeline Keystrokes Integration (Timeline series: 5)](./timeline-keystrokes-integration.md)
 - [Timeline Network Synchronization (Timeline series: 6)](./timeline-network-synchronization.md)
+
 - Add a corner Logo
 - Draw an dotted outline boundary for the grid
 - Check if capping the framerate at 60 would reduce CPU load
