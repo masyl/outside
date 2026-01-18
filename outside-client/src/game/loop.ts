@@ -3,6 +3,8 @@ import { CommandQueue } from '../commands/queue';
 import { executeCommand } from '../commands/handlers';
 import { GameRenderer } from '../renderer/renderer';
 import { DebugOverlay } from '../debug/overlay';
+import { PlaybackState } from '../timeline/types';
+import { TimelineManager } from '../timeline/manager';
 
 const STATE_UPDATE_INTERVAL = 125; // 125ms
 
@@ -17,12 +19,58 @@ export class GameLoop {
   private stateUpdateIntervalId: number | null = null;
   private animationFrameId: number | null = null;
   private isRunning: boolean = false;
+  private playbackState: PlaybackState = PlaybackState.PLAYING;
+  private timelineManager: TimelineManager | null = null;
 
   constructor(store: Store, commandQueue: CommandQueue, renderer: GameRenderer, debugOverlay?: DebugOverlay) {
     this.store = store;
     this.commandQueue = commandQueue;
     this.renderer = renderer;
     this.debugOverlay = debugOverlay;
+  }
+
+  setTimelineManager(manager: TimelineManager): void {
+    this.timelineManager = manager;
+  }
+
+  getPlaybackState(): PlaybackState {
+    return this.playbackState;
+  }
+
+  setPlaybackState(state: PlaybackState): void {
+    const previousState = this.playbackState;
+    this.playbackState = state;
+
+    // If entering TRAVELING mode, clear the command queue
+    // This prevents commands intended for the "live" head from executing on historical states
+    if (state === PlaybackState.TRAVELING && previousState !== PlaybackState.TRAVELING) {
+      this.commandQueue.clear();
+    }
+  }
+
+  /**
+   * Pause the game execution
+   */
+  pause(): void {
+    this.setPlaybackState(PlaybackState.PAUSED);
+  }
+
+  /**
+   * Resume normal game execution
+   */
+  resume(): void {
+    this.setPlaybackState(PlaybackState.PLAYING);
+  }
+
+  /**
+   * Execute a single step forward (only when paused/traveling)
+   */
+  step(): void {
+    if (this.timelineManager) {
+      this.timelineManager.stepForward();
+      // Force an update to process any immediate effects if needed,
+      // though typically TimelineManager handles state updates directly.
+    }
   }
 
   /**
@@ -73,6 +121,11 @@ export class GameLoop {
   private startStateUpdateLoop(): void {
     this.stateUpdateIntervalId = window.setInterval(() => {
       if (!this.isRunning) {
+        return;
+      }
+
+      // Only process commands in PLAYING state
+      if (this.playbackState !== PlaybackState.PLAYING) {
         return;
       }
 

@@ -106,6 +106,34 @@ export class KeyboardHandler {
       this.handleArrowKey('right');
     });
 
+    // Space: Pause/Resume
+    this.keyHandlers.set(' ', (event) => {
+      event.preventDefault();
+      if (this.timelineManager) {
+        const currentState = this.timelineManager.getPlaybackState();
+        if (currentState === 'PLAYING') {
+          this.timelineManager.pause();
+        } else {
+          this.timelineManager.resume();
+        }
+      }
+    });
+
+    // , (comma): Step Backward
+    this.keyHandlers.set(',', (event) => {
+      // event.preventDefault(); // Don't prevent default, might be needed for input fields? But we don't have inputs yet.
+      if (this.timelineManager) {
+        this.timelineManager.stepBackward();
+      }
+    });
+
+    // . (period): Step Forward
+    this.keyHandlers.set('.', (event) => {
+      if (this.timelineManager) {
+        this.timelineManager.stepForward();
+      }
+    });
+
     // ?: Toggle keystroke overlay
     this.keyHandlers.set('?', (event) => {
       event.preventDefault();

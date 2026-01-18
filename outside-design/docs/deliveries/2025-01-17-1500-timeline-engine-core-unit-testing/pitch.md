@@ -41,8 +41,8 @@ The 10,000 step limit will be enforced by checking `events.length` before adding
 
 ## Related Pitches
 
-- **Prerequisite**: [Keystroke Help Menu (Timeline series: 1)](../pitches/keystroke-help-menu.md)
-- **Next**: [Playback Controls & Game Loop Integration (Timeline series: 3)](../pitches/timeline-playback-controls.md)
+- **Prerequisite**: [Keystroke Help Menu (Timeline series: 1)](../../pitches/keystroke-help-menu.md)
+- **Next**: [Playback Controls & Game Loop Integration (Timeline series: 3)](../../pitches/timeline-playback-controls.md)
 - **Depends on**: EventLogger, Store, CommandHandler
 
 ## Prerequisites
@@ -51,10 +51,10 @@ The 10,000 step limit will be enforced by checking `events.length` before adding
 
 ## Next Logical Pitches
 
-- [Playback Controls & Game Loop Integration (Timeline series: 3)](../pitches/timeline-playback-controls.md)
-- [Timeline UI Components (Timeline series: 4)](../pitches/timeline-ui-components.md)
-- [Timeline Keystrokes Integration (Timeline series: 5)](../pitches/timeline-keystrokes-integration.md)
-- [Timeline Network Synchronization (Timeline series: 6)](../pitches/timeline-network-synchronization.md)
+- [Playback Controls & Game Loop Integration (Timeline series: 3)](../../pitches/timeline-playback-controls.md)
+- [Timeline UI Components (Timeline series: 4)](../../pitches/timeline-ui-components.md)
+- [Timeline Keystrokes Integration (Timeline series: 5)](../../pitches/timeline-keystrokes-integration.md)
+- [Timeline Network Synchronization (Timeline series: 6)](../../pitches/timeline-network-synchronization.md)
 
 ## Open Questions
 

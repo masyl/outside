@@ -1,3 +1,4 @@
+import { PlaybackState } from './timeline/types';
 import { Application, autoDetectRenderer } from 'pixi.js';
 import { Store } from './store/store';
 import { WorldState } from '@outside/core';
@@ -349,16 +350,24 @@ async function init(options?: {
         debugOverlay.setStepCount(restoredStep);
       }
 
-      await hostMode.initialize({ local: isLocal });
+      // Initialize Timeline Manager for time travel support
+      const timelineManager = new TimelineManager(store, eventLogger);
+
+      // Create keyboard handler (host mode - commands go to local queue)
+      // Inject timeline manager for playback controls
+      const keyboardHandler = new KeyboardHandler(selectionManager, commandQueue, store, renderer, undefined, timelineManager);
+
+      // Set timeline manager on game loop
+      gameLoop.setTimelineManager(timelineManager);
+
+      // Initial playback state
+      timelineManager.setPlaybackState(PlaybackState.PLAYING);
+      gameLoop.setPlaybackState(PlaybackState.PLAYING);
+
+      await hostMode.initialize(gameLoop, timelineManager, { local: isLocal });
 
       // Update client count initially
       debugOverlay.setClientCount(hostMode.getConnectedClientCount());
-
-      // Create keyboard handler (host mode - commands go to local queue)
-      const keyboardHandler = new KeyboardHandler(selectionManager, commandQueue, store, renderer);
-
-      // Initialize Timeline Manager for time travel support
-      const timelineManager = new TimelineManager(store, eventLogger);
 
       // Start the game loop
       gameLoop.start();

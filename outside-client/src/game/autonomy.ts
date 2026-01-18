@@ -1,6 +1,6 @@
 import { GameObject, WorldState, Direction } from '@outside/core';
 import { Random } from './random';
-import { GameCommand } from '../commands/queue';
+import { ParsedCommand } from '../commands/parser';
 
 /**
  * Handles autonomous behavior for bots
@@ -16,7 +16,7 @@ export class BotAutonomy {
    * Decide on an action for a bot
    * Returns a command or null if no action should be taken
    */
-  decideAction(bot: GameObject, world: WorldState): GameCommand | null {
+  decideAction(bot: GameObject, world: WorldState): ParsedCommand | null {
     // 1/6th chance to wait (do nothing)
     if (this.random.chance(1/6)) {
       return null;

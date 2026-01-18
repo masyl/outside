@@ -12,6 +12,9 @@ import {
 import { deserializeInputCommand, InputCommand } from './inputCommands';
 import { WorldState } from '@outside/core';
 import { BotAutonomy } from '../game/autonomy';
+import { PlaybackState } from '../timeline/types';
+import { GameLoop } from '../game/loop';
+import { TimelineManager } from '../timeline/manager';
 
 export interface HostCallbacks {
   onClientConnected?: (clientId: string) => void;
@@ -35,6 +38,7 @@ export class HostMode {
   private autonomy?: BotAutonomy;
   private botLastMovedStep: Map<string, number> = new Map();
   private autonomyEnabled: boolean = false; // Default to disabled for manual control
+  private playbackState: PlaybackState = PlaybackState.PLAYING;
 
   constructor(
     store: Store,
@@ -50,6 +54,34 @@ export class HostMode {
 
     // Note: State changes are now broadcast by the step counter at regular intervals
     // No need to subscribe to every store change - step counter handles it
+  }
+
+  setPlaybackState(state: PlaybackState): void {
+    this.playbackState = state;
+
+    // Pause autonomy in non-PLAYING states
+    if (state !== PlaybackState.PLAYING) {
+      this.pauseAutonomy();
+    } else {
+      // Only resume if it was enabled before? 
+      // For now, let's keep autonomy explicit toggle, but ensure it doesn't run when paused.
+      // The processAutonomy() check handles the PLAYING state check.
+    }
+  }
+
+  getPlaybackState(): PlaybackState {
+    return this.playbackState;
+  }
+
+  private pauseAutonomy(): void {
+    // We don't change the enabled flag, just stop processing
+    // But processAutonomy checks autonomyEnabled.
+    // If we want to strictly enforce it:
+    // Actually, processAutonomy checks this.playbackState now (will need to update it).
+  }
+
+  private resumeAutonomy(): void {
+    // No-op
   }
 
   /**
@@ -76,10 +108,22 @@ export class HostMode {
     }
   }
 
+  initialize(gameLoop: GameLoop, timelineManager: TimelineManager, options?: { local?: boolean }): Promise<void> {
+    gameLoop.setTimelineManager(timelineManager);
+
+    // Sync playback state changes
+    timelineManager.onStateChange((state) => {
+      this.setPlaybackState(state);
+      gameLoop.setPlaybackState(state);
+    });
+
+    return this.initializeInternal(options);
+  }
+
   /**
-   * Initialize host mode
+   * Internal initialization logic
    */
-  async initialize(options?: { local?: boolean }): Promise<void> {
+  async initializeInternal(options?: { local?: boolean }): Promise<void> {
     if (!options?.local) {
       // Connect to signaling server
       await this.signalingClient.connect();
@@ -132,6 +176,14 @@ export class HostMode {
     const STEP_INTERVAL = 125; // 125ms, same as game loop
 
     this.stepIntervalId = window.setInterval(() => {
+      // Always increment step count for UI purposes?
+      // Or should time stop when paused?
+      // Typically "game time" stops. "UI time" might continue.
+      // If we pause, we stop updating the step count.
+      if (this.playbackState !== PlaybackState.PLAYING) {
+        return;
+      }
+
       this.currentStep++;
 
       // Handle autonomous bot movement
@@ -169,7 +221,7 @@ export class HostMode {
    * Process autonomous bot behavior
    */
   private processAutonomy(): void {
-    if (!this.autonomy || !this.autonomyEnabled) return;
+    if (!this.autonomy || !this.autonomyEnabled || this.playbackState !== PlaybackState.PLAYING) return;
 
     const world = this.store.getState();
     const bots = Array.from(world.objects.values()).filter((obj) => obj.type === 'bot');

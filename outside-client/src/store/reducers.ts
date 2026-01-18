@@ -170,6 +170,22 @@ export function reducer(state: WorldState, action: Action): WorldState {
           case 'down':
             newPosition.y += distance;
             break;
+          case 'up-left':
+            newPosition.x -= distance;
+            newPosition.y -= distance;
+            break;
+          case 'up-right':
+            newPosition.x += distance;
+            newPosition.y -= distance;
+            break;
+          case 'down-left':
+            newPosition.x -= distance;
+            newPosition.y += distance;
+            break;
+          case 'down-right':
+            newPosition.x += distance;
+            newPosition.y += distance;
+            break;
         }
 
         // Validate new position

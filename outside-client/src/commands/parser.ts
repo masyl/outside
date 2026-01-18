@@ -85,7 +85,16 @@ export function parseCommand(commandString: string): ParsedCommand {
     if (cmd === 'move' && args.length === 4) {
       const direction = args[2] as Direction;
       const distance = parseInt(args[3], 10);
-      const validDirections: Direction[] = ['left', 'right', 'up', 'down'];
+      const validDirections: Direction[] = [
+        'left',
+        'right',
+        'up',
+        'down',
+        'up-left',
+        'up-right',
+        'down-left',
+        'down-right',
+      ];
       if (validDirections.includes(direction) && !isNaN(distance)) {
         return { type: 'move', id: args[1], direction, distance, raw: trimmed };
       }

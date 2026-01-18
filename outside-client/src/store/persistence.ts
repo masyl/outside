@@ -42,10 +42,13 @@ export class EventLogger {
 
     try {
       const events = this.loadEvents();
+      // Auto-assign step if not provided
+      const finalStep = step ?? events.length;
+      
       events.push({
         action,
         timestamp,
-        step, // Save optional step number
+        step: finalStep,
       });
 
       // Store events array in localStorage
@@ -88,7 +91,8 @@ export class EventLogger {
     const allEvents = this.loadEvents();
     return allEvents.filter((event) => {
       const eventStep = (event as any).step;
-      return eventStep !== undefined && eventStep <= step;
+      // Include events with matching step or undefined step (treated as always active/setup)
+      return eventStep === undefined || eventStep <= step;
     });
   }
 

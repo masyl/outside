@@ -4,7 +4,7 @@
 
 - **Pitch**: [pitch.md](./pitch.md)
 - **Commit Message**: [commit.md](./commit.md)
-- **Testing Report**: [testing.md](../src/timeline/testing.md)
+- **Testing Report**: See `src/timeline/testing.md` in client package
 
 # Work Summary
 

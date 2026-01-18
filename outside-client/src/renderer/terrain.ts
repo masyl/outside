@@ -25,7 +25,7 @@ function getTerrainColor(terrainType: string): number {
 /**
  * Create a sprite for a terrain object (solid color or sprite sheet)
  */
-function createTerrainSprite(terrain: TerrainObject, terrainTexture?: Texture): Sprite | TilingSprite {
+function createTerrainSprite(terrain: TerrainObject, terrainTexture?: Texture): Container {
   // Try to use sprite sheet if available and supported terrain type
   if (terrainTexture) {
     let tileX = -1;

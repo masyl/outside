@@ -279,23 +279,24 @@ outside-client/src/
 
 ## Checklist
 
-- [ ] Add playback state to Game Loop
-- [ ] Implement pause/resume methods in Game Loop
-- [ ] Implement step-by-step method in Game Loop
-- [ ] Add playback state management to Host Mode
-- [ ] Modify step counter to continue during timeline navigation
-- [ ] Add state change callbacks to Timeline Manager
-- [ ] Update Timeline Manager navigation methods to set playback state
-- [ ] Implement bot autonomy control based on playback state
-- [ ] Add autonomy pause/resume methods to Host Mode
-- [ ] Implement event queue clearing in timeline mode
-- [ ] Prevent queue processing in timeline mode
-- [ ] Connect all components in main.ts
-- [ ] Test pause/resume transitions
-- [ ] Test step-by-step execution
-- [ ] Verify autonomy pauses in timeline mode
-- [ ] Test event queue isolation
-- [ ] Update pitches index
+- [x] Add playback state to Game Loop
+- [x] Implement pause/resume methods in Game Loop
+- [x] Implement step-by-step method in Game Loop
+- [x] Add playback state management to Host Mode
+- [x] Modify step counter to continue during timeline navigation
+- [x] Add state change callbacks to Timeline Manager
+- [x] Update Timeline Manager navigation methods to set playback state
+- [x] Implement bot autonomy control based on playback state
+- [x] Add autonomy pause/resume methods to Host Mode
+- [x] Implement event queue clearing in timeline mode
+- [x] Prevent queue processing in timeline mode
+- [x] Connect all components in main.ts
+- [x] Test pause/resume transitions
+- [x] Test step-by-step execution
+- [x] Verify autonomy pauses in timeline mode
+- [x] Test event queue isolation
+- [x] Update pitches index
+
 
 ## Success Metrics
 

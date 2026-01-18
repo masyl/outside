@@ -63,10 +63,10 @@ Client timeline bar will reuse existing `TimelineBar` class but be positioned in
 ## Related Pitches
 
 - **Prerequisites**:
-  - [Timeline Engine Core (Timeline series: 2)](../pitches/timeline-engine-core.md)
-  - [Playback Controls & Game Loop Integration (Timeline series: 3)](../pitches/timeline-playback-controls.md)
-  - [Timeline UI Components (Timeline series: 4)](../pitches/timeline-ui-components.md)
-  - [Timeline Keystrokes Integration (Timeline series: 5)](../pitches/timeline-keystrokes-integration.md)
+  - [Timeline Engine Core (Timeline series: 2)](../../pitches/timeline-engine-core.md)
+  - [Playback Controls & Game Loop Integration (Timeline series: 3)](../../pitches/timeline-playback-controls.md)
+  - [Timeline UI Components (Timeline series: 4)](../../pitches/timeline-ui-components.md)
+  - [Timeline Keystrokes Integration (Timeline series: 5)](../../pitches/timeline-keystrokes-integration.md)
 - **Next**: None (final deliverable in series)
 - **Depends on**: HostMode, ClientMode, TimelineManager, EventLogger
 

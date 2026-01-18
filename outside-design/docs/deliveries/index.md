@@ -1,40 +1,3 @@
-# Deliveries
-
-This section contains plans that have been completed and implemented. Each plan document reflects the actual work that was done, including a work summary, implementation details, and references to the commits where the work was completed.
-
-## What are Deliveries?
-
-Deliveries are implementation plans archived in design documentation. They serve as:
-
-- **Historical Record**: Documentation of what was built and how
-- **Reference Material**: Examples of implementation approaches and decisions
-- **Learning Resource**: Insights into development process and outcomes
-
-### Delivery Folder Structure (New Format)
-
-**New deliveries (2026-01-14 and later)** use a folder structure:
-
-```
-{YYYY-MM-DD-HHMM}-{descriptive-name}/
-├── pitch.md      # Original pitch for this delivery
-├── commit.md     # Prepared commit message for merging to main
-├── plan.md       # Implementation plan (completed or ongoing)
-└── README.md     # Optional additional context
-```
-
-**Legacy deliveries (before 2026-01-14)** are single markdown files.
-
-## Process
-
-When a plan is ready for delivery, it goes through a "wrapup" process:
-
-1. A delivery folder is created with the new structure
-2. The pitch is copied to `pitch.md`
-3. A commit message is prepared in `commit.md`
-4. The plan is updated and saved to `plan.md` with cross-references
-5. The delivery is added to this index
-
-**Note**: The wrapup process is only initiated when explicitly requested. Plans are not automatically wrapped up.
 
 ---
 
@@ -48,11 +11,13 @@ This implementation plan details() step-by-step approach to add Storybook as a s
 
 ## Completed Deliveries
 
-### Timeline Engine Core Unit Testing (2025-01-17 21:36)
+### [Timeline Playback Controls (2026-01-17)](./2026-01-16-1000-timeline-playback-controls/README.md)
+
+Implemented core playback controls (pause, resume, step) and game loop integration. Introduced synchronized `PlaybackState` management (PLAYING, PAUSED, TRAVELING) across the system. Ensures bot autonomy and event queues are handled correctly during time travel, preventing state corruption. Stabilized test infrastructure and build pipeline.
+
+### [Timeline Engine Core Unit Testing (2025-01-17 21:36)](./2025-01-17-1500-timeline-engine-core-unit-testing/plan.md)
 
 Successfully implemented comprehensive unit testing for Timeline Engine Core with 92%+ test coverage across all timeline components. Created 65 test cases covering TimelineManager, EventLogger timeline features, and integration testing. Fixed critical implementation issues including state reconstruction from fresh state and store reducer integration. Timeline Engine Core is now production-ready with robust test foundation for all subsequent timeline features.
-
-[Delivery →](./2025-01-17-1500-timeline-engine-core-unit-testing/plan.md)
 
 ### Keystroke Help Menu (Timeline series: 1) (2026-01-16 14:30)
 
@@ -64,7 +29,7 @@ Implemented DOM-based help overlay displaying all available keyboard shortcuts. 
 
 Implemented comprehensive unit testing infrastructure across all workspace packages with code coverage reporting and TypeScript support. Achieved 100% statement coverage for core package and 97.95% branch coverage focusing on all conditional paths.
 
-[Delivery →](./2026-01-15-0031-basic-unit-testing-setup/plan.md)
+[Delivery →](./2026-01-14-2258-basic-unit-testing-setup/plan.md)
 
 ### 2026-01-09 12:30 - Pixel Art Visuals
 

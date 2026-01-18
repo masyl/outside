@@ -9,7 +9,7 @@ This delivery provides comprehensive unit testing for the Timeline Engine Core, 
 - **Pitch**: [timeline-engine-core.md](../../pitches/timeline-engine-core.md)
 - **Plan**: [plan.md](./plan.md)
 - **Commit**: [commit.md](./commit.md)
-- **Testing Report**: [testing.md](../../../src/timeline/testing.md)
+- **Testing Report**: See `src/timeline/testing.md` in client package
 
 ## What Was Delivered
 

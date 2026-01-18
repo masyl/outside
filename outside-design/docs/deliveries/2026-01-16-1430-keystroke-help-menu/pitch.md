@@ -34,7 +34,7 @@ Create a new `KeystrokeOverlay` class in `outside-client/src/debug/keystrokeOver
 
 ## Related Pitches
 
-- **Next**: [Timeline Engine Core (Timeline series: 2)](../pitches/timeline-engine-core.md)
+- **Next**: [Timeline Engine Core (Timeline series: 2)](../../pitches/timeline-engine-core.md)
 - **Depends on**: None (foundational feature)
 
 ## Prerequisites
@@ -43,7 +43,7 @@ None - this establishes the keystroke documentation foundation for all future fe
 
 ## Next Logical Pitches
 
-- [Timeline Engine Core (Timeline series: 2)](../pitches/timeline-engine-core.md)
+- [Timeline Engine Core (Timeline series: 2)](../../pitches/timeline-engine-core.md)
 
 ## Open Questions
 

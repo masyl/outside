@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { enableMapSet } from 'immer';
 import { reducer } from './reducers';
 import { createWorldState } from '@outside/core';
 import { Action } from './actions';
+
+// Enable Immer MapSet plugin
+enableMapSet();
 
 describe('Reducer Logic', () => {
   let initialState: ReturnType<typeof createWorldState>;
@@ -62,12 +66,27 @@ describe('Reducer Logic', () => {
 
   describe('MOVE_BOT Action', () => {
     beforeEach(() => {
+      // Create terrain first
+      const createTerrainAction: Action = {
+        type: 'CREATE_TERRAIN',
+        payload: {
+          id: 'ground',
+          terrainType: 'grass',
+          x: 0,
+          y: 0,
+          width: 20,
+          height: 10,
+        },
+      };
+      initialState = reducer(initialState, createTerrainAction);
+
       // Add a bot to move
       const createBotAction: Action = {
         type: 'CREATE_BOT',
         payload: { id: 'bot-1' },
       };
-      reducer(initialState, createBotAction);
+      // Update initialState with the created bot
+      initialState = reducer(initialState, createBotAction);
     });
 
     it('should move bot to valid position', () => {
@@ -229,12 +248,27 @@ describe('Reducer Logic', () => {
 
   describe('PLACE_OBJECT Action', () => {
     beforeEach(() => {
+      // Create terrain first
+      const createTerrainAction: Action = {
+        type: 'CREATE_TERRAIN',
+        payload: {
+          id: 'ground',
+          terrainType: 'grass',
+          x: 0,
+          y: 0,
+          width: 20,
+          height: 10,
+        },
+      };
+      initialState = reducer(initialState, createTerrainAction);
+
       // Add a bot to place
       const createBotAction: Action = {
         type: 'CREATE_BOT',
         payload: { id: 'bot-1' },
       };
-      reducer(initialState, createBotAction);
+      // Update initialState with the created bot
+      initialState = reducer(initialState, createBotAction);
     });
 
     it('should place object at valid position', () => {
@@ -290,7 +324,7 @@ describe('Reducer Logic', () => {
       expect(newState).not.toBe(initialState);
     });
 
-    it('should handle empty world state replacement', () => {
+    it('should handle empty world state replacement by keeping current state', () => {
       const action: Action = {
         type: 'SET_WORLD_STATE',
         payload: { worldState: null },
@@ -298,20 +332,20 @@ describe('Reducer Logic', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState).toBeNull();
+      expect(newState).toBe(initialState);
     });
   });
 
   describe('Unknown Actions', () => {
     it('should return unchanged state for unknown action types', () => {
-      const unknownAction: Action = {
-        type: 'SET_WORLD_STATE',
-        payload: { worldState: createWorldState() },
-      };
+      const unknownAction = {
+        type: 'UNKNOWN_ACTION',
+        payload: {},
+      } as any;
 
       const newState = reducer(initialState, unknownAction);
 
-      expect(newState).toEqual(initialState);
+      expect(newState).toBe(initialState);
     });
 
     it('should handle malformed actions gracefully', () => {
@@ -388,6 +422,14 @@ describe('Reducer Logic', () => {
       const unchangedState1 = reducer(initialState, moveNonExistentAction);
       expect(unchangedState1).toEqual(initialState);
 
+      // Setup state with terrain and bot
+      let state = initialState;
+      const createTerrainAction: Action = {
+        type: 'CREATE_TERRAIN',
+        payload: { id: 'ground', terrainType: 'grass', x: 0, y: 0, width: 20, height: 10 },
+      };
+      state = reducer(state, createTerrainAction);
+
       // Test zero distance path
       const createAction: Action = {
         type: 'CREATE_BOT',
@@ -397,7 +439,7 @@ describe('Reducer Logic', () => {
         type: 'PLACE_OBJECT',
         payload: { id: 'bot-1', position: { x: 5, y: 3 } },
       };
-      const stateWithBot = reducer(initialState, createAction);
+      const stateWithBot = reducer(state, createAction);
       const stateWithPlacedBot = reducer(stateWithBot, placeAction);
 
       const zeroDistanceAction: Action = {

@@ -67,11 +67,11 @@ Update `KeystrokeOverlay` to include all timeline keystrokes with proper modifie
 ## Related Pitches
 
 - **Prerequisites**:
-  - [Keystroke Help Menu (Timeline series: 1)](../pitches/keystroke-help-menu.md)
-  - [Timeline Engine Core (Timeline series: 2)](../pitches/timeline-engine-core.md)
-  - [Playback Controls & Game Loop Integration (Timeline series: 3)](../pitches/timeline-playback-controls.md)
-  - [Timeline UI Components (Timeline series: 4)](../pitches/timeline-ui-components.md)
-- **Next**: [Timeline Network Synchronization (Timeline series: 6)](../pitches/timeline-network-synchronization.md)
+  - [Keystroke Help Menu (Timeline series: 1)](../../pitches/keystroke-help-menu.md)
+  - [Timeline Engine Core (Timeline series: 2)](../../pitches/timeline-engine-core.md)
+  - [Playback Controls & Game Loop Integration (Timeline series: 3)](../../pitches/timeline-playback-controls.md)
+  - [Timeline UI Components (Timeline series: 4)](../../pitches/timeline-ui-components.md)
+- **Next**: [Timeline Network Synchronization (Timeline series: 6)](../../pitches/timeline-network-synchronization.md)
 - **Depends on**: KeyboardHandler, TimelineManager
 
 ## Prerequisites
@@ -83,7 +83,7 @@ Update `KeystrokeOverlay` to include all timeline keystrokes with proper modifie
 
 ## Next Logical Pitches
 
-- [Timeline Network Synchronization (Timeline series: 6)](../pitches/timeline-network-synchronization.md)
+- [Timeline Network Synchronization (Timeline series: 6)](../../pitches/timeline-network-synchronization.md)
 
 ## Open Questions
 

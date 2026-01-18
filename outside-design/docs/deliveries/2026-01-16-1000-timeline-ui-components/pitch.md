@@ -54,9 +54,9 @@ The timeline bar will be added to the PIXI stage in `main.ts` and positioned at 
 ## Related Pitches
 
 - **Prerequisites**:
-  - [Timeline Engine Core (Timeline series: 2)](../pitches/timeline-engine-core.md)
-  - [Playback Controls & Game Loop Integration (Timeline series: 3)](../pitches/timeline-playback-controls.md)
-- **Next**: [Timeline Keystrokes Integration (Timeline series: 5)](../pitches/timeline-keystrokes-integration.md)
+  - [Timeline Engine Core (Timeline series: 2)](../../pitches/timeline-engine-core.md)
+  - [Playback Controls & Game Loop Integration (Timeline series: 3)](../../pitches/timeline-playback-controls.md)
+- **Next**: [Timeline Keystrokes Integration (Timeline series: 5)](../../pitches/timeline-keystrokes-integration.md)
 - **Depends on**: DebugOverlay, TimelineManager, PIXI
 
 ## Prerequisites
@@ -66,8 +66,8 @@ The timeline bar will be added to the PIXI stage in `main.ts` and positioned at 
 
 ## Next Logical Pitches
 
-- [Timeline Keystrokes Integration (Timeline series: 5)](../pitches/timeline-keystrokes-integration.md)
-- [Timeline Network Synchronization (Timeline series: 6)](../pitches/timeline-network-synchronization.md)
+- [Timeline Keystrokes Integration (Timeline series: 5)](../../pitches/timeline-keystrokes-integration.md)
+- [Timeline Network Synchronization (Timeline series: 6)](../../pitches/timeline-network-synchronization.md)
 
 ## Open Questions
 

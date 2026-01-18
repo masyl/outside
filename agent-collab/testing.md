@@ -16,17 +16,10 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Problems of current build
 
-[ ] Regression: After reloading the browser window, bots are drawned at the step 0 location instead of the updated position of the real game state.
-
 - None
 
 ### Other Confirmed Problems
 
-[ ] The game does not wait for sprites to load, this causes sprites to revers to basic shapes for a moment when the game reloads.
-[ ] Host console logs has a warning:
-    signaling.ts:147 [Signaling] Unknown message type: host-registered
-[ ] Host has logs regarding missing sprite:
-    animationController.ts:88 [AnimationController] Sprite not found for object bob
 [ ] When resetting the game, the step count should also reset. It is the main game clock.
 [ ] Openning the console in chrome messes up the rendering of the sprites and creates needless pixel doubling during animations.
 [ ] Favicon is missing and causing a 404 error in the console.
@@ -38,3 +31,15 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 ### Design or usability Problems
 
 [ ] DESIGN: Two users can have the same bot selected. Solution: When more than one user has selected a bot, the circle should have two blue borders.
+
+## General Review Notes
+
+### Timeline Series
+
+- Local/Host/Client modes should be clarified and formally documented at this point.
+- The time travelling moves 1 step at a time, which is very slow. Moving second by second would be more natural.
+- Should the number of "steps" per seconds be dynamic ?
+- Wether clients and host are able to maintain SPS (Steps per seconds) should be tracked by detecting late steps and show this stat in the debug window
+- The are various "modes" that dont have formal enough terms. Multiplayer mode, Time travel mode, Autonomy mode, etc... This should be made more formal.
+- The Timeline deliveries mention "Autonomy Control" to prevent bots from moving during time travel. This is super weird because the architecture should not even allow it. Did the agent code something special for this ?
+- Having the best method to keep the game steps in sync with the animation loop should be investigated at some point. This could make it difficult to have butter smooth animations.

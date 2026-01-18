@@ -1,13 +1,13 @@
-Implement playback controls and game loop integration
+feat(timeline): implement playback controls and game loop integration
 
-Integrate Timeline Manager with Game Loop to support pause/resume, step-by-step execution, and playback state management.
+- Added `PlaybackState` management (PLAYING, PAUSED, TRAVELING) to GameLoop, HostMode, and TimelineManager.
+- Implemented `pause()`, `resume()`, and `step()` methods in GameLoop for fine-grained execution control.
+- Integrated Bot Autonomy with playback state: bots now pause automatically during time travel.
+- Enforced Event Queue isolation: new events are ignored during historical navigation to prevent state corruption.
+- Stabilized Test Infrastructure: Configured Vitest for process isolation and suppressed console noise.
+- Fixed Build Pipeline: Resolved Storybook entry point issues and documentation dead links.
 
-- Added pause/resume/step methods to Game Loop
-- Implemented playback state tracking (PLAYING, PAUSED, TRAVELING)
-- Added bot autonomy control based on playback state
-- Modified Host Mode to sync with playback state
-- Implemented event queue clearing for timeline mode
-- Added step-by-step execution for debugging
-- Connected Timeline Manager with Game Loop and Host Mode
+This delivery fulfills the "Timeline Playback Controls" pitch, enabling time travel debugging and pause capabilities.
 
-This enables users to control game playback state and step through time, providing foundation for timeline UI and keystrokes.
+Ref: [pitch](../pitches/timeline-playback-controls.md)
+Ref: [plan](./plan.md)

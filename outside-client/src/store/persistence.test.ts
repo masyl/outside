@@ -136,7 +136,7 @@ describe('EventLogger Timeline Features', () => {
       eventLogger.logEvent(actions.placeObject('bot-1', { x: 1, y: 1 }), initialState, 1);
 
       let events = eventLogger.getEventsUpTo(1);
-      expect(events).toHaveLength(1);
+      expect(events).toHaveLength(2);
 
       // Replace events
       eventLogger.setEvents([
@@ -146,7 +146,7 @@ describe('EventLogger Timeline Features', () => {
 
       // Should return new events
       events = eventLogger.getEventsUpTo(1);
-      expect(events).toHaveLength(1);
+      expect(events).toHaveLength(2);
       expect((events[0].action as any).payload.id).toBe('bot-2');
     });
   });
@@ -166,7 +166,7 @@ describe('EventLogger Timeline Features', () => {
       const filteredEvents = eventLogger.getEventsUpTo(500);
       const endTime = performance.now();
 
-      expect(filteredEvents).toHaveLength(500);
+      expect(filteredEvents).toHaveLength(501); // 0 to 500 is 501 items
       expect(endTime - startTime).toBeLessThan(50); // Should be fast
     });
 

@@ -85,9 +85,9 @@ export class DebugMenu {
     buttonView.eventMode = 'static';
     buttonView.cursor = 'pointer';
 
-    this.resetButton.x = 100;
-    this.resetButton.y = 100;
-    this.container.addChild(this.resetButton.view);
+    buttonView.x = 100;
+    buttonView.y = 100;
+    this.container.addChild(buttonView);
 
     // Create toggle autonomy button
     const autonomyButtonBackground = new Graphics();
@@ -121,9 +121,9 @@ export class DebugMenu {
     autonomyButtonView.eventMode = 'static';
     autonomyButtonView.cursor = 'pointer';
 
-    this.autonomyButton.x = 100;
-    this.autonomyButton.y = 160;
-    this.container.addChild(this.autonomyButton.view);
+    autonomyButtonView.x = 100;
+    autonomyButtonView.y = 160;
+    this.container.addChild(autonomyButtonView);
   }
 
   private getAutonomyButtonText(): string {

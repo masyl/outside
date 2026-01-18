@@ -7,5 +7,9 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: ['node_modules', 'dist'],
+    // Suppress console logs to keep test output clean
+    onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
+      return false;
+    },
   },
 });

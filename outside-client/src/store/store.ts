@@ -70,7 +70,11 @@ export class Store {
    */
   private notifySubscribers(): void {
     this.subscribers.forEach((subscriber) => {
-      subscriber(this.state);
+      try {
+        subscriber(this.state);
+      } catch (error) {
+        console.error('[Store] Error in subscriber:', error);
+      }
     });
   }
 

@@ -74,7 +74,11 @@ export class TimelineManager {
       }
 
       // Clamp step number
-      const targetStep = Math.max(0, Math.min(stepNumber, events.length - 1));
+      let targetStep = stepNumber;
+      if (isNaN(targetStep)) {
+        targetStep = 0;
+      }
+      targetStep = Math.max(0, Math.min(targetStep, events.length - 1));
 
       if (!this.endStateCache) {
         this.endStateCache = this.store.getState();
@@ -117,8 +121,6 @@ export class TimelineManager {
       for (let i = 0; i <= targetStep; i++) {
         const event = events[i];
         if (!event || !event.action) continue;
-
-        if ((event.step ?? i) > targetStep) continue;
 
         try {
           state = this.reducer(state, event.action);
@@ -169,8 +171,18 @@ export class TimelineManager {
     if (this.endStateCache) {
       this.store.dispatch({ type: 'SET_WORLD_STATE', payload: { worldState: this.endStateCache } });
       this.endStateCache = null;
+      // When restoring, we typically want to resume playing, or go to PAUSED?
+      // Default to PLAYING for "Exit Timeline Mode" behavior
       this.setPlaybackState(PlaybackState.PLAYING);
     }
+  }
+
+  pause(): void {
+    this.setPlaybackState(PlaybackState.PAUSED);
+  }
+
+  resume(): void {
+    this.setPlaybackState(PlaybackState.PLAYING);
   }
 
   setPlaybackState(state: PlaybackState): void {
