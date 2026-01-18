@@ -5,6 +5,7 @@ export interface TimelineEvent {
   timestamp: number;
   step: number;
   originalValue?: any;
+  tag?: string; // Optional tag/marker (e.g., "LevelStart")
 }
 
 export interface TimelineConfig {

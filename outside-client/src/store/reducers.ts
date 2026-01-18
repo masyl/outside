@@ -36,11 +36,11 @@ export function reducer(state: WorldState, action: Action): WorldState {
           return state;
         }
 
-        // Create new bot
+        // Create new bot without a position - will be positioned later via PLACE_OBJECT
         const bot: Bot = {
           id,
           type: 'bot',
-          position: { x: 0, y: 0 }, // Default position, will be placed later
+          // No position - bot is invisible until placed
         };
 
         draft.objects.set(id, bot);
@@ -133,7 +133,7 @@ export function reducer(state: WorldState, action: Action): WorldState {
           return state;
         }
 
-        // Remove object from old position
+        // Remove object from old position (if it had one)
         if (object.position) {
           removeObjectFromGrid(draft.grid, object.position);
         }
@@ -150,6 +150,12 @@ export function reducer(state: WorldState, action: Action): WorldState {
         const object = draft.objects.get(id);
         if (!object) {
           console.warn(`Object with id "${id}" not found`);
+          return state;
+        }
+
+        // Can't move an object that doesn't have a position yet
+        if (!object.position) {
+          console.warn(`Object with id "${id}" has no position and cannot be moved`);
           return state;
         }
 
@@ -250,9 +256,9 @@ export function reducer(state: WorldState, action: Action): WorldState {
         draft.height = height;
         draft.grid = newGrid;
 
-        // Clear any objects that are now outside bounds
+        // Clear any objects that are now outside bounds (only if they have a position)
         for (const [id, object] of draft.objects) {
-          if (!isValidPosition(draft, object.position)) {
+          if (object.position && !isValidPosition(draft, object.position)) {
             draft.objects.delete(id);
           }
         }

@@ -7,7 +7,6 @@ import { GameRenderer } from './renderer/renderer';
 import { GameLoop } from './game/loop';
 import { MockCommandFeeder } from './mock/commandFeeder';
 import { DebugOverlay } from './debug/overlay';
-import { DebugMenu } from './debug/menu';
 import { ConnectionOverlay } from './debug/connectionOverlay';
 import { KeystrokeOverlay } from './debug/keystrokeOverlay';
 import { AnimationController } from './game/animationController';
@@ -95,49 +94,74 @@ async function init(options?: {
   const SIGNALING_URL = 'ws://localhost:3001';
   const signalingClient = new SignalingClient(SIGNALING_URL);
 
-  // Create debug menu (after commandFeeder is created)
   // Note: hostMode will be set later, so we use a variable that gets updated
   let hostModeRef: HostMode | null = null;
+  // Note: timelineManager will be set later, so we use a variable that gets updated
+  let timelineManagerRef: TimelineManager | null = null;
 
-  const debugMenu = new DebugMenu(app, {
-    onResetLevel: () => {
-      console.log('[Debug] Resetting level...');
-      // Clear event log
-      store.getEventLogger().clearEvents();
-      // Reset store to initial state (this will generate a NEW random seed)
-      const newState = createWorldState();
-      store.dispatch(actions.setWorldState(newState));
-      console.log(`[Debug] Generated new master seed: ${newState.seed}`);
+  // Reset level function - Full reset: clear events, reset step count, reinitialize level
+  const resetLevel = () => {
+    console.log('[Debug] Resetting level (full reset: clear events, reset step count, reinitialize)...');
+    
+    // Clear event log and step count
+    const eventLogger = store.getEventLogger();
+    eventLogger.clearEvents(); // This also clears STEP_COUNT_KEY
+    
+    // Reset step count explicitly (in case it's stored elsewhere)
+    eventLogger.saveStepCount(0);
+    
+    // Reset timeline manager pointer to 0 if it exists
+    if (timelineManagerRef) {
+      // Reset the internal pointer by going to step 0
+      timelineManagerRef.goToStep(0);
+    }
+    
+    // Reset store to initial state (this will generate a NEW random seed)
+    const newState = createWorldState();
+    store.dispatch(actions.setWorldState(newState));
+    console.log(`[Debug] Generated new master seed: ${newState.seed}`);
 
-      // Reload level
-      commandFeeder.loadLevel('/levels/demo.md').then(() => {
-        const terrainCommands = commandFeeder.getInitialTerrainCommands();
-        for (const command of terrainCommands) {
-          executeCommand(store, command);
-        }
-        commandFeeder.feedBotCommands();
-        renderer.setWorld(store.getState());
-        // Mark game as started after reset
-        store.start();
-        console.log('[Debug] Level reset complete');
-      });
-    },
-    onToggleAutonomy: () => {
-      if (hostModeRef) {
-        hostModeRef.toggleAutonomy();
+    // Reload level
+    commandFeeder.loadLevel('/levels/demo.md').then(() => {
+      const terrainCommands = commandFeeder.getInitialTerrainCommands();
+      for (const command of terrainCommands) {
+        executeCommand(store, command);
       }
-    },
-    isAutonomyEnabled: () => {
-      return hostModeRef ? hostModeRef.isAutonomyEnabled() : false;
-    },
-  });
+      commandFeeder.feedBotCommands();
+      renderer.setWorld(store.getState());
+      // Mark game as started after reset
+      store.start();
+      
+      // Tag the current step as "LevelStart" (right after level initialization)
+      setTimeout(() => {
+        const events = eventLogger.loadEvents();
+        if (events.length > 0) {
+          const lastStep = events.length - 1;
+          eventLogger.tagStep(lastStep, 'LevelStart');
+          console.log(`[Debug] Tagged step ${lastStep} as LevelStart (reset)`);
+        }
+      }, 0);
+      
+      console.log('[Debug] Level reset complete');
+    });
+  };
 
-  // Handle window resize (moved after debugMenu initialization to avoid ReferenceError)
+  // Toggle freeze/unfreeze (autonomy) function
+  const toggleFreeze = () => {
+    if (hostModeRef) {
+      hostModeRef.toggleAutonomy();
+    }
+  };
+
+  const isFreezeEnabled = () => {
+    return hostModeRef ? hostModeRef.isAutonomyEnabled() : false;
+  };
+
+  // Handle window resize
   window.addEventListener('resize', () => {
     // renderer.resize() handles both app renderer resize and viewport centering
     // It also ensures resolution stays at 1 for pixel-perfect rendering
     renderer.resize();
-    debugMenu.onResize();
   });
 
   // Determine host/client mode and initialize game
@@ -263,7 +287,6 @@ async function init(options?: {
       // Create new world state with seed if starting fresh
       if (!hasPersistedEvents) {
         // Re-create world state to ensure it has a fresh seed if this is a new game
-        // Note: We already created one in debugMenu, but this is the main initialization path
         // Actually, store already has a state from init, but let's make sure it's fresh
       } else {
         // If replaying, we might want to recover the seed from events?
@@ -309,10 +332,33 @@ async function init(options?: {
       if (!hasPersistedEvents) {
         console.log('[Init] Feeding bot commands from level file...');
         commandFeeder.feedBotCommands();
+        
+        // Tag the current step as "LevelStart" (right after initial level initialization)
+        setTimeout(() => {
+          const eventLogger = store.getEventLogger();
+          const events = eventLogger.loadEvents();
+          if (events.length > 0) {
+            const lastStep = events.length - 1;
+            eventLogger.tagStep(lastStep, 'LevelStart');
+            console.log(`[Debug] Tagged step ${lastStep} as LevelStart (initial load)`);
+          }
+        }, 0);
       } else {
         console.log(
           '[Init] Skipping bot commands from level file (bots already restored from events)'
         );
+        
+        // Still tag LevelStart even when restoring from events (at step 0)
+        setTimeout(() => {
+          const eventLogger = store.getEventLogger();
+          const events = eventLogger.loadEvents();
+          if (events.length > 0) {
+            // Tag the last event from the loaded level initialization
+            const lastStep = events.length - 1;
+            eventLogger.tagStep(lastStep, 'LevelStart');
+            console.log(`[Debug] Tagged step ${lastStep} as LevelStart (restored)`);
+          }
+        }, 0);
       }
 
       // Initialize host mode
@@ -337,7 +383,6 @@ async function init(options?: {
         },
       });
 
-      // Update reference for debug menu
       hostModeRef = hostMode;
 
       // Set debug overlay for step count updates
@@ -352,10 +397,34 @@ async function init(options?: {
 
       // Initialize Timeline Manager for time travel support
       const timelineManager = new TimelineManager(store, eventLogger);
+      timelineManagerRef = timelineManager; // Store reference for resetLevel
+
+      // Subscribe to timeline state changes to update debug overlay
+      timelineManager.onStateChange((state) => {
+        debugOverlay.setPlaybackMode(state);
+      });
+
+      // Update timeline cursor position when it changes
+      const updateTimelineCursor = () => {
+        const timelineState = timelineManager.getState();
+        debugOverlay.setTimelineCursor(timelineState.currentStep, timelineState.totalSteps);
+      };
+
+      // Subscribe to position changes (need to check if this exists in TimelineManager)
+      // For now, update periodically and on state changes
+      timelineManager.onStateChange(() => {
+        updateTimelineCursor();
+      });
 
       // Create keyboard handler (host mode - commands go to local queue)
       // Inject timeline manager for playback controls
       const keyboardHandler = new KeyboardHandler(selectionManager, commandQueue, store, renderer, undefined, timelineManager);
+
+      // Connect GameLoop, DebugOverlay, and callbacks to KeyboardHandler for timeline controls
+      keyboardHandler.setGameLoop(gameLoop);
+      keyboardHandler.setDebugOverlay(debugOverlay);
+      keyboardHandler.setOnResetLevel(resetLevel);
+      keyboardHandler.setOnToggleAutonomy(toggleFreeze, isFreezeEnabled);
 
       // Set timeline manager on game loop
       gameLoop.setTimelineManager(timelineManager);
@@ -364,10 +433,19 @@ async function init(options?: {
       timelineManager.setPlaybackState(PlaybackState.PLAYING);
       gameLoop.setPlaybackState(PlaybackState.PLAYING);
 
+      // Initial debug overlay updates
+      debugOverlay.setPlaybackMode(PlaybackState.PLAYING);
+      updateTimelineCursor();
+
       await hostMode.initialize(gameLoop, timelineManager, { local: isLocal });
 
       // Update client count initially
       debugOverlay.setClientCount(hostMode.getConnectedClientCount());
+
+      // Periodically update timeline cursor (in case navigation happens via other means)
+      setInterval(() => {
+        updateTimelineCursor();
+      }, 250);
 
       // Start the game loop
       gameLoop.start();

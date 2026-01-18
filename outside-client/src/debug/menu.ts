@@ -60,7 +60,7 @@ export class DebugMenu {
     buttonBackground.stroke({ width: 1, color: 0x00ff00 });
 
     const buttonText = new Text({ 
-      text: 'Reset Level (R)', 
+      text: 'Reset Level (Alt+R)', 
       style: new TextStyle({
         fontFamily: 'Courier New',
         fontSize: 14,
@@ -148,12 +148,13 @@ export class DebugMenu {
       } else if (!isModifierPressed && event.key === 'Escape' && this.isOpen) {
         event.preventDefault();
         this.close();
-      } else if (this.isOpen && event.key === 'r' && !event.metaKey && !event.ctrlKey) {
+      } else if (event.altKey && (event.key === 'r' || event.key === 'R')) {
         event.preventDefault();
         if (this.callbacks.onResetLevel) {
+          console.log('[Debug] Reset level (Alt+R)');
           this.callbacks.onResetLevel();
         }
-      } else if (this.isOpen && event.key === 'a' && !event.metaKey && !event.ctrlKey) {
+      } else if (this.isOpen && (event.key === 'a' || event.key === 'A') && !event.metaKey && !event.ctrlKey) {
         event.preventDefault();
         if (this.callbacks.onToggleAutonomy) {
           this.callbacks.onToggleAutonomy();

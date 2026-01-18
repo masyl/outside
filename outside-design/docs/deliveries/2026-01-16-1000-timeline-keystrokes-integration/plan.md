@@ -273,19 +273,17 @@ private jumpToEnd(): void {
 
 ## Checklist
 
-- [ ] Add Option/Alt + Space handler for play/pause
-- [ ] Add Option/Alt + Up/Down handlers for stepping
-- [ ] Add Option/Alt + Left/Right handlers for scrubbing
-- [ ] Add Option/Alt + Home/End handlers for jumping
-- [ ] Implement togglePausePlayback helper method
-- [ ] Implement stepForward and stepBackward methods
-- [ ] Implement scrubTimeline method (50 steps)
-- [ ] Implement jumpToStart and jumpToEnd methods
-- [ ] Map existing debug keystrokes to modifier pattern
-- [ ] Add getCurrentStep method to Timeline Manager
-- [ ] Add component properties to KeyboardHandler
-- [ ] Add initialization in main.ts
-- [ ] Update keystroke overlay with timeline controls
+- [x] Add Option/Alt + Space handler for play/pause
+- [x] Add Option/Alt + Up/Down handlers for stepping
+- [x] Add Option/Alt + Left/Right handlers for scrubbing
+- [x] Add Option/Alt + Home/End handlers for jumping
+- [x] Implement togglePausePlayback helper method
+- [x] Implement scrubTimeline method (50 steps)
+- [x] Add component properties to KeyboardHandler (gameLoop, isHostMode helper)
+- [x] Add initialization in main.ts (setGameLoop)
+- [x] Update keystroke overlay with timeline controls
+- [ ] Map existing debug keystrokes to modifier pattern (Optional - skipped per plan)
+- [x] getCurrentStep method already exists in Timeline Manager
 - [ ] Test all timeline keystrokes
 - [ ] Verify modifier key detection works on Mac and Windows
 - [ ] Test keystrokes only work in host mode

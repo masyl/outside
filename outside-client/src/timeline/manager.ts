@@ -108,6 +108,16 @@ export class TimelineManager {
     this.goToStep(0);
   }
 
+  goToLevelStart(): void {
+    const levelStartStep = this.eventLogger.findStepByTag('LevelStart');
+    if (levelStartStep !== null) {
+      this.goToStep(levelStartStep);
+    } else {
+      // Fallback to step 0 if LevelStart not found
+      this.goToStep(0);
+    }
+  }
+
   goToEnd(): void {
     const events = this.eventLogger.loadEvents();
     this.goToStep(events.length - 1);

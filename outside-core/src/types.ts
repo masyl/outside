@@ -22,7 +22,7 @@ export type ObjectType = 'bot';
 export interface GameObject {
   id: string;
   type: ObjectType;
-  position: Position;
+  position?: Position; // Optional - bots can exist without a position until placed
   facing?: Direction; // Optional facing direction
 }
 

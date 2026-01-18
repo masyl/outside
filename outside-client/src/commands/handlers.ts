@@ -37,6 +37,12 @@ export function executeCommand(store: Store, command: ParsedCommand, step?: numb
         return;
       }
 
+      // Can't move a bot that doesn't have a position yet
+      if (!bot.position) {
+        console.warn(`Bot with id "${command.id}" has no position and cannot be moved`);
+        return;
+      }
+
       const originalValue = { x: bot.position.x, y: bot.position.y };
       store.dispatch(
         actions.moveObject(command.id, command.direction, command.distance, originalValue),

@@ -91,8 +91,13 @@ export function createObjectsLayerWithIndex(
   const container = new Container();
   const spriteIndex: SpriteIndex = new Map();
 
-  // Create sprites for each object
+  // Create sprites for each object (only if they have a position)
   world.objects.forEach((object) => {
+    // Skip objects without a position (they're invisible until placed)
+    if (!object.position) {
+      return;
+    }
+
     let sprite: Sprite;
 
     if (object.type === 'bot') {
@@ -137,6 +142,16 @@ export function updateObjectsLayerWithIndex(
     currentObjectIds.add(object.id);
 
     if (object.type === 'bot') {
+      // If bot has no position, remove its sprite if it exists (shouldn't happen, but safety check)
+      if (!object.position) {
+        const sprite = spriteIndex.get(object.id);
+        if (sprite) {
+          container.removeChild(sprite);
+          spriteIndex.delete(object.id);
+        }
+        return; // Skip bots without position
+      }
+
       let sprite = spriteIndex.get(object.id);
 
       // Create sprite if it doesn't exist

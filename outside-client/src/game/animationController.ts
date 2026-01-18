@@ -67,6 +67,20 @@ export class AnimationController {
       const fromPos = prevObj.position;
       const toPos = currentObj.position;
 
+      // If bot was previously unpositioned, skip animation (appears instantly at new position)
+      if (!fromPos || !toPos) {
+        // Bot was just positioned - no animation needed, just update sprite position directly
+        if (!fromPos && toPos) {
+          const sprite = this.renderer.getSpriteForObject(id);
+          if (sprite) {
+            const VERTICAL_OFFSET = -8;
+            sprite.x = toPos.x * DISPLAY_TILE_SIZE;
+            sprite.y = (toPos.y * DISPLAY_TILE_SIZE) + VERTICAL_OFFSET;
+          }
+        }
+        return;
+      }
+
       if (!this.positionsDiffer(fromPos, toPos)) {
         return;
       }

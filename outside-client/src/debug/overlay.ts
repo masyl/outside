@@ -14,6 +14,8 @@ export class DebugOverlay {
   private clientCountElement: HTMLDivElement;
   private eventCountElement: HTMLDivElement;
   private p2pStatusElement: HTMLDivElement;
+  private playbackModeElement: HTMLDivElement;
+  private timelineCursorElement: HTMLDivElement;
   private fps: number = 0;
   private frameCount: number = 0;
   private lastFpsUpdate: number = 0;
@@ -23,6 +25,9 @@ export class DebugOverlay {
   private groundCount: number = 0;
   private clientCount: number = 0;
   private eventCount: number = 0;
+  private playbackMode: string = 'unknown';
+  private timelineCursor: number = 0;
+  private timelineTotal: number = 0;
 
   constructor() {
     // Create container
@@ -81,6 +86,16 @@ export class DebugOverlay {
     this.p2pStatusElement = document.createElement('div');
     this.p2pStatusElement.textContent = 'P2P: unknown';
     this.container.appendChild(this.p2pStatusElement);
+
+    // Create playback mode element
+    this.playbackModeElement = document.createElement('div');
+    this.playbackModeElement.textContent = 'Playback: unknown';
+    this.container.appendChild(this.playbackModeElement);
+
+    // Create timeline cursor element
+    this.timelineCursorElement = document.createElement('div');
+    this.timelineCursorElement.textContent = 'Timeline: -- / --';
+    this.container.appendChild(this.timelineCursorElement);
 
     // Append to body
     document.body.appendChild(this.container);
@@ -185,6 +200,23 @@ export class DebugOverlay {
    */
   setP2pStatus(status: string): void {
     this.p2pStatusElement.textContent = `P2P: ${status}`;
+  }
+
+  /**
+   * Update playback mode (PLAYING, PAUSED, TRAVELING)
+   */
+  setPlaybackMode(mode: string): void {
+    this.playbackMode = mode;
+    this.playbackModeElement.textContent = `Playback: ${mode}`;
+  }
+
+  /**
+   * Update timeline cursor position
+   */
+  setTimelineCursor(current: number, total: number): void {
+    this.timelineCursor = current;
+    this.timelineTotal = total;
+    this.timelineCursorElement.textContent = `Timeline: ${current} / ${total}`;
   }
 
   /**

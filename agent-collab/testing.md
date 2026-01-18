@@ -43,3 +43,8 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 - The are various "modes" that dont have formal enough terms. Multiplayer mode, Time travel mode, Autonomy mode, etc... This should be made more formal.
 - The Timeline deliveries mention "Autonomy Control" to prevent bots from moving during time travel. This is super weird because the architecture should not even allow it. Did the agent code something special for this ?
 - Having the best method to keep the game steps in sync with the animation loop should be investigated at some point. This could make it difficult to have butter smooth animations.
+
+### Timeline keystrokes
+
+- The time passing counted as number of steps and as number of events is not always in sync when moving on the timeline.
+- 

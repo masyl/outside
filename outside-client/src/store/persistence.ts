@@ -60,9 +60,42 @@ export class EventLogger {
   }
 
   /**
+   * Tag a specific step with a marker (e.g., "LevelStart")
+   */
+  tagStep(step: number, tag: string): void {
+    try {
+      const events = this.loadEvents();
+      if (step >= 0 && step < events.length) {
+        (events[step] as any).tag = tag;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+      }
+    } catch (error) {
+      console.warn('[EventLogger] Failed to tag step:', error);
+    }
+  }
+
+  /**
+   * Find the step index with a given tag
+   */
+  findStepByTag(tag: string): number | null {
+    try {
+      const events = this.loadEvents();
+      for (let i = 0; i < events.length; i++) {
+        if ((events[i] as any).tag === tag) {
+          return i;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.warn('[EventLogger] Failed to find step by tag:', error);
+      return null;
+    }
+  }
+
+  /**
    * Load all events from localStorage
    */
-  loadEvents(): Array<{ action: Action; timestamp: number; step?: number }> {
+  loadEvents(): Array<{ action: Action; timestamp: number; step?: number; tag?: string }> {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {

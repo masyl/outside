@@ -294,6 +294,11 @@ export class GameRenderer {
       return undefined;
     }
 
+    // Don't create sprites for bots without a position
+    if (!object.position) {
+      return undefined;
+    }
+
     let sprite = this.spriteIndex.get(object.id);
     if (sprite) {
       return sprite;
