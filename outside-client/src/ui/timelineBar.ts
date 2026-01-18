@@ -28,6 +28,7 @@ export class TimelineBar extends Container {
   private background!: Graphics;
   private bar!: Graphics;
   private positionMarker!: Graphics;
+  private ticks!: Graphics; // For timeline tick marks
 
   // State
   private isVisible: boolean = false;
@@ -39,14 +40,22 @@ export class TimelineBar extends Container {
   private readonly config = {
     barHeight: 12, // Half as thick (was 24)
     padding: 12, // Increased by 50% (was 8)
+    innerPadding: 6, // Inner padding between bar edge and green
     sideOffset: 12, // Same as padding for side spacing
     bottomOffset: 50,
-    markerWidth: 2,
+    markerWidth: 4, // Thicker marker
+    markerHeight: 24, // Taller marker (double bar height)
     cornerRadius: 8, // Same as debug menu
+    tickInterval: 10, // 10 seconds for small ticks
+    majorTickInterval: 60, // 60 seconds for major ticks
+    tickWidth: 1, // 1px width for small ticks
+    majorTickWidth: 2, // 2px width for major ticks
     colors: {
       background: 0x000000,
       bar: 0x00ff00,
-      marker: 0x000000,
+      marker: 0xffffff, // White marker
+      markerBorder: 0x000000, // Black border
+      tick: 0x000000, // Black ticks
       borderHover: 0x40ff40, // Brighter green for hover
     },
   };
@@ -90,8 +99,13 @@ export class TimelineBar extends Container {
     this.positionMarker = new Graphics();
     this.addChild(this.positionMarker);
 
+    // Create tick marks container
+    this.ticks = new Graphics();
+    this.addChild(this.ticks);
+
     this.updateLayout();
     this.updateMarkerPosition();
+    this.updateTicks();
   }
 
   private setupEventHandlers(): void {
@@ -101,9 +115,9 @@ export class TimelineBar extends Container {
 
     // Mouse events
     this.on('pointerdown', this.handleMouseDown.bind(this));
-    this.app.stage.on('pointermove', this.handleMouseMove.bind(this));
-    this.app.stage.on('pointerup', this.handleMouseUp.bind(this));
-    this.app.stage.on('pointerupoutside', this.handleMouseUp.bind(this));
+    this.on('pointermove', this.handleMouseMove.bind(this));
+    this.on('pointerup', this.handleMouseUp.bind(this));
+    this.on('pointerupoutside', this.handleMouseUp.bind(this));
 
     // Hover effects
     this.on('pointerover', this.handleMouseOver.bind(this));
@@ -124,7 +138,15 @@ export class TimelineBar extends Container {
 
   private updateFromTimelineManager(): void {
     const state = this.timelineManager.getState();
-    this.setTimelinePosition(state.currentStep, state.totalSteps);
+    const playbackState = this.timelineManager.getPlaybackState();
+
+    // When pausing, ensure cursor shows at end (current position), not start
+    if (playbackState === PlaybackState.PAUSED && state.currentStep < state.totalSteps - 1) {
+      this.setTimelinePosition(state.totalSteps - 1, state.totalSteps);
+    } else {
+      this.setTimelinePosition(state.currentStep, state.totalSteps);
+    }
+
     this.updateVisibility();
   }
 
@@ -132,8 +154,9 @@ export class TimelineBar extends Container {
     const playbackState = this.timelineManager.getPlaybackState();
     const state = this.timelineManager.getState();
 
-    // Show only when TRAVELING (not when PLAYING)
-    const shouldShow = playbackState === PlaybackState.TRAVELING;
+    // Show when TRAVELING or PAUSED (not when PLAYING)
+    const shouldShow =
+      playbackState === PlaybackState.TRAVELING || playbackState === PlaybackState.PAUSED;
 
     this.setVisible(shouldShow);
   }
@@ -194,7 +217,7 @@ export class TimelineBar extends Container {
     this.background.roundRect(0, 0, barWidth, totalHeight, this.config.cornerRadius);
     this.background.fill({ color: this.config.colors.background, alpha: 1.0 });
 
-    // Draw green bar (centered within padding) with rounded corners
+    // Draw green bar with inner padding and rounded corners
     this.bar.clear();
     this.bar.roundRect(
       0,
@@ -204,6 +227,19 @@ export class TimelineBar extends Container {
       this.config.cornerRadius
     );
     this.bar.fill({ color: this.config.colors.bar });
+
+    // Draw inner padding area (black rectangle on left and right edges)
+    const innerPadding = this.config.innerPadding;
+    if (innerPadding > 0) {
+      this.bar.rect(0, this.config.padding, innerPadding, this.config.barHeight);
+      this.bar.rect(
+        barWidth - innerPadding,
+        this.config.padding,
+        innerPadding,
+        this.config.barHeight
+      );
+      this.bar.fill({ color: this.config.colors.background, alpha: 1.0 });
+    }
 
     // Update marker position
     this.updateMarkerPosition();
@@ -221,12 +257,16 @@ export class TimelineBar extends Container {
     const markerX = (this.currentStep / (this.totalSteps - 1)) * barWidth;
 
     this.positionMarker.clear();
+
+    // White marker with black border, taller than bar
+    const markerY = this.config.padding - (this.config.markerHeight - this.config.barHeight) / 2;
     this.positionMarker.rect(
       markerX - this.config.markerWidth / 2,
-      this.config.padding,
+      markerY,
       this.config.markerWidth,
-      this.config.barHeight
+      this.config.markerHeight
     );
+    this.positionMarker.stroke({ width: 1, color: this.config.colors.markerBorder });
     this.positionMarker.fill({ color: this.config.colors.marker });
   }
 
@@ -248,9 +288,51 @@ export class TimelineBar extends Container {
     this.currentStep = currentStep;
     this.totalSteps = totalSteps;
     this.updateMarkerPosition();
+    this.updateTicks();
   }
 
-  // Public API
+  private updateTicks(): void {
+    if (this.totalSteps === 0) {
+      this.ticks.visible = false;
+      return;
+    }
+
+    this.ticks.visible = true;
+    this.ticks.clear();
+
+    const screenWidth = this.app.screen.width;
+    const barWidth = screenWidth - this.config.sideOffset * 2;
+    const greenAreaStart = this.config.innerPadding;
+    const greenAreaWidth = barWidth - 2 * this.config.innerPadding;
+
+    // Simple debug ticks - add ticks at 25%, 50%, 75% of the timeline
+    const debugPositions = [0.25, 0.5, 0.75];
+
+    for (const position of debugPositions) {
+      const tickX = greenAreaStart + position * greenAreaWidth;
+
+      // Small tick (1/3 height)
+      this.ticks.rect(
+        tickX - this.config.tickWidth / 2,
+        this.config.padding + this.config.barHeight - this.config.barHeight / 3,
+        this.config.tickWidth,
+        this.config.barHeight / 3
+      );
+      this.ticks.fill({ color: this.config.colors.tick });
+
+      // Major tick at 50% (full height)
+      if (position === 0.5) {
+        this.ticks.rect(
+          tickX - this.config.majorTickWidth / 2,
+          this.config.padding,
+          this.config.majorTickWidth,
+          this.config.barHeight
+        );
+        this.ticks.fill({ color: this.config.colors.tick });
+      }
+    }
+  }
+
   public setVisible(visible: boolean): void {
     this.visible = visible;
     this.isVisible = visible;
@@ -258,6 +340,7 @@ export class TimelineBar extends Container {
 
   public onResize(): void {
     this.updateLayout();
+    this.updateTicks();
   }
 
   public dispose(): void {
@@ -265,9 +348,9 @@ export class TimelineBar extends Container {
     this.off('pointerdown', this.handleMouseDown);
     this.off('pointerover', this.handleMouseOver);
     this.off('pointerout', this.handleMouseOut);
-    this.app.stage.off('pointermove', this.handleMouseMove);
-    this.app.stage.off('pointerup', this.handleMouseUp);
-    this.app.stage.off('pointerupoutside', this.handleMouseUp);
+    this.off('pointermove', this.handleMouseMove);
+    this.off('pointerup', this.handleMouseUp);
+    this.off('pointerupoutside', this.handleMouseUp);
 
     // Remove from parent
     if (this.parent) {
@@ -278,5 +361,6 @@ export class TimelineBar extends Container {
     this.background.destroy();
     this.bar.destroy();
     this.positionMarker.destroy();
+    this.ticks.destroy();
   }
 }
