@@ -254,7 +254,9 @@ export class TimelineBar extends Container {
     this.positionMarker.visible = true;
     const screenWidth = this.app.screen.width;
     const barWidth = screenWidth - this.config.sideOffset * 2;
-    const markerX = (this.currentStep / (this.totalSteps - 1)) * barWidth;
+    const usableWidth = barWidth - this.config.innerPadding * 2;
+    const markerX =
+      (this.currentStep / (this.totalSteps - 1)) * usableWidth + this.config.innerPadding;
 
     this.positionMarker.clear();
 
@@ -318,8 +320,9 @@ export class TimelineBar extends Container {
         this.config.tickWidth,
         this.config.barHeight / 3
       );
-      this.ticks.fill({ color: this.config.colors.tick });
     }
+
+    this.ticks.fill({ color: this.config.colors.tick });
   }
 
   public setVisible(visible: boolean): void {
