@@ -140,9 +140,9 @@ export class TimelineBar extends Container {
     const state = this.timelineManager.getState();
     const playbackState = this.timelineManager.getPlaybackState();
 
-    // When pausing, ensure cursor shows at end (current position), not start
-    if (playbackState === PlaybackState.PAUSED && state.currentStep < state.totalSteps - 1) {
-      this.setTimelinePosition(state.totalSteps - 1, state.totalSteps);
+    // When pausing, ensure cursor shows at current position (not start)
+    if (playbackState === PlaybackState.PAUSED) {
+      this.setTimelinePosition(state.currentStep, state.totalSteps);
     } else {
       this.setTimelinePosition(state.currentStep, state.totalSteps);
     }
@@ -302,16 +302,16 @@ export class TimelineBar extends Container {
 
     const screenWidth = this.app.screen.width;
     const barWidth = screenWidth - this.config.sideOffset * 2;
-    const greenAreaStart = this.config.innerPadding;
-    const greenAreaWidth = barWidth - 2 * this.config.innerPadding;
+    const usableWidth = barWidth - this.config.innerPadding * 2;
 
-    // Simple debug ticks - add ticks at 25%, 50%, 75% of the timeline
-    const debugPositions = [0.25, 0.5, 0.75];
+    // Place a tick at every event position (every step)
+    for (let i = 0; i < this.totalSteps; i++) {
+      // Skip the first and last positions to avoid clutter at edges
+      if (i === 0 || i === this.totalSteps - 1) continue;
 
-    for (const position of debugPositions) {
-      const tickX = greenAreaStart + position * greenAreaWidth;
+      const normalizedPosition = i / (this.totalSteps - 1);
+      const tickX = normalizedPosition * usableWidth + this.config.innerPadding;
 
-      // Small tick (1/3 height)
       this.ticks.rect(
         tickX - this.config.tickWidth / 2,
         this.config.padding + this.config.barHeight - this.config.barHeight / 3,
@@ -319,17 +319,6 @@ export class TimelineBar extends Container {
         this.config.barHeight / 3
       );
       this.ticks.fill({ color: this.config.colors.tick });
-
-      // Major tick at 50% (full height)
-      if (position === 0.5) {
-        this.ticks.rect(
-          tickX - this.config.majorTickWidth / 2,
-          this.config.padding,
-          this.config.majorTickWidth,
-          this.config.barHeight
-        );
-        this.ticks.fill({ color: this.config.colors.tick });
-      }
     }
   }
 

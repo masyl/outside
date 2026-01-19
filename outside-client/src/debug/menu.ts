@@ -36,9 +36,11 @@ export class DebugMenu {
   private setupMenu(): void {
     // Create background with rounded corners
     const background = new Graphics();
-    background.roundRect(0, 0, 400, 300, 8); // 8px corner radius
-    background.fill(0x1a1a1a);
-    background.stroke({ width: 2, color: 0x00ff00 });
+    background.beginFill(0x1a1a1a);
+    background.drawRoundedRect(0, 0, 400, 300, 8); // 8px corner radius
+    background.endFill();
+    background.lineStyle(2, 0x00ff00);
+    background.drawRoundedRect(0, 0, 400, 300, 8);
     this.container.addChild(background);
 
     // Create title
@@ -55,9 +57,11 @@ export class DebugMenu {
 
     // Create reset level button with rounded corners
     const buttonBackground = new Graphics();
-    buttonBackground.roundRect(0, 0, 200, 40, 6); // 6px corner radius for buttons
-    buttonBackground.fill(0x333333);
-    buttonBackground.stroke({ width: 1, color: 0x00ff00 });
+    buttonBackground.beginFill(0x333333);
+    buttonBackground.drawRoundedRect(0, 0, 200, 40, 6); // 6px corner radius for buttons
+    buttonBackground.endFill();
+    buttonBackground.lineStyle(1, 0x00ff00);
+    buttonBackground.drawRoundedRect(0, 0, 200, 40, 6);
 
     const buttonText = new Text({
       text: 'Reset Level (Alt+R)',
@@ -91,9 +95,11 @@ export class DebugMenu {
 
     // Create toggle autonomy button with rounded corners
     const autonomyButtonBackground = new Graphics();
-    autonomyButtonBackground.roundRect(0, 0, 200, 40, 6); // 6px corner radius for buttons
-    autonomyButtonBackground.fill(0x333333);
-    autonomyButtonBackground.stroke({ width: 1, color: 0x00ff00 });
+    autonomyButtonBackground.beginFill(0x333333);
+    autonomyButtonBackground.drawRoundedRect(0, 0, 200, 40, 6); // 6px corner radius for buttons
+    autonomyButtonBackground.endFill();
+    autonomyButtonBackground.lineStyle(1, 0x00ff00);
+    autonomyButtonBackground.drawRoundedRect(0, 0, 200, 40, 6);
 
     this.autonomyButtonText = new Text({
       text: this.getAutonomyButtonText(),
