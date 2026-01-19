@@ -41,9 +41,12 @@ Successfully implemented a fully functional timeline bar component with all requ
 ### Visual Design Decisions
 
 - **Color scheme**: Green bar (#00ff00) with black padding, matching debug aesthetic
-- **Positioning**: 50px from bottom of screen as specified
+- **Positioning**: 50px from bottom with 12px side padding for balanced layout
 - **Hover effects**: Brighter green border (#40ff40) on hover
 - **Marker styling**: 2px width black line for clear position indication
+- **Rounded corners**: 8px corner radius for consistency with debug menu
+- **Bar thickness**: 12px height (half original thickness) for refined appearance
+- **Padding**: 12px padding (50% increase) for better visual separation
 
 ### Interaction Model
 
@@ -59,6 +62,8 @@ Successfully implemented a fully functional timeline bar component with all requ
 - **Edge case handling**: Added proper handling for empty timelines (totalSteps = 0)
 - **Event cleanup**: Implemented comprehensive dispose() method for memory management
 - **Callback enhancement**: Improved TimelineManager callback system for better separation of concerns
+- **Visual refinements**: Side padding, rounded corners, thickness adjustments based on user feedback
+- **Debug menu consistency**: Added rounded corners to debug menu for uniform appearance
 
 ### No Major Changes
 
@@ -109,7 +114,11 @@ Successfully implemented a fully functional timeline bar component with all requ
 ### Manual Testing
 
 - ✅ **Development server** runs successfully on localhost:5180
-- ✅ **Timeline bar visibility** correctly shows/hides based on playback state
+- ✅ **Timeline bar visibility** correctly shows only when TRAVELING, hides during PLAY mode
+- ✅ **Side padding** provides balanced spacing from screen edges
+- ✅ **Rounded corners** create uniform appearance with debug menu
+- ✅ **Reduced thickness** (12px) provides more refined visual appearance
+- ✅ **Increased padding** (12px) creates better visual separation
 - ✅ **Click navigation** accurately jumps to clicked positions
 - ✅ **Drag navigation** provides smooth timeline scrubbing
 - ✅ **Hover effects** work as expected (cursor change, border brightness)

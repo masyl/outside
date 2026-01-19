@@ -69,11 +69,45 @@ The timeline bar will be added to the PIXI stage in `main.ts` and positioned at 
 - [Timeline Keystrokes Integration (Timeline series: 5)](../pitches/timeline-keystrokes-integration.md)
 - [Timeline Network Synchronization (Timeline series: 6)](../pitches/timeline-network-synchronization.md)
 
-## Open Questions
+## Pitch Review Questions
 
-- Should timeline bar be visible in client mode? (Answer: Only visible in host mode for now)
-- Should the timeline bar have any visual indication of the 10,000 step limit? (Not specified)
+- Q: Should timeline bar be visible in client mode?
+  - A: Only visible in Local and Host mode.
+  - A: Special Client behavior will be done later.
 
-## Timeline Series Context
+- Q: Should the timeline bar have any visual indication of the 10,000 step limit? (Not specified)
+- A: Not for now.
 
-This deliverable provides visual interface for timeline features. It makes timeline state visible to users and establishes the visual language (green timeline bar) that will be synchronized to clients in the final deliverable.
+- Q: Timeline bar interactivity: Should users be able to click the timeline bar to jump to specific positions, or should it be purely visual for now?
+  - A: The timeline should be clickable. It moves the time cursor while the user keeps the mouse down. A single click move the cursor at that position.
+
+- Q: Integration approach: Do you prefer a separate timeline bar component at the bottom of screen, or should it be integrated into the existing DebugOverlay panel?
+  - A: It's a separate UI.
+  
+- Q: Visibility control: Should the timeline bar only be visible in host mode, or do you want a way to toggle visibility?
+  - A: The toolbar should become visible only when the game starts travelling in time. Once the game resumes the normal PLAY mode at the head of the event stream, it disapears.
+
+- Q: Any styling preferences: Beyond the "green bar with black padding" specification, any specific height, positioning, or visual effects you'd like?
+  - A: Keep the green pixelated aesthetic and fonts. This first timeline UI will be for debugging and development. Better looking timelines could be added later to be used "in game".
+  - A: We can tweak the look together during the implementation.
+
+- Q: Mouse interaction behavior: When the user holds down mouse and moves, should the timeline update continuously (every mouse move) or should there be some throttling/debouncing?
+  - A: Yes, add some debounce and throttling to prevent spamming the CPU.
+
+- Q: Edge case handling: What should happen when:
+
+  - Q: Total steps = 0 (empty timeline)?
+    - A: Nothing special. At that point the world state should simply already be blank.
+  - Q: User clicks outside the green bar but inside the padding?
+    - A: Nothing for now.
+  - Q: User drags beyond the timeline boundaries?
+    - A: The cursor should never go out of bound and respect the boundaries of the timeline.
+
+- Q: Visual feedback: Should there be any visual indication when the timeline is interactive (hover state, cursor change, etc.)?
+  - A: The cursor point should change to a hand and the color of the border should be a little brighter.
+
+- Q: Animation: Should the position marker animate to new positions or jump instantly?
+  - A: Jump instantly for now.
+
+- Q: Mode specificity: Should the timeline behave differently in Local vs Host mode, or just visibility control?
+  - The idead of a "local" mode is just being a host without waiting for inbound clients. So the timeline should behave the same. Only in Client mode is the bar hidden by default.

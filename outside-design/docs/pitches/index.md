@@ -2,7 +2,14 @@
 
 ## Next Logical Pitches
 
+- DONE - [Keystroke Help Menu (Timeline series: 1)](./keystroke-help-menu.md)
+- DONE - [Timeline Engine Core (Timeline series: 2)](./timeline-engine-core.md)
+- DONE - [Playback Controls & Game Loop Integration (Timeline series: 3)](./timeline-playback-controls.md)
+- DONE - [Timeline Keystrokes Integration (Timeline series: 5)](./timeline-keystrokes-integration.md)
+- [Timeline UI Components (Timeline series: 4)](./timeline-ui-components.md)
 - [Multiple Character Skins](./multiple-character-skins.md)
+- [Timeline Network Synchronization (Timeline series: 6)](./timeline-network-synchronization.md)
+
 
 ## Core features
 
@@ -11,9 +18,9 @@
 - [Spawning Bots](./spawning-bots.md)
 - [Diegetic Welcome Screen](./diegetic-welcome-screen.md)
 
-## Mini Games
+## Games built Outside
 
-- Dingle Brawl (aka Calvin Ball animated by a faux fairy from Hyrule)
+- [Dingle Brawl](./dingle-brawl.md)
 - [Mini Game: Chess](./mini-game-chess.md)
 - [Mini Game: Beach Sweeper](./mini-game-beach-sweeper.md)
 
@@ -30,15 +37,6 @@
   - Timeline
   - Time in hours, minutes, seconds
   - Command buttons
-
-## Timeline Controls Series
-
-- [Keystroke Help Menu (Timeline series: 1)](./keystroke-help-menu.md)
-- [Timeline Engine Core (Timeline series: 2)](./timeline-engine-core.md)
-- [Playback Controls & Game Loop Integration (Timeline series: 3)](./timeline-playback-controls.md)
-- [Timeline UI Components (Timeline series: 4)](./timeline-ui-components.md)
-- [Timeline Keystrokes Integration (Timeline series: 5)](./timeline-keystrokes-integration.md)
-- [Timeline Network Synchronization (Timeline series: 6)](./timeline-network-synchronization.md)
 
 - Add a corner Logo
 - Draw an dotted outline boundary for the grid
