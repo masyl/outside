@@ -232,6 +232,7 @@ export class GameRenderer {
    * Update debug overlay grid for bot target positions
    */
   updateBotDebugGrid(world: WorldState, enabled: boolean): void {
+    console.log(`[GameRenderer] updateBotDebugGrid called with enabled: ${enabled}`);
     // Update existing debug overlay (green dotted squares)
     this.debugOverlayContainer.removeChildren();
 

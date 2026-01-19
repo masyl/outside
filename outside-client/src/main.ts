@@ -88,6 +88,7 @@ async function init(options?: {
     const gridY = Math.floor(worldY);
 
     // Update visual debug layer with grid position
+    console.log(`[Main] Mouse position - gridX: ${gridX}, gridY: ${gridY}`);
     renderer.updateMousePosition(gridX, gridY);
   });
 

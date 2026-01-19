@@ -27,6 +27,7 @@ export class VisualDebugLayer extends Container {
   private mouseY: number = -1;
 
   constructor() {
+    console.log('[VisualDebugLayer] Constructor called');
     super();
     this.graphics = new Graphics();
     this.addChild(this.graphics);
@@ -37,12 +38,13 @@ export class VisualDebugLayer extends Container {
    * Toggle debug layer visibility
    */
   setVisible(visible: boolean): void {
+    console.log(`[VisualDebugLayer] setVisible called with: ${visible}`);
     this.isVisible = visible;
     this.visible = visible;
     if (visible) {
       this.render();
     } else {
-      this.clear();
+      this.graphics.clear();
     }
   }
 
@@ -65,17 +67,11 @@ export class VisualDebugLayer extends Container {
   }
 
   /**
-   * Clear all graphics
-   */
-  private clear(): void {
-    this.graphics.clear();
-  }
-
-  /**
    * Render all debug visualizations
    */
   private render(): void {
-    this.clear();
+    console.log(`[VisualDebugLayer] render() called, isVisible: ${this.isVisible}`);
+    this.graphics.clear();
 
     this.renderDotGrid();
     this.renderWorldBoundary();
@@ -89,14 +85,21 @@ export class VisualDebugLayer extends Container {
   private renderDotGrid(): void {
     const { GRID_WIDTH, GRID_HEIGHT, TILE_SIZE, COLORS } = VisualDebugLayer;
 
-    this.graphics.setStrokeStyle({ width: 2, color: COLORS.GRID_DOTS });
+    console.log(
+      `[VisualDebugLayer] renderDotGrid: drawing ${GRID_WIDTH + 1}x${GRID_HEIGHT + 1} dots`
+    );
 
     // Draw dots at each tile corner
     for (let x = 0; x <= GRID_WIDTH; x++) {
       for (let y = 0; y <= GRID_HEIGHT; y++) {
         const pixelX = x * TILE_SIZE;
         const pixelY = y * TILE_SIZE;
-        this.graphics.drawCircle(pixelX, pixelY, 2);
+
+        // Fill a small circle for each dot
+        this.graphics.beginPath();
+        this.graphics.fill({ color: COLORS.GRID_DOTS });
+        this.graphics.circle(pixelX, pixelY, 2);
+        this.graphics.fill();
       }
     }
   }
@@ -107,8 +110,13 @@ export class VisualDebugLayer extends Container {
   private renderWorldBoundary(): void {
     const { GRID_WIDTH, GRID_HEIGHT, TILE_SIZE, COLORS } = VisualDebugLayer;
 
+    console.log(
+      `[VisualDebugLayer] renderWorldBoundary: drawing boundary of size ${GRID_WIDTH * TILE_SIZE}x${GRID_HEIGHT * TILE_SIZE}`
+    );
+
     this.graphics.setStrokeStyle({ width: 3, color: COLORS.WORLD_BOUNDARY });
-    this.graphics.drawRect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+    this.graphics.rect(0, 0, GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE);
+    this.graphics.stroke();
   }
 
   /**
@@ -121,12 +129,19 @@ export class VisualDebugLayer extends Container {
     const centerX = this.mouseX * TILE_SIZE + TILE_SIZE / 2;
     const centerY = this.mouseY * TILE_SIZE + TILE_SIZE / 2;
 
+    console.log(
+      `[VisualDebugLayer] renderMouseVisualizations: mouse at grid (${this.mouseX}, ${this.mouseY})`
+    );
+
     // Continuous mouse position circle (blue)
     this.graphics.setStrokeStyle({ width: 2, color: COLORS.MOUSE_CIRCLE });
-    this.graphics.drawCircle(centerX, centerY, TILE_SIZE / 3);
+    this.graphics.beginPath();
+    this.graphics.circle(centerX, centerY, TILE_SIZE / 3);
+    this.graphics.stroke();
 
     // Grid-snapped cursor tile square (yellow)
     this.graphics.setStrokeStyle({ width: 2, color: COLORS.CURSOR_TILE });
-    this.graphics.drawRect(this.mouseX * TILE_SIZE, this.mouseY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    this.graphics.rect(this.mouseX * TILE_SIZE, this.mouseY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    this.graphics.stroke();
   }
 }
