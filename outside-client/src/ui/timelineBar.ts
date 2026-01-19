@@ -95,13 +95,13 @@ export class TimelineBar extends Container {
     this.bar = new Graphics();
     this.addChild(this.bar);
 
-    // Create position marker
-    this.positionMarker = new Graphics();
-    this.addChild(this.positionMarker);
-
     // Create tick marks container
     this.ticks = new Graphics();
     this.addChild(this.ticks);
+
+    // Create position marker (on top of ticks)
+    this.positionMarker = new Graphics();
+    this.addChild(this.positionMarker);
 
     this.updateLayout();
     this.updateMarkerPosition();

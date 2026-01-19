@@ -75,7 +75,7 @@ export class AnimationController {
           if (sprite) {
             const VERTICAL_OFFSET = -8;
             sprite.x = toPos.x * DISPLAY_TILE_SIZE;
-            sprite.y = (toPos.y * DISPLAY_TILE_SIZE) + VERTICAL_OFFSET;
+            sprite.y = toPos.y * DISPLAY_TILE_SIZE + VERTICAL_OFFSET;
           }
         }
         return;
@@ -143,10 +143,10 @@ export class AnimationController {
     // Ideally, the game logic (HostMode) should update facing, but AnimationController is client-side visual logic.
     // For now, we'll let the renderer handle the visual update based on direction if we can pass it.
     // But AnimationController is about position interpolation.
-    
+
     // We can update the sprite's texture frame directly in the renderer based on direction
     // But we need to persist "facing" state for idle animations.
-    
+
     // Let's call a method on renderer to set the facing direction for this bot
     this.renderer.updateBotDirection(id, direction, true); // true = moving
 
@@ -154,11 +154,11 @@ export class AnimationController {
     // This allows smooth continuation if an animation is interrupted
     const currentPixelX = sprite.x;
     const currentPixelY = sprite.y;
-    
+
     // Convert current pixel position to grid coordinates for the animation function
     // The animation function expects grid coordinates and converts to pixels internally
     const fromGridX = currentPixelX / DISPLAY_TILE_SIZE;
-    const fromGridY = currentPixelY / DISPLAY_TILE_SIZE;
+    const fromGridY = (currentPixelY - VERTICAL_OFFSET) / DISPLAY_TILE_SIZE;
 
     // Animate from current position (in grid coords) to target position (in grid coords)
     // The animation function will handle pixel interpolation, allowing smooth sub-grid movement
@@ -173,14 +173,14 @@ export class AnimationController {
         // Update sprite position in pixel space
         // This allows the sprite to be at intermediate positions between grid tiles
         sprite.x = pixelX;
-        sprite.y = pixelY;
+        sprite.y = pixelY + VERTICAL_OFFSET;
       },
       () => {
         // Animation complete - ensure sprite is exactly at target grid position
         sprite.x = toPos.x * DISPLAY_TILE_SIZE;
-        sprite.y = (toPos.y * DISPLAY_TILE_SIZE) + VERTICAL_OFFSET;
+        sprite.y = toPos.y * DISPLAY_TILE_SIZE + VERTICAL_OFFSET;
         this.activeAnimations.delete(id);
-        
+
         // Update state to idle
         this.renderer.updateBotDirection(id, direction, false); // false = idle
       }
@@ -189,4 +189,3 @@ export class AnimationController {
     this.activeAnimations.set(id, cancel);
   }
 }
-

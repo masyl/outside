@@ -5,6 +5,7 @@
 export const VERSION = '0.1.8'; // Update patch number when making changes
 
 export class DebugOverlay {
+  private static readonly VISIBILITY_KEY = 'outside.debugOverlay.visible';
   private container: HTMLDivElement;
   private fpsElement: HTMLDivElement;
   private stepElement: HTMLDivElement;
@@ -42,11 +43,18 @@ export class DebugOverlay {
       font-size: 16px;
       padding: 20px;
       border: 2px solid #00ff00;
+      border-radius: 8px;
       z-index: 10000;
       pointer-events: none;
       user-select: none;
       display: block;
     `;
+
+    // Restore visibility state
+    const storedVisibility = window.localStorage.getItem(DebugOverlay.VISIBILITY_KEY);
+    if (storedVisibility === 'hidden') {
+      this.container.style.display = 'none';
+    }
 
     // Create title element
     const titleElement = document.createElement('div');
@@ -122,17 +130,17 @@ export class DebugOverlay {
   private startFpsCounter(): void {
     const updateFps = (timestamp: number) => {
       this.frameCount++;
-      
+
       if (timestamp - this.lastFpsUpdate >= 1000) {
         this.fps = this.frameCount;
         this.frameCount = 0;
         this.lastFpsUpdate = timestamp;
         this.fpsElement.textContent = `FPS: ${this.fps}`;
       }
-      
+
       requestAnimationFrame(updateFps);
     };
-    
+
     requestAnimationFrame(updateFps);
   }
 
@@ -236,6 +244,7 @@ export class DebugOverlay {
    */
   show(): void {
     this.container.style.display = 'block';
+    window.localStorage.setItem(DebugOverlay.VISIBILITY_KEY, 'visible');
   }
 
   /**
@@ -243,6 +252,7 @@ export class DebugOverlay {
    */
   hide(): void {
     this.container.style.display = 'none';
+    window.localStorage.setItem(DebugOverlay.VISIBILITY_KEY, 'hidden');
   }
 
   /**
