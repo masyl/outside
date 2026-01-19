@@ -19,6 +19,7 @@ export class DebugOverlay {
   private timelineCursorElement: HTMLDivElement;
   private fps: number = 0;
   private frameCount: number = 0;
+  private visibilityChangeHandler?: (visible: boolean) => void;
   private lastFpsUpdate: number = 0;
   private stepCount: number = 0;
   private mode: 'host' | 'client' | 'unknown' = 'unknown';
@@ -245,6 +246,9 @@ export class DebugOverlay {
   show(): void {
     this.container.style.display = 'block';
     window.localStorage.setItem(DebugOverlay.VISIBILITY_KEY, 'visible');
+    if (this.visibilityChangeHandler) {
+      this.visibilityChangeHandler(true);
+    }
   }
 
   /**
@@ -253,6 +257,9 @@ export class DebugOverlay {
   hide(): void {
     this.container.style.display = 'none';
     window.localStorage.setItem(DebugOverlay.VISIBILITY_KEY, 'hidden');
+    if (this.visibilityChangeHandler) {
+      this.visibilityChangeHandler(false);
+    }
   }
 
   /**
@@ -264,6 +271,14 @@ export class DebugOverlay {
     } else {
       this.hide();
     }
+  }
+
+  isVisible(): boolean {
+    return this.container.style.display !== 'none';
+  }
+
+  onVisibilityChange(callback: (visible: boolean) => void): void {
+    this.visibilityChangeHandler = callback;
   }
 
   /**

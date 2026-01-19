@@ -61,7 +61,7 @@ export class TimelineManager {
     this.stateChangeCallbacks.forEach((callback) => callback(this.playbackState));
   }
 
-  private notifyPositionChange(): void {
+  notifyPositionChange(): void {
     const events = this.eventLogger.loadEvents();
     this.positionChangeCallbacks.forEach((callback) => {
       callback(this.pointer, events.length);

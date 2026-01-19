@@ -70,6 +70,14 @@ async function init(options?: {
   // Create renderer
   const renderer = new GameRenderer(app);
 
+  // Toggle debug grid when debug overlay visibility changes
+  debugOverlay.onVisibilityChange((visible) => {
+    renderer.updateBotDebugGrid(store.getState(), visible);
+  });
+
+  // Ensure debug grid matches persisted visibility state
+  renderer.updateBotDebugGrid(store.getState(), debugOverlay.isVisible());
+
   // Pre-load all assets before starting the game
   // This ensures spritesheets are ready and prevents default placeholder sprites
   console.log('[Init] Loading assets...');

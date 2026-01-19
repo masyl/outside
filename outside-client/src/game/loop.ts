@@ -22,7 +22,12 @@ export class GameLoop {
   private playbackState: PlaybackState = PlaybackState.PLAYING;
   private timelineManager: TimelineManager | null = null;
 
-  constructor(store: Store, commandQueue: CommandQueue, renderer: GameRenderer, debugOverlay?: DebugOverlay) {
+  constructor(
+    store: Store,
+    commandQueue: CommandQueue,
+    renderer: GameRenderer,
+    debugOverlay?: DebugOverlay
+  ) {
     this.store = store;
     this.commandQueue = commandQueue;
     this.renderer = renderer;
@@ -45,6 +50,11 @@ export class GameLoop {
     // This prevents commands intended for the "live" head from executing on historical states
     if (state === PlaybackState.TRAVELING && previousState !== PlaybackState.TRAVELING) {
       this.commandQueue.clear();
+    }
+
+    // When pausing or traveling, ensure UI updates with current timeline position
+    if (this.timelineManager && state !== PlaybackState.PLAYING) {
+      this.timelineManager.notifyPositionChange();
     }
   }
 
@@ -86,6 +96,9 @@ export class GameLoop {
     // Subscribe to state changes for rendering
     this.store.subscribe((state) => {
       this.renderer.update(state);
+      if (this.timelineManager && this.playbackState !== PlaybackState.PLAYING) {
+        this.timelineManager.notifyPositionChange();
+      }
     });
 
     // Note: Initial render is now handled in main.ts after terrain is loaded
@@ -132,14 +145,14 @@ export class GameLoop {
       // Process multiple commands per step to drain the queue
       // This allows multiple bots to move in the same visual "step"
       const currentStep = this.debugOverlay?.getStepCount();
-      
+
       // Process up to 10 commands per tick to prevent infinite loops but drain queue
       const MAX_COMMANDS_PER_TICK = 10;
       let processed = 0;
 
       while (this.commandQueue.length() > 0 && processed < MAX_COMMANDS_PER_TICK) {
-      const command = this.commandQueue.dequeue();
-      if (command) {
+        const command = this.commandQueue.dequeue();
+        if (command) {
           // #region agent log
           // fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'loop.ts:startStateUpdateLoop',message:'Executing command',data:{command, step: currentStep, processedCount: processed},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
           // #endregion
@@ -161,7 +174,7 @@ export class GameLoop {
 
       // Animation updates happen here if needed
       // For now, motion.dev handles its own animation loop
-      
+
       this.animationFrameId = requestAnimationFrame(loop);
     };
 
