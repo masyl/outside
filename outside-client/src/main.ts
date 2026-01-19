@@ -21,6 +21,7 @@ import { actions } from './store/actions';
 import { SignalingClient } from './network/signaling';
 import { HostMode } from './network/host';
 import { ClientMode } from './network/client';
+import { DISPLAY_TILE_SIZE } from './renderer/grid';
 
 /**
  * Initialize and start the game
@@ -69,6 +70,26 @@ async function init(options?: {
 
   // Create renderer
   const renderer = new GameRenderer(app);
+
+  // Add mouse tracking for visual debug layer
+  app.stage.eventMode = 'static';
+  app.stage.hitArea = app.screen;
+  app.stage.on('pointermove', (event) => {
+    // Get global position
+    const globalPos = event.global;
+
+    // Convert to world coordinates by accounting for root container transformation
+    const rootPos = renderer.getRootContainerPosition();
+    const worldX = (globalPos.x - rootPos.x) / DISPLAY_TILE_SIZE;
+    const worldY = (globalPos.y - rootPos.y) / DISPLAY_TILE_SIZE;
+
+    // Convert to grid coordinates (floor for tile-based positioning)
+    const gridX = Math.floor(worldX);
+    const gridY = Math.floor(worldY);
+
+    // Update visual debug layer with grid position
+    renderer.updateMousePosition(gridX, gridY);
+  });
 
   // Toggle debug grid when debug overlay visibility changes
   debugOverlay.onVisibilityChange((visible) => {

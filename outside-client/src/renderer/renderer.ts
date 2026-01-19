@@ -9,6 +9,7 @@ import {
   SpriteIndex,
 } from './objects';
 import { createTerrainLayer, updateTerrainLayer } from './terrain';
+import { VisualDebugLayer } from './visualDebugLayer';
 
 /**
  * Main renderer for the game
@@ -19,6 +20,7 @@ export class GameRenderer {
   private terrainContainer: Container;
   private objectsContainer: Container;
   private debugOverlayContainer!: Container;
+  private visualDebugLayer: VisualDebugLayer;
   private rootContainer: Container;
   private botTexture?: Texture;
   private botWalkTexture?: Texture;
@@ -39,12 +41,14 @@ export class GameRenderer {
     this.gridContainer = new Container();
     this.terrainContainer = new Container();
     this.debugOverlayContainer = new Container();
+    this.visualDebugLayer = new VisualDebugLayer();
     this.objectsContainer = new Container();
 
-    // Add containers in render order: grid (bottom), terrain (middle), debug overlay, objects (top)
+    // Add containers in render order: grid (bottom), terrain (middle), debug overlay, visual debug, objects (top)
     this.rootContainer.addChild(this.gridContainer);
     this.rootContainer.addChild(this.terrainContainer);
     this.rootContainer.addChild(this.debugOverlayContainer);
+    this.rootContainer.addChild(this.visualDebugLayer);
     this.rootContainer.addChild(this.objectsContainer);
   }
 
@@ -228,12 +232,19 @@ export class GameRenderer {
    * Update debug overlay grid for bot target positions
    */
   updateBotDebugGrid(world: WorldState, enabled: boolean): void {
+    // Update existing debug overlay (green dotted squares)
     this.debugOverlayContainer.removeChildren();
 
     if (!enabled) {
+      // Disable visual debug layer when debug is off
+      this.visualDebugLayer.setVisible(false);
       return;
     }
 
+    // Enable visual debug layer when debug is on
+    this.visualDebugLayer.setVisible(true);
+
+    // Fix and render existing green dotted squares
     const graphics = new Graphics();
     const VIRTUAL_PIXEL = 2; // Matches PIXEL_RATIO for crisp 1px lines
 
@@ -245,7 +256,7 @@ export class GameRenderer {
       const x = object.position.x * DISPLAY_TILE_SIZE;
       const y = object.position.y * DISPLAY_TILE_SIZE;
 
-      graphics.lineStyle(VIRTUAL_PIXEL, 0x00ff00, 1);
+      graphics.setStrokeStyle({ width: VIRTUAL_PIXEL, color: 0x00ff00, alpha: 1 });
 
       // Draw dotted square with virtual pixel spacing
       const dot = VIRTUAL_PIXEL;
@@ -269,6 +280,20 @@ export class GameRenderer {
     });
 
     this.debugOverlayContainer.addChild(graphics);
+
+    // Update visual debug layer with bot positions
+    const botPositions = Array.from(world.objects.values())
+      .filter((obj) => obj.type === 'bot' && obj.position)
+      .map((obj) => ({ x: obj.position!.x, y: obj.position!.y }));
+
+    this.visualDebugLayer.updateBotPositions(botPositions);
+  }
+
+  /**
+   * Update mouse position for visual debug layer
+   */
+  updateMousePosition(gridX: number, gridY: number): void {
+    this.visualDebugLayer.updateMousePosition(gridX, gridY);
   }
 
   /**
@@ -296,6 +321,13 @@ export class GameRenderer {
    */
   setBotTexture(texture: Texture): void {
     this.botTexture = texture;
+  }
+
+  /**
+   * Get the root container position for coordinate transformation
+   */
+  getRootContainerPosition(): { x: number; y: number } {
+    return { x: this.rootContainer.x, y: this.rootContainer.y };
   }
 
   /**
