@@ -1,10 +1,10 @@
 ---
 Title: Debug Overlay Object Counts
 DeliveryDate: 2026-01-09
-Summary: "Updated the Debug Overlay to display separate counts for Surface objects (bots) and Ground objects (terrain). Resolved an issue where object counts were inaccurate. The overlay now displays Objects: X (Surf) / Y (Gnd)."
+Summary: 'Updated the Debug Overlay to display separate counts for Surface objects (bots) and Ground objects (terrain). Resolved an issue where object counts were inaccurate. The overlay now displays Objects: X (Surf) / Y (Gnd).'
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Debug Overlay Object Counts

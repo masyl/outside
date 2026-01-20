@@ -3,8 +3,8 @@ Title: Game Client POC
 DeliveryDate: 2026-01-08
 Summary: Built the first POC for the game client with complete CQRS/Flux architecture. Includes Pixi.js rendering, command system, 500ms game loop, and mock command feeder. All core systems implemented and working.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Game Client POC

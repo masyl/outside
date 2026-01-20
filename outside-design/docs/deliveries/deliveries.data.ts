@@ -1,4 +1,4 @@
-import { createContentLoader } from 'vitepress'
+import { createContentLoader } from 'vitepress';
 
 export default createContentLoader('deliveries/*/README.md', {
   includeSrc: false,
@@ -15,20 +15,20 @@ export default createContentLoader('deliveries/*/README.md', {
           Branch: page.frontmatter.Branch,
           Commit: page.frontmatter.Commit,
           path: page.url,
-          folderName: page.url.split('/').slice(-2, -1)[0]
-        }
+          folderName: page.url.split('/').slice(-2, -1)[0],
+        };
       })
       .sort((a, b) => {
-        const dateA = new Date(a.DeliveryDate || 0)
-        const dateB = new Date(b.DeliveryDate || 0)
-        const timeDiff = dateB.getTime() - dateA.getTime()
-        
+        const dateA = new Date(a.DeliveryDate || 0);
+        const dateB = new Date(b.DeliveryDate || 0);
+        const timeDiff = dateB.getTime() - dateA.getTime();
+
         if (timeDiff !== 0) {
-          return timeDiff
+          return timeDiff;
         }
-        
+
         // Secondary sort by folder name (contains timestamp) descending
-        return b.folderName.localeCompare(a.folderName)
-      })
-  }
-})
+        return b.folderName.localeCompare(a.folderName);
+      });
+  },
+});

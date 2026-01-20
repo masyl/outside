@@ -3,8 +3,8 @@ Title: Client Reconnection Stability
 DeliveryDate: 2026-01-09
 Summary: Implemented a progressive reconnection system for clients. Features a smart backoff strategy (silent retry after 1s, visible warning after 2s, then 5s loop) to handle network interruptions gracefully. Includes a new ConnectionOverlay UI component to keep users informed during outages.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Client Reconnection Stability

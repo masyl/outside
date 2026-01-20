@@ -2,8 +2,6 @@
 
 ## Motivation
 
-
-
 ## Solution
 
 Dingle Brawl is a game inspired by Calvin Ball. The concept is that a bunch of friends try to count points by going through a series of 1 minutes rounds that each have arbitrary rules told to them just as the round starts.
@@ -24,7 +22,6 @@ RULES:
 - Rounds can be suddenly cut short or extended, because Dingle says so.
 - Lagging players are always given pittied and give better power ups.
 - Dingle can give random arbitrary invented trophies.
-
 
 ## Pre-requisites
 

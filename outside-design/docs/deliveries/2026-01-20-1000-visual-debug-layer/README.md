@@ -3,8 +3,8 @@ Title: Visual Debug Layer
 DeliveryDate: 2026-01-20
 Summary: A visual debug layer drawn between the ground layer and the surface layer that provides enhanced visualization of the game's internal state. Includes dot grid system, world boundary visualization, mouse position tracking, and bot position visualization. Only visible when debug mode is active.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Visual Debug Layer

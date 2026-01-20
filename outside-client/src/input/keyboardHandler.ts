@@ -9,6 +9,7 @@ import { KeystrokeOverlay } from '../debug/keystrokeOverlay';
 import { TimelineManager } from '../timeline/manager';
 import { GameLoop } from '../game/loop';
 import { PlaybackState } from '../timeline/types';
+import { zoomManager } from '../zoom/zoomState';
 
 export type InputCommandSender = (
   command: InputCommandType,
@@ -157,6 +158,23 @@ export class KeyboardHandler {
       }
       event.preventDefault();
       this.handleArrowKey('down');
+    });
+
+    // Zoom controls - Alt plus/minus for zoom in/out
+    this.keyHandlers.set('Equal', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom in (Alt + Plus/Equal)');
+        zoomManager.increaseZoom();
+      }
+    });
+
+    this.keyHandlers.set('Minus', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom out (Alt + Minus)');
+        zoomManager.decreaseZoom();
+      }
     });
 
     this.keyHandlers.set('ArrowLeft', (event) => {

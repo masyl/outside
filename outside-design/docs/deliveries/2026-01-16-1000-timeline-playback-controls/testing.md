@@ -7,20 +7,24 @@ This report validates the implementation of playback controls, game loop integra
 ## Tested Features
 
 ### Game Loop Integration
+
 - **Playback State**: Verified initialization, transitions (PLAYING ↔ PAUSED ↔ TRAVELING), and persistence.
 - **Queue Management**: Confirmed that the command queue processes events only in `PLAYING` state and is cleared/ignored in `TRAVELING` state.
 - **Step Execution**: Validated `step()` method delegates correctly to `TimelineManager`.
 
 ### Host Mode Integration
+
 - **State Sync**: Verified that `HostMode` receives and updates playback state from `TimelineManager`.
 - **Step Counter**: Confirmed step counter continues incrementing in `PAUSED` state (for UI/heartbeat) while game logic stops.
 - **Autonomy Control**: Tested that bot autonomy is disabled in non-`PLAYING` states.
 
 ### Timeline Manager
+
 - **State Tracking**: Confirmed correct state updates during navigation (`goToStep` → `TRAVELING`, `restoreEndState` → `PLAYING`).
 - **Callbacks**: Verified that registered callbacks fire on state changes.
 
 ### Autonomy
+
 - **State Awareness**: Verified `BotAutonomy` returns `null` (no command) when not in `PLAYING` state.
 
 ## Metrics

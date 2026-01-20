@@ -3,8 +3,8 @@ Title: Pixel Art Visuals
 DeliveryDate: 2026-01-09
 Summary: Replaced geometric placeholders with pixel art assets. Implemented asynchronous sprite sheet loading and rendering for terrain (grass, water) and bots. Includes tiling support for terrain and automatic placeholder-to-sprite upgrading.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Pixel Art Visuals

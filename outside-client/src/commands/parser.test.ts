@@ -276,13 +276,13 @@ describe('Command Parser', () => {
         // Current code is case sensitive.
         // So I should update expectation to 'unknown' for mismatched case.
         // EXCEPT: `create bot TEST-BOT` matches `create` and `bot`.
-        
+
         if (cmd === 'create bot TEST-BOT') {
-           expect(result.type).toBe('create');
-           expect((result as any).objectType).toBe('bot');
-           expect((result as any).id).toBe('TEST-BOT');
+          expect(result.type).toBe('create');
+          expect((result as any).objectType).toBe('bot');
+          expect((result as any).id).toBe('TEST-BOT');
         } else {
-           expect(result.type).toBe('unknown');
+          expect(result.type).toBe('unknown');
         }
       });
     });

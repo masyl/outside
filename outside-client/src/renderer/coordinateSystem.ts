@@ -20,7 +20,24 @@
  */
 
 /**
- * Core coordinate system constants
+ * Core coordinate system for the game
+ *
+ * Coordinate Concepts:
+ * 1. World Coordinates (Floating Point):
+ *    - Integer part = Grid Tile index (0, 1, 2...)
+ *    - Fractional part = Position within tile (0.0 to <1.0)
+ *    - Example: { x: 2.5, y: 1.5 } is center of tile (2,1)
+ *
+ * 2. Grid Coordinates (Integer):
+ *    - Tile indices only
+ *
+ * 3. Display Coordinates (Pixels):
+ *    - Screen rendering units
+ *    - Example: { x: 2.5, y: 1.5 } is center of tile (2,1)
+ *
+ * 4. Screen Coordinates (Browser Window):
+ *    - Browser window coordinates
+ *    - Used for mouse events and viewport calculations
  */
 export const COORDINATE_SYSTEM = {
   // Base virtual tile size (game logic coordinates)
@@ -37,6 +54,15 @@ export const COORDINATE_SYSTEM = {
   VERTICAL_OFFSET: -8, // Consistent vertical positioning
   VIRTUAL_PIXEL: 2, // For crisp 1px lines
 } as const;
+
+/**
+ * Get current zoom scale from zoom manager
+ */
+export function getZoomScale(): number {
+  // Return default zoom scale for now
+  // TODO: Fix circular import issue with zoom state
+  return 1.0; // Default zoom level 4 = 1.0x scale
+}
 
 /**
  * World Position - Single source of truth for entity positioning

@@ -46,6 +46,7 @@ Implement a two-layer grid system: **surface layer** (existing bots/objects) and
 ### Data Structure
 
 Terrain objects are stored separately from the surface grid. Each terrain object:
+
 - Has a position (x, y), width, height
 - Occupies a rectangular area
 - Has a type (grass, dirt, water, sand, hole)
@@ -59,16 +60,19 @@ For walkability lookups, we query all terrain objects that cover a position and 
 ### 1. Core Types (`outside-core/src/types.ts`)
 
 **Added terrain types:**
+
 - `TerrainType`: 'grass' | 'dirt' | 'water' | 'sand' | 'hole'
 - `TerrainObject`: Interface with id, type, position, width, height, createdAt timestamp
 - `GroundLayer`: Interface with terrainObjects Map and terrainObjectsByPosition Map for efficient lookups
 
 **Updated WorldState:**
+
 - Added `groundLayer: GroundLayer` field to store terrain separately from surface layer
 
 ### 2. Core World Utilities (`outside-core/src/world.ts`)
 
 **Added terrain utilities:**
+
 - `createGroundLayer()`: Initialize empty ground layer
 - `getTerrainObjectsAtPosition()`: Return all terrain objects covering a position
 - `getTopMostTerrainAtPosition()`: Return most recently created terrain at position (for walkability)
@@ -79,11 +83,13 @@ For walkability lookups, we query all terrain objects that cover a position and 
 - `doesTerrainCoverPosition()`: Check if terrain object covers a given position
 
 **Updated `createWorldState()`:**
+
 - Initialize `groundLayer` with empty terrain objects map
 
 ### 3. Command Parser (`outside-client/src/commands/parser.ts`)
 
 **Added terrain command parsing:**
+
 - Format: `"create terrain <type> <id> <x> <y> <width> <height>"`
 - Example: `"create terrain grass grass1 0 0 6 6"`
 - Validates terrain type and numeric parameters
@@ -91,22 +97,26 @@ For walkability lookups, we query all terrain objects that cover a position and 
 ### 4. Store Actions (`outside-client/src/store/actions.ts`)
 
 **Added terrain action:**
+
 - `CREATE_TERRAIN` action type with payload: id, terrainType, x, y, width, height
 - `createTerrain()` action creator
 
 ### 5. Reducer (`outside-client/src/store/reducers.ts`)
 
 **Added CREATE_TERRAIN case:**
+
 - Validates terrain bounds and dimensions
 - Creates TerrainObject with current timestamp
 - Adds to groundLayer using world utilities
 - Updates position index for efficient lookups
 
 **Updated MOVE_OBJECT case:**
+
 - Added walkability check using `isWalkable()` before allowing movement
 - Combined check: occupied by surface object OR not walkable
 
 **Updated PLACE_OBJECT case:**
+
 - Added walkability check before allowing placement
 - Ensures bots can only be placed on walkable terrain
 
@@ -115,11 +125,13 @@ For walkability lookups, we query all terrain objects that cover a position and 
 **New file for terrain rendering:**
 
 **Functions:**
+
 - `createTerrainLayer()`: Create container with all terrain sprites
 - `createTerrainSprite()`: Create sprite for single terrain object (solid color based on type)
 - `updateTerrainLayer()`: Update terrain layer when terrain changes
 
 **Terrain colors:**
+
 - grass: green (0x00ff00)
 - dirt: brown (0x8b4513)
 - water: blue (0x0000ff)
@@ -127,6 +139,7 @@ For walkability lookups, we query all terrain objects that cover a position and 
 - hole: black (0x000000)
 
 **Rendering approach:**
+
 - Terrains rendered in order of creation (oldest first, newest last)
 - Pixi.js z-ordering ensures newest terrain appears on top
 - Each terrain object rendered as full sprite covering its width/height
@@ -134,12 +147,14 @@ For walkability lookups, we query all terrain objects that cover a position and 
 ### 7. Renderer Integration (`outside-client/src/renderer/renderer.ts`)
 
 **Updated GameRenderer:**
+
 - Added `terrainContainer` to render ground layer
 - Added `previousGroundLayerSize` to track terrain changes
 - Updated `setWorld()` to create terrain layer before surface layer
 - Updated `update()` to always update terrain layer on world state changes
 
 **Render order (z-index):**
+
 1. Grid background (checkered pattern) - bottom
 2. Terrain layer (ground layer) - middle
 3. Surface layer (bots/objects) - top
@@ -147,6 +162,7 @@ For walkability lookups, we query all terrain objects that cover a position and 
 ### 8. Bot Sprite Update (`outside-client/src/renderer/objects.ts`)
 
 **Updated `createBotPlaceholder()`:**
+
 - Changed from 16px square to 32px circle (diameter) centered in 64px tile
 - Selected bot: white circle (#ffffff) with blue outline (#0000ff, 3px width)
 - Unselected bots: white circle (#ffffff) with grey border (#808080, 2px width)
@@ -155,11 +171,13 @@ For walkability lookups, we query all terrain objects that cover a position and 
 ### 9. Command Handler (`outside-client/src/commands/handlers.ts`)
 
 **Added terrain command handling:**
+
 - Handles `create terrain` commands by dispatching CREATE_TERRAIN action
 
 ### 10. Mock Command Feeder (`outside-client/src/mock/commandFeeder.ts`)
 
 **Updated to support initial terrain loading:**
+
 - `getInitialTerrainCommands()`: Returns array of terrain commands to be processed immediately
 - `feedBotCommands()`: Enqueues bot creation/placement commands for game loop
 - Terrain commands separated from bot commands for synchronous processing
@@ -167,6 +185,7 @@ For walkability lookups, we query all terrain objects that cover a position and 
 ### 11. Grid Background Update (`outside-client/src/renderer/grid.ts`)
 
 **Updated checkered pattern:**
+
 - Changed from grid-wide alternating tiles to 4x4 pattern inside each tile
 - Each tile (64px) contains 16 small squares (16px each) in 4x4 pattern
 - Uses same two colors (DARK_GREY and DARKER_GREY) for pattern
@@ -175,6 +194,7 @@ For walkability lookups, we query all terrain objects that cover a position and 
 ### 12. Initial Terrain Loading (`outside-client/src/main.ts`)
 
 **Added synchronous terrain processing:**
+
 - Process all terrain commands immediately before game loop starts
 - Call `renderer.setWorld()` after terrain is loaded to render terrain instantly
 - Bot commands still processed by game loop at 125ms intervals
@@ -194,10 +214,12 @@ During implementation, several issues were identified and fixed:
 ## Files Created/Modified
 
 ### New Files
+
 - `outside-client/src/renderer/terrain.ts` - Terrain rendering functions
 - `outside-client/meatsack-testing.md` - Testing notes and bug tracking
 
 ### Modified Files
+
 - `outside-core/src/types.ts` - Added terrain types and GroundLayer
 - `outside-core/src/world.ts` - Added terrain utilities and walkability checks
 - `outside-client/src/commands/parser.ts` - Add terrain command parsing
@@ -220,6 +242,7 @@ Terrain objects can overlap and stack. The system tracks all terrain objects at 
 ### Walkability System
 
 Walkability is determined by:
+
 1. Position must be valid (within world bounds)
 2. Position must have terrain (no terrain = not walkable)
 3. Top-most terrain at position must be walkable (grass, dirt, sand = walkable; water, hole = not walkable)
@@ -237,6 +260,7 @@ All terrain commands are processed synchronously before the game loop starts, en
 ## Future Enhancements
 
 Potential improvements for future iterations:
+
 - Optimize terrain rendering to only update changed terrain objects
 - Add terrain editing capabilities
 - Support for terrain animations (e.g., water movement)

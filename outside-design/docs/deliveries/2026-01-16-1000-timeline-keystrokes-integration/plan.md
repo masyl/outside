@@ -295,9 +295,11 @@ private jumpToEnd(): void {
 Beyond the original plan scope, the following improvements were implemented:
 
 ### Mac Compatibility Fixes
+
 - **Event.code usage**: Changed keystroke detection to use `event.code` instead of `event.key` for Alt+R, Alt+F, Alt+Home, Alt+End, Alt+D to handle Mac's Option key behavior (e.g., Option+R emits '®' as key but 'KeyR' as code)
 
 ### UI Enhancements
+
 - **Font system**: Replaced Press Start 2P with Minecraft font (less bold, better readability)
 - **Debug panel improvements**:
   - Added "Debug Panel" title
@@ -308,12 +310,14 @@ Beyond the original plan scope, the following improvements were implemented:
 - **Keystroke menu readability**: Simplified modifier notes (removed repetitive "Option/Alt" text, single note at bottom)
 
 ### Behavior Improvements
+
 - **Bot creation**: Bots are now created without a position and are invisible until explicitly placed
 - **Animation**: Bots appear instantly at their first position without "warp-in" animation
 - **LevelStart tagging**: Added timeline tagging system to mark the point immediately after level initialization
 - **Reset vs Time Travel**: Distinguished Alt+R (full reset - clears events, reinitializes) from Alt+Home (time travel to LevelStart)
 
 ### Scrubbing Behavior
+
 - Changed from 50 steps per key press to 1 second (8 steps) based on 8 steps per second configuration
 - More intuitive for users who think in terms of time rather than step counts
 

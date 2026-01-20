@@ -6,6 +6,6 @@ Audio feedback enhances the player experience and provides important cues about 
 
 ## Solution
 
-* Sound when moving
-* Sound on collision
-* Mute button
+- Sound when moving
+- Sound on collision
+- Mute button

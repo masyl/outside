@@ -13,17 +13,21 @@ Early sketches and wireframes exploring various approaches.
 ## Design Concepts
 
 ### Concept A
+
 Description of the first design concept...
 
 ### Concept B
+
 Description of the second design concept...
 
 ### Concept C
+
 Description of the third design concept...
 
 ## Evaluation
 
 We evaluated each concept based on:
+
 - User needs alignment
 - Technical feasibility
 - Visual appeal
@@ -36,4 +40,3 @@ After evaluation, we selected [Concept X] because...
 ---
 
 [← Back to Design Process](/design-process/)
-

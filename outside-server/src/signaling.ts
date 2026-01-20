@@ -37,10 +37,12 @@ export class SignalingServer {
       this.peers.set(peerId, peer);
 
       // Send peer ID to client
-      ws.send(JSON.stringify({
-        type: 'peer-id',
-        peerId,
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'peer-id',
+          peerId,
+        })
+      );
 
       // Handle messages
       ws.on('message', (data: Buffer) => {
@@ -108,10 +110,12 @@ export class SignalingServer {
     console.log(`[Signaling] Host registered: ${peerId}`);
 
     // Notify host of successful registration
-    peer.ws.send(JSON.stringify({
-      type: 'host-registered',
-      peerId,
-    }));
+    peer.ws.send(
+      JSON.stringify({
+        type: 'host-registered',
+        peerId,
+      })
+    );
 
     // Notify all clients that host is available
     this.broadcastToClients({
@@ -132,15 +136,19 @@ export class SignalingServer {
 
     // Send host status to new client
     if (this.hostPeerId) {
-      peer.ws.send(JSON.stringify({
-        type: 'host-status',
-        data: { isRunning: true, hostPeerId: this.hostPeerId },
-      }));
+      peer.ws.send(
+        JSON.stringify({
+          type: 'host-status',
+          data: { isRunning: true, hostPeerId: this.hostPeerId },
+        })
+      );
     } else {
-      peer.ws.send(JSON.stringify({
-        type: 'host-status',
-        data: { isRunning: false },
-      }));
+      peer.ws.send(
+        JSON.stringify({
+          type: 'host-status',
+          data: { isRunning: false },
+        })
+      );
     }
   }
 

@@ -40,7 +40,7 @@ Storybook will be added to the outside-client package with custom decorators to 
 ## Open Questions
 
 - How to handle PIXI.js canvas initialization in Storybook environment?
-  - Answer: Because the core game does not and will not use a typical DOM/HTML component system, custom wrappers should be built to facilitate the integration of game entities into Storybook. These HTML/DOM wrappers should never bleed into the game itself, but rather only serve the purpose or featuring aspects of the game inside a web page. 
+  - Answer: Because the core game does not and will not use a typical DOM/HTML component system, custom wrappers should be built to facilitate the integration of game entities into Storybook. These HTML/DOM wrappers should never bleed into the game itself, but rather only serve the purpose or featuring aspects of the game inside a web page.
 - What approach works best for loading game assets (sprites, textures) in stories?
 - Should Storybook run as separate workspace package or within outside-client?
   - Answer: The instance of Storybook should remain apart from the client and live in its own sub project in the mono-repo.

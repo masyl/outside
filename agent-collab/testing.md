@@ -15,7 +15,7 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 - A default ground should cover the entire level
 - The worlds center should be 0,0 and the dimensions/size be in both positive and negative directions.
 - The bots should be positionned according to sub-tiles for more precision.
-- 
+-
 
 ### Problems of current build
 
@@ -58,4 +58,4 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 - The animation system is not working well enough to be kept as is. Bots become visually offsync and the whole approach is not "reversible" when time travelling.
 
-- 
+-

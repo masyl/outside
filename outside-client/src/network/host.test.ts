@@ -26,7 +26,7 @@ describe('HostMode', () => {
     commandQueue = new CommandQueue();
     signalingClient = new SignalingClient('ws://localhost:8080');
     hostMode = new HostMode(store, commandQueue, signalingClient);
-    
+
     gameLoop = new GameLoop(store, commandQueue, {} as any);
     timelineManager = new TimelineManager(store, null as any);
 
@@ -57,7 +57,7 @@ describe('HostMode', () => {
       await hostMode.initialize(gameLoop, timelineManager, { local: true });
 
       expect(onStateChangeSpy).toHaveBeenCalled();
-      
+
       // Simulate callback execution
       const callback = onStateChangeSpy.mock.calls[0][0];
       callback(PlaybackState.PAUSED);
@@ -73,10 +73,10 @@ describe('HostMode', () => {
       hostMode.setPlaybackState(PlaybackState.PLAYING);
 
       const initialStep = hostMode.getCurrentStep();
-      
+
       // Advance time by 125ms (one step)
       vi.advanceTimersByTime(125);
-      
+
       expect(hostMode.getCurrentStep()).toBe(initialStep + 1);
     });
 
@@ -85,10 +85,10 @@ describe('HostMode', () => {
       hostMode.setPlaybackState(PlaybackState.PAUSED);
 
       const initialStep = hostMode.getCurrentStep();
-      
+
       // Advance time by 125ms
       vi.advanceTimersByTime(125);
-      
+
       expect(hostMode.getCurrentStep()).toBe(initialStep);
     });
   });
@@ -100,13 +100,13 @@ describe('HostMode', () => {
       expect(hostMode.isAutonomyEnabled()).toBe(true);
 
       hostMode.setPlaybackState(PlaybackState.PAUSED);
-      
+
       // We can't easily spy on private processAutonomy, but we can verify side effects (queue length)
       // Assuming empty world, autonomy might not do much, but we can verify it doesn't crash or enqueue
-      
+
       // Advance time
       vi.advanceTimersByTime(125);
-      
+
       // If we had bots, we'd check queue.
     });
   });

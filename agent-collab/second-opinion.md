@@ -5,9 +5,11 @@
 Based on the pitch analysis and your preferences, here's the detailed implementation plan:
 
 ### Summary
+
 Create a PIXI-based **TimelineBar** component that displays a visual indicator for current timeline position. Most DebugOverlay functionality is already complete; this deliverable primarily focuses on the visual timeline bar.
 
 ### User Decisions
+
 - **Dimensions**: 24px thick, 8px padding
 - **Position Style**: Marker only (thin vertical line)
 - **Positioning**: 50px from bottom
@@ -18,9 +20,11 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 ### Tasks
 
 #### 1. Create TimelineBar Component
+
 **File**: `outside-client/src/ui/timelineBar.ts` (new)
 
 **Implementation Details**:
+
 - Extend PIXI `Container` class
 - Constructor takes `app: Application` and `timelineManager: TimelineManager`
 - **Black padding rectangle**: 8px padding on all sides, full screen width
@@ -33,6 +37,7 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
   - `dispose()` - Cleanup
 
 **Color Scheme**:
+
 - Black padding: `0x000000` with alpha `1.0` (opaque)
 - Green bar: `0x00ff00` (matching DebugOverlay)
 - Position marker: `0x000000` (black) or `0xffffff` (white) for contrast
@@ -40,9 +45,11 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 ---
 
 #### 2. Integrate TimelineBar into main.ts
+
 **File**: `outside-client/src/main.ts`
 
 **Changes**:
+
 - Import `TimelineBar` class
 - In `initializeHostMode()` (after line 448), create TimelineBar instance:
   ```typescript
@@ -57,19 +64,22 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 ---
 
 #### 3. Update TimelineManager Position Notifications
+
 **File**: `outside-client/src/timeline/manager.ts`
 
 **Enhancement**:
+
 - The `notifyPositionChange()` method (line 59) already exists but needs improvement
 - Currently only checks for `onPositionChange` callback on state change callbacks
 - Consider adding a dedicated position change callback system:
+
   ```typescript
   private positionChangeCallbacks: ((step: number, total: number) => void)[] = [];
-  
+
   onPositionChange(callback: (step: number, total: number) => void): void {
     this.positionChangeCallbacks.push(callback);
   }
-  
+
   private notifyPositionChange(): void {
     const events = this.eventLogger.loadEvents();
     this.positionChangeCallbacks.forEach(callback => {
@@ -81,9 +91,11 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 ---
 
 #### 4. DebugOverlay Enhancements (Verify Implementation)
+
 **File**: `outside-client/src/debug/overlay.ts`
 
 **Status**: ✅ Already Implemented
+
 - `setPlaybackMode()` - line 220 (PLAYING, PAUSED, TRAVELING)
 - `setTimelineCursor(current, total)` - line 228 (displays "Timeline: X / Y")
 - Integration in main.ts - lines 403-448 (already subscribing to state changes)
@@ -95,6 +107,7 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 ### Technical Specifications
 
 #### TimelineBar Layout
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  Black padding (8px top)                             │
@@ -110,13 +123,16 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 ```
 
 #### Position Calculation
+
 ```
 markerX = (currentStep / totalSteps) * barWidth
 ```
+
 - Handle edge cases: `totalSteps = 0` → marker at position 0
 - Clamp position to bar bounds
 
 #### Visibility Control
+
 - Only visible in host mode
 - Can be toggled via `setVisible()` method for future features
 - Initially visible by default
@@ -141,13 +157,13 @@ markerX = (currentStep / totalSteps) * barWidth
 ### Files to Create/Modify
 
 **New Files**:
+
 1. `outside-client/src/ui/timelineBar.ts` - TimelineBar component
 
-**Modified Files**:
-2. `outside-client/src/main.ts` - Integrate TimelineBar
-3. `outside-client/src/timeline/manager.ts` - Enhance position change notifications (optional but recommended)
+**Modified Files**: 2. `outside-client/src/main.ts` - Integrate TimelineBar 3. `outside-client/src/timeline/manager.ts` - Enhance position change notifications (optional but recommended)
 
 **No Changes Needed**:
+
 - `outside-client/src/debug/overlay.ts` - Already complete
 
 ---

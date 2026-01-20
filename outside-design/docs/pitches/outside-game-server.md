@@ -1,4 +1,3 @@
-
 # Outside Game Server
 
 ## Motivation
@@ -40,4 +39,3 @@ The main game logic loop should still run in the browser and allow other browser
 - An initial grid state can be sent for client that connect after the game has already started, in ordre to "keep up".
 - The grid state is essentially its core attributes and the list of objects it contains
 - This implies that the "currently selected bot" outline will not be drawn on the same characters on each client.
- 

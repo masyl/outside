@@ -1,7 +1,14 @@
 import { Store } from '../store/store';
 import { WebRTCPeer } from './webrtc';
 import { SignalingClient } from './signaling';
-import { serializeNetworkMessage, deserializeNetworkMessage, NetworkMessage, InitialState, StateChangeEvent, BotAssignment } from './stateEvents';
+import {
+  serializeNetworkMessage,
+  deserializeNetworkMessage,
+  NetworkMessage,
+  InitialState,
+  StateChangeEvent,
+  BotAssignment,
+} from './stateEvents';
 import { serializeInputCommand, InputCommand, InputCommandType } from './inputCommands';
 import { actions } from '../store/actions';
 import { WorldState, createWorldState } from '@outside/core';
@@ -29,11 +36,7 @@ export class ClientMode {
   private lastStep: number = 0;
   private pendingState: WorldState | null = null;
 
-  constructor(
-    store: Store,
-    signalingClient: SignalingClient,
-    callbacks: ClientCallbacks = {}
-  ) {
+  constructor(store: Store, signalingClient: SignalingClient, callbacks: ClientCallbacks = {}) {
     this.store = store;
     this.signalingClient = signalingClient;
     this.clientId = signalingClient.getPeerId() || 'unknown';
@@ -77,7 +80,7 @@ export class ClientMode {
    */
   async reconnect(): Promise<void> {
     console.log('[Client] Attempting to reconnect...');
-    
+
     // Close existing connection if any
     if (this.hostPeer) {
       this.hostPeer.close();
@@ -106,7 +109,7 @@ export class ClientMode {
     // console.log('[Client] Initiating WebRTC connection to host...');
 
     this.hostPeer = new WebRTCPeer();
-    
+
     // Set up incoming data channel
     this.hostPeer.setupIncomingDataChannel();
 
@@ -239,7 +242,7 @@ export class ClientMode {
    */
   private handleInitialState(message: InitialState): void {
     // console.log('[Client] Received initial state');
-    
+
     // Create new world state from initial state
     const worldState = createWorldState();
     worldState.width = message.gridData.width;
@@ -266,16 +269,16 @@ export class ClientMode {
 
     // Set world state
     this.store.dispatch(actions.setWorldState(worldState));
-    
+
     // Update step count from initial state
     const initialStep = message.step || 0;
     this.lastStep = initialStep;
-    
+
     // Update debug overlay with step count from host
     if (this.callbacks.onStepUpdate) {
       this.callbacks.onStepUpdate(initialStep);
     }
-    
+
     // If we have an assigned bot, set it as selected
     if (this.assignedBotId && worldState.objects.has(this.assignedBotId)) {
       // Trigger bot assignment callback to set selection
@@ -292,8 +295,10 @@ export class ClientMode {
     // Check if we're missing steps - if too far behind, request initial state
     if (message.step !== this.lastStep + 1) {
       const stepsBehind = message.step - this.lastStep;
-      console.warn(`[Client] Step mismatch: expected ${this.lastStep + 1}, got ${message.step} (${stepsBehind} steps behind)`);
-      
+      console.warn(
+        `[Client] Step mismatch: expected ${this.lastStep + 1}, got ${message.step} (${stepsBehind} steps behind)`
+      );
+
       // If we're more than 5 steps behind, request initial state
       if (stepsBehind > 5) {
         console.log('[Client] Too far behind, requesting initial state...');
@@ -324,7 +329,7 @@ export class ClientMode {
     // Add all objects from the state change event
     for (const obj of message.gridData.objects) {
       newWorldState.objects.set(obj.id, obj);
-      
+
       // Update grid if object has position
       if (obj.position) {
         const { x, y } = obj.position;
@@ -354,7 +359,11 @@ export class ClientMode {
   /**
    * Send input command to host
    */
-  sendInputCommand(command: InputCommandType, selectedBotId?: string, data?: { x?: number; y?: number }): void {
+  sendInputCommand(
+    command: InputCommandType,
+    selectedBotId?: string,
+    data?: { x?: number; y?: number }
+  ): void {
     if (!this.hostPeer) {
       console.warn('[Client] Cannot send input: no peer connection');
       return;

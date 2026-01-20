@@ -29,7 +29,7 @@ In short, plans are update one last time, testing and feature reports are writte
 
 All the required documents created during the wrapup are added to the delivery folder, using the following structure:
 
-``` text
+```text
 outside-design/docs/deliveries/{YYYY-MM-DD-HHMM}-{descriptive-name}/
 ├── README.md     # Optional: additional context or notes
 ├── pitch.md      # The original pitch for this delivery.

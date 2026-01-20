@@ -10,7 +10,6 @@
 - [Multiple Character Skins](./multiple-character-skins.md)
 - [Timeline Network Synchronization (Timeline series: 6)](./timeline-network-synchronization.md)
 
-
 ## Core features
 
 - [Player Nicknames](./player-nicknames.md)

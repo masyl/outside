@@ -10,7 +10,7 @@ The premise is simple:
 2. **Agents read fast**: Agents are extremely fast at reading and writing good documentation.
 3. **Pobodies Nerfect:** Both humans and coding agents can get lost very quickly during software developement. And a lot of the same problem we have with "human + human" collaboration also happen when working with agents.
 
-This is why this approach with deliveries tries to recreate a lot of proven good practices, but adapted to a fast work loop with coding agents.  
+This is why this approach with deliveries tries to recreate a lot of proven good practices, but adapted to a fast work loop with coding agents.
 
 ## When does a change should become a delivery
 
