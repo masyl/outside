@@ -1,6 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import { CoordinateConverter, COORDINATE_SYSTEM, WorldPosition } from './coordinateSystem';
-import { Direction } from '@outside/core';
+import { WorldState, Direction } from '@outside/core';
 
 /**
  * VisualDebugLayer - renders debug visualizations between ground and surface layers
@@ -9,6 +9,7 @@ import { Direction } from '@outside/core';
 export class VisualDebugLayer extends Container {
   private graphics: Graphics;
   private isVisible: boolean = false;
+  private world: WorldState | null = null;
 
   // Color scheme constants
   private static readonly COLORS = {
@@ -18,10 +19,6 @@ export class VisualDebugLayer extends Container {
     CURSOR_TILE: 0xffff00, // Yellow
     BOT_POSITION: 0x00ff00, // Green (maintain existing)
   };
-
-  // Grid configuration
-  private static readonly GRID_WIDTH = 20;
-  private static readonly GRID_HEIGHT = 10;
 
   // Mouse tracking (using floating-point world coordinates)
   private mousePos: WorldPosition = { x: -1, y: -1 };
@@ -38,6 +35,16 @@ export class VisualDebugLayer extends Container {
     this.graphics = new Graphics();
     this.addChild(this.graphics);
     this.visible = false;
+  }
+
+  /**
+   * Set world state for rendering
+   */
+  setWorld(world: WorldState): void {
+    this.world = world;
+    if (this.isVisible) {
+      this.render();
+    }
   }
 
   /**
@@ -131,6 +138,10 @@ export class VisualDebugLayer extends Container {
    */
   private render(): void {
     console.log(`[VisualDebugLayer] render() called, isVisible: ${this.isVisible}`);
+
+    if (!this.world) {
+      return;
+    }
 
     // Clear graphics and remove all children (text labels)
     this.graphics.clear();
@@ -285,15 +296,16 @@ export class VisualDebugLayer extends Container {
    * Render dots at tile corners
    */
   private renderDotGrid(): void {
-    const { GRID_WIDTH, GRID_HEIGHT, COLORS } = VisualDebugLayer;
+    if (!this.world) return;
+
+    const { COLORS } = VisualDebugLayer;
 
     console.log(
-      `[VisualDebugLayer] renderDotGrid: drawing ${GRID_WIDTH + 1}x${GRID_HEIGHT + 1} dots`
+      `[VisualDebugLayer] renderDotGrid: drawing ${this.world.horizontalLimit * 2 + 1}x${this.world.verticalLimit * 2 + 1} dots`
     );
 
-    // Draw dots at each tile corner
-    for (let x = 0; x <= GRID_WIDTH; x++) {
-      for (let y = 0; y <= GRID_HEIGHT; y++) {
+    for (let x = -this.world.horizontalLimit; x <= this.world.horizontalLimit; x++) {
+      for (let y = -this.world.verticalLimit; y <= this.world.verticalLimit; y++) {
         const gridPos = { x, y };
         const displayPos = CoordinateConverter.gridToDisplay(gridPos);
 
@@ -310,28 +322,33 @@ export class VisualDebugLayer extends Container {
    * Render 8x8 sub-grid for precise positioning
    */
   private renderSubGrid8(): void {
-    const { GRID_WIDTH, GRID_HEIGHT, COLORS } = VisualDebugLayer;
+    if (!this.world) return;
+
+    const { COLORS } = VisualDebugLayer;
     const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
     const SUB_SIZE = DISPLAY_TILE_SIZE / 8;
+
+    const totalWidth = (this.world.horizontalLimit * 2 + 1) * DISPLAY_TILE_SIZE;
+    const totalHeight = (this.world.verticalLimit * 2 + 1) * DISPLAY_TILE_SIZE;
 
     this.graphics.setStrokeStyle({ width: 1, color: COLORS.GRID_DOTS, alpha: 0.3 });
     this.graphics.beginPath();
 
     // Draw vertical sub-grid lines
-    for (let x = 0; x < GRID_WIDTH; x++) {
+    for (let x = -this.world.horizontalLimit; x <= this.world.horizontalLimit; x++) {
       for (let subX = 1; subX < 8; subX++) {
-        const xPos = x * DISPLAY_TILE_SIZE + subX * SUB_SIZE;
+        const xPos = (x + this.world.horizontalLimit) * DISPLAY_TILE_SIZE + subX * SUB_SIZE;
         this.graphics.moveTo(xPos, 0);
-        this.graphics.lineTo(xPos, GRID_HEIGHT * DISPLAY_TILE_SIZE);
+        this.graphics.lineTo(xPos, totalHeight);
       }
     }
 
     // Draw horizontal sub-grid lines
-    for (let y = 0; y < GRID_HEIGHT; y++) {
+    for (let y = -this.world.verticalLimit; y <= this.world.verticalLimit; y++) {
       for (let subY = 1; subY < 8; subY++) {
-        const yPos = y * DISPLAY_TILE_SIZE + subY * SUB_SIZE;
+        const yPos = (y + this.world.verticalLimit) * DISPLAY_TILE_SIZE + subY * SUB_SIZE;
         this.graphics.moveTo(0, yPos);
-        this.graphics.lineTo(GRID_WIDTH * DISPLAY_TILE_SIZE, yPos);
+        this.graphics.lineTo(totalWidth, yPos);
       }
     }
 
@@ -342,11 +359,19 @@ export class VisualDebugLayer extends Container {
    * Render world boundary rectangle
    */
   private renderWorldBoundary(): void {
-    const { GRID_WIDTH, GRID_HEIGHT, COLORS } = VisualDebugLayer;
+    if (!this.world) return;
+
+    const { COLORS } = VisualDebugLayer;
 
     // Use coordinate converter for dimensions
-    const topLeft = CoordinateConverter.gridToDisplay({ x: 0, y: 0 });
-    const bottomRight = CoordinateConverter.gridToDisplay({ x: GRID_WIDTH, y: GRID_HEIGHT });
+    const topLeft = CoordinateConverter.gridToDisplay({
+      x: -this.world.horizontalLimit,
+      y: -this.world.verticalLimit,
+    });
+    const bottomRight = CoordinateConverter.gridToDisplay({
+      x: this.world.horizontalLimit + 1,
+      y: this.world.verticalLimit + 1,
+    });
     const width = bottomRight.x - topLeft.x;
     const height = bottomRight.y - topLeft.y;
 

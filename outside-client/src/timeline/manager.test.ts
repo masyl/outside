@@ -110,7 +110,7 @@ describe('TimelineManager', () => {
       const bot = currentState.objects.get('bot-1');
       // At step 2, we have Placed bot at (1,1)
       expect(bot?.position).toEqual({ x: 1, y: 1 });
-      
+
       // Navigate to step 3 (Move Right)
       timelineManager.goToStep(3);
       const nextState = store.getState();
@@ -193,10 +193,10 @@ describe('TimelineManager', () => {
       // Total events 4: Terrain, Bot, Place, Move R. Indices 0, 1, 2, 3.
       // At step 2, we can go to 3.
       expect(canGoForward(timelineManager)).toBe(true);
-      
+
       timelineManager.stepForward();
       expect(timelineManager.getCurrentStep()).toBe(3);
-      
+
       expect(canGoForward(timelineManager)).toBe(false);
     });
 
@@ -276,24 +276,24 @@ describe('TimelineManager', () => {
 
     it('should maintain world properties during reconstruction', () => {
       const originalSeed = initialState.seed;
-      const originalWidth = initialState.width;
-      const originalHeight = initialState.height;
+      const originalHorizontalLimit = initialState.horizontalLimit;
+      const originalVerticalLimit = initialState.verticalLimit;
 
       store.dispatch(actions.createBot('bot-1'), 0);
-      store.dispatch(actions.setWorldSize(25, 15), 1);
+      store.dispatch(actions.setWorldSize(12, 7), 1);
 
       timelineManager.goToStep(0);
       let state = store.getState();
       // Seed might change
       expect(state.seed).toBeDefined();
-      expect(state.width).toBe(originalWidth);
-      expect(state.height).toBe(originalHeight);
+      expect(state.horizontalLimit).toBe(originalHorizontalLimit);
+      expect(state.verticalLimit).toBe(originalVerticalLimit);
 
       timelineManager.goToStep(1);
       state = store.getState();
       expect(state.seed).toBeDefined();
-      expect(state.width).toBe(25);
-      expect(state.height).toBe(15);
+      expect(state.horizontalLimit).toBe(12);
+      expect(state.verticalLimit).toBe(7);
     });
   });
 
@@ -321,7 +321,7 @@ describe('TimelineManager', () => {
       timelineManager.goToStep(Infinity);
       // Clamps to last available step
       expect(timelineManager.getCurrentStep()).toBe(timelineManager.getState().totalSteps - 1);
-      
+
       timelineManager.goToStep(-Infinity);
       expect(timelineManager.getCurrentStep()).toBe(0);
     });
@@ -332,7 +332,7 @@ describe('TimelineManager', () => {
       store.dispatch(actions.placeObject('bot-1', { x: 5, y: 5 }), 1);
 
       // Events: Terrain (0), Bot (1), Place (2)
-      
+
       timelineManager.goToEnd();
       expect(timelineManager.getCurrentStep()).toBe(2);
 

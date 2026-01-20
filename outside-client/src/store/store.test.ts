@@ -29,8 +29,8 @@ describe('Store Management', () => {
       expect(state).toHaveProperty('grid');
       expect(state).toHaveProperty('objects');
       expect(state).toHaveProperty('groundLayer');
-      expect(state).toHaveProperty('width', 20);
-      expect(state).toHaveProperty('height', 10);
+      expect(state).toHaveProperty('horizontalLimit', 30);
+      expect(state).toHaveProperty('verticalLimit', 30);
       expect(state).toHaveProperty('seed');
     });
 
@@ -203,8 +203,8 @@ describe('Store Management', () => {
       // State should contain expected properties
       expect(state1).toHaveProperty('grid');
       expect(state1).toHaveProperty('objects');
-      expect(state1).toHaveProperty('width');
-      expect(state1).toHaveProperty('height');
+      expect(state1).toHaveProperty('horizontalLimit');
+      expect(state1).toHaveProperty('verticalLimit');
       expect(state1).toHaveProperty('seed');
     });
 

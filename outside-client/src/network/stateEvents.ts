@@ -4,8 +4,8 @@ import { GameObject, TerrainObject } from '@outside/core';
  * Partial grid data sent in state change events
  */
 export interface PartialGridData {
-  width: number;
-  height: number;
+  horizontalLimit: number;
+  verticalLimit: number;
   objects: GameObject[];
   terrain?: TerrainObject[]; // Included in initial state, not in state change events
 }

@@ -103,6 +103,9 @@ export class GameRenderer {
     // Store current world state for resize handler
     this.currentWorld = world;
 
+    // Update visual debug layer with new world state
+    this.visualDebugLayer.setWorld(world);
+
     // Clear existing grid
     this.gridContainer.removeChildren();
 
@@ -179,6 +182,9 @@ export class GameRenderer {
   update(world: WorldState): void {
     // Store current world state for resize handler
     this.currentWorld = world;
+
+    // Update visual debug layer with new world state
+    this.visualDebugLayer.setWorld(world);
 
     // Always update terrain layer when world state changes
     // This ensures terrain is rendered correctly as it's added incrementally

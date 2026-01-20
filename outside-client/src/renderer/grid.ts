@@ -22,8 +22,8 @@ export function createGrid(world: WorldState): Container {
   const PATTERN_SIZE = DISPLAY_TILE_SIZE / 4; // 16px per square (64px / 4 = 16px)
 
   // Draw each tile with a 4x4 checkered pattern inside
-  for (let tileY = 0; tileY < world.height; tileY++) {
-    for (let tileX = 0; tileX < world.width; tileX++) {
+  for (let tileY = -world.verticalLimit; tileY <= world.verticalLimit; tileY++) {
+    for (let tileX = -world.horizontalLimit; tileX <= world.horizontalLimit; tileX++) {
       const displayPos = CoordinateConverter.gridToDisplay({ x: tileX, y: tileY });
       const tileXPos = displayPos.x;
       const tileYPos = displayPos.y;
@@ -52,8 +52,10 @@ export function createGrid(world: WorldState): Container {
  * Get the total grid dimensions in pixels
  */
 export function getGridDimensions(world: WorldState): { width: number; height: number } {
+  const totalWidth = (world.horizontalLimit * 2 + 1) * DISPLAY_TILE_SIZE;
+  const totalHeight = (world.verticalLimit * 2 + 1) * DISPLAY_TILE_SIZE;
   return {
-    width: world.width * DISPLAY_TILE_SIZE,
-    height: world.height * DISPLAY_TILE_SIZE,
+    width: totalWidth,
+    height: totalHeight,
   };
 }

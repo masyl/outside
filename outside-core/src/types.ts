@@ -7,10 +7,10 @@ export type Position = {
   y: number;
 };
 
-export type Direction = 
-  | 'left' 
-  | 'right' 
-  | 'up' 
+export type Direction =
+  | 'left'
+  | 'right'
+  | 'up'
   | 'down'
   | 'up-left'
   | 'up-right'
@@ -52,7 +52,7 @@ export interface WorldState {
   grid: Grid; // Surface layer (existing)
   objects: Map<string, GameObject>; // Surface layer objects (existing)
   groundLayer: GroundLayer; // New ground layer
-  width: number;
-  height: number;
+  horizontalLimit: number; // Tiles from -limit to +limit on X axis
+  verticalLimit: number; // Tiles from -limit to +limit on Y axis
   seed: number; // Master seed for RNG
 }

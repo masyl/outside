@@ -63,7 +63,7 @@ export class HostMode {
     if (state !== PlaybackState.PLAYING) {
       this.pauseAutonomy();
     } else {
-      // Only resume if it was enabled before? 
+      // Only resume if it was enabled before?
       // For now, let's keep autonomy explicit toggle, but ensure it doesn't run when paused.
       // The processAutonomy() check handles the PLAYING state check.
     }
@@ -108,7 +108,11 @@ export class HostMode {
     }
   }
 
-  initialize(gameLoop: GameLoop, timelineManager: TimelineManager, options?: { local?: boolean }): Promise<void> {
+  initialize(
+    gameLoop: GameLoop,
+    timelineManager: TimelineManager,
+    options?: { local?: boolean }
+  ): Promise<void> {
     gameLoop.setTimelineManager(timelineManager);
 
     // Sync playback state changes
@@ -221,7 +225,8 @@ export class HostMode {
    * Process autonomous bot behavior
    */
   private processAutonomy(): void {
-    if (!this.autonomy || !this.autonomyEnabled || this.playbackState !== PlaybackState.PLAYING) return;
+    if (!this.autonomy || !this.autonomyEnabled || this.playbackState !== PlaybackState.PLAYING)
+      return;
 
     const world = this.store.getState();
     const bots = Array.from(world.objects.values()).filter((obj) => obj.type === 'bot');
@@ -268,8 +273,8 @@ export class HostMode {
   private broadcastStepUpdate(): void {
     const world = this.store.getState();
     const gridData = {
-      width: world.width,
-      height: world.height,
+      horizontalLimit: world.horizontalLimit,
+      verticalLimit: world.verticalLimit,
       objects: Array.from(world.objects.values()),
     };
 
@@ -589,8 +594,8 @@ export class HostMode {
   private sendInitialState(clientId: string): void {
     const world = this.store.getState();
     const gridData = {
-      width: world.width,
-      height: world.height,
+      horizontalLimit: world.horizontalLimit,
+      verticalLimit: world.verticalLimit,
       objects: Array.from(world.objects.values()),
       terrain: Array.from(world.groundLayer.terrainObjects.values()), // Include terrain in initial state
     };
