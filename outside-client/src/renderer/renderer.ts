@@ -295,15 +295,23 @@ export class GameRenderer {
 
   /**
    * Center the viewport horizontally and vertically
+   * Ensures world coordinate (0,0) is at the center of the viewport
    */
   private centerViewport(world: WorldState): void {
     const dimensions = getGridDimensions(world);
     const screenWidth = this.app.screen.width;
     const screenHeight = this.app.screen.height;
 
-    // Center the grid
-    this.rootContainer.x = (screenWidth - dimensions.width) / 2;
-    this.rootContainer.y = (screenHeight - dimensions.height) / 2;
+    // Calculate where world coordinate 0,0 should be positioned
+    const centerOfWorld0_0 = CoordinateConverter.gridToDisplay({ x: 0, y: 0 });
+
+    // Calculate the offset needed to center 0,0 in the viewport
+    const offsetX = screenWidth / 2 - centerOfWorld0_0.x;
+    const offsetY = screenHeight / 2 - centerOfWorld0_0.y;
+
+    // Apply the offset to center the world
+    this.rootContainer.x = offsetX;
+    this.rootContainer.y = offsetY;
   }
 
   /**
