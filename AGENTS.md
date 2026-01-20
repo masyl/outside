@@ -20,6 +20,51 @@ Non trivial work typically starts by writing a pitch, before writing an implemen
 - [Design Process - Pitch Phase](outside-design/docs/design-process/pitch-phase.md)
 - Find examples in the [Pitches Directory](outside-design/docs/pitches/)
 
+## Agent Skills
+
+The project includes a comprehensive skills system that implements development workflows:
+
+- [Skills Documentation](outside-design/docs/skills/README.md)
+- Skills are located in `outside-design/docs/skills/`
+- **Wrapup Workflow**: Complete 9-step wrapup process automation
+- Individual skills can be used for partial workflows
+- Skills integrate with existing build commands and project conventions
+
+### Using Agent Skills
+
+Skills are designed to be user-initiated and can be run individually or as complete workflows:
+
+```bash
+# Complete wrapup workflow (when implemented)
+skill run wrapup-workflow --deliveryName="feature-name" --branchName="feature/branch-name"
+
+# Individual skill usage
+skill run wrapup-prerequisites --branchName="feature/branch-name"
+skill run testing-report --deliveryPath="path/to/delivery" --testedFeatures="feature1,feature2"
+```
+
+### Available Wrapup Skills
+
+1. **wrapup-prerequisites** - Validates pre-requisites (tests, builds, coverage)
+2. **wrapup-folder-setup** - Creates delivery folder structure
+3. **plan-update** - Updates implementation plan to reflect reality
+4. **testing-report** - Generates comprehensive testing report
+5. **delivery-summary** - Creates detailed delivery report
+6. **pitch-relocation** - Copies original pitch to delivery folder
+7. **commit-preparation** - Prepares commit message and tags
+8. **delivery-readme** - Creates README.md with frontmatter
+9. **delivery-index-update** - Updates deliveries list index
+10. **wrapup-workflow** - Orchestrates all 9 steps
+
+### Wrapup Process Integration
+
+Skills implement the complete wrapup process from [wrapup documentation](outside-design/docs/wrapup.md):
+
+- **User-initiated**: Never automatic, always requires user confirmation
+- **Quality gates**: Enforces 80%+ coverage, green builds, passing tests
+- **Documentation standards**: Creates structured delivery folders with required documents
+- **Human collaboration**: Confirmation points at critical steps
+
 ## Build Commands
 
 ### Root Level Commands
