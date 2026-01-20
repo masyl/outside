@@ -12,7 +12,10 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Needed improvement
 
-- None yet
+- A default ground should cover the entire level
+- The worlds center should be 0,0 and the dimensions/size be in both positive and negative directions.
+- The bots should be positionned according to sub-tiles for more precision.
+- 
 
 ### Problems of current build
 
@@ -43,8 +46,16 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 - The are various "modes" that dont have formal enough terms. Multiplayer mode, Time travel mode, Autonomy mode, etc... This should be made more formal.
 - The Timeline deliveries mention "Autonomy Control" to prevent bots from moving during time travel. This is super weird because the architecture should not even allow it. Did the agent code something special for this ?
 - Having the best method to keep the game steps in sync with the animation loop should be investigated at some point. This could make it difficult to have butter smooth animations.
+- The timeline cursor is not initialised at the end when opening the debug mode in some situations.
 
 ### Timeline keystrokes
 
 - The time passing counted as number of steps and as number of events is not always in sync when moving on the timeline.
+
+### Visual Debug Layer & Grid System Refactoring
+
+- The direction of the bots is not properly attached to the game logic loop or the state management. It seems to invert when playing time backward. It is probably calculated during the animation. The animation loop should never change state.
+
+- The animation system is not working well enough to be kept as is. Bots become visually offsync and the whole approach is not "reversible" when time travelling.
+
 - 

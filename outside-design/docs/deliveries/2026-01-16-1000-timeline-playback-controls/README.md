@@ -1,9 +1,10 @@
 ---
-title: Timeline Playback Controls
-date: 2026-01-17
-description: Implemented pause, resume, and step-by-step time travel controls with game loop integration.
-tags: [timeline-playback-controls, feature]
-status: Done
+Title: Timeline Playback Controls
+DeliveryDate: 2026-01-17
+Summary: Implemented core playback controls (pause, resume, step) and game loop integration. Introduced synchronized PlaybackState management (PLAYING, PAUSED, TRAVELING) across the system. Ensures bot autonomy and event queues are handled correctly during time travel, preventing state corruption. Stabilized test infrastructure and build pipeline.
+Status: DONE
+Branch: feature/timeline-playback-controls
+Commit: eb8eda8
 ---
 
 # Timeline Playback Controls

@@ -2,7 +2,9 @@ import { WorldState, GameObject, Position, Direction } from '@outside/core';
 import { Store } from '../store/store';
 import { GameRenderer } from '../renderer/renderer';
 import { animateObjectMovement } from './animations';
-import { DISPLAY_TILE_SIZE } from '../renderer/grid';
+import { COORDINATE_SYSTEM, CoordinateConverter } from '../renderer/coordinateSystem';
+
+const { DISPLAY_TILE_SIZE, VERTICAL_OFFSET } = COORDINATE_SYSTEM;
 
 type CancelAnimation = () => void;
 
@@ -73,9 +75,9 @@ export class AnimationController {
         if (!fromPos && toPos) {
           const sprite = this.renderer.getSpriteForObject(id);
           if (sprite) {
-            const VERTICAL_OFFSET = -8;
-            sprite.x = toPos.x * DISPLAY_TILE_SIZE;
-            sprite.y = toPos.y * DISPLAY_TILE_SIZE + VERTICAL_OFFSET;
+            const displayPos = CoordinateConverter.gridToDisplay({ x: toPos.x, y: toPos.y });
+            sprite.x = displayPos.x;
+            sprite.y = displayPos.y + VERTICAL_OFFSET;
           }
         }
         return;
@@ -100,7 +102,7 @@ export class AnimationController {
     // The vertical offset should be the equivalent of four virtual pixels.
     // This is to account for the placement of the bots to "look" like they are
     // at the center of a tile instead of "inside" the tile.
-    const VERTICAL_OFFSET = -8;
+
     let sprite = this.renderer.getSpriteForObject(id);
     if (!sprite) {
       const world = this.store.getState();
@@ -177,8 +179,9 @@ export class AnimationController {
       },
       () => {
         // Animation complete - ensure sprite is exactly at target grid position
-        sprite.x = toPos.x * DISPLAY_TILE_SIZE;
-        sprite.y = toPos.y * DISPLAY_TILE_SIZE + VERTICAL_OFFSET;
+        const displayPos = CoordinateConverter.gridToDisplay({ x: toPos.x, y: toPos.y });
+        sprite.x = displayPos.x;
+        sprite.y = displayPos.y + VERTICAL_OFFSET;
         this.activeAnimations.delete(id);
 
         // Update state to idle

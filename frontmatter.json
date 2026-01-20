@@ -44,6 +44,73 @@
           "type": "categories"
         }
       ]
+    },
+    {
+      "name": "delivery",
+      "pageBundle": true,
+      "previewPath": null,
+      "card": {
+        "fields": {
+          "title": "Title",
+          "description": "Summary",
+          "date": "DeliveryDate"
+        }
+      },
+      "listView": {
+        "columns": ["Title", "DeliveryDate", "Summary"]
+      },
+      "gridView": {
+        "fields": ["Title", "DeliveryDate", "Summary"]
+      },
+      "fields": [
+        {
+          "title": "Title",
+          "name": "Title",
+          "type": "string",
+          "isTitle": true
+        },
+        {
+          "title": "Delivery Date",
+          "name": "DeliveryDate",
+          "type": "datetime",
+          "isPublishDate": true
+        },
+        {
+          "title": "Summary",
+          "name": "Summary",
+          "type": "string",
+          "isDescription": true
+        },
+        {
+          "title": "Status",
+          "name": "Status",
+          "type": "choice",
+          "choices": [
+            {
+              "id": "TODO",
+              "title": "TODO"
+            },
+            {
+              "id": "DOING",
+              "title": "DOING"
+            },
+            {
+              "id": "DONE",
+              "title": "DONE"
+            }
+          ]
+        },
+        {
+          "title": "Branch",
+          "name": "Branch",
+          "type": "string"
+        },
+        {
+          "title": "Commit",
+          "name": "Commit",
+          "type": "string"
+        }
+      ]
     }
   ],
   "frontMatter.framework.id": "other",
@@ -57,7 +124,18 @@
     {
       "title": "pitches",
       "path": "[[workspace]]/outside-design/docs/pitches"
+    },
+    {
+      "title": "deliveries",
+      "path": "[[workspace]]/outside-design/docs/deliveries",
+      "contentTypes": ["delivery"],
+      "defaultContentType": "delivery"
     }
   ],
-  "frontMatter.dashboard.openOnStart": false
+  "frontMatter.dashboard.openOnStart": false,
+  "frontMatter.dashboard.content.card.fields": {
+    "title": "Title",
+    "description": "Summary",
+    "date": "DeliveryDate"
+  }
 }

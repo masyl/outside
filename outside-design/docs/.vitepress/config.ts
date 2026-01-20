@@ -33,7 +33,6 @@ export default defineConfig({
       { text: 'Deliveries', link: '/deliveries/' },
       { text: 'Design Process', link: '/design-process/' },
       { text: 'Components', link: '/components/' },
-      { text: 'Style Guide', link: '/style-guide/' },
     ],
 
     sidebar: {
@@ -60,16 +59,6 @@ export default defineConfig({
             { text: 'Overview', link: '/components/' },
             { text: 'UI Elements', link: '/components/ui-elements' },
             { text: 'Game Components', link: '/components/game-components' },
-          ],
-        },
-      ],
-      '/style-guide/': [
-        {
-          text: 'Style Guide',
-          items: [
-            { text: 'Overview', link: '/style-guide/' },
-            { text: 'Colors', link: '/style-guide/colors' },
-            { text: 'Typography', link: '/style-guide/typography' },
           ],
         },
       ],

@@ -11,8 +11,13 @@ const KEYSTROKES: KeystrokeEntry[] = [
     description: 'Toggle this help menu',
   },
   {
-    keys: ['Alt + D'],
+    keys: ['Alt + D', 'Alt + Esc'],
     description: 'Toggle debug panel',
+    category: 'Debug',
+  },
+  {
+    keys: ['Shift + G'],
+    description: 'Toggle sub-grid (8x8) in debug mode',
     category: 'Debug',
   },
   {
@@ -117,7 +122,8 @@ export class KeystrokeOverlay {
       border-top: 1px solid #00ff00;
       font-style: italic;
     `;
-    modifierNote.textContent = 'Note: On Mac, use Option key instead of Alt for the shortcuts above';
+    modifierNote.textContent =
+      'Note: On Mac, use Option key instead of Alt for the shortcuts above';
     this.container.appendChild(modifierNote);
   }
 

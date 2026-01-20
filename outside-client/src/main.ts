@@ -21,6 +21,8 @@ import { actions } from './store/actions';
 import { SignalingClient } from './network/signaling';
 import { HostMode } from './network/host';
 import { ClientMode } from './network/client';
+import { DISPLAY_TILE_SIZE } from './renderer/grid';
+import { CoordinateConverter } from './renderer/coordinateSystem';
 
 /**
  * Initialize and start the game
@@ -69,6 +71,30 @@ async function init(options?: {
 
   // Create renderer
   const renderer = new GameRenderer(app);
+
+  // Add mouse tracking for visual debug layer
+  app.stage.eventMode = 'static';
+  app.stage.hitArea = app.screen;
+  app.stage.on('pointermove', (event) => {
+    // Get global position
+    const globalPos = event.global;
+
+    // Convert to world coordinates by accounting for root container transformation
+    const rootPos = renderer.getRootContainerPosition();
+
+    // Use unified coordinate conversion - preserves floating point precision
+    const worldPos = CoordinateConverter.screenToWorld(globalPos, rootPos);
+
+    // Update visual debug layer with floating-point position
+    // Note: gridX/gridY logging retained but we pass full precision to renderer
+    const gridX = Math.floor(worldPos.x);
+    const gridY = Math.floor(worldPos.y);
+
+    console.log(
+      `[Main] Mouse position - world: (${worldPos.x.toFixed(2)}, ${worldPos.y.toFixed(2)}), grid: (${gridX}, ${gridY})`
+    );
+    renderer.updateMousePosition(worldPos.x, worldPos.y);
+  });
 
   // Toggle debug grid when debug overlay visibility changes
   debugOverlay.onVisibilityChange((visible) => {

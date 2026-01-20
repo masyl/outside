@@ -1,6 +1,7 @@
 import { Application, Container, Texture, Sprite, Assets, Graphics } from 'pixi.js';
 import { GameObject, WorldState, Direction } from '@outside/core';
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
+import { COORDINATE_SYSTEM, CoordinateConverter } from './coordinateSystem';
 import {
   createBotPlaceholder,
   createObjectsLayerWithIndex,
@@ -9,6 +10,7 @@ import {
   SpriteIndex,
 } from './objects';
 import { createTerrainLayer, updateTerrainLayer } from './terrain';
+import { VisualDebugLayer } from './visualDebugLayer';
 
 /**
  * Main renderer for the game
@@ -19,6 +21,7 @@ export class GameRenderer {
   private terrainContainer: Container;
   private objectsContainer: Container;
   private debugOverlayContainer!: Container;
+  private visualDebugLayer: VisualDebugLayer;
   private rootContainer: Container;
   private botTexture?: Texture;
   private botWalkTexture?: Texture;
@@ -27,6 +30,7 @@ export class GameRenderer {
   private selectedBotId: string | null = null;
   private previousGroundLayerSize: number = 0;
   private currentWorld: WorldState | null = null;
+  private isDebugEnabled: boolean = false;
 
   constructor(app: Application) {
     this.app = app;
@@ -39,12 +43,14 @@ export class GameRenderer {
     this.gridContainer = new Container();
     this.terrainContainer = new Container();
     this.debugOverlayContainer = new Container();
+    this.visualDebugLayer = new VisualDebugLayer();
     this.objectsContainer = new Container();
 
-    // Add containers in render order: grid (bottom), terrain (middle), debug overlay, objects (top)
+    // Add containers in render order: grid (bottom), terrain (middle), debug overlay, visual debug, objects (top)
     this.rootContainer.addChild(this.gridContainer);
     this.rootContainer.addChild(this.terrainContainer);
     this.rootContainer.addChild(this.debugOverlayContainer);
+    this.rootContainer.addChild(this.visualDebugLayer);
     this.rootContainer.addChild(this.objectsContainer);
   }
 
@@ -193,7 +199,7 @@ export class GameRenderer {
     );
 
     // Update debug grid if enabled
-    if (this.debugOverlayContainer.children.length > 0) {
+    if (this.isDebugEnabled) {
       this.updateBotDebugGrid(world, true);
     }
 
@@ -225,50 +231,53 @@ export class GameRenderer {
   }
 
   /**
-   * Update debug overlay grid for bot target positions
+   * Toggle debug overlay grid for bot target positions
    */
   updateBotDebugGrid(world: WorldState, enabled: boolean): void {
-    this.debugOverlayContainer.removeChildren();
+    this.isDebugEnabled = enabled;
 
     if (!enabled) {
+      // Disable visual debug layer when debug is off
+      this.visualDebugLayer.setVisible(false);
       return;
     }
 
-    const graphics = new Graphics();
-    const VIRTUAL_PIXEL = 2; // Matches PIXEL_RATIO for crisp 1px lines
+    // Enable visual debug layer when debug is on
+    this.visualDebugLayer.setVisible(true);
 
-    world.objects.forEach((object) => {
-      if (object.type !== 'bot' || !object.position) {
-        return;
-      }
+    // Update visual debug layer with bot positions and directions
+    const botPositions = Array.from(world.objects.values())
+      .filter((obj) => obj.type === 'bot' && obj.position)
+      .map((obj) => {
+        // Access facing direction from animation state (real-time visual direction)
+        // Fallback to object property if not animating yet
+        const animState = this.botAnimationStates.get(obj.id);
+        const bot = obj as any;
 
-      const x = object.position.x * DISPLAY_TILE_SIZE;
-      const y = object.position.y * DISPLAY_TILE_SIZE;
+        return {
+          x: obj.position!.x,
+          y: obj.position!.y,
+          direction: animState?.direction || bot.facing,
+        };
+      });
 
-      graphics.lineStyle(VIRTUAL_PIXEL, 0x00ff00, 1);
+    this.visualDebugLayer.updateBotPositions(botPositions);
+  }
 
-      // Draw dotted square with virtual pixel spacing
-      const dot = VIRTUAL_PIXEL;
-      const gap = VIRTUAL_PIXEL;
-      const size = DISPLAY_TILE_SIZE;
+  /**
+   * Toggle sub-grid visibility in visual debug layer
+   */
+  toggleSubGrid(): void {
+    if (this.isDebugEnabled) {
+      this.visualDebugLayer.toggleSubGrid();
+    }
+  }
 
-      for (let i = 0; i < size; i += dot + gap) {
-        // Top edge
-        graphics.moveTo(x + i, y);
-        graphics.lineTo(x + Math.min(i + dot, size), y);
-        // Bottom edge
-        graphics.moveTo(x + i, y + size);
-        graphics.lineTo(x + Math.min(i + dot, size), y + size);
-        // Left edge
-        graphics.moveTo(x, y + i);
-        graphics.lineTo(x, y + Math.min(i + dot, size));
-        // Right edge
-        graphics.moveTo(x + size, y + i);
-        graphics.lineTo(x + size, y + Math.min(i + dot, size));
-      }
-    });
-
-    this.debugOverlayContainer.addChild(graphics);
+  /**
+   * Update mouse position for visual debug layer
+   */
+  updateMousePosition(gridX: number, gridY: number): void {
+    this.visualDebugLayer.updateMousePosition(gridX, gridY);
   }
 
   /**
@@ -296,6 +305,13 @@ export class GameRenderer {
    */
   setBotTexture(texture: Texture): void {
     this.botTexture = texture;
+  }
+
+  /**
+   * Get the root container position for coordinate transformation
+   */
+  getRootContainerPosition(): { x: number; y: number } {
+    return { x: this.rootContainer.x, y: this.rootContainer.y };
   }
 
   /**
@@ -358,7 +374,6 @@ export class GameRenderer {
    * Ensure a sprite exists for the given object, creating a placeholder if needed.
    */
   ensureSpriteForObject(object: GameObject): Sprite | undefined {
-    const VERTICAL_OFFSET = -8;
     if (object.type !== 'bot') {
       return undefined;
     }
@@ -374,8 +389,12 @@ export class GameRenderer {
     }
 
     sprite = createBotPlaceholder(this.app.renderer, false);
-    sprite.x = object.position.x * DISPLAY_TILE_SIZE;
-    sprite.y = object.position.y * DISPLAY_TILE_SIZE + VERTICAL_OFFSET;
+    const displayPos = CoordinateConverter.gridToDisplay({
+      x: object.position.x,
+      y: object.position.y,
+    });
+    sprite.x = displayPos.x;
+    sprite.y = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
     this.objectsContainer.addChild(sprite);
     this.spriteIndex.set(object.id, sprite);
 

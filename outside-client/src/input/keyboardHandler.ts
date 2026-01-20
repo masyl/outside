@@ -53,11 +53,19 @@ export class KeyboardHandler {
     this.keystrokeOverlay = new KeystrokeOverlay();
 
     this.setupKeyHandlers();
-    
+
     // Debug: log registered handlers BEFORE attaching listeners
-    console.log('[KeyboardHandler] Initialized, handlers registered:', Array.from(this.keyHandlers.keys()));
-    console.log('[KeyboardHandler] isHostMode:', this.isHostMode(), 'hasTimelineManager:', !!this.timelineManager);
-    
+    console.log(
+      '[KeyboardHandler] Initialized, handlers registered:',
+      Array.from(this.keyHandlers.keys())
+    );
+    console.log(
+      '[KeyboardHandler] isHostMode:',
+      this.isHostMode(),
+      'hasTimelineManager:',
+      !!this.timelineManager
+    );
+
     this.attachEventListeners();
   }
 
@@ -268,7 +276,7 @@ export class KeyboardHandler {
       }
     });
 
-    // Note: Alt+F is handled in attachEventListeners via event.code='KeyF' 
+    // Note: Alt+F is handled in attachEventListeners via event.code='KeyF'
     // because on Mac, Alt+F produces a special character, not 'f'
   }
 
@@ -384,7 +392,11 @@ export class KeyboardHandler {
         });
       }
       // Debug: log ANY Alt+key or Mod+key combinations for troubleshooting (but skip Alt key by itself)
-      if ((event.altKey || event.metaKey || event.ctrlKey) && event.code !== 'AltLeft' && event.code !== 'AltRight') {
+      if (
+        (event.altKey || event.metaKey || event.ctrlKey) &&
+        event.code !== 'AltLeft' &&
+        event.code !== 'AltRight'
+      ) {
         console.log('[KeyboardHandler] Modifier key detected:', {
           key: event.key,
           code: event.code,
@@ -406,7 +418,14 @@ export class KeyboardHandler {
       if (event.key === ' ' || event.key === 'Spacebar' || event.code === 'Space') {
         const handler = this.keyHandlers.get(' ');
         if (handler) {
-          console.log('[KeyboardHandler] Space key matched, altKey:', event.altKey, 'isHostMode:', this.isHostMode(), 'hasTimelineManager:', !!this.timelineManager);
+          console.log(
+            '[KeyboardHandler] Space key matched, altKey:',
+            event.altKey,
+            'isHostMode:',
+            this.isHostMode(),
+            'hasTimelineManager:',
+            !!this.timelineManager
+          );
           handler(event);
           return;
         } else {
@@ -433,7 +452,9 @@ export class KeyboardHandler {
         event.stopPropagation();
         if (this.isHostMode() && this.onToggleAutonomy) {
           const wasEnabled = this.isAutonomyEnabled ? this.isAutonomyEnabled() : false;
-          console.log(`[Debug] Toggle Freeze/Unfreeze (Alt+F) - current: ${wasEnabled ? 'Unfrozen' : 'Frozen'}`);
+          console.log(
+            `[Debug] Toggle Freeze/Unfreeze (Alt+F) - current: ${wasEnabled ? 'Unfrozen' : 'Frozen'}`
+          );
           this.onToggleAutonomy();
         }
         return;
@@ -476,6 +497,31 @@ export class KeyboardHandler {
         return;
       }
 
+      // Handle Alt+Esc using event.code
+      // Alt+Esc = Toggle debug panel visibility (Alternative shortcut)
+      if (event.altKey && event.code === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.debugOverlay && typeof this.debugOverlay.toggle === 'function') {
+          console.log('[Debug] Toggle debug panel (Alt+Esc)');
+          this.debugOverlay.toggle();
+        }
+        return;
+      }
+
+      // Handle Shift+G
+      // Shift+G = Toggle sub-grid visibility
+      if (event.key === 'G' && event.shiftKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('[Debug] Toggle sub-grid (Shift+G)');
+        // Access toggleSubGrid via renderer if available
+        if (this.renderer && typeof (this.renderer as any).toggleSubGrid === 'function') {
+          (this.renderer as any).toggleSubGrid();
+        }
+        return;
+      }
+
       // Handle other keys using event.key
       const handler = this.keyHandlers.get(event.key);
       if (handler) {
@@ -483,16 +529,33 @@ export class KeyboardHandler {
       } else {
         // Debug: log if Alt+R or Alt+F wasn't handled
         if (event.altKey && event.code === 'KeyR') {
-          console.warn('[KeyboardHandler] Alt+R handler NOT found! Event.key:', event.key, 'Event.code:', event.code, 'Available keys:', Array.from(this.keyHandlers.keys()));
+          console.warn(
+            '[KeyboardHandler] Alt+R handler NOT found! Event.key:',
+            event.key,
+            'Event.code:',
+            event.code,
+            'Available keys:',
+            Array.from(this.keyHandlers.keys())
+          );
         }
         if (event.altKey && event.code === 'KeyF') {
-          console.warn('[KeyboardHandler] Alt+F handler NOT found! Event.key:', event.key, 'Event.code:', event.code, 'Available keys:', Array.from(this.keyHandlers.keys()));
+          console.warn(
+            '[KeyboardHandler] Alt+F handler NOT found! Event.key:',
+            event.key,
+            'Event.code:',
+            event.code,
+            'Available keys:',
+            Array.from(this.keyHandlers.keys())
+          );
         }
       }
     };
-    
+
     window.addEventListener('keydown', eventHandler, { capture: true });
-    console.log('[KeyboardHandler] Event listener attached successfully. Registered handlers:', Array.from(this.keyHandlers.keys()).sort());
+    console.log(
+      '[KeyboardHandler] Event listener attached successfully. Registered handlers:',
+      Array.from(this.keyHandlers.keys()).sort()
+    );
   }
 
   /**
@@ -524,7 +587,7 @@ export class KeyboardHandler {
     const eventLogger = this.store.getEventLogger();
     const events = eventLogger.loadEvents();
     const currentStep = this.timelineManager.getCurrentStep();
-    
+
     // Game runs at 8 steps per second (125ms interval), so 1 second = 8 steps
     const STEPS_PER_SECOND = 8;
     const scrubAmount = STEPS_PER_SECOND; // Jump 1 second worth of steps
@@ -536,7 +599,9 @@ export class KeyboardHandler {
       targetStep = Math.max(currentStep - scrubAmount, 0);
     }
 
-    console.log(`[Timeline] Scrubbing ${direction} (1 second = ${STEPS_PER_SECOND} steps): ${currentStep} -> ${targetStep} (total: ${events.length})`);
+    console.log(
+      `[Timeline] Scrubbing ${direction} (1 second = ${STEPS_PER_SECOND} steps): ${currentStep} -> ${targetStep} (total: ${events.length})`
+    );
     this.timelineManager.goToStep(targetStep);
     this.updateTimelineCursor();
   }

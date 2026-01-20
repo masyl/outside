@@ -1,14 +1,12 @@
 import { GameObject } from '@outside/core';
-import { DISPLAY_TILE_SIZE } from '../renderer/grid';
+import { CoordinateConverter } from '../renderer/coordinateSystem';
 
 /**
  * Cubic ease-in-out function
  * Equivalent to CSS cubic-bezier(0.4, 0, 0.2, 1)
  */
 function easeInOutCubic(t: number): number {
-  return t < 0.5
-    ? 4 * t * t * t
-    : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 /**
@@ -44,10 +42,13 @@ export function animateObjectMovement(
   onComplete?: () => void
 ): () => void {
   // Convert grid coordinates to pixel coordinates
-  const fromPixelX = fromX * DISPLAY_TILE_SIZE;
-  const fromPixelY = fromY * DISPLAY_TILE_SIZE;
-  const toPixelX = toX * DISPLAY_TILE_SIZE;
-  const toPixelY = toY * DISPLAY_TILE_SIZE;
+  const fromDisplay = CoordinateConverter.gridToDisplay({ x: fromX, y: fromY });
+  const toDisplay = CoordinateConverter.gridToDisplay({ x: toX, y: toY });
+
+  const fromPixelX = fromDisplay.x;
+  const fromPixelY = fromDisplay.y;
+  const toPixelX = toDisplay.x;
+  const toPixelY = toDisplay.y;
 
   // console.log(`[animateObjectMovement] Starting animation for ${objectId}:`);
   // console.log(`  From pixel: (${fromPixelX}, ${fromPixelY})`);
@@ -66,14 +67,14 @@ export function animateObjectMovement(
 
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    
+
     // Apply easing (cubic ease-in-out: [0.4, 0, 0.2, 1])
     const easedProgress = easeInOutCubic(progress);
-    
+
     // Interpolate between start and end pixel positions
     const currentX = fromPixelX + (toPixelX - fromPixelX) * easedProgress;
     const currentY = fromPixelY + (toPixelY - fromPixelY) * easedProgress;
-    
+
     if (onUpdate) {
       // Callback receives pixel coordinates, allowing sub-grid positioning
       onUpdate(currentX, currentY);

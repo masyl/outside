@@ -2,7 +2,7 @@
  * Debug overlay for displaying FPS, step counter, and other debug info
  */
 
-export const VERSION = '0.1.8'; // Update patch number when making changes
+export const VERSION = '0.1.10'; // Update patch number when making changes
 
 export class DebugOverlay {
   private static readonly VISIBILITY_KEY = 'outside.debugOverlay.visible';

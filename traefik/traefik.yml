@@ -1,0 +1,51 @@
+# Traefik Global Configuration
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  http:
+    address: ':80'
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+          permanent: true
+
+  https:
+    address: ':443'
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: traefik-proxy
+    watch: true
+
+  file:
+    directory: /dynamic
+    watch: true
+
+certificatesResolvers:
+  local:
+    acme:
+      email: admin@outside.local
+      storage: /acme.json
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      httpChallenge:
+        entryPoint: http
+
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/_wildcard.outside.local+2.pem
+        keyFile: /certs/_wildcard.outside.local+2-key.pem
+  certificates:
+    - certFile: /certs/_wildcard.outside.local+2.pem
+      keyFile: /certs/_wildcard.outside.local+2-key.pem
+
+log:
+  level: INFO
+
+accessLog: {}

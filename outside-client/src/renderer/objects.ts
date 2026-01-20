@@ -1,6 +1,8 @@
 import { Sprite, Container, Texture, Renderer, Rectangle } from 'pixi.js';
 import { WorldState, GameObject, Direction } from '@outside/core';
-import { DISPLAY_TILE_SIZE } from './grid';
+import { COORDINATE_SYSTEM, CoordinateConverter } from './coordinateSystem';
+
+const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
 
 /**
  * Create a placeholder sprite for a bot (until PNG is provided)
@@ -16,14 +18,14 @@ export function createBotPlaceholder(renderer?: Renderer, isSelected: boolean = 
   canvas.width = DISPLAY_TILE_SIZE;
   canvas.height = DISPLAY_TILE_SIZE;
   const ctx = canvas.getContext('2d')!;
-  
+
   // Draw circle centered in the 64px canvas
   // Circle radius: 16px (DISPLAY_TILE_SIZE / 4), diameter: 32px
   // Center: 32px, 32px
   const centerX = DISPLAY_TILE_SIZE / 2; // 32px
   const centerY = DISPLAY_TILE_SIZE / 2; // 32px
   const radius = DISPLAY_TILE_SIZE / 4; // 16px
-  
+
   if (isSelected) {
     // Selected bot: white circle with blue outline
     ctx.fillStyle = '#ffffff'; // White fill
@@ -43,7 +45,7 @@ export function createBotPlaceholder(renderer?: Renderer, isSelected: boolean = 
     ctx.fill();
     ctx.stroke();
   }
-  
+
   const texture = Texture.from(canvas);
   return new Sprite(texture);
 }
@@ -55,25 +57,25 @@ export function createBotSprite(texture: Texture): Sprite {
   // If texture is a spritesheet (large image), slice the first 16x16 tile
   // Sheet: /sprites/eris-esra-character-template-4/16x16/16x16 Idle-Sheet.png
   // Default bot: (0, 0) -> x=0, y=0, w=16, h=16
-  
+
   // Check if texture is likely the full sheet (width > 16)
   // Or just always slice the first tile for now since we know the asset
-  
+
   // Create a new texture that references the source but with the correct frame
   const tileTexture = new Texture({
     source: texture.source,
-    frame: new Rectangle(4, 4, 16, 16)
+    frame: new Rectangle(4, 4, 16, 16),
     //frame: new Rectangle(0, 0, 16, 16)
   });
 
   const sprite = new Sprite(tileTexture);
-  
+
   // Scale 16x16 sprite to the needed ratio
   sprite.width = DISPLAY_TILE_SIZE;
   sprite.height = DISPLAY_TILE_SIZE;
-  
+
   // Anchor point is top-left by default, which matches our grid system
-  
+
   return sprite;
 }
 
@@ -110,8 +112,12 @@ export function createObjectsLayerWithIndex(
       }
 
       // Position sprite at object's grid position
-      sprite.x = object.position.x * DISPLAY_TILE_SIZE;
-      sprite.y = object.position.y * DISPLAY_TILE_SIZE;
+      const displayPos = CoordinateConverter.gridToDisplay({
+        x: object.position.x,
+        y: object.position.y,
+      });
+      sprite.x = displayPos.x;
+      sprite.y = displayPos.y;
 
       container.addChild(sprite);
       spriteIndex.set(object.id, sprite);
@@ -165,8 +171,12 @@ export function updateObjectsLayerWithIndex(
         }
 
         // Only set initial position when creating - AnimationController handles updates
-        sprite.x = object.position.x * DISPLAY_TILE_SIZE;
-        sprite.y = object.position.y * DISPLAY_TILE_SIZE;
+        const displayPos = CoordinateConverter.gridToDisplay({
+          x: object.position.x,
+          y: object.position.y,
+        });
+        sprite.x = displayPos.x;
+        sprite.y = displayPos.y;
 
         container.addChild(sprite);
         spriteIndex.set(object.id, sprite);
@@ -178,11 +188,11 @@ export function updateObjectsLayerWithIndex(
           if (sprite.texture.source !== botTexture.source) {
             // Replace placeholder with textured sprite
             const newSprite = createBotSprite(botTexture);
-            
+
             // Preserve position
             newSprite.x = sprite.x;
             newSprite.y = sprite.y;
-            
+
             // Swap sprites
             container.removeChild(sprite);
             container.addChild(newSprite);
@@ -221,24 +231,43 @@ export function updateBotSpriteFrame(
   // Row 2: Right (Flip for Left)
   // Row 3: Up-Right (Flip for Up-Left)
   // Row 4: Up
-  
+
   let row = 0;
   let flipX = false;
-  
+
   switch (direction) {
-    case 'down': row = 0; break;
-    case 'down-right': row = 1; break;
-    case 'down-left': row = 1; flipX = true; break;
-    case 'right': row = 2; break;
-    case 'left': row = 2; flipX = true; break;
-    case 'up-right': row = 3; break;
-    case 'up-left': row = 3; flipX = true; break;
-    case 'up': row = 4; break;
+    case 'down':
+      row = 0;
+      break;
+    case 'down-right':
+      row = 1;
+      break;
+    case 'down-left':
+      row = 1;
+      flipX = true;
+      break;
+    case 'right':
+      row = 2;
+      break;
+    case 'left':
+      row = 2;
+      flipX = true;
+      break;
+    case 'up-right':
+      row = 3;
+      break;
+    case 'up-left':
+      row = 3;
+      flipX = true;
+      break;
+    case 'up':
+      row = 4;
+      break;
   }
-  
+
   // Select texture based on state
   const sourceTexture = isMoving ? walkTexture : idleTexture;
-  
+
   // Calculate frame position
   // 16x16 frames with 4px padding between rows/columns?
   // User mentions 4px padding between rows and columns.
@@ -246,27 +275,27 @@ export function updateBotSpriteFrame(
   const SPRITE_SIZE = 16;
   const PADDING = 2;
   const STRIDE = SPRITE_SIZE + PADDING * 2;
-  
+
   const frameX = frameIndex * STRIDE + PADDING;
   const frameY = row * STRIDE + PADDING + 2;
-  
+
   // Update texture frame
   const newTexture = new Texture({
     source: sourceTexture.source,
-    frame: new Rectangle(frameX, frameY, SPRITE_SIZE, SPRITE_SIZE)
+    frame: new Rectangle(frameX, frameY, SPRITE_SIZE, SPRITE_SIZE),
   });
-  
+
   sprite.texture = newTexture;
-  
+
   // Handle flipping: when flipping horizontally, we need to keep the sprite in the same grid position
   // Standard approach: anchor at right edge (1, 0) with negative scale should flip around the right edge
   // But this was causing the sprite to shift left, so there might be an issue with how anchor is calculated
-  // 
+  //
   // Alternative: Keep anchor at (0, 0) and use pivot property instead
   // Pivot is the local point in the texture that will be placed at sprite.x, sprite.y
   // To flip around the right edge of a 16px texture: pivot.x = 16
   sprite.anchor.set(0, 0);
-  
+
   if (flipX) {
     sprite.scale.x = -1 * (DISPLAY_TILE_SIZE / 16);
     // Use pivot to flip around the right edge (16px = texture width)
@@ -275,7 +304,7 @@ export function updateBotSpriteFrame(
     sprite.scale.x = 1 * (DISPLAY_TILE_SIZE / 16);
     sprite.pivot.x = 0;
   }
-  
+
   sprite.scale.y = DISPLAY_TILE_SIZE / 16;
   sprite.pivot.y = 0;
 }
@@ -299,15 +328,15 @@ export function updateSpriteColors(
         // Only update appearance if using placeholder (not texture)
         if (!botTexture) {
           const isSelected = object.id === selectedBotId;
-          
+
           // Remove old sprite
           container.removeChild(sprite);
-          
+
           // Create new sprite with correct selection state
           const newSprite = createBotPlaceholder(renderer, isSelected);
           newSprite.x = sprite.x;
           newSprite.y = sprite.y;
-          
+
           container.addChild(newSprite);
           spriteIndex.set(object.id, newSprite);
         }
@@ -315,4 +344,3 @@ export function updateSpriteColors(
     }
   });
 }
-
