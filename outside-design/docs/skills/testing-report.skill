@@ -1,0 +1,143 @@
+{
+  "name": "testing-report",
+  "version": "1.0.0",
+  "description": "Generates a comprehensive testing report for the delivery",
+  "category": "wrapup",
+  "metadata": {
+    "author": "AI Agent",
+    "created": "2026-01-20",
+    "processStep": 4,
+    "dependencies": ["pnpm", "vitest"]
+  },
+  "inputs": {
+    "required": ["deliveryPath", "testedFeatures"],
+    "optional": ["untestedFeatures", "testTypes", "coverageThreshold"]
+  },
+  "outputs": {
+    "reportPath": "string",
+    "metrics": {
+      "totalTests": "number",
+      "passingTests": "number", 
+      "failingTests": "number",
+      "coveragePercentage": "number",
+      "coverageLines": "number",
+      "coverageFunctions": "number",
+      "coverageBranches": "number",
+      "coverageStatements": "number"
+    },
+    "status": "success|error"
+  },
+  "template": {
+    "reportStructure": {
+      "title": "Testing Report",
+      "sections": [
+        "## Overview",
+        "## Features Tested", 
+        "## Features Not Tested",
+        "## Test Metrics",
+        "## Coverage Analysis",
+        "## Recommendations"
+      ]
+    },
+    "readingTime": "5 minutes",
+    "format": "Markdown with bullet points and metrics tables"
+  },
+  "steps": [
+    {
+      "name": "Collect test metrics",
+      "description": "Run test coverage and collect detailed metrics",
+      "commands": [
+        "pnpm test -- --reporter=json > test-results.json",
+        "pnpm test:coverage -- --reporter=json > coverage-results.json"
+      ],
+      "extraction": {
+        "totalTests": "Parse from test results",
+        "passingTests": "Parse from test results", 
+        "coverageData": "Parse from coverage results"
+      }
+    },
+    {
+      "name": "Analyze test coverage",
+      "description": "Calculate coverage percentages and identify gaps",
+      "metrics": {
+        "lines": "Calculate from coverage data",
+        "functions": "Calculate from coverage data",
+        "branches": "Calculate from coverage data",
+        "statements": "Calculate from coverage data"
+      }
+    },
+    {
+      "name": "Document tested features",
+      "description": "List all features/modules that have test coverage",
+      "content": {
+        "format": "- **{FeatureName}**: {CoverageLevel} coverage ({testCount} tests)",
+        "levels": ["Full", "Partial", "Minimal"],
+        "source": "Combine input with analysis"
+      }
+    },
+    {
+      "name": "Document untested features",
+      "description": "Identify and document features without adequate testing",
+      "content": {
+        "format": "- **{FeatureName}**: {Reason for lack of testing}",
+        "reasons": ["Complex to test", "Low priority", "Requires integration test", "Not implemented yet"]
+      }
+    },
+    {
+      "name": "Generate recommendations",
+      "description": "Provide specific recommendations for test improvement",
+      "categories": [
+        "Missing unit tests",
+        "Coverage gaps", 
+        "Integration test needs",
+        "Test performance improvements"
+      ]
+    },
+    {
+      "name": "Write testing report",
+      "description": "Compile all information into final testing report",
+      "action": "Write to {deliveryPath}/testing.md",
+      "validation": {
+        "completeness": "All sections filled",
+        "accuracy": "Metrics match actual test results",
+        "readability": "Can be read in 5 minutes"
+      }
+    }
+  ],
+  "errorHandling": {
+    "testCommandFails": {
+      "message": "Test commands failed. Check test configuration and dependencies.",
+      "action": "Debug test setup and retry metrics collection"
+    },
+    "lowCoverage": {
+      "message": "Coverage is below expected threshold (80%).",
+      "action": "Document this in recommendations and ask user confirmation"
+    }
+  },
+  "examples": {
+    "usage": "Use after plan-update to document testing status and coverage",
+    "input": {
+      "deliveryPath": "outside-design/docs/deliveries/2026-01-16-1000-timeline-playback-controls/",
+      "testedFeatures": ["playback state management", "game loop integration"],
+      "untestedFeatures": ["concurrent timeline operations"]
+    },
+    "expectedOutput": {
+      "metrics": {
+        "totalTests": 15,
+        "passingTests": 15,
+        "failingTests": 0,
+        "coveragePercentage": 85
+      }
+    }
+  },
+  "integration": {
+    "previousSkill": "plan-update",
+    "nextSkill": "delivery-summary"
+  },
+  "notes": [
+    "Report should be readable in 5 minutes",
+    "Include both quantitative metrics and qualitative analysis",
+    "Focus on actionable recommendations",
+    "Document reasons for any untested areas"
+  ]
+}

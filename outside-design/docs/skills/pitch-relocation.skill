@@ -1,0 +1,129 @@
+{
+  "name": "pitch-relocation",
+  "version": "1.0.0",
+  "description": "Relocates the original pitch document to the delivery folder",
+  "category": "wrapup",
+  "metadata": {
+    "author": "AI Agent",
+    "created": "2026-01-20",
+    "processStep": 6,
+    "dependencies": ["file system", "git"]
+  },
+  "inputs": {
+    "required": ["deliveryPath", "pitchName"],
+    "optional": ["pitchPath", "amendments"]
+  },
+  "outputs": {
+    "pitchCopied": "boolean",
+    "originalLocation": "string",
+    "newLocation": "string",
+    "status": "success|error"
+  },
+  "template": {
+    "sourceLocation": "outside-design/docs/pitches/",
+    "destinationLocation": "{deliveryPath}/pitch.md",
+    "backupStrategy": "Copy original, don't move"
+  },
+  "steps": [
+    {
+      "name": "Locate original pitch",
+      "description": "Find the pitch that initiated this delivery",
+      "searchOrder": [
+        "{pitchName}.md",
+        "{deliveryName}.md", 
+        "Latest pitch by date",
+        "Search pitch content for delivery keywords"
+      ],
+      "fallback": "Ask user to specify the correct pitch"
+    },
+    {
+      "name": "Verify pitch authenticity",
+      "description": "Confirm this is the correct pitch for this delivery",
+      "validation": {
+        "contentMatch": "Pitch content relates to delivered features",
+        "timingMatch": "Pitch date aligns with development timeline",
+        "scopeMatch": "Pitch scope matches delivery scope"
+      }
+    },
+    {
+      "name": "Check for amendments",
+      "description": "Look for pitch modifications during implementation",
+      "indicators": [
+        "Strikethrough formatting",
+        "Amendment warnings",
+        "Modification timestamps",
+        "Scope change notes"
+      ]
+    },
+    {
+      "name": "Copy pitch to delivery folder",
+      "description": "Copy original pitch to delivery folder as pitch.md",
+      "action": "cp {sourcePitch} {deliveryPath}/pitch.md",
+      "preserveOriginal": true
+    },
+    {
+      "name": "Verify pitch relocation",
+      "description": "Confirm pitch was copied successfully",
+      "validation": {
+        "fileExists": "pitch.md exists in delivery folder",
+        "contentIntact": "Content matches original pitch",
+        "originalPreserved": "Original pitch still in pitches folder"
+      }
+    },
+    {
+      "name": "Document pitch metadata",
+      "description": "Add pitch information to delivery tracking",
+      "metadata": {
+        "originalPitch": "Source location and date",
+        "relocationDate": "Current timestamp",
+        "authenticity": "Verification status"
+      }
+    }
+  ],
+  "errorHandling": {
+    "pitchNotFound": {
+      "message": "Original pitch not found in pitches directory.",
+      "action": "Ask user to specify correct pitch file or provide pitch content"
+    },
+    "multiplePitches": {
+      "message": "Multiple possible pitches found for this delivery.",
+      "action": "Present options to user for selection"
+    },
+    "pitchMismatch": {
+      "message": "Found pitch doesn't match delivery content.",
+      "action": "Ask user to confirm if this is correct pitch or search again"
+    },
+    "copyFailed": {
+      "message": "Failed to copy pitch to delivery folder.",
+      "action": "Check file permissions and retry"
+    }
+  },
+  "examples": {
+    "usage": "Use after delivery-summary to preserve original pitch context",
+    "input": {
+      "deliveryPath": "outside-design/docs/deliveries/2026-01-16-1000-timeline-playback-controls/",
+      "pitchName": "timeline-playback-controls"
+    },
+    "output": {
+      "pitchCopied": true,
+      "originalLocation": "outside-design/docs/pitches/timeline-playback-controls.md",
+      "newLocation": "outside-design/docs/deliveries/2026-01-16-1000-timeline-playback-controls/pitch.md"
+    }
+  },
+  "integration": {
+    "previousSkill": "delivery-summary",
+    "nextSkill": "commit-preparation"
+  },
+  "searchStrategy": {
+    "primary": "Exact name match with pitchName input",
+    "secondary": "Fuzzy match with delivery name keywords",
+    "tertiary": "Content-based search using delivery features",
+    "fallback": "User selection from candidate pitches"
+  },
+  "notes": [
+    "Always copy, never move the original pitch",
+    "Preserve the original pitch in the pitches folder",
+    "Verify pitch authenticity before relocation",
+    "Handle amended pitches carefully to preserve modification history"
+  ]
+}

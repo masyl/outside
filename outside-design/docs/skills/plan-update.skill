@@ -1,0 +1,122 @@
+{
+  "name": "plan-update",
+  "version": "1.0.0",
+  "description": "Updates the implementation plan to reflect the end state of delivery",
+  "category": "wrapup",
+  "metadata": {
+    "author": "AI Agent",
+    "created": "2026-01-20",
+    "processStep": 3,
+    "dependencies": ["file system", "git"]
+  },
+  "inputs": {
+    "required": ["deliveryPath", "actualChanges"],
+    "optional": ["originalPlan", "deviations"]
+  },
+  "outputs": {
+    "updatedPlan": "string",
+    "status": "success|error",
+    "changes": ["string"]
+  },
+  "template": {
+    "planStructure": {
+      "sections": [
+        "Overview",
+        "Completed Work",
+        "Incomplete Work", 
+        "Deviations from Original Plan",
+        "Technical Decisions",
+        "Next Steps"
+      ]
+    },
+    "format": {
+      "completedItems": "- [x] Task description",
+      "incompleteItems": "- [ ] Task description (reason for incompleteness)",
+      "deviations": "**Original:** {original}\n**Actual:** {actual}\n**Reason:** {reason}"
+    }
+  },
+  "steps": [
+    {
+      "name": "Locate existing plan",
+      "description": "Find and read the current implementation plan",
+      "action": "Read {deliveryPath}/plan.md",
+      "fallback": "Create new plan if none exists"
+    },
+    {
+      "name": "Analyze actual implementation",
+      "description": "Compare what was planned vs what was actually delivered",
+      "analysis": {
+        "completedFeatures": "Extract from actualChanges input",
+        "missingFeatures": "Identify gaps between plan and reality",
+        "additionalFeatures": "Document unplanned additions"
+      }
+    },
+    {
+      "name": "Update todo status",
+      "description": "Mark completed items and note incomplete ones",
+      "logic": {
+        "completed": "Mark with [x] and completion notes",
+        "incomplete": "Mark with [ ] and reason for incompleteness",
+        "modified": "Document scope changes with justification"
+      }
+    },
+    {
+      "name": "Add deviation notes",
+      "description": "Document any changes from the original plan",
+      "sections": [
+        "## Deviations from Original Plan",
+        "### Technical Approach Changes",
+        "### Scope Modifications",
+        "### Timeline Adjustments"
+      ]
+    },
+    {
+      "name": "Finalize plan content",
+      "description": "Ensure plan reflects current reality and end state",
+      "validation": {
+        "accuracy": "Plan matches delivered work",
+        "completeness": "All major changes documented",
+        "clarity": "Future readers can understand what happened"
+      }
+    },
+    {
+      "name": "Write updated plan",
+      "description": "Save the updated plan to the delivery folder",
+      "action": "Write to {deliveryPath}/plan.md"
+    }
+  ],
+  "errorHandling": {
+    "planNotFound": {
+      "message": "No existing plan found. Creating new plan based on delivered work.",
+      "action": "Generate new plan from actual implementation"
+    },
+    "planCorrupted": {
+      "message": "Existing plan file is corrupted or unreadable.",
+      "action": "Create backup and generate new plan"
+    }
+  },
+  "examples": {
+    "usage": "Use after wrapup-folder-setup to document what was actually accomplished",
+    "input": {
+      "deliveryPath": "outside-design/docs/deliveries/2026-01-16-1000-timeline-playback-controls/",
+      "actualChanges": ["Implemented playback states", "Added game loop control", "Fixed infrastructure issues"],
+      "deviations": [
+        {
+          "original": "Basic play/pause controls",
+          "actual": "Full playback state management with TRAVELING state",
+          "reason": "Needed for safe time travel implementation"
+        }
+      ]
+    }
+  },
+  "integration": {
+    "previousSkill": "wrapup-folder-setup",
+    "nextSkill": "testing-report"
+  },
+  "notes": [
+    "Always update plan to reflect reality, not original intention",
+    "Include what was actually built, even if it differs from plan",
+    "Document important decisions made during implementation",
+    "This is a documentation step, not a code change step"
+  ]
+}

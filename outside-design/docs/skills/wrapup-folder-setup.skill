@@ -1,0 +1,113 @@
+{
+  "name": "wrapup-folder-setup",
+  "version": "1.0.0",
+  "description": "Creates the delivery folder structure according to project standards",
+  "category": "wrapup",
+  "metadata": {
+    "author": "AI Agent",
+    "created": "2026-01-20",
+    "processStep": 2,
+    "dependencies": ["git", "file system"]
+  },
+  "inputs": {
+    "required": ["deliveryName", "timestamp"],
+    "optional": ["deliveryPath"]
+  },
+  "outputs": {
+    "folderPath": "string",
+    "created": ["string"],
+    "status": "success|error"
+  },
+  "template": {
+    "folderStructure": {
+      "basePath": "outside-design/docs/deliveries/",
+      "naming": "{YYYY-MM-DD-HHMM}-{descriptive-name}",
+      "example": "2024-01-08-1409-game-client-poc/"
+    },
+    "files": [
+      {
+        "name": "README.md",
+        "required": false,
+        "description": "Optional: additional context or notes"
+      },
+      {
+        "name": "pitch.md",
+        "required": false,
+        "description": "The original pitch for this delivery"
+      },
+      {
+        "name": "plan.md",
+        "required": true,
+        "description": "Completed or ongoing implementation plan"
+      },
+      {
+        "name": "delivered.md",
+        "required": true,
+        "description": "A summary of what was actually delivered"
+      },
+      {
+        "name": "testing.md",
+        "required": true,
+        "description": "A report on automated tests and code coverage"
+      },
+      {
+        "name": "commit.md",
+        "required": true,
+        "description": "Prepared commit message for quick review"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "name": "Generate delivery folder name",
+      "description": "Create timestamped folder name with descriptive title",
+      "logic": {
+        "timestamp": "current date and time in YYYY-MM-DD-HHMM format",
+        "folderName": "{timestamp}-{deliveryName}"
+      }
+    },
+    {
+      "name": "Create delivery directory",
+      "description": "Create the main delivery folder",
+      "action": "mkdir -p {deliveryPath}/{folderName}"
+    },
+    {
+      "name": "Initialize placeholder files",
+      "description": "Create empty files for required documentation",
+      "files": ["plan.md", "delivered.md", "testing.md", "commit.md"]
+    },
+    {
+      "name": "Verify folder creation",
+      "description": "Confirm all files and folders were created successfully",
+      "validation": {
+        "folderExists": true,
+        "filesCreated": ["plan.md", "delivered.md", "testing.md", "commit.md"]
+      }
+    }
+  ],
+  "errorHandling": {
+    "folderExists": {
+      "message": "Delivery folder already exists. Use a different name or timestamp.",
+      "action": "Generate new timestamp or ask for different delivery name"
+    },
+    "permissionDenied": {
+      "message": "Cannot create delivery folder due to permissions.",
+      "action": "Check file system permissions and retry"
+    }
+  },
+  "examples": {
+    "usage": "Use after wrapup-prerequisites to set up the documentation structure",
+    "input": {
+      "deliveryName": "timeline-playback-controls",
+      "timestamp": "2026-01-16-1000"
+    },
+    "output": {
+      "folderPath": "outside-design/docs/deliveries/2026-01-16-1000-timeline-playback-controls/",
+      "created": ["plan.md", "delivered.md", "testing.md", "commit.md"]
+    }
+  },
+  "integration": {
+    "previousSkill": "wrapup-prerequisites",
+    "nextSkill": "plan-update"
+  }
+}
