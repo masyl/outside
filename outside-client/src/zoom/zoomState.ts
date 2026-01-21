@@ -6,14 +6,14 @@
 import { setCurrentZoomScale } from './zoomScaleService';
 
 export interface ZoomState {
-  level: number; // 2, 4, 6, 8 (zoom level)
-  scale: number; // 0.5, 1.0, 1.5, 2.0 (pixel multiplier)
+  level: number; // (zoom level)
+  scale: number; // (pixel multiplier)
 }
 
 export class ZoomManager {
-  private level: 2 | 4 | 6 | 8 = 4; // Default zoom level 4 (1.0x scale)
-  private readonly ZOOM_LEVELS = [2, 4, 6, 8] as const;
-  private readonly ZOOM_SCALES = [0.5, 1.0, 1.5, 2.0] as const;
+  private level: 1 | 2 | 3 | 4 | 5 = 3; // Default zoom level 4 (1.0x scale)
+  private readonly ZOOM_LEVELS = [1, 2, 3, 4, 5] as const;
+  private readonly ZOOM_SCALES = [0.25, 0.5, 0.75, 1, 1.5] as const;
   private readonly STORAGE_KEY = 'outside-zoom-level';
   private zoomChangeListeners: Array<(level: number, scale: number) => void> = [];
 
@@ -30,7 +30,7 @@ export class ZoomManager {
   /**
    * Set zoom level
    */
-  setLevel(level: 2 | 4 | 6 | 8): void {
+  setLevel(level: 1 | 2 | 3 | 4 | 5): void {
     this.level = level;
     const scale = this.ZOOM_SCALES[this.ZOOM_LEVELS.indexOf(this.level)];
     setCurrentZoomScale(scale);
@@ -89,8 +89,8 @@ export class ZoomManager {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
         const level = parseInt(stored, 10);
-        if (this.ZOOM_LEVELS.includes(level as 2 | 4 | 6 | 8)) {
-          this.level = level as 2 | 4 | 6 | 8;
+        if (this.ZOOM_LEVELS.includes(level as 1 | 2 | 3 | 4 | 5)) {
+          this.level = level as 1 | 2 | 3 | 4 | 5;
         }
       }
     } catch (error) {
