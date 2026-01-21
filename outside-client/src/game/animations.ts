@@ -1,5 +1,5 @@
 import { GameObject } from '@outside/core';
-import { CoordinateConverter } from '../renderer/coordinateSystem';
+import { CoordinateConverter, getZoomScale } from '../renderer/coordinateSystem';
 
 /**
  * Cubic ease-in-out function
@@ -42,8 +42,9 @@ export function animateObjectMovement(
   onComplete?: () => void
 ): () => void {
   // Convert grid coordinates to pixel coordinates
-  const fromDisplay = CoordinateConverter.gridToDisplay({ x: fromX, y: fromY });
-  const toDisplay = CoordinateConverter.gridToDisplay({ x: toX, y: toY });
+  const zoomScale = getZoomScale();
+  const fromDisplay = CoordinateConverter.gridToDisplay({ x: fromX, y: fromY }, zoomScale);
+  const toDisplay = CoordinateConverter.gridToDisplay({ x: toX, y: toY }, zoomScale);
 
   const fromPixelX = fromDisplay.x;
   const fromPixelY = fromDisplay.y;
