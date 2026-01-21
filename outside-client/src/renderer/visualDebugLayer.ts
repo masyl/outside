@@ -183,7 +183,7 @@ export class VisualDebugLayer extends Container {
       // Draw dotted square manually since PixiJS Graphics doesn't support dotted lines natively in a simple way
       const dot = VIRTUAL_PIXEL;
       const gap = VIRTUAL_PIXEL;
-      const size = DISPLAY_TILE_SIZE;
+      const size = DISPLAY_TILE_SIZE * zoomScale;
       const x = displayPos.x;
       const y = displayPos.y;
 
@@ -422,7 +422,7 @@ export class VisualDebugLayer extends Container {
 
     this.graphics.setStrokeStyle({ width: 2, color: COLORS.MOUSE_CIRCLE });
     this.graphics.beginPath();
-    this.graphics.circle(mouseDisplay.x, mouseDisplay.y, DISPLAY_TILE_SIZE / 3);
+    this.graphics.circle(mouseDisplay.x, mouseDisplay.y, (DISPLAY_TILE_SIZE / 3) * zoomScale);
     this.graphics.stroke();
 
     // 2. Grid-snapped cursor tile square (yellow) - highlights the tile
@@ -442,7 +442,7 @@ export class VisualDebugLayer extends Container {
     const sub8Pos = CoordinateConverter.snapToSubGrid8(this.mousePos);
     const sub8Display = CoordinateConverter.worldToDisplay(sub8Pos, zoomScale);
 
-    const HALF_SUB_SIZE = DISPLAY_TILE_SIZE / 8 / 2; // 4px
+    const HALF_SUB_SIZE = (DISPLAY_TILE_SIZE / 8 / 2) * zoomScale; // 4px scaled
 
     this.graphics.setStrokeStyle({ width: 1, color: COLORS.CURSOR_TILE, alpha: 0.5 });
     this.graphics.beginPath();
