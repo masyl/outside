@@ -32,6 +32,7 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Deliveries', link: '/deliveries/' },
       { text: 'Design Process', link: '/design-process/' },
+      { text: 'Licensing', link: '/licensing/' },
       { text: 'Components', link: '/components/' },
       { text: 'Style Guide', link: '/style-guide/' },
     ],
@@ -60,6 +61,15 @@ export default defineConfig({
             { text: 'Overview', link: '/components/' },
             { text: 'UI Elements', link: '/components/ui-elements' },
             { text: 'Game Components', link: '/components/game-components' },
+          ],
+        },
+      ],
+      '/licensing/': [
+        {
+          text: 'Licensing',
+          items: [
+            { text: 'Overview', link: '/licensing/' },
+            { text: 'License Details', link: '/licensing/licensing' },
           ],
         },
       ],
