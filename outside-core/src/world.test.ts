@@ -25,14 +25,15 @@ describe('World State Management', () => {
   });
 
   describe('createWorldState', () => {
-    it('should create world with correct dimensions', () => {
-      expect(world.width).toBe(20);
-      expect(world.height).toBe(10);
+    it('should create world with correct limits', () => {
+      expect(world.horizontalLimit).toBe(30);
+      expect(world.verticalLimit).toBe(30);
     });
 
     it('should create empty grid', () => {
-      expect(world.grid).toHaveLength(10);
-      expect(world.grid[0]).toHaveLength(20);
+      const gridSize = 30 * 2 + 1; // 61
+      expect(world.grid).toHaveLength(gridSize);
+      expect(world.grid[0]).toHaveLength(gridSize);
       expect(world.grid[0][0]).toBeNull();
     });
 
@@ -194,7 +195,7 @@ describe('World State Management', () => {
         position: { x: 5, y: 3 },
       };
 
-      placeObjectInGrid(world.grid, object, { x: 5, y: 3 });
+      placeObjectInGrid(world.grid, object, { x: 5, y: 3 }, world.horizontalLimit);
       expect(isPositionOccupied(world, { x: 5, y: 3 })).toBe(true);
       expect(isPositionOccupied(world, { x: 6, y: 3 })).toBe(false);
     });
@@ -206,7 +207,7 @@ describe('World State Management', () => {
         position: { x: 5, y: 3 },
       };
 
-      placeObjectInGrid(world.grid, object, { x: 5, y: 3 });
+      placeObjectInGrid(world.grid, object, { x: 5, y: 3 }, world.horizontalLimit);
 
       expect(getObjectAtPosition(world, { x: 5, y: 3 })).toBe(object);
       expect(getObjectAtPosition(world, { x: 6, y: 3 })).toBeNull();
@@ -219,10 +220,10 @@ describe('World State Management', () => {
         position: { x: 5, y: 3 },
       };
 
-      placeObjectInGrid(world.grid, object, { x: 5, y: 3 });
+      placeObjectInGrid(world.grid, object, { x: 5, y: 3 }, world.horizontalLimit);
       expect(isPositionOccupied(world, { x: 5, y: 3 })).toBe(true);
 
-      removeObjectFromGrid(world.grid, { x: 5, y: 3 });
+      removeObjectFromGrid(world.grid, { x: 5, y: 3 }, world.horizontalLimit);
       expect(isPositionOccupied(world, { x: 5, y: 3 })).toBe(false);
     });
 
@@ -233,8 +234,8 @@ describe('World State Management', () => {
         position: { x: 5, y: 3 },
       };
 
-      placeObjectInGrid(world.grid, object, { x: -1, y: 0 });
-      removeObjectFromGrid(world.grid, { x: -1, y: 0 });
+      placeObjectInGrid(world.grid, object, { x: -1, y: 0 }, world.horizontalLimit);
+      removeObjectFromGrid(world.grid, { x: -1, y: 0 }, world.horizontalLimit);
 
       // Should not throw errors
       expect(isPositionOccupied(world, { x: -1, y: 0 })).toBe(false);
