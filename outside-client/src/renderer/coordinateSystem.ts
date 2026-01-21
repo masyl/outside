@@ -63,15 +63,7 @@ export const COORDINATE_SYSTEM = {
  * This is a convenience function that can be called from components
  */
 export function getZoomScale(): number {
-  try {
-    // Import dynamically to avoid circular dependency
-    // This will work in runtime but TypeScript doesn't like it
-    const zoomModule = eval('require')('../zoom/zoomState');
-    return zoomModule.zoomManager.getState().scale;
-  } catch (error) {
-    console.warn('Failed to get zoom scale, using default:', error);
-    return 1.0; // Default zoom level 4 = 1.0x scale
-  }
+  return getCurrentZoomScale();
 }
 
 /**
@@ -189,6 +181,16 @@ export class CoordinateConverter {
     return {
       x: Math.floor(pos.x),
       y: Math.floor(pos.y),
+    };
+  }
+
+  /**
+   * Get center of a tile in World coordinates
+   */
+  static getTileCenter(tileX: number, tileY: number, zoomScale: number = 1.0): WorldPosition {
+    return {
+      x: tileX + 0.5,
+      y: tileY + 0.5,
     };
   }
 
