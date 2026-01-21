@@ -122,6 +122,7 @@ export function createObjectsLayerWithIndex(
       );
       sprite.x = displayPos.x;
       sprite.y = displayPos.y;
+      sprite.scale.set(zoomScale, zoomScale);
 
       container.addChild(sprite);
       spriteIndex.set(object.id, sprite);
@@ -176,12 +177,16 @@ export function updateObjectsLayerWithIndex(
 
         // Only set initial position when creating - AnimationController handles updates
         const zoomScale = getZoomScale();
-        const displayPos = CoordinateConverter.gridToDisplay({
-          x: object.position.x,
-          y: object.position.y,
-        });
+        const displayPos = CoordinateConverter.gridToDisplay(
+          {
+            x: object.position.x,
+            y: object.position.y,
+          },
+          zoomScale
+        );
         sprite.x = displayPos.x;
         sprite.y = displayPos.y;
+        sprite.scale.set(zoomScale, zoomScale);
 
         container.addChild(sprite);
         spriteIndex.set(object.id, sprite);
@@ -194,9 +199,10 @@ export function updateObjectsLayerWithIndex(
             // Replace placeholder with textured sprite
             const newSprite = createBotSprite(botTexture);
 
-            // Preserve position
+            // Preserve position and scaling
             newSprite.x = sprite.x;
             newSprite.y = sprite.y;
+            newSprite.scale.copyFrom(sprite.scale);
 
             // Swap sprites
             container.removeChild(sprite);
