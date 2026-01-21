@@ -3,6 +3,8 @@
  * Provides discrete zoom levels with wrap-around cycling
  */
 
+import { setCurrentZoomScale } from './zoomScaleService';
+
 export interface ZoomState {
   level: number; // 2, 4, 6, 8 (zoom level)
   scale: number; // 0.5, 1.0, 1.5, 2.0 (pixel multiplier)
@@ -29,6 +31,8 @@ export class ZoomManager {
    */
   setLevel(level: 2 | 4 | 6 | 8): void {
     this.level = level;
+    const scale = this.ZOOM_SCALES[this.ZOOM_LEVELS.indexOf(this.level)];
+    setCurrentZoomScale(scale);
     this.saveToBrowser();
   }
 
@@ -83,6 +87,9 @@ export class ZoomManager {
    */
   constructor() {
     this.loadFromBrowser();
+    // Initialize the zoom scale service with current scale
+    const scale = this.ZOOM_SCALES[this.ZOOM_LEVELS.indexOf(this.level)];
+    setCurrentZoomScale(scale);
   }
 }
 

@@ -1,3 +1,5 @@
+import { getCurrentZoomScale } from '../zoom/zoomScaleService';
+
 /**
  * Core coordinate system for the game
  *
@@ -13,10 +15,11 @@
  *
  * 3. Display Coordinates (Pixels):
  *    - Screen rendering units
- *    - 1 World Unit = 64 Display Pixels
+ *    - Example: { x: 2.5, y: 1.5 } is center of tile (2,1)
  *
- * 4. Screen Coordinates (Pixels):
+ * 4. Screen Coordinates (Browser Window):
  *    - Browser window coordinates
+ *    - Used for mouse events and viewport calculations
  */
 
 /**
@@ -186,16 +189,6 @@ export class CoordinateConverter {
     return {
       x: Math.floor(pos.x),
       y: Math.floor(pos.y),
-    };
-  }
-
-  /**
-   * Get center of a tile in World coordinates
-   */
-  static getTileCenter(tileX: number, tileY: number, zoomScale: number = 1.0): WorldPosition {
-    return {
-      x: tileX + 0.5,
-      y: tileY + 0.5,
     };
   }
 
