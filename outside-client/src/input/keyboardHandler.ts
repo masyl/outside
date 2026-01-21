@@ -166,6 +166,10 @@ export class KeyboardHandler {
         event.preventDefault();
         console.log('[Zoom] Zoom in (Alt + Plus/Equal)');
         zoomManager.increaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
       }
     });
 
@@ -174,6 +178,10 @@ export class KeyboardHandler {
         event.preventDefault();
         console.log('[Zoom] Zoom out (Alt + Minus)');
         zoomManager.decreaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
       }
     });
 

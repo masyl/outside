@@ -1,7 +1,7 @@
 import { Application, Container, Texture, Sprite, Assets, Graphics } from 'pixi.js';
 import { GameObject, WorldState, Direction } from '@outside/core';
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
-import { COORDINATE_SYSTEM, CoordinateConverter } from './coordinateSystem';
+import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
 import {
   createBotPlaceholder,
   createObjectsLayerWithIndex,
@@ -301,9 +301,10 @@ export class GameRenderer {
     const dimensions = getGridDimensions(world);
     const screenWidth = this.app.screen.width;
     const screenHeight = this.app.screen.height;
+    const zoomScale = getZoomScale();
 
     // Calculate where world coordinate 0,0 should be positioned
-    const centerOfWorld0_0 = CoordinateConverter.gridToDisplay({ x: 0, y: 0 });
+    const centerOfWorld0_0 = CoordinateConverter.gridToDisplay({ x: 0, y: 0 }, zoomScale);
 
     // Calculate the offset needed to center 0,0 in the viewport
     const offsetX = screenWidth / 2 - centerOfWorld0_0.x;
@@ -403,10 +404,14 @@ export class GameRenderer {
     }
 
     sprite = createBotPlaceholder(this.app.renderer, false);
-    const displayPos = CoordinateConverter.gridToDisplay({
-      x: object.position.x,
-      y: object.position.y,
-    });
+    const zoomScale = getZoomScale();
+    const displayPos = CoordinateConverter.gridToDisplay(
+      {
+        x: object.position.x,
+        y: object.position.y,
+      },
+      zoomScale
+    );
     sprite.x = displayPos.x;
     sprite.y = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
     this.objectsContainer.addChild(sprite);

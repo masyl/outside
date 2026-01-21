@@ -1,5 +1,10 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js';
-import { CoordinateConverter, COORDINATE_SYSTEM, WorldPosition } from './coordinateSystem';
+import {
+  CoordinateConverter,
+  COORDINATE_SYSTEM,
+  WorldPosition,
+  getZoomScale,
+} from './coordinateSystem';
 import { WorldState, Direction } from '@outside/core';
 
 /**
@@ -167,8 +172,9 @@ export class VisualDebugLayer extends Container {
     const { COLORS } = VisualDebugLayer;
     const { DISPLAY_TILE_SIZE, VIRTUAL_PIXEL } = COORDINATE_SYSTEM;
 
+    const zoomScale = getZoomScale();
     this.bots.forEach((bot) => {
-      const displayPos = CoordinateConverter.gridToDisplay({ x: bot.x, y: bot.y });
+      const displayPos = CoordinateConverter.gridToDisplay({ x: bot.x, y: bot.y }, zoomScale);
 
       // 1. Draw tile highlight (dotted square)
       this.graphics.setStrokeStyle({ width: VIRTUAL_PIXEL, color: COLORS.BOT_POSITION, alpha: 1 });
@@ -206,8 +212,8 @@ export class VisualDebugLayer extends Container {
 
       // 2. Draw direction vector if available
       if (bot.direction) {
-        const center = CoordinateConverter.getTileCenter(bot.x, bot.y);
-        const centerDisplay = CoordinateConverter.worldToDisplay(center);
+        const center = CoordinateConverter.getTileCenter(bot.x, bot.y, zoomScale);
+        const centerDisplay = CoordinateConverter.worldToDisplay(center, zoomScale);
 
         let dx = 0;
         let dy = 0;
@@ -299,6 +305,7 @@ export class VisualDebugLayer extends Container {
     if (!this.world) return;
 
     const { COLORS } = VisualDebugLayer;
+    const zoomScale = getZoomScale();
 
     console.log(
       `[VisualDebugLayer] renderDotGrid: drawing ${this.world.horizontalLimit * 2 + 1}x${this.world.verticalLimit * 2 + 1} dots`
@@ -307,7 +314,7 @@ export class VisualDebugLayer extends Container {
     for (let x = -this.world.horizontalLimit; x <= this.world.horizontalLimit; x++) {
       for (let y = -this.world.verticalLimit; y <= this.world.verticalLimit; y++) {
         const gridPos = { x, y };
-        const displayPos = CoordinateConverter.gridToDisplay(gridPos);
+        const displayPos = CoordinateConverter.gridToDisplay(gridPos, zoomScale);
 
         // Fill a small circle for each dot
         this.graphics.beginPath();
@@ -327,9 +334,10 @@ export class VisualDebugLayer extends Container {
     const { COLORS } = VisualDebugLayer;
     const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
     const SUB_SIZE = DISPLAY_TILE_SIZE / 8;
+    const zoomScale = getZoomScale();
 
-    const totalWidth = (this.world.horizontalLimit * 2 + 1) * DISPLAY_TILE_SIZE;
-    const totalHeight = (this.world.verticalLimit * 2 + 1) * DISPLAY_TILE_SIZE;
+    const totalWidth = (this.world.horizontalLimit * 2 + 1) * DISPLAY_TILE_SIZE * zoomScale;
+    const totalHeight = (this.world.verticalLimit * 2 + 1) * DISPLAY_TILE_SIZE * zoomScale;
 
     this.graphics.setStrokeStyle({ width: 1, color: COLORS.GRID_DOTS, alpha: 0.3 });
     this.graphics.beginPath();
@@ -337,7 +345,9 @@ export class VisualDebugLayer extends Container {
     // Draw vertical sub-grid lines
     for (let x = -this.world.horizontalLimit; x <= this.world.horizontalLimit; x++) {
       for (let subX = 1; subX < 8; subX++) {
-        const xPos = (x + this.world.horizontalLimit) * DISPLAY_TILE_SIZE + subX * SUB_SIZE;
+        const xPos =
+          (x + this.world.horizontalLimit) * DISPLAY_TILE_SIZE * zoomScale +
+          subX * SUB_SIZE * zoomScale;
         this.graphics.moveTo(xPos, 0);
         this.graphics.lineTo(xPos, totalHeight);
       }
@@ -346,7 +356,9 @@ export class VisualDebugLayer extends Container {
     // Draw horizontal sub-grid lines
     for (let y = -this.world.verticalLimit; y <= this.world.verticalLimit; y++) {
       for (let subY = 1; subY < 8; subY++) {
-        const yPos = (y + this.world.verticalLimit) * DISPLAY_TILE_SIZE + subY * SUB_SIZE;
+        const yPos =
+          (y + this.world.verticalLimit) * DISPLAY_TILE_SIZE * zoomScale +
+          subY * SUB_SIZE * zoomScale;
         this.graphics.moveTo(0, yPos);
         this.graphics.lineTo(totalWidth, yPos);
       }
@@ -362,16 +374,23 @@ export class VisualDebugLayer extends Container {
     if (!this.world) return;
 
     const { COLORS } = VisualDebugLayer;
+    const zoomScale = getZoomScale();
 
     // Use coordinate converter for dimensions
-    const topLeft = CoordinateConverter.gridToDisplay({
-      x: -this.world.horizontalLimit,
-      y: -this.world.verticalLimit,
-    });
-    const bottomRight = CoordinateConverter.gridToDisplay({
-      x: this.world.horizontalLimit + 1,
-      y: this.world.verticalLimit + 1,
-    });
+    const topLeft = CoordinateConverter.gridToDisplay(
+      {
+        x: -this.world.horizontalLimit,
+        y: -this.world.verticalLimit,
+      },
+      zoomScale
+    );
+    const bottomRight = CoordinateConverter.gridToDisplay(
+      {
+        x: this.world.horizontalLimit + 1,
+        y: this.world.verticalLimit + 1,
+      },
+      zoomScale
+    );
     const width = bottomRight.x - topLeft.x;
     const height = bottomRight.y - topLeft.y;
 
@@ -392,13 +411,14 @@ export class VisualDebugLayer extends Container {
 
     const { COLORS } = VisualDebugLayer;
     const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
+    const zoomScale = getZoomScale();
 
     console.log(
       `[VisualDebugLayer] renderMouseVisualizations: mouse at world (${this.mousePos.x.toFixed(2)}, ${this.mousePos.y.toFixed(2)})`
     );
 
     // 1. Continuous mouse position circle (blue) - follows exact floating point position
-    const mouseDisplay = CoordinateConverter.worldToDisplay(this.mousePos);
+    const mouseDisplay = CoordinateConverter.worldToDisplay(this.mousePos, zoomScale);
 
     this.graphics.setStrokeStyle({ width: 2, color: COLORS.MOUSE_CIRCLE });
     this.graphics.beginPath();
@@ -407,15 +427,20 @@ export class VisualDebugLayer extends Container {
 
     // 2. Grid-snapped cursor tile square (yellow) - highlights the tile
     const gridPos = CoordinateConverter.getGridPosition(this.mousePos);
-    const tileDisplay = CoordinateConverter.gridToDisplay(gridPos);
+    const tileDisplay = CoordinateConverter.gridToDisplay(gridPos, zoomScale);
 
     this.graphics.setStrokeStyle({ width: 2, color: COLORS.CURSOR_TILE });
-    this.graphics.rect(tileDisplay.x, tileDisplay.y, DISPLAY_TILE_SIZE, DISPLAY_TILE_SIZE);
+    this.graphics.rect(
+      tileDisplay.x,
+      tileDisplay.y,
+      DISPLAY_TILE_SIZE * zoomScale,
+      DISPLAY_TILE_SIZE * zoomScale
+    );
     this.graphics.stroke();
 
     // 3. 8x8 Sub-grid snapping visualization (always visible when debug is on)
     const sub8Pos = CoordinateConverter.snapToSubGrid8(this.mousePos);
-    const sub8Display = CoordinateConverter.worldToDisplay(sub8Pos);
+    const sub8Display = CoordinateConverter.worldToDisplay(sub8Pos, zoomScale);
 
     const HALF_SUB_SIZE = DISPLAY_TILE_SIZE / 8 / 2; // 4px
 

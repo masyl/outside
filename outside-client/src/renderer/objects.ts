@@ -1,6 +1,6 @@
 import { Sprite, Container, Texture, Renderer, Rectangle } from 'pixi.js';
 import { WorldState, GameObject, Direction } from '@outside/core';
-import { COORDINATE_SYSTEM, CoordinateConverter } from './coordinateSystem';
+import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
 
 const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
 
@@ -112,10 +112,14 @@ export function createObjectsLayerWithIndex(
       }
 
       // Position sprite at object's grid position
-      const displayPos = CoordinateConverter.gridToDisplay({
-        x: object.position.x,
-        y: object.position.y,
-      });
+      const zoomScale = getZoomScale();
+      const displayPos = CoordinateConverter.gridToDisplay(
+        {
+          x: object.position.x,
+          y: object.position.y,
+        },
+        zoomScale
+      );
       sprite.x = displayPos.x;
       sprite.y = displayPos.y;
 
@@ -171,6 +175,7 @@ export function updateObjectsLayerWithIndex(
         }
 
         // Only set initial position when creating - AnimationController handles updates
+        const zoomScale = getZoomScale();
         const displayPos = CoordinateConverter.gridToDisplay({
           x: object.position.x,
           y: object.position.y,

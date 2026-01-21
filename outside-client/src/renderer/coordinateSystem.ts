@@ -57,11 +57,18 @@ export const COORDINATE_SYSTEM = {
 
 /**
  * Get current zoom scale from zoom manager
+ * This is a convenience function that can be called from components
  */
 export function getZoomScale(): number {
-  // Return default zoom scale for now
-  // TODO: Fix circular import issue with zoom state
-  return 1.0; // Default zoom level 4 = 1.0x scale
+  try {
+    // Import dynamically to avoid circular dependency
+    // This will work in runtime but TypeScript doesn't like it
+    const zoomModule = eval('require')('../zoom/zoomState');
+    return zoomModule.zoomManager.getState().scale;
+  } catch (error) {
+    console.warn('Failed to get zoom scale, using default:', error);
+    return 1.0; // Default zoom level 4 = 1.0x scale
+  }
 }
 
 /**
@@ -116,40 +123,44 @@ export class CoordinateConverter {
   /**
    * Convert Grid to Display coordinates (Top-Left of tile)
    */
-  static gridToDisplay(grid: GridPosition): DisplayPosition {
+  static gridToDisplay(grid: GridPosition, zoomScale: number = 1.0): DisplayPosition {
+    const scale = zoomScale;
     return {
-      x: grid.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: grid.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: grid.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
+      y: grid.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
     };
   }
 
   /**
-   * Convert Display to Grid coordinates (Floored)
+   * Convert Display to Grid coordinates with zoom support
    */
-  static displayToGrid(display: DisplayPosition): GridPosition {
+  static displayToGrid(display: DisplayPosition, zoomScale: number = 1.0): GridPosition {
+    const scale = zoomScale;
     return {
-      x: Math.floor(display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE),
-      y: Math.floor(display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE),
+      x: Math.floor(display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale),
+      y: Math.floor(display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale),
     };
   }
 
   /**
-   * Convert World (Float) to Display coordinates
+   * Convert World to Display coordinates with zoom support
    */
-  static worldToDisplay(world: WorldPosition): DisplayPosition {
+  static worldToDisplay(world: WorldPosition, zoomScale: number = 1.0): DisplayPosition {
+    const scale = zoomScale;
     return {
-      x: world.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: world.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: world.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
+      y: world.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
     };
   }
 
   /**
-   * Convert Display to World coordinates
+   * Convert Display to World coordinates with zoom support
    */
-  static displayToWorld(display: DisplayPosition): WorldPosition {
+  static displayToWorld(display: DisplayPosition, zoomScale: number = 1.0): WorldPosition {
+    const scale = zoomScale;
     return {
-      x: display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
+      y: display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
     };
   }
 
@@ -158,11 +169,13 @@ export class CoordinateConverter {
    */
   static screenToWorld(
     screen: { x: number; y: number },
-    rootPos: { x: number; y: number }
+    rootPos: { x: number; y: number },
+    zoomScale: number = 1.0
   ): WorldPosition {
+    const scale = zoomScale;
     return {
-      x: (screen.x - rootPos.x) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: (screen.y - rootPos.y) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: (screen.x - rootPos.x) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
+      y: (screen.y - rootPos.y) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
     };
   }
 
@@ -179,7 +192,7 @@ export class CoordinateConverter {
   /**
    * Get center of a tile in World coordinates
    */
-  static getTileCenter(tileX: number, tileY: number): WorldPosition {
+  static getTileCenter(tileX: number, tileY: number, zoomScale: number = 1.0): WorldPosition {
     return {
       x: tileX + 0.5,
       y: tileY + 0.5,
