@@ -307,16 +307,20 @@ export function updateBotSpriteFrame(
   // To flip around the right edge of a 16px texture: pivot.x = 16
   sprite.anchor.set(0, 0);
 
+  // Get current zoom scale to preserve it when updating sprite frames
+  const zoomScale = getZoomScale();
+  const baseScale = (DISPLAY_TILE_SIZE / 16) * zoomScale;
+
   if (flipX) {
-    sprite.scale.x = -1 * (DISPLAY_TILE_SIZE / 16);
+    sprite.scale.x = -1 * baseScale;
     // Use pivot to flip around the right edge (16px = texture width)
     sprite.pivot.x = 16;
   } else {
-    sprite.scale.x = 1 * (DISPLAY_TILE_SIZE / 16);
+    sprite.scale.x = 1 * baseScale;
     sprite.pivot.x = 0;
   }
 
-  sprite.scale.y = DISPLAY_TILE_SIZE / 16;
+  sprite.scale.y = baseScale;
   sprite.pivot.y = 0;
 }
 

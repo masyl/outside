@@ -306,6 +306,20 @@ export class GameRenderer {
   private forceCompleteRedraw(): void {
     const zoomScale = getZoomScale();
 
+    // Recreate grid with new zoom scale
+    if (this.currentWorld) {
+      this.gridContainer.removeChildren();
+      const grid = createGrid(this.currentWorld);
+      this.gridContainer.addChild(grid);
+    }
+
+    // Recreate terrain layer with new zoom scale
+    if (this.currentWorld && this.terrainTexture) {
+      this.terrainContainer.removeChildren();
+      const terrainLayer = createTerrainLayer(this.currentWorld, this.terrainTexture);
+      this.terrainContainer.addChild(terrainLayer);
+    }
+
     // Update all existing bot sprites' scales and positions
     this.spriteIndex.forEach((sprite, objectId) => {
       // Apply zoom scaling to sprite

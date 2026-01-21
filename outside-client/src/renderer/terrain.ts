@@ -64,8 +64,9 @@ function createTerrainSprite(terrain: TerrainObject, terrainTexture?: Texture): 
         height,
       });
 
-      // Scale the 16x16 texture up to 64x64 (4x scale)
-      sprite.tileScale.set(4, 4);
+      // Scale the 16x16 texture up to 64x64, considering zoom scale
+      const tileScale = 4 * zoomScale;
+      sprite.tileScale.set(tileScale, tileScale);
 
       return sprite;
     }
