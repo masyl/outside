@@ -161,6 +161,7 @@ export class KeyboardHandler {
     });
 
     // Zoom controls - Alt plus/minus for zoom in/out
+    // Support both main keyboard and numpad keys
     this.keyHandlers.set('Equal', (event) => {
       if (event.altKey) {
         event.preventDefault();
@@ -173,10 +174,34 @@ export class KeyboardHandler {
       }
     });
 
+    this.keyHandlers.set('NumpadAdd', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom in (Alt + Numpad Plus)');
+        zoomManager.increaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
+    });
+
     this.keyHandlers.set('Minus', (event) => {
       if (event.altKey) {
         event.preventDefault();
         console.log('[Zoom] Zoom out (Alt + Minus)');
+        zoomManager.decreaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
+    });
+
+    this.keyHandlers.set('NumpadSubtract', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom out (Alt + Numpad Minus)');
         zoomManager.decreaseZoom();
         const zoomState = zoomManager.getState();
         if (this.debugOverlay) {

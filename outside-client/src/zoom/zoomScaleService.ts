@@ -25,6 +25,13 @@ export function getCurrentZoomScale(): number {
 }
 
 /**
+ * Get the current zoom scale (convenience function for components)
+ */
+export function getZoomScale(): number {
+  return getCurrentZoomScale();
+}
+
+/**
  * Global zoom scale provider
  */
 export const zoomScaleProvider: ZoomScaleProvider = {

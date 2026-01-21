@@ -193,6 +193,16 @@ export class CoordinateConverter {
   }
 
   /**
+   * Get center of a tile in World coordinates
+   */
+  static getTileCenter(tileX: number, tileY: number, zoomScale: number = 1.0): WorldPosition {
+    return {
+      x: tileX + 0.5,
+      y: tileY + 0.5,
+    };
+  }
+
+  /**
    * Decompose World position into tile and sub-tile offset
    */
   static toSubTilePosition(pos: WorldPosition): SubTilePosition {
@@ -203,16 +213,6 @@ export class CoordinateConverter {
       tileY,
       offsetX: pos.x - tileX,
       offsetY: pos.y - tileY,
-    };
-  }
-
-  /**
-   * Reconstruct World position from tile and offset
-   */
-  static fromSubTilePosition(sub: SubTilePosition): WorldPosition {
-    return {
-      x: sub.tileX + sub.offsetX,
-      y: sub.tileY + sub.offsetY,
     };
   }
 
@@ -229,6 +229,9 @@ export class CoordinateConverter {
     };
   }
 
+  /**
+   * Get current zoom scale from zoom scale service
+   */
   /**
    * Convert 8x8 sub-grid to World position (Center of sub-cell)
    */

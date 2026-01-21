@@ -245,8 +245,8 @@ export class ClientMode {
 
     // Create new world state from initial state
     const worldState = createWorldState();
-    worldState.width = message.gridData.width;
-    worldState.height = message.gridData.height;
+    worldState.horizontalLimit = message.gridData.horizontalLimit;
+    worldState.verticalLimit = message.gridData.verticalLimit;
 
     // Copy terrain from initial state if provided
     if (message.gridData.terrain) {
@@ -261,7 +261,12 @@ export class ClientMode {
       // Update grid if object has position
       if (obj.position) {
         const { x, y } = obj.position;
-        if (x >= 0 && x < worldState.width && y >= 0 && y < worldState.height) {
+        if (
+          x >= -worldState.horizontalLimit &&
+          x <= worldState.horizontalLimit &&
+          y >= -worldState.verticalLimit &&
+          y <= worldState.verticalLimit
+        ) {
           worldState.grid[y][x] = obj;
         }
       }
@@ -316,8 +321,8 @@ export class ClientMode {
     // Create new world state from the state change event
     // Don't mutate the existing state (it's frozen by Immer)
     const newWorldState = createWorldState();
-    newWorldState.width = message.gridData.width;
-    newWorldState.height = message.gridData.height;
+    newWorldState.horizontalLimit = message.gridData.horizontalLimit;
+    newWorldState.verticalLimit = message.gridData.verticalLimit;
 
     // Copy terrain from current state (terrain doesn't change in state events, only objects)
     const currentState = this.store.getState();
@@ -333,8 +338,15 @@ export class ClientMode {
       // Update grid if object has position
       if (obj.position) {
         const { x, y } = obj.position;
-        if (x >= 0 && x < newWorldState.width && y >= 0 && y < newWorldState.height) {
-          newWorldState.grid[y][x] = obj;
+        if (
+          x >= -newWorldState.horizontalLimit &&
+          x <= newWorldState.horizontalLimit &&
+          y >= -newWorldState.verticalLimit &&
+          y <= newWorldState.verticalLimit
+        ) {
+          const gridX = x + newWorldState.horizontalLimit;
+          const gridY = y + newWorldState.verticalLimit;
+          newWorldState.grid[gridY][gridX] = obj;
         }
       }
     }

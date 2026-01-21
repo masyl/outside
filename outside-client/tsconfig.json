@@ -18,10 +18,5 @@
     "noEmit": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    {
-      "path": "../outside-core"
-    }
-  ]
+  "exclude": ["node_modules", "dist"]
 }
