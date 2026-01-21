@@ -321,13 +321,21 @@ export class GameRenderer {
     }
 
     // Update all existing bot sprites' scales and positions
-    this.spriteIndex.forEach((sprite, objectId) => {
-      // Apply zoom scaling to sprite
-      sprite.scale.set(zoomScale, zoomScale);
+    if (this.currentWorld) {
+      const world = this.currentWorld; // Create local const to satisfy TypeScript
+      this.spriteIndex.forEach((sprite, objectId) => {
+        // Apply zoom scaling to sprite
+        sprite.scale.set(zoomScale, zoomScale);
 
-      // Update position if we have the world state
-      // For now, just ensure scaling is applied - positions will be updated on next render
-    });
+        // Update position to match new zoom scale
+        const gameObject = world.objects.get(objectId);
+        if (gameObject?.position) {
+          const displayPos = CoordinateConverter.gridToDisplay(gameObject.position, zoomScale);
+          sprite.x = displayPos.x;
+          sprite.y = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
+        }
+      });
+    }
 
     // Force visual debug layer to redraw with new zoom
     this.visualDebugLayer.forceRedraw();
