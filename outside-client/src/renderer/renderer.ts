@@ -11,6 +11,7 @@ import {
 } from './objects';
 import { createTerrainLayer, updateTerrainLayer } from './terrain';
 import { VisualDebugLayer } from './visualDebugLayer';
+import { zoomManager } from '../zoom/zoomState';
 
 /**
  * Main renderer for the game
@@ -52,6 +53,12 @@ export class GameRenderer {
     this.rootContainer.addChild(this.debugOverlayContainer);
     this.rootContainer.addChild(this.visualDebugLayer);
     this.rootContainer.addChild(this.objectsContainer);
+
+    // Listen for zoom changes and force redraw
+    zoomManager.addZoomChangeListener((level, scale) => {
+      console.log(`[Renderer] Zoom changed to level ${level} (${scale}x), forcing redraw`);
+      this.forceCompleteRedraw();
+    });
   }
 
   /**
@@ -291,6 +298,28 @@ export class GameRenderer {
    */
   getSpriteForObject(id: string): Sprite | undefined {
     return this.spriteIndex.get(id);
+  }
+
+  /**
+   * Force a complete redraw of all visual elements with current zoom
+   */
+  private forceCompleteRedraw(): void {
+    const zoomScale = getZoomScale();
+
+    // Update all existing bot sprites' scales and positions
+    this.spriteIndex.forEach((sprite, objectId) => {
+      // Apply zoom scaling to sprite
+      sprite.scale.set(zoomScale, zoomScale);
+
+      // Update position if we have the world state
+      // For now, just ensure scaling is applied - positions will be updated on next render
+    });
+
+    // Force visual debug layer to redraw with new zoom
+    this.visualDebugLayer.forceRedraw();
+
+    // Trigger immediate render
+    this.app.render();
   }
 
   /**

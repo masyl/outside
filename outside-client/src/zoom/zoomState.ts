@@ -15,6 +15,7 @@ export class ZoomManager {
   private readonly ZOOM_LEVELS = [2, 4, 6, 8] as const;
   private readonly ZOOM_SCALES = [0.5, 1.0, 1.5, 2.0] as const;
   private readonly STORAGE_KEY = 'outside-zoom-level';
+  private zoomChangeListeners: Array<(level: number, scale: number) => void> = [];
 
   /**
    * Get current zoom state
@@ -34,6 +35,32 @@ export class ZoomManager {
     const scale = this.ZOOM_SCALES[this.ZOOM_LEVELS.indexOf(this.level)];
     setCurrentZoomScale(scale);
     this.saveToBrowser();
+    this.notifyZoomChangeListeners();
+  }
+
+  /**
+   * Add a listener for zoom changes
+   */
+  addZoomChangeListener(callback: (level: number, scale: number) => void): void {
+    this.zoomChangeListeners.push(callback);
+  }
+
+  /**
+   * Remove a zoom change listener
+   */
+  removeZoomChangeListener(callback: (level: number, scale: number) => void): void {
+    const index = this.zoomChangeListeners.indexOf(callback);
+    if (index > -1) {
+      this.zoomChangeListeners.splice(index, 1);
+    }
+  }
+
+  /**
+   * Notify all listeners of zoom change
+   */
+  private notifyZoomChangeListeners(): void {
+    const scale = this.ZOOM_SCALES[this.ZOOM_LEVELS.indexOf(this.level)];
+    this.zoomChangeListeners.forEach((callback) => callback(this.level, scale));
   }
 
   /**

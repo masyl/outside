@@ -92,9 +92,7 @@ async function init(options?: {
     const gridX = Math.floor(worldPos.x);
     const gridY = Math.floor(worldPos.y);
 
-    console.log(
-      `[Main] Mouse position - world: (${worldPos.x.toFixed(2)}, ${worldPos.y.toFixed(2)}), grid: (${gridX}, ${gridY})`
-    );
+    // Removed noisy mouse position logging
     renderer.updateMousePosition(worldPos.x, worldPos.y);
   });
 

@@ -79,6 +79,15 @@ export class VisualDebugLayer extends Container {
   }
 
   /**
+   * Force a complete redraw of the debug layer
+   */
+  forceRedraw(): void {
+    if (this.isVisible) {
+      this.render();
+    }
+  }
+
+  /**
    * Update bot positions from game state
    */
   updateBotPositions(bots: Array<{ x: number; y: number; direction?: Direction }>): void {
@@ -142,7 +151,7 @@ export class VisualDebugLayer extends Container {
    * Render all debug visualizations
    */
   private render(): void {
-    console.log(`[VisualDebugLayer] render() called, isVisible: ${this.isVisible}`);
+    // Removed noisy render logging
 
     if (!this.world) {
       return;
@@ -307,9 +316,7 @@ export class VisualDebugLayer extends Container {
     const { COLORS } = VisualDebugLayer;
     const zoomScale = getZoomScale();
 
-    console.log(
-      `[VisualDebugLayer] renderDotGrid: drawing ${this.world.horizontalLimit * 2 + 1}x${this.world.verticalLimit * 2 + 1} dots`
-    );
+    // Removed noisy dot grid logging
 
     for (let x = -this.world.horizontalLimit; x <= this.world.horizontalLimit; x++) {
       for (let y = -this.world.verticalLimit; y <= this.world.verticalLimit; y++) {
@@ -394,9 +401,7 @@ export class VisualDebugLayer extends Container {
     const width = bottomRight.x - topLeft.x;
     const height = bottomRight.y - topLeft.y;
 
-    console.log(
-      `[VisualDebugLayer] renderWorldBoundary: drawing boundary of size ${width}x${height}`
-    );
+    // Removed noisy boundary logging
 
     this.graphics.setStrokeStyle({ width: 3, color: COLORS.WORLD_BOUNDARY });
     this.graphics.rect(topLeft.x, topLeft.y, width, height);
@@ -413,9 +418,7 @@ export class VisualDebugLayer extends Container {
     const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
     const zoomScale = getZoomScale();
 
-    console.log(
-      `[VisualDebugLayer] renderMouseVisualizations: mouse at world (${this.mousePos.x.toFixed(2)}, ${this.mousePos.y.toFixed(2)})`
-    );
+    // Removed noisy mouse position logging
 
     // 1. Continuous mouse position circle (blue) - follows exact floating point position
     const mouseDisplay = CoordinateConverter.worldToDisplay(this.mousePos, zoomScale);
