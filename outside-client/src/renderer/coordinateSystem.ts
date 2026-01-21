@@ -193,16 +193,6 @@ export class CoordinateConverter {
   }
 
   /**
-   * Get center of a tile in World coordinates
-   */
-  static getTileCenter(tileX: number, tileY: number, zoomScale: number = 1.0): WorldPosition {
-    return {
-      x: tileX + 0.5,
-      y: tileY + 0.5,
-    };
-  }
-
-  /**
    * Decompose World position into tile and sub-tile offset
    */
   static toSubTilePosition(pos: WorldPosition): SubTilePosition {
