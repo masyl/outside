@@ -70,9 +70,9 @@ export function createBotSprite(texture: Texture): Sprite {
 
   const sprite = new Sprite(tileTexture);
 
-  // Scale 16x16 sprite to the needed ratio
-  sprite.width = DISPLAY_TILE_SIZE;
-  sprite.height = DISPLAY_TILE_SIZE;
+  // Set base scale to make 16x16 sprite match display tile size
+  const baseScale = DISPLAY_TILE_SIZE / 16;
+  sprite.scale.set(baseScale, baseScale);
 
   // Anchor point is top-left by default, which matches our grid system
 
