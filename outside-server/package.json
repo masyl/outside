@@ -2,6 +2,7 @@
   "name": "@outside/server",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
@@ -22,4 +23,3 @@
     "tsx": "^4.7.0"
   }
 }
-

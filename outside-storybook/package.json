@@ -2,6 +2,7 @@
   "name": "outside-storybook",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",

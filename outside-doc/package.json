@@ -2,6 +2,7 @@
   "name": "@outside/doc",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "echo \"Configure your documentation server here\"",
     "build": "echo \"Configure your build here\"",
@@ -13,4 +14,3 @@
     "typescript": "^5.3.3"
   }
 }
-
