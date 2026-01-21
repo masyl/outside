@@ -187,7 +187,7 @@ export class AnimationController {
       },
       () => {
         // Animation complete - ensure sprite is exactly at target grid position
-        const displayPos = CoordinateConverter.gridToDisplay({ x: toPos.x, y: toPos.y });
+        const displayPos = CoordinateConverter.gridToDisplay({ x: toPos.x, y: toPos.y }, zoomScale);
         sprite.x = displayPos.x;
         sprite.y = displayPos.y + VERTICAL_OFFSET;
         this.activeAnimations.delete(id);
