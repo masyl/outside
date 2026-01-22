@@ -185,36 +185,30 @@ export class VisualDebugLayer extends Container {
     this.bots.forEach((bot) => {
       const displayPos = CoordinateConverter.gridToDisplay({ x: bot.x, y: bot.y }, zoomScale);
 
-      // 1. Draw tile highlight (dotted square)
+      // 1. Draw tile highlight (dotted circle)
       this.graphics.setStrokeStyle({ width: VIRTUAL_PIXEL, color: COLORS.BOT_POSITION, alpha: 1 });
-      this.graphics.beginPath(); // Start new path for dotted square
+      this.graphics.beginPath();
 
-      // Draw dotted square manually since PixiJS Graphics doesn't support dotted lines natively in a simple way
+      // Draw dotted circle manually
       const dot = VIRTUAL_PIXEL;
       const gap = VIRTUAL_PIXEL;
-      const size = DISPLAY_TILE_SIZE * zoomScale;
-      const x = displayPos.x;
-      const y = displayPos.y;
+      const radius = (DISPLAY_TILE_SIZE / 2) * zoomScale;
+      const centerX = displayPos.x + radius;
+      const centerY = displayPos.y + radius;
+      const circumference = 2 * Math.PI * radius;
+      const steps = Math.floor(circumference / (dot + gap));
 
-      // Top edge
-      for (let i = 0; i < size; i += dot + gap) {
-        this.graphics.moveTo(x + i, y);
-        this.graphics.lineTo(Math.min(x + i + dot, x + size), y);
-      }
-      // Bottom edge
-      for (let i = 0; i < size; i += dot + gap) {
-        this.graphics.moveTo(x + i, y + size);
-        this.graphics.lineTo(Math.min(x + i + dot, x + size), y + size);
-      }
-      // Left edge
-      for (let i = 0; i < size; i += dot + gap) {
-        this.graphics.moveTo(x, y + i);
-        this.graphics.lineTo(x, Math.min(y + i + dot, y + size));
-      }
-      // Right edge
-      for (let i = 0; i < size; i += dot + gap) {
-        this.graphics.moveTo(x + size, y + i);
-        this.graphics.lineTo(x + size, Math.min(y + i + dot, y + size));
+      for (let i = 0; i < steps; i++) {
+        const angle1 = (i / steps) * 2 * Math.PI;
+        const angle2 = Math.min(((i + 1) / steps) * 2 * Math.PI, 2 * Math.PI);
+
+        const x1 = centerX + Math.cos(angle1) * radius;
+        const y1 = centerY + Math.sin(angle1) * radius;
+        const x2 = centerX + Math.cos(angle2) * radius;
+        const y2 = centerY + Math.sin(angle2) * radius;
+
+        this.graphics.moveTo(x1, y1);
+        this.graphics.lineTo(x2, y2);
       }
 
       this.graphics.stroke();
@@ -265,10 +259,10 @@ export class VisualDebugLayer extends Container {
           dy /= length;
         }
 
-        // Line length = half tile size (radius), scaled by zoom
-        const length = (DISPLAY_TILE_SIZE / 2) * zoomScale;
+        // Line length = half tile size (radius), scaled by zoom, 50% longer for better visibility
+        const length = (DISPLAY_TILE_SIZE / 2) * zoomScale * 1.5;
 
-        this.graphics.setStrokeStyle({ width: 2, color: COLORS.BOT_POSITION, alpha: 1 });
+        this.graphics.setStrokeStyle({ width: 2, color: 0xffffff, alpha: 1 }); // White
         this.graphics.beginPath();
         this.graphics.moveTo(centerDisplay.x, centerDisplay.y);
         this.graphics.lineTo(centerDisplay.x + dx * length, centerDisplay.y + dy * length);
