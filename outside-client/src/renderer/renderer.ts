@@ -1,5 +1,6 @@
 import { Application, Container, Texture, Sprite, Assets, Graphics } from 'pixi.js';
 import { GameObject, WorldState, Direction } from '@outside/core';
+import { animate } from 'motion';
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
 import {
@@ -32,6 +33,9 @@ export class GameRenderer {
   private previousGroundLayerSize: number = 0;
   private currentWorld: WorldState | null = null;
   private isDebugEnabled: boolean = false;
+
+  // Camera state (Grid Coordinates)
+  private cameraPos = { x: 0, y: 0 };
 
   constructor(app: Application) {
     this.app = app;
@@ -142,8 +146,8 @@ export class GameRenderer {
     this.objectsContainer.addChild(container);
     this.spriteIndex = spriteIndex;
 
-    // Center the viewport
-    this.centerViewport(world);
+    // Update camera target based on initial state
+    this.updateCameraTarget(world);
 
     // Start animation loop for sprites
     this.startSpriteAnimationLoop();
@@ -154,6 +158,9 @@ export class GameRenderer {
   private startSpriteAnimationLoop(): void {
     const loop = () => {
       const now = Date.now();
+
+      // Update camera viewport every frame for smooth animation
+      this.updateViewportTransform();
 
       this.botAnimationStates.forEach((state, id) => {
         // Update frame every 125ms
@@ -216,8 +223,8 @@ export class GameRenderer {
       this.updateBotDebugGrid(world, true);
     }
 
-    // Ensure viewport is centered (in case window was resized)
-    this.centerViewport(world);
+    // Update camera target to follow selected bot or return to center
+    this.updateCameraTarget(world);
   }
 
   /**
@@ -241,6 +248,9 @@ export class GameRenderer {
         this.selectedBotId
       );
     }
+
+    // Update camera target to follow new selection
+    this.updateCameraTarget(world);
   }
 
   /**
@@ -340,30 +350,59 @@ export class GameRenderer {
     // Force visual debug layer to redraw with new zoom
     this.visualDebugLayer.forceRedraw();
 
+    // Update viewport transform with new zoom scale
+    this.updateViewportTransform();
+
     // Trigger immediate render
     this.app.render();
   }
 
   /**
-   * Center the viewport horizontally and vertically
-   * Ensures world coordinate (0,0) is at the center of the viewport
+   * Update the root container position based on current camera state
+   * Called automatically in the render loop or on resize
    */
-  private centerViewport(world: WorldState): void {
-    const dimensions = getGridDimensions(world);
+  private updateViewportTransform(): void {
     const screenWidth = this.app.screen.width;
     const screenHeight = this.app.screen.height;
     const zoomScale = getZoomScale();
 
-    // Calculate where world coordinate 0,0 should be positioned
-    const centerOfWorld0_0 = CoordinateConverter.gridToDisplay({ x: 0, y: 0 }, zoomScale);
+    // Get current smoothed camera position (Grid Units)
+    const camX = this.cameraPos.x;
+    const camY = this.cameraPos.y;
 
-    // Calculate the offset needed to center 0,0 in the viewport
-    const offsetX = screenWidth / 2 - centerOfWorld0_0.x;
-    const offsetY = screenHeight / 2 - centerOfWorld0_0.y;
+    // Convert to display pixels relative to world origin
+    const centerPos = CoordinateConverter.gridToDisplay({ x: camX, y: camY }, zoomScale);
 
-    // Apply the offset to center the world
-    this.rootContainer.x = offsetX;
-    this.rootContainer.y = offsetY;
+    // Apply offset to center the view on screen
+    this.rootContainer.x = screenWidth / 2 - centerPos.x;
+    this.rootContainer.y = screenHeight / 2 - centerPos.y;
+  }
+
+  /**
+   * Update the camera target based on selection and world state
+   * Animates the camera to the new target position
+   */
+  private updateCameraTarget(world: WorldState): void {
+    let targetX = 0;
+    let targetY = 0;
+
+    // If a bot is selected, target its center position
+    if (this.selectedBotId) {
+      const bot = world.objects.get(this.selectedBotId);
+      if (bot && bot.position) {
+        // Target center of the tile (x + 0.5, y + 0.5)
+        targetX = bot.position.x + 0.5;
+        targetY = bot.position.y + 0.5;
+      }
+    }
+
+    // Animate to new target using spring physics for smooth following
+    // Spring allows continuous retargeting without interruption
+    animate(
+      this.cameraPos,
+      { x: targetX, y: targetY },
+      { type: 'spring', stiffness: 200, damping: 25 }
+    );
   }
 
   /**
@@ -430,10 +469,8 @@ export class GameRenderer {
     // This is critical for pixel art rendering to remain crisp
     this.app.renderer.resolution = 1;
 
-    // Recenter the viewport after resize if we have a world state
-    if (this.currentWorld) {
-      this.centerViewport(this.currentWorld);
-    }
+    // Update viewport transform with new screen dimensions
+    this.updateViewportTransform();
   }
 
   /**
