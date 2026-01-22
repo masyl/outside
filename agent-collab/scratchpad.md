@@ -5,10 +5,18 @@ Random notes taken during development.
 
 ## DX & Velocity
 
-- A "Local" mode is needed soon to make testing easier.
 - Ability to remember levels and switch quickly between them to test live.
 - Ability to have "scripted playbacks" when commands are issued at specific times.
 - FUCK YEAH: Should I keep actual session state in the browser local storage? Or should there be a notion of "ongoing game session" that is more like a transportable TMUX session you connect to ?
+
+## Architecture
+
+- Before adding more UI, I should add the PixiJS React library to cut up the app in reusable parts.
+- Gradually convert parts of the application into React components:
+    1. The level rendering.
+    2. The debug panel, which is currently in HTML, should be brought back into the pixi rendering.
+    3. The keystroke help window.
+    4. The timeline.
 
 ## Brain dump
 
@@ -33,4 +41,8 @@ Random notes taken during development.
 - TODO: Remove mentions of monetization from the licensing page.
 - TODO: Add info on the "code availability" on the main repo.
 
-## 
+## Next Pitch
+
+Let's write a pitch for this:
+
+* 

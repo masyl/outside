@@ -2,7 +2,7 @@ import { Store } from '../store/store';
 import { CommandQueue } from '../commands/queue';
 import { executeCommand } from '../commands/handlers';
 import { GameRenderer } from '../renderer/renderer';
-import { DebugOverlay } from '../debug/overlay';
+import { DebugBridge } from '../debug/debugBridge';
 import { PlaybackState } from '../timeline/types';
 import { TimelineManager } from '../timeline/manager';
 
@@ -15,7 +15,7 @@ export class GameLoop {
   private store: Store;
   private commandQueue: CommandQueue;
   private renderer: GameRenderer;
-  private debugOverlay?: DebugOverlay;
+  private debugOverlay?: typeof DebugBridge; // Updated type to allow static class
   private stateUpdateIntervalId: number | null = null;
   private animationFrameId: number | null = null;
   private isRunning: boolean = false;
@@ -26,7 +26,7 @@ export class GameLoop {
     store: Store,
     commandQueue: CommandQueue,
     renderer: GameRenderer,
-    debugOverlay?: DebugOverlay
+    debugOverlay?: any // Use any to accept static class or instance with matching interface
   ) {
     this.store = store;
     this.commandQueue = commandQueue;

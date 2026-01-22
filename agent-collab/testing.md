@@ -12,8 +12,16 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Bugs
 
+- Bug: Bots can't move anymore:
+  - Console: installHook.js:1 Bot with id "bob" has no position and cannot be moved
 - Bug: #Perf When moving the cursor in debug mode, everyting freezes. Something is probably not being debounced properly.
+- The visual debug layer has disapeared (this should be renamned)
 - Bug: After a zoom level change and a full game reload, the bots did not resize until they where moved. Where was corrupted state persisted ?
+- The minecraft pixel font was lost during the transition to React components on both panels
+- The rounded corners was log on panels
+- Both panels should have the same transparency, rounded corners, fonts and ets.
+- The items in the debug panel are overflowing
+- 
 
 
 ### Needed improvement

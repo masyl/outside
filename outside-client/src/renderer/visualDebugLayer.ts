@@ -36,7 +36,7 @@ export class VisualDebugLayer extends Container {
 
   constructor() {
     super();
-    console.log('[VisualDebugLayer] Constructor called, showSubGrid:', this.showSubGrid);
+    // console.log('[VisualDebugLayer] Constructor called, showSubGrid:', this.showSubGrid);
     this.graphics = new Graphics();
     this.addChild(this.graphics);
     this.visible = false;
@@ -56,7 +56,11 @@ export class VisualDebugLayer extends Container {
    * Toggle debug layer visibility
    */
   setVisible(visible: boolean): void {
-    console.log(`[VisualDebugLayer] setVisible called with: ${visible}`);
+    // Only log if visibility actually changes to reduce console spam
+    if (this.isVisible !== visible) {
+      console.log(`[VisualDebugLayer] setVisible changed to: ${visible}`);
+    }
+
     this.isVisible = visible;
     this.visible = visible;
     if (visible) {
