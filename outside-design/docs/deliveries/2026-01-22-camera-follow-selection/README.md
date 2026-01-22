@@ -1,3 +1,12 @@
+---
+Title: Smooth Camera Follow for Selected Entity
+DeliveryDate: 2026-01-22
+Summary: Implements a smooth camera tracking system using the motion library to follow the selected bot, providing fluid viewport transitions when the bot moves or selection changes.
+Status: DONE
+Branch: improved-level-boundaries
+Commit: 2c2ed24
+---
+
 # Smooth Camera Follow for Selected Entity
 
 ## Summary
