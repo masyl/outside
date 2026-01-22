@@ -179,9 +179,10 @@ describe('World State Management', () => {
     it('should validate positions within bounds', () => {
       expect(isValidPosition(world, { x: 0, y: 0 })).toBe(true);
       expect(isValidPosition(world, { x: 19, y: 9 })).toBe(true);
-      expect(isValidPosition(world, { x: 20, y: 0 })).toBe(false);
-      expect(isValidPosition(world, { x: 0, y: 10 })).toBe(false);
-      expect(isValidPosition(world, { x: -1, y: 0 })).toBe(false);
+      expect(isValidPosition(world, { x: 30, y: 30 })).toBe(true);
+      expect(isValidPosition(world, { x: 31, y: 0 })).toBe(false);
+      expect(isValidPosition(world, { x: 0, y: 31 })).toBe(false);
+      expect(isValidPosition(world, { x: -31, y: 0 })).toBe(false);
     });
   });
 

@@ -23,7 +23,7 @@ export class DebugOverlay {
   private visibilityChangeHandler?: (visible: boolean) => void;
   private lastFpsUpdate: number = 0;
   private stepCount: number = 0;
-  private mode: 'host' | 'client' | 'unknown' = 'unknown';
+  private mode: 'host' | 'client' | 'local' | 'unknown' = 'unknown';
   private surfaceCount: number = 0;
   private groundCount: number = 0;
   private clientCount: number = 0;
@@ -185,7 +185,7 @@ export class DebugOverlay {
   /**
    * Set the game mode (host or client)
    */
-  setMode(mode: 'host' | 'client'): void {
+  setMode(mode: 'host' | 'client' | 'local'): void {
     this.mode = mode;
     this.modeElement.textContent = `Mode: ${mode.toUpperCase()}`;
   }
@@ -193,7 +193,7 @@ export class DebugOverlay {
   /**
    * Get current mode
    */
-  getMode(): 'host' | 'client' | 'unknown' {
+  getMode(): 'host' | 'client' | 'local' | 'unknown' {
     return this.mode;
   }
 

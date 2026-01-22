@@ -12,7 +12,7 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 ### Bugs
 
-- Bug: The vector line for the cardinal orientation is not resizing according to zoom levels
+- Bug: #Perf When moving the cursor in debug mode, everyting freezes. Something is probably not being debounced properly.
 - Bug: After a zoom level change and a full game reload, the bots did not resize until they where moved. Where was corrupted state persisted ?
 
 

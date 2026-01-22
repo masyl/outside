@@ -214,10 +214,11 @@ describe('Type System Validation', () => {
     });
 
     it('should support WorldState structure', () => {
+      const gridSize = 30 * 2 + 1; // 61
       const worldState: WorldState = {
-        grid: Array(10)
+        grid: Array(gridSize)
           .fill(null)
-          .map(() => Array(20).fill(null)),
+          .map(() => Array(gridSize).fill(null)),
         objects: new Map(),
         groundLayer: {
           terrainObjects: new Map(),
@@ -228,7 +229,6 @@ describe('Type System Validation', () => {
         seed: 42,
       };
 
-      const gridSize = 30 * 2 + 1; // 61
       expect(worldState.grid).toHaveLength(gridSize);
       expect(worldState.grid[0]).toHaveLength(gridSize);
       expect(worldState.horizontalLimit).toBe(30);

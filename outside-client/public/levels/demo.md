@@ -5,6 +5,7 @@ This is the demo level for the Outside game. Commands are organized by section.
 ## Terrain
 
 ```cmd
+create terrain grass grassBase -30 -30 60 60
 create terrain dirt dirt2 0 0 2 10
 create terrain water water1 8 1 10 9
 create terrain grass grass1 2 0 6 10

@@ -25,6 +25,9 @@ import { ClientMode } from './network/client';
 import { DISPLAY_TILE_SIZE } from './renderer/grid';
 import { CoordinateConverter } from './renderer/coordinateSystem';
 
+type ConnectionMode = 'local' | 'host' | 'client';
+const CONNECTION_MODE_KEY = 'outside-connection-mode';
+
 /**
  * Initialize and start the game
  */
@@ -39,6 +42,53 @@ async function init(options?: {
   if (!appElement) {
     throw new Error('App element not found');
   }
+
+  // Determine connection mode
+  // Priority: options.mode (if specific) > localStorage > 'local' (default)
+  let connectionMode: ConnectionMode = 'local';
+
+  if (options?.mode && options.mode !== 'auto') {
+    connectionMode = options.mode;
+  } else {
+    const storedMode = localStorage.getItem(CONNECTION_MODE_KEY);
+    if (storedMode === 'host' || storedMode === 'client' || storedMode === 'local') {
+      connectionMode = storedMode as ConnectionMode;
+    }
+  }
+
+  console.log(`[Init] Connection mode: ${connectionMode}`);
+
+  // Handle global mode switching shortcuts
+  window.addEventListener('keydown', (event) => {
+    // Only handle if Alt is pressed
+    if (!event.altKey) return;
+
+    let newMode: ConnectionMode | null = null;
+
+    // Alt+H -> Host
+    if (event.code === 'KeyH') {
+      newMode = 'host';
+    }
+    // Alt+C -> Client
+    else if (event.code === 'KeyC') {
+      newMode = 'client';
+    }
+    // Alt+L -> Local
+    else if (event.code === 'KeyL') {
+      newMode = 'local';
+    }
+
+    if (newMode) {
+      event.preventDefault();
+      if (newMode !== connectionMode) {
+        console.log(`[Init] Switching to ${newMode} mode...`);
+        localStorage.setItem(CONNECTION_MODE_KEY, newMode);
+        window.location.reload();
+      } else {
+        console.log(`[Init] Already in ${newMode} mode`);
+      }
+    }
+  });
 
   // Create Pixi.js application
   // Note: Application.init() will use the same auto-detection when preference is specified
@@ -203,85 +253,49 @@ async function init(options?: {
 
   // Determine host/client mode and initialize game
   async function initializeGame() {
-    let isHost = false;
     let hostMode: HostMode | null = null;
     let clientMode: ClientMode | null = null;
-    const requestedMode = options?.mode ?? 'auto';
 
     try {
-      if (requestedMode === 'local') {
-        console.log('[Init] Starting in local mode (no signaling).');
-        debugOverlay.setMode('host');
+      if (connectionMode === 'local') {
+        console.log('[Init] Starting in LOCAL mode (no signaling).');
+        debugOverlay.setMode('local');
+        // Local mode behaves like host but without network/signaling
         await initializeHostMode({ local: true, startupCommands: options?.startupCommands });
         return;
       }
 
-      if (requestedMode === 'host') {
-        console.log('[Init] Forcing host mode.');
-        debugOverlay.setMode('host');
-        signalingClient.registerHost();
-        await initializeHostMode({ startupCommands: options?.startupCommands });
-        return;
-      }
-
-      if (requestedMode === 'client') {
-        console.log('[Init] Forcing client mode.');
-        debugOverlay.setMode('client');
-        await initializeClientMode();
-        return;
-      }
-
+      // For Host and Client modes, we need to connect to the signaling server first
+      console.log('[Init] Connecting to signaling server...');
       await signalingClient.connect();
 
-      // Check host status
-      let hostStatusResolved = false;
-      const hostStatusPromise = new Promise<{ isRunning: boolean; hostPeerId?: string }>(
-        (resolve) => {
-          signalingClient.onHostStatusUpdate((isRunning, hostPeerId) => {
-            if (!hostStatusResolved) {
-              hostStatusResolved = true;
-              resolve({ isRunning, hostPeerId });
-            }
-          });
-
-          // Register as client first to get status
-          signalingClient.registerClient();
-
-          // Timeout after 1 second if no response
-          setTimeout(() => {
-            if (!hostStatusResolved) {
-              hostStatusResolved = true;
-              resolve({ isRunning: false });
-            }
-          }, 1000);
-        }
-      );
-
-      const hostStatus = await hostStatusPromise;
-      isHost = !hostStatus.isRunning;
-
-      if (isHost) {
-        console.log('[Init] No host found, becoming host...');
+      if (connectionMode === 'host') {
+        console.log('[Init] Starting in HOST mode.');
         debugOverlay.setMode('host');
         signalingClient.registerHost();
         await initializeHostMode({ startupCommands: options?.startupCommands });
-      } else {
-        console.log('[Init] Host found, connecting as client...');
+        return;
+      }
+
+      if (connectionMode === 'client') {
+        console.log('[Init] Starting in CLIENT mode.');
         debugOverlay.setMode('client');
         await initializeClientMode();
+        return;
       }
     } catch (error) {
-      console.error('[Init] Error checking host status, defaulting to host mode:', error);
-      isHost = true;
-      debugOverlay.setMode('host');
-      try {
-        signalingClient.registerHost();
-        await initializeHostMode({ startupCommands: options?.startupCommands });
-      } catch (hostError) {
-        console.error('[Init] Failed to initialize as host:', hostError);
-        // Fallback: initialize as client with empty state
-        debugOverlay.setMode('client');
-        await initializeClientMode();
+      console.error('[Init] Error initializing game mode:', error);
+
+      // Fallback to local mode if connection/initialization fails
+      if (connectionMode !== 'local') {
+        console.log('[Init] Falling back to LOCAL mode due to error.');
+        debugOverlay.setMode('local');
+        // Ensure we try to proceed locally even if signaling failed
+        try {
+          await initializeHostMode({ local: true, startupCommands: options?.startupCommands });
+        } catch (localError) {
+          console.error('[Init] Fatal: Failed to initialize local fallback:', localError);
+        }
       }
     }
 
