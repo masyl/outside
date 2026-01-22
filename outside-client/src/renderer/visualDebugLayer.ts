@@ -26,7 +26,7 @@ export class VisualDebugLayer extends Container {
   };
 
   // Mouse tracking (using floating-point world coordinates)
-  private mousePos: WorldPosition = { x: -1, y: -1 };
+  private mousePos: WorldPosition | null = null;
 
   // Bot tracking
   private bots: Array<{ x: number; y: number; direction?: Direction }> = [];
@@ -406,7 +406,7 @@ export class VisualDebugLayer extends Container {
    * Render mouse position circle and cursor tile square
    */
   private renderMouseVisualizations(): void {
-    if (this.mousePos.x < 0 || this.mousePos.y < 0) return;
+    if (!this.mousePos) return;
 
     const { COLORS } = VisualDebugLayer;
     const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
