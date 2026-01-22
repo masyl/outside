@@ -103,27 +103,37 @@ async function init(options?: {
   // Declare timelineManager at init level so it's available for GameRoot
   let timelineManager: TimelineManager | null = null;
 
+  // Game services that will be initialized when renderer is ready
+  let renderer: GameRenderer | null = null;
+  let animationController: AnimationController | null = null;
+  let commandQueue: CommandQueue | null = null;
+  let selectionManager: SelectionManager | null = null;
+  let gameLoop: GameLoop | null = null;
+  let commandFeeder: MockCommandFeeder | null = null;
+  let signalingClient: SignalingClient | null = null;
+
+  // Use DebugBridge instead of DebugOverlay
+  const debugOverlay = DebugBridge;
+
+  // Create connection overlay for disconnection warnings
+  const connectionOverlay = new ConnectionOverlay();
+
+  // Note: hostMode will be set later, so we use a variable that gets updated
+  let hostModeRef: HostMode | null = null;
+  // Note: timelineManager will be set later, so we use a variable that gets updated
+  let timelineManagerRef: TimelineManager | null = null;
+
   // Callback when Pixi App is ready via React
   const onAppReady = async (app: PixiApplication) => {
     // Log which renderer was actually detected/used
     console.log(`[PixiJS] Using renderer: ${app.renderer.type || 'auto-detected'}`);
 
-    // Use DebugBridge instead of DebugOverlay
-    const debugOverlay = DebugBridge;
-
-    // Create connection overlay for disconnection warnings
-    const connectionOverlay = new ConnectionOverlay();
-
-    // Create keystroke overlay for keyboard shortcuts
-    // const keystrokeOverlay = new KeystrokeOverlay(); // Moved to React component
-
-    // Create renderer
-    const renderer = new GameRenderer(app);
-
     // Add mouse tracking for visual debug layer
     app.stage.eventMode = 'static';
     app.stage.hitArea = app.screen;
     app.stage.on('pointermove', (event) => {
+      if (!renderer) return;
+
       // Get global position
       const globalPos = event.global;
 
@@ -145,11 +155,9 @@ async function init(options?: {
 
     // Toggle debug grid when debug overlay visibility changes
     debugOverlay.onVisibilityChange((visible) => {
+      if (!renderer) return;
       renderer.updateBotDebugGrid(store.getState(), visible);
     });
-
-    // Ensure debug grid matches persisted visibility state
-    renderer.updateBotDebugGrid(store.getState(), debugOverlay.isVisible());
 
     // Sync zoom state with debug overlay
     zoomManager.addZoomChangeListener((level, scale) => {
@@ -158,38 +166,52 @@ async function init(options?: {
     // Initial sync
     debugOverlay.setZoomLevel(zoomManager.getLevel(), zoomManager.getScale());
 
-    // Pre-load all assets before starting the game
-    // This ensures spritesheets are ready and prevents default placeholder sprites
-    console.log('[Init] Loading assets...');
-    await renderer.loadAssets();
-    console.log('[Init] Assets loaded, starting game...');
+    // Update debug overlay with object count
+    store.subscribe((world: WorldState) => {
+      debugOverlay.setObjectCounts(world.objects.size, world.groundLayer.terrainObjects.size);
+    });
+
+    // Update debug overlay with event count periodically
+    const updateEventCount = () => {
+      const eventLogger = store.getEventLogger();
+      const events = eventLogger.loadEvents();
+      debugOverlay.setEventCount(events.length);
+    };
+
+    // Update immediately and then periodically (every 500ms)
+    updateEventCount();
+    setInterval(updateEventCount, 500);
+
+    console.log('Outside Game Client - POC initialized');
+  };
+
+  // Callback when Renderer is ready from LevelViewport
+  const onRendererReady = async (rendererInstance: GameRenderer) => {
+    renderer = rendererInstance;
+
+    // Ensure debug grid matches persisted visibility state
+    renderer.updateBotDebugGrid(store.getState(), debugOverlay.isVisible());
 
     // Create animation controller (subscribes to store and animates sprites)
-    const animationController = new AnimationController(store, renderer);
+    animationController = new AnimationController(store, renderer);
 
     // Create command queue
-    const commandQueue = new CommandQueue();
+    commandQueue = new CommandQueue();
 
     // Create selection manager
-    const selectionManager = new SelectionManager();
+    selectionManager = new SelectionManager();
 
     // Create game loop (pass debug overlay for step counting)
     // Note: DebugBridge has same interface as DebugOverlay for what GameLoop needs (setStepCount)
-    // We cast it to any because GameLoop expects the class instance, but DebugBridge is static
+    // We cast it to any because GameLoop expects to be a class instance, but DebugBridge is static
     // We should probably interface GameLoop better, but for now this works as DebugBridge has static methods matching instance methods
-    const gameLoop = new GameLoop(store, commandQueue, renderer, debugOverlay as any);
+    gameLoop = new GameLoop(store, commandQueue, renderer, debugOverlay as any);
 
     // Create mock command feeder
-    const commandFeeder = new MockCommandFeeder(commandQueue);
+    commandFeeder = new MockCommandFeeder(commandQueue);
 
     // Create signaling client for host/client detection
-    const SIGNALING_URL = 'ws://localhost:3001';
-    const signalingClient = new SignalingClient(SIGNALING_URL);
-
-    // Note: hostMode will be set later, so we use a variable that gets updated
-    let hostModeRef: HostMode | null = null;
-    // Note: timelineManager will be set later, so we use a variable that gets updated
-    let timelineManagerRef: TimelineManager | null = null;
+    signalingClient = new SignalingClient('ws://localhost:3001');
 
     // Reset level function - Full reset: clear events, reset step count, reinitialize level
     const resetLevel = () => {
@@ -216,13 +238,13 @@ async function init(options?: {
       console.log(`[Debug] Generated new master seed: ${newState.seed}`);
 
       // Reload level
-      commandFeeder.loadLevel('/levels/demo.md').then(() => {
-        const terrainCommands = commandFeeder.getInitialTerrainCommands();
+      commandFeeder!.loadLevel('/levels/demo.md').then(() => {
+        const terrainCommands = commandFeeder!.getInitialTerrainCommands();
         for (const command of terrainCommands) {
           executeCommand(store, command);
         }
-        commandFeeder.feedBotCommands();
-        renderer.setWorld(store.getState());
+        commandFeeder!.feedBotCommands();
+        renderer!.setWorld(store.getState());
         // Mark game as started after reset
         store.start();
 
@@ -255,7 +277,7 @@ async function init(options?: {
     window.addEventListener('resize', () => {
       // renderer.resize() handles both app renderer resize and viewport centering
       // It also ensures resolution stays at 1 for pixel-perfect rendering
-      renderer.resize();
+      renderer!.resize();
     });
 
     // Determine host/client mode and initialize game
@@ -272,14 +294,14 @@ async function init(options?: {
           return;
         }
 
-        // For Host and Client modes, we need to connect to the signaling server first
+        // For Host and Client modes, we need to connect to signaling server first
         console.log('[Init] Connecting to signaling server...');
-        await signalingClient.connect();
+        await signalingClient!.connect();
 
         if (connectionMode === 'host') {
           console.log('[Init] Starting in HOST mode.');
           debugOverlay.setMode('host');
-          signalingClient.registerHost();
+          signalingClient!.registerHost();
           await initializeHostMode({ startupCommands: options?.startupCommands });
           return;
         }
@@ -320,11 +342,11 @@ async function init(options?: {
         } else if (!isLocal) {
           // Load level file
           console.log('[Init] Loading level file...');
-          await commandFeeder.loadLevel('/levels/demo.md');
+          await commandFeeder!.loadLevel('/levels/demo.md');
 
           // Process all initial terrain commands immediately before game loop starts
           console.log('[Init] Processing initial terrain commands...');
-          const terrainCommands = commandFeeder.getInitialTerrainCommands();
+          const terrainCommands = commandFeeder!.getInitialTerrainCommands();
           for (const command of terrainCommands) {
             executeCommand(store, command);
           }
@@ -334,7 +356,7 @@ async function init(options?: {
         }
 
         // Initial render to show terrain
-        renderer.setWorld(store.getState());
+        renderer!.setWorld(store.getState());
 
         // Load and replay persisted events to restore runtime state
         console.log('[Init] Loading persisted game state...');
@@ -347,9 +369,9 @@ async function init(options?: {
           // Re-create world state to ensure it has a fresh seed if this is a new game
           // Actually, store already has a state from init, but let's make sure it's fresh
         } else {
-          // If replaying, we might want to recover the seed from events?
-          // Currently events don't store the master seed, only state changes.
-          // But we can check if the store state has a seed.
+          // If replaying, we might want to recover seed from events?
+          // Currently events don't store of the master seed, only state changes.
+          // But we can check if of the store state has a seed.
         }
 
         if (hasPersistedEvents) {
@@ -357,19 +379,19 @@ async function init(options?: {
           eventLogger.replayEvents(store, persistedEvents, () => {
             // After replay completes, update renderer to create sprites for all objects
             // This ensures sprites exist before animation controller tries to animate them
-            renderer.update(store.getState());
-            // Reset animation controller's previous state so it doesn't try to animate the restoration
-            // (The animation controller will see the final state as the "previous" state)
-            animationController.resetPreviousState();
+            renderer!.update(store.getState());
+            // Reset animation controller's previous state so it doesn't try to animate restoration
+            // (The animation controller will see the final state as "previous" state)
+            animationController!.resetPreviousState();
           });
           console.log('[Init] Game state restored from persisted events');
 
-          // The replayed state might not have the seed if it was created before the seed field existed.
+          // The replayed state might not have seed if it was created before seed field existed.
           // Ensure seed is present.
           const world = store.getState();
           if (world.seed === undefined) {
             console.warn('[Init] Restored state is missing seed, generating new one...');
-            // We need to update the state with a seed without triggering a new event
+            // We need to update of the state with a seed without triggering a new event
             // But Store doesn't allow direct state mutation outside actions.
             // We can dispatch a SET_WORLD_STATE action with the same state + seed.
             const stateWithSeed = { ...world, seed: Math.floor(Math.random() * 2147483647) };
@@ -389,7 +411,7 @@ async function init(options?: {
         // (persisted events already contain bot creation/placement commands)
         if (!hasPersistedEvents) {
           console.log('[Init] Feeding bot commands from level file...');
-          commandFeeder.feedBotCommands();
+          commandFeeder!.feedBotCommands();
 
           // Tag the current step as "LevelStart" (right after initial level initialization)
           setTimeout(() => {
@@ -420,7 +442,7 @@ async function init(options?: {
         }
 
         // Initialize host mode
-        hostMode = new HostMode(store, commandQueue, signalingClient, {
+        hostMode = new HostMode(store, commandQueue!, signalingClient!, {
           onClientConnected: (clientId) => {
             console.log(`[Host] Client connected: ${clientId}`);
             // Update client count in debug overlay
@@ -479,22 +501,22 @@ async function init(options?: {
         // Create keyboard handler (host mode - commands go to local queue)
         // Inject timeline manager for playback controls
         const keyboardHandler = new KeyboardHandler(
-          selectionManager,
-          commandQueue,
+          selectionManager!,
+          commandQueue!,
           store,
-          renderer,
+          renderer!,
           undefined,
           timelineManager
         );
 
         // Connect GameLoop, DebugOverlay, and callbacks to KeyboardHandler for timeline controls
-        keyboardHandler.setGameLoop(gameLoop);
+        keyboardHandler.setGameLoop(gameLoop!);
         keyboardHandler.setDebugOverlay(debugOverlay as any);
         keyboardHandler.setOnResetLevel(resetLevel);
         keyboardHandler.setOnToggleAutonomy(toggleFreeze, isFreezeEnabled);
 
         // Set timeline manager on game loop
-        gameLoop.setTimelineManager(timelineManager);
+        gameLoop!.setTimelineManager(timelineManager);
 
         // Create and initialize Timeline Bar (Moved to React component in GameRoot)
         // const timelineBar = new TimelineBar(app, timelineManager);
@@ -508,13 +530,13 @@ async function init(options?: {
 
         // Initial playback state
         timelineManager.setPlaybackState(PlaybackState.PLAYING);
-        gameLoop.setPlaybackState(PlaybackState.PLAYING);
+        gameLoop!.setPlaybackState(PlaybackState.PLAYING);
 
         // Initial debug overlay updates
         debugOverlay.setPlaybackMode(PlaybackState.PLAYING);
         updateTimelineCursor();
 
-        await hostMode.initialize(gameLoop, timelineManager, { local: isLocal });
+        await hostMode.initialize(gameLoop!, timelineManager, { local: isLocal });
 
         // Update client count initially
         debugOverlay.setClientCount(hostMode.getConnectedClientCount());
@@ -525,14 +547,14 @@ async function init(options?: {
         }, 250);
 
         // Start the game loop
-        gameLoop.start();
+        gameLoop!.start();
       }
 
       async function initializeClientMode() {
         // Initialize with empty world state so grid can render
         // The state will be updated when we receive data from host
         const initialWorld = store.getState();
-        renderer.setWorld(initialWorld);
+        renderer!.setWorld(initialWorld);
 
         let isReconnecting = false;
         let reconnectionAttempt = 0;
@@ -580,7 +602,7 @@ async function init(options?: {
                 // If reconnect() throws immediately, we need to schedule next attempt
                 // But initiateConnection mostly sets up listeners and sends offer via signaling.
 
-                // Key point: We need to reset isReconnecting so the NEXT failure event triggers this again.
+                // Key point: We need to reset isReconnecting so NEXT failure event triggers this again.
                 // But if we reset it too early, we might get multiple triggers for the same failure sequence.
                 // Let's reset it after a short delay to allow for state transition events to fire?
                 // Actually, better strategy:
@@ -598,7 +620,7 @@ async function init(options?: {
         };
 
         // Initialize client mode
-        clientMode = new ClientMode(store, signalingClient, {
+        clientMode = new ClientMode(store, signalingClient!, {
           onConnected: () => {
             console.log('[Client] Connected to host');
             connectionOverlay.hide();
@@ -630,10 +652,10 @@ async function init(options?: {
 
         // Create keyboard handler (client mode - commands sent to host)
         const keyboardHandler = new KeyboardHandler(
-          selectionManager,
+          selectionManager!,
           null, // No local command queue in client mode
           store,
-          renderer,
+          renderer!,
           (command, selectedBotId, data) => {
             clientMode?.sendInputCommand(command, selectedBotId, data);
           }
@@ -641,7 +663,7 @@ async function init(options?: {
 
         // Subscribe to store for rendering (client receives state from host)
         store.subscribe((world: WorldState) => {
-          renderer.update(world);
+          renderer!.update(world);
         });
       }
     }
@@ -649,38 +671,20 @@ async function init(options?: {
     // Initialize the game
     initializeGame();
 
-    // Update debug overlay with object count
-    store.subscribe((world: WorldState) => {
-      debugOverlay.setObjectCounts(world.objects.size, world.groundLayer.terrainObjects.size);
-    });
-
-    // Update debug overlay with event count periodically
-    const updateEventCount = () => {
-      const eventLogger = store.getEventLogger();
-      const events = eventLogger.loadEvents();
-      debugOverlay.setEventCount(events.length);
-    };
-
-    // Update immediately and then periodically (every 500ms)
-    updateEventCount();
-    setInterval(updateEventCount, 500);
-
     // Set initial selection when bots are available
     // Subscribe to store to detect when bots are created
     let initialSelectionSet = false;
     const unsubscribeSelection = store.subscribe((world: WorldState) => {
       if (!initialSelectionSet && world.objects.size >= 3) {
         // All 3 bots should be created and placed by now
-        const firstBotId = selectionManager.cycleNext(world);
+        const firstBotId = selectionManager!.cycleNext(world);
         if (firstBotId) {
-          renderer.updateSelection(world, firstBotId);
+          renderer!.updateSelection(world, firstBotId);
           initialSelectionSet = true;
           unsubscribeSelection(); // Unsubscribe after setting initial selection
         }
       }
     });
-
-    console.log('Outside Game Client - POC initialized');
   };
 
   // Create React root and render GameRoot
@@ -690,6 +694,7 @@ async function init(options?: {
       width: appElement.clientWidth || window.innerWidth,
       height: appElement.clientHeight || window.innerHeight,
       onAppReady: onAppReady,
+      onRendererReady: onRendererReady,
       store: store,
       timelineManager: timelineManager,
     })

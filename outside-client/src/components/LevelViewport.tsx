@@ -51,17 +51,5 @@ export const LevelViewport: React.FC<LevelViewportProps> = ({ store, onRendererR
     }
   }, [world]);
 
-  // Handle Resize
-  useEffect(() => {
-    if (!app) return;
-
-    const handleResize = () => {
-      rendererRef.current?.resize();
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [app]);
-
   return null; // This component doesn't render React nodes, it manages the imperative renderer
 };

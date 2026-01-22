@@ -7,9 +7,11 @@ import { Timeline } from './Timeline';
 import { Store } from '../store/store';
 import { Application, useApplication } from '@pixi/react';
 import { TimelineManager } from '../timeline/manager';
+import { GameRenderer } from '../renderer/renderer';
 
 interface GameRootProps {
   onAppReady: (app: PixiApplication) => void;
+  onRendererReady?: (renderer: GameRenderer) => void;
   width: number;
   height: number;
   store: Store;
@@ -34,6 +36,7 @@ const AppInitializer: React.FC<{ onAppReady: (app: PixiApplication) => void }> =
 
 export const GameRoot: React.FC<GameRootProps> = ({
   onAppReady,
+  onRendererReady,
   width,
   height,
   store,
@@ -50,7 +53,7 @@ export const GameRoot: React.FC<GameRootProps> = ({
       autoDensity={true}
     >
       <AppInitializer onAppReady={onAppReady} />
-      <LevelViewport store={store} />
+      <LevelViewport store={store} onRendererReady={onRendererReady} />
       <DebugPanel />
       <KeystrokeHelp />
       {timelineManager && <Timeline timelineManager={timelineManager} />}
