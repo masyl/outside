@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   game-server:
     build:
       context: .
-      dockerfile: packages/server/Dockerfile
+      dockerfile: outside-server/Dockerfile
     container_name: game-server-feature2
     restart: unless-stopped
     networks:
@@ -29,7 +27,7 @@ services:
   game-client:
     build:
       context: .
-      dockerfile: packages/client/Dockerfile
+      dockerfile: outside-client/Dockerfile
     container_name: game-client-feature2
     restart: unless-stopped
     networks:
@@ -49,7 +47,7 @@ services:
   storybook:
     build:
       context: .
-      dockerfile: packages/storybook/Dockerfile
+      dockerfile: outside-storybook/Dockerfile
     container_name: storybook-feature2
     restart: unless-stopped
     networks:
