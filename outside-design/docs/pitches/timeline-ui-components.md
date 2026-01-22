@@ -83,7 +83,6 @@ The timeline bar will be added to the PIXI stage in `main.ts` and positioned at 
 
 - Q: Integration approach: Do you prefer a separate timeline bar component at the bottom of screen, or should it be integrated into the existing DebugOverlay panel?
   - A: It's a separate UI.
-  
 - Q: Visibility control: Should the timeline bar only be visible in host mode, or do you want a way to toggle visibility?
   - A: The toolbar should become visible only when the game starts travelling in time. Once the game resumes the normal PLAY mode at the head of the event stream, it disapears.
 
@@ -95,7 +94,6 @@ The timeline bar will be added to the PIXI stage in `main.ts` and positioned at 
   - A: Yes, add some debounce and throttling to prevent spamming the CPU.
 
 - Q: Edge case handling: What should happen when:
-
   - Q: Total steps = 0 (empty timeline)?
     - A: Nothing special. At that point the world state should simply already be blank.
   - Q: User clicks outside the green bar but inside the padding?

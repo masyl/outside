@@ -2,7 +2,7 @@
  * Debug overlay for displaying FPS, step counter, and other debug info
  */
 
-export const VERSION = '0.1.10'; // Update patch number when making changes
+export const VERSION = '0.1.11'; // Update patch number when making changes
 
 export class DebugOverlay {
   private static readonly VISIBILITY_KEY = 'outside.debugOverlay.visible';
@@ -17,6 +17,7 @@ export class DebugOverlay {
   private p2pStatusElement: HTMLDivElement;
   private playbackModeElement: HTMLDivElement;
   private timelineCursorElement: HTMLDivElement;
+  private zoomElement: HTMLDivElement;
   private fps: number = 0;
   private frameCount: number = 0;
   private visibilityChangeHandler?: (visible: boolean) => void;
@@ -117,6 +118,11 @@ export class DebugOverlay {
     this.timelineCursorElement = document.createElement('div');
     this.timelineCursorElement.textContent = 'Timeline: -- / --';
     this.container.appendChild(this.timelineCursorElement);
+
+    // Create zoom element
+    this.zoomElement = document.createElement('div');
+    this.zoomElement.textContent = 'Zoom: 4 (1.0x)';
+    this.container.appendChild(this.zoomElement);
 
     // Append to body
     document.body.appendChild(this.container);
@@ -229,6 +235,13 @@ export class DebugOverlay {
   setPlaybackMode(mode: string): void {
     this.playbackMode = mode;
     this.playbackModeElement.textContent = `Playback: ${mode}`;
+  }
+
+  /**
+   * Update zoom level display
+   */
+  setZoomLevel(level: number, scale: number): void {
+    this.zoomElement.textContent = `Zoom: ${level} (${scale.toFixed(1)}x)`;
   }
 
   /**

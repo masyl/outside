@@ -1,3 +1,5 @@
+import { getCurrentZoomScale } from '../zoom/zoomScaleService';
+
 /**
  * Core coordinate system for the game
  *
@@ -13,14 +15,32 @@
  *
  * 3. Display Coordinates (Pixels):
  *    - Screen rendering units
- *    - 1 World Unit = 64 Display Pixels
+ *    - Example: { x: 2.5, y: 1.5 } is center of tile (2,1)
  *
- * 4. Screen Coordinates (Pixels):
+ * 4. Screen Coordinates (Browser Window):
  *    - Browser window coordinates
+ *    - Used for mouse events and viewport calculations
  */
 
 /**
- * Core coordinate system constants
+ * Core coordinate system for the game
+ *
+ * Coordinate Concepts:
+ * 1. World Coordinates (Floating Point):
+ *    - Integer part = Grid Tile index (0, 1, 2...)
+ *    - Fractional part = Position within tile (0.0 to <1.0)
+ *    - Example: { x: 2.5, y: 1.5 } is center of tile (2,1)
+ *
+ * 2. Grid Coordinates (Integer):
+ *    - Tile indices only
+ *
+ * 3. Display Coordinates (Pixels):
+ *    - Screen rendering units
+ *    - Example: { x: 2.5, y: 1.5 } is center of tile (2,1)
+ *
+ * 4. Screen Coordinates (Browser Window):
+ *    - Browser window coordinates
+ *    - Used for mouse events and viewport calculations
  */
 export const COORDINATE_SYSTEM = {
   // Base virtual tile size (game logic coordinates)
@@ -37,6 +57,14 @@ export const COORDINATE_SYSTEM = {
   VERTICAL_OFFSET: -8, // Consistent vertical positioning
   VIRTUAL_PIXEL: 2, // For crisp 1px lines
 } as const;
+
+/**
+ * Get current zoom scale from zoom manager
+ * This is a convenience function that can be called from components
+ */
+export function getZoomScale(): number {
+  return getCurrentZoomScale();
+}
 
 /**
  * World Position - Single source of truth for entity positioning
@@ -90,40 +118,44 @@ export class CoordinateConverter {
   /**
    * Convert Grid to Display coordinates (Top-Left of tile)
    */
-  static gridToDisplay(grid: GridPosition): DisplayPosition {
+  static gridToDisplay(grid: GridPosition, zoomScale: number = 1.0): DisplayPosition {
+    const scale = zoomScale;
     return {
-      x: grid.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: grid.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: grid.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
+      y: grid.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
     };
   }
 
   /**
-   * Convert Display to Grid coordinates (Floored)
+   * Convert Display to Grid coordinates with zoom support
    */
-  static displayToGrid(display: DisplayPosition): GridPosition {
+  static displayToGrid(display: DisplayPosition, zoomScale: number = 1.0): GridPosition {
+    const scale = zoomScale;
     return {
-      x: Math.floor(display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE),
-      y: Math.floor(display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE),
+      x: Math.floor(display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale),
+      y: Math.floor(display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale),
     };
   }
 
   /**
-   * Convert World (Float) to Display coordinates
+   * Convert World to Display coordinates with zoom support
    */
-  static worldToDisplay(world: WorldPosition): DisplayPosition {
+  static worldToDisplay(world: WorldPosition, zoomScale: number = 1.0): DisplayPosition {
+    const scale = zoomScale;
     return {
-      x: world.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: world.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: world.x * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
+      y: world.y * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * scale,
     };
   }
 
   /**
-   * Convert Display to World coordinates
+   * Convert Display to World coordinates with zoom support
    */
-  static displayToWorld(display: DisplayPosition): WorldPosition {
+  static displayToWorld(display: DisplayPosition, zoomScale: number = 1.0): WorldPosition {
+    const scale = zoomScale;
     return {
-      x: display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: display.x / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
+      y: display.y / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
     };
   }
 
@@ -132,11 +164,13 @@ export class CoordinateConverter {
    */
   static screenToWorld(
     screen: { x: number; y: number },
-    rootPos: { x: number; y: number }
+    rootPos: { x: number; y: number },
+    zoomScale: number = 1.0
   ): WorldPosition {
+    const scale = zoomScale;
     return {
-      x: (screen.x - rootPos.x) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
-      y: (screen.y - rootPos.y) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE,
+      x: (screen.x - rootPos.x) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
+      y: (screen.y - rootPos.y) / COORDINATE_SYSTEM.DISPLAY_TILE_SIZE / scale,
     };
   }
 
@@ -153,7 +187,7 @@ export class CoordinateConverter {
   /**
    * Get center of a tile in World coordinates
    */
-  static getTileCenter(tileX: number, tileY: number): WorldPosition {
+  static getTileCenter(tileX: number, tileY: number, zoomScale: number = 1.0): WorldPosition {
     return {
       x: tileX + 0.5,
       y: tileY + 0.5,
@@ -175,16 +209,6 @@ export class CoordinateConverter {
   }
 
   /**
-   * Reconstruct World position from tile and offset
-   */
-  static fromSubTilePosition(sub: SubTilePosition): WorldPosition {
-    return {
-      x: sub.tileX + sub.offsetX,
-      y: sub.tileY + sub.offsetY,
-    };
-  }
-
-  /**
    * Convert World position to 8x8 sub-grid
    */
   static toSubGrid8(pos: WorldPosition): SubGrid8Position {
@@ -197,6 +221,9 @@ export class CoordinateConverter {
     };
   }
 
+  /**
+   * Get current zoom scale from zoom scale service
+   */
   /**
    * Convert 8x8 sub-grid to World position (Center of sub-cell)
    */

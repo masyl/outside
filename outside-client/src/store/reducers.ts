@@ -57,10 +57,15 @@ export function reducer(state: WorldState, action: Action): WorldState {
         }
 
         // Validate terrain bounds
-        // Terrain must be fully within the grid: x + width <= width, y + height <= height
-        if (x < 0 || y < 0 || x + width > draft.width || y + height > draft.height) {
+        // Terrain must be fully within the grid: x + width <= limit, y + height <= limit
+        if (
+          x < -draft.horizontalLimit ||
+          x + width > draft.horizontalLimit + 1 ||
+          y < -draft.verticalLimit ||
+          y + height > draft.verticalLimit + 1
+        ) {
           console.warn(
-            `Terrain extends outside world bounds: (${x}, ${y}) ${width}x${height}, world size: ${draft.width}x${draft.height}`
+            `Terrain extends outside world bounds: (${x}, ${y}) ${width}x${height}, world limits: ±${draft.horizontalLimit}, ±${draft.verticalLimit}`
           );
           return state;
         }
@@ -135,12 +140,12 @@ export function reducer(state: WorldState, action: Action): WorldState {
 
         // Remove object from old position (if it had one)
         if (object.position) {
-          removeObjectFromGrid(draft.grid, object.position);
+          removeObjectFromGrid(draft.grid, object.position, draft.horizontalLimit);
         }
 
         // Place object at new position
         object.position = position;
-        placeObjectInGrid(draft.grid, object, position);
+        placeObjectInGrid(draft.grid, object, position, draft.horizontalLimit);
         break;
       }
 
@@ -237,23 +242,25 @@ export function reducer(state: WorldState, action: Action): WorldState {
         }
 
         // Remove from old position and place at new position
-        removeObjectFromGrid(draft.grid, currentPos);
+        removeObjectFromGrid(draft.grid, currentPos, draft.horizontalLimit);
         object.position = newPosition;
-        placeObjectInGrid(draft.grid, object, newPosition);
+        placeObjectInGrid(draft.grid, object, newPosition, draft.horizontalLimit);
         break;
       }
 
       case 'SET_WORLD_SIZE': {
-        const { width, height } = action.payload;
+        const { horizontalLimit, verticalLimit } = action.payload;
 
-        // Create new grid with specified dimensions
-        const newGrid = Array(height)
+        // Create new grid with specified limits (limit * 2 + 1 for center-based coordinates)
+        const gridSizeX = horizontalLimit * 2 + 1;
+        const gridSizeY = verticalLimit * 2 + 1;
+        const newGrid = Array(gridSizeY)
           .fill(null)
-          .map(() => Array(width).fill(null));
+          .map(() => Array(gridSizeX).fill(null));
 
         // Update dimensions and grid
-        draft.width = width;
-        draft.height = height;
+        draft.horizontalLimit = horizontalLimit;
+        draft.verticalLimit = verticalLimit;
         draft.grid = newGrid;
 
         // Clear any objects that are now outside bounds (only if they have a position)
@@ -273,13 +280,14 @@ export function reducer(state: WorldState, action: Action): WorldState {
       }
 
       case 'RESET_WORLD': {
-        const newState = createWorldState(draft.seed);
+        const newState = createWorldState(draft.seed, draft.horizontalLimit);
         // Preserve dimensions if they've been customized
-        newState.width = draft.width;
-        newState.height = draft.height;
-        newState.grid = Array(draft.height)
+        newState.horizontalLimit = draft.horizontalLimit;
+        newState.verticalLimit = draft.verticalLimit;
+        const gridSize = draft.horizontalLimit * 2 + 1;
+        newState.grid = Array(gridSize)
           .fill(null)
-          .map(() => Array(draft.width).fill(null));
+          .map(() => Array(gridSize).fill(null));
 
         // Replace entire state
         return newState;

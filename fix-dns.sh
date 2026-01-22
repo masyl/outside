@@ -11,9 +11,9 @@ sudo mkdir -p /etc/resolver
 sudo cp "$(dirname "$0")/outside.local.resolver" /etc/resolver/outside.local
 
 # Restart dnsmasq
-echo "Restarting dnsmasq..."
-sudo pkill -f "dnsmasq.*outside" || true
-sudo /opt/homebrew/sbin/dnsmasq -C "$(dirname "$0")/dnsmasq.conf"
+echo "Restarting dnsmasq on port 5333..."
+pkill -f "dnsmasq.*outside" || true
+/opt/homebrew/sbin/dnsmasq -C "$(dirname "$0")/dnsmasq.conf"
 
 # Restart DNS service
 echo "Flushing DNS cache..."

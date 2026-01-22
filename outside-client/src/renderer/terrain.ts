@@ -1,6 +1,6 @@
 import { Sprite, Container, Texture, Graphics, Rectangle, TilingSprite } from 'pixi.js';
 import { WorldState, TerrainObject } from '@outside/core';
-import { COORDINATE_SYSTEM, CoordinateConverter } from './coordinateSystem';
+import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
 
 const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
 
@@ -53,9 +53,10 @@ function createTerrainSprite(terrain: TerrainObject, terrainTexture?: Texture): 
       });
 
       // Use TilingSprite to repeat the texture across the terrain area
-      // Display size: terrain width * 64px
-      const width = terrain.width * DISPLAY_TILE_SIZE;
-      const height = terrain.height * DISPLAY_TILE_SIZE;
+      // Display size: terrain width * 64px * zoomScale
+      const zoomScale = getZoomScale();
+      const width = terrain.width * DISPLAY_TILE_SIZE * zoomScale;
+      const height = terrain.height * DISPLAY_TILE_SIZE * zoomScale;
 
       const sprite = new TilingSprite({
         texture: tileTexture,
@@ -63,25 +64,33 @@ function createTerrainSprite(terrain: TerrainObject, terrainTexture?: Texture): 
         height,
       });
 
-      // Scale the 16x16 texture up to 64x64 (4x scale)
-      sprite.tileScale.set(4, 4);
+      // Scale the 16x16 texture up to 64x64, considering zoom scale
+      const tileScale = 4 * zoomScale;
+      sprite.tileScale.set(tileScale, tileScale);
 
       return sprite;
     }
   }
 
   // Fallback to solid color rendering
+  const zoomScale = getZoomScale();
   const canvas = document.createElement('canvas');
-  canvas.width = terrain.width * DISPLAY_TILE_SIZE;
-  canvas.height = terrain.height * DISPLAY_TILE_SIZE;
+  canvas.width = terrain.width * DISPLAY_TILE_SIZE * zoomScale;
+  canvas.height = terrain.height * DISPLAY_TILE_SIZE * zoomScale;
   const ctx = canvas.getContext('2d')!;
 
   if (!ctx) {
     console.error(`[createTerrainSprite] Failed to get 2d context for terrain ${terrain.id}`);
     // Create a fallback sprite
+    const zoomScale = getZoomScale();
     const graphics = new Graphics();
     const color = getTerrainColor(terrain.type);
-    graphics.rect(0, 0, terrain.width * DISPLAY_TILE_SIZE, terrain.height * DISPLAY_TILE_SIZE);
+    graphics.rect(
+      0,
+      0,
+      terrain.width * DISPLAY_TILE_SIZE * zoomScale,
+      terrain.height * DISPLAY_TILE_SIZE * zoomScale
+    );
     graphics.fill(color);
     return graphics;
   }
@@ -120,13 +129,18 @@ export function createTerrainLayer(world: WorldState, terrainTexture?: Texture):
     (a, b) => a.createdAt - b.createdAt
   );
 
+  const zoomScale = getZoomScale();
+
   // Render all terrain objects
   for (const terrain of sortedTerrains) {
     const sprite = createTerrainSprite(terrain, terrainTexture);
-    const displayPos = CoordinateConverter.gridToDisplay({
-      x: terrain.position.x,
-      y: terrain.position.y,
-    });
+    const displayPos = CoordinateConverter.gridToDisplay(
+      {
+        x: terrain.position.x,
+        y: terrain.position.y,
+      },
+      zoomScale
+    );
     sprite.x = displayPos.x;
     sprite.y = displayPos.y;
 

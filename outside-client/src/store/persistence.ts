@@ -44,7 +44,7 @@ export class EventLogger {
       const events = this.loadEvents();
       // Auto-assign step if not provided
       const finalStep = step ?? events.length;
-      
+
       events.push({
         action,
         timestamp,

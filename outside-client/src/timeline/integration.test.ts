@@ -74,7 +74,7 @@ describe('Timeline Integration Tests', () => {
     it('should handle SET_WORLD_STATE action dispatching', () => {
       // Add event
       store.dispatch(actions.createBot('bot-1'), 0);
-      
+
       const mockDispatch = vi.spyOn(store, 'dispatch');
 
       timelineManager.goToStep(0);
@@ -84,7 +84,7 @@ describe('Timeline Integration Tests', () => {
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'SET_WORLD_STATE',
-          payload: expect.any(Object)
+          payload: expect.any(Object),
         })
       );
     });
@@ -122,7 +122,7 @@ describe('Timeline Integration Tests', () => {
       // So at index 0, Bot doesn't exist.
       // If I want to verify Bot exists at initial state (step 0), I should go to index 1.
       // Or I can check objects size is 0.
-      expect(state.objects.size).toBe(0); 
+      expect(state.objects.size).toBe(0);
     });
   });
 

@@ -9,6 +9,7 @@ import { KeystrokeOverlay } from '../debug/keystrokeOverlay';
 import { TimelineManager } from '../timeline/manager';
 import { GameLoop } from '../game/loop';
 import { PlaybackState } from '../timeline/types';
+import { zoomManager } from '../zoom/zoomState';
 
 export type InputCommandSender = (
   command: InputCommandType,
@@ -157,6 +158,81 @@ export class KeyboardHandler {
       }
       event.preventDefault();
       this.handleArrowKey('down');
+    });
+
+    // Zoom controls - Alt plus/minus for zoom in/out
+    // On Mac, Alt+Plus produces '≠' and Alt+Minus produces '–'
+    this.keyHandlers.set('≠', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom in (Alt + Plus)');
+        zoomManager.increaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
+    });
+
+    this.keyHandlers.set('–', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom out (Alt + Minus)');
+        zoomManager.decreaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
+    });
+
+    // Also keep the standard keys for cross-platform support
+    this.keyHandlers.set('Equal', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom in (Alt + Plus/Equal)');
+        zoomManager.increaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
+    });
+
+    this.keyHandlers.set('NumpadAdd', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom in (Alt + Numpad Plus)');
+        zoomManager.increaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
+    });
+
+    this.keyHandlers.set('Minus', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom out (Alt + Minus)');
+        zoomManager.decreaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
+    });
+
+    this.keyHandlers.set('NumpadSubtract', (event) => {
+      if (event.altKey) {
+        event.preventDefault();
+        console.log('[Zoom] Zoom out (Alt + Numpad Minus)');
+        zoomManager.decreaseZoom();
+        const zoomState = zoomManager.getState();
+        if (this.debugOverlay) {
+          this.debugOverlay.setZoomLevel(zoomState.level, zoomState.scale);
+        }
+      }
     });
 
     this.keyHandlers.set('ArrowLeft', (event) => {

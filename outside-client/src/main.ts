@@ -8,6 +8,7 @@ import { GameLoop } from './game/loop';
 import { MockCommandFeeder } from './mock/commandFeeder';
 import { DebugOverlay } from './debug/overlay';
 import { ConnectionOverlay } from './debug/connectionOverlay';
+import { getZoomScale } from './renderer/coordinateSystem';
 import { KeystrokeOverlay } from './debug/keystrokeOverlay';
 import { AnimationController } from './game/animationController';
 import { SelectionManager } from './input/selection';
@@ -83,16 +84,15 @@ async function init(options?: {
     const rootPos = renderer.getRootContainerPosition();
 
     // Use unified coordinate conversion - preserves floating point precision
-    const worldPos = CoordinateConverter.screenToWorld(globalPos, rootPos);
+    const zoomScale = getZoomScale();
+    const worldPos = CoordinateConverter.screenToWorld(globalPos, rootPos, zoomScale);
 
     // Update visual debug layer with floating-point position
     // Note: gridX/gridY logging retained but we pass full precision to renderer
     const gridX = Math.floor(worldPos.x);
     const gridY = Math.floor(worldPos.y);
 
-    console.log(
-      `[Main] Mouse position - world: (${worldPos.x.toFixed(2)}, ${worldPos.y.toFixed(2)}), grid: (${gridX}, ${gridY})`
-    );
+    // Removed noisy mouse position logging
     renderer.updateMousePosition(worldPos.x, worldPos.y);
   });
 

@@ -30,10 +30,10 @@ describe('GameLoop', () => {
     renderer = new GameRenderer(mockApp);
     gameLoop = new GameLoop(store, commandQueue, renderer);
     timelineManager = new TimelineManager(store, null as any); // Mocked
-    
+
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Mock window.setInterval
     vi.useFakeTimers();
   });
@@ -72,14 +72,14 @@ describe('GameLoop', () => {
   describe('Game Loop Execution', () => {
     it('should process commands when PLAYING', () => {
       gameLoop.start();
-      
+
       // Enqueue a command
       const command = { type: 'test', id: '1' } as any;
       commandQueue.enqueue(command);
-      
+
       // Advance timers
       vi.advanceTimersByTime(125);
-      
+
       // Command should be dequeued (processed)
       expect(commandQueue.length()).toBe(0);
     });
@@ -87,14 +87,14 @@ describe('GameLoop', () => {
     it('should NOT process commands when PAUSED', () => {
       gameLoop.start();
       gameLoop.pause();
-      
+
       // Enqueue a command
       const command = { type: 'test', id: '1' } as any;
       commandQueue.enqueue(command);
-      
+
       // Advance timers
       vi.advanceTimersByTime(125);
-      
+
       // Command should NOT be dequeued
       expect(commandQueue.length()).toBe(1);
     });
@@ -102,14 +102,14 @@ describe('GameLoop', () => {
     it('should NOT process commands when TRAVELING', () => {
       gameLoop.start();
       gameLoop.setPlaybackState(PlaybackState.TRAVELING);
-      
+
       // Enqueue a command
       const command = { type: 'test', id: '1' } as any;
       commandQueue.enqueue(command);
-      
+
       // Advance timers
       vi.advanceTimersByTime(125);
-      
+
       // Command should NOT be dequeued
       expect(commandQueue.length()).toBe(1);
     });
@@ -119,9 +119,9 @@ describe('GameLoop', () => {
     it('should delegate step to timeline manager', () => {
       gameLoop.setTimelineManager(timelineManager);
       const stepSpy = vi.spyOn(timelineManager, 'stepForward');
-      
+
       gameLoop.step();
-      
+
       expect(stepSpy).toHaveBeenCalled();
     });
 

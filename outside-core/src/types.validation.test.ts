@@ -223,15 +223,16 @@ describe('Type System Validation', () => {
           terrainObjects: new Map(),
           terrainObjectsByPosition: new Map(),
         },
-        width: 20,
-        height: 10,
+        horizontalLimit: 30,
+        verticalLimit: 30,
         seed: 42,
       };
 
-      expect(worldState.grid).toHaveLength(10);
-      expect(worldState.grid[0]).toHaveLength(20);
-      expect(worldState.width).toBe(20);
-      expect(worldState.height).toBe(10);
+      const gridSize = 30 * 2 + 1; // 61
+      expect(worldState.grid).toHaveLength(gridSize);
+      expect(worldState.grid[0]).toHaveLength(gridSize);
+      expect(worldState.horizontalLimit).toBe(30);
+      expect(worldState.verticalLimit).toBe(30);
       expect(worldState.seed).toBe(42);
       expect(worldState.objects.size).toBe(0);
       expect(worldState.groundLayer.terrainObjects.size).toBe(0);

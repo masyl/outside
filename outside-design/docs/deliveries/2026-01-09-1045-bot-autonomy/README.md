@@ -3,8 +3,8 @@ Title: Bot Autonomy
 DeliveryDate: 2026-01-09
 Summary: Implemented seeded, autonomous movement for bots. Bots now randomly explore the map (or wait) based on a deterministic random number generator. The master seed is persisted in the world state, ensuring consistent behavior across reloads. Also includes fixes for legacy save states and console log cleanup.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Bot Autonomy

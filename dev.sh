@@ -53,11 +53,20 @@ setup_dnsmasq() {
     sudo cp "$PROJECT_DIR/outside.local.resolver" /etc/resolver/outside.local
     
     # Stop any existing dnsmasq processes
-    sudo pkill -f "dnsmasq.*$PROJECT_DIR" 2>/dev/null || true
-    
-    # Start dnsmasq with sudo to allow binding to port 53
-    log "Starting dnsmasq (requires sudo for port 53)..."
-    sudo /opt/homebrew/sbin/dnsmasq -C "$PROJECT_DIR/dnsmasq.conf"
+    pkill -f "dnsmasq.*$PROJECT_DIR" 2>/dev/null || true
+
+    # Ensure port 5333 is free before starting dnsmasq
+    if command -v lsof >/dev/null 2>&1; then
+        if lsof -i :5333 >/dev/null 2>&1; then
+            warning "Port 5333 is already in use. Please free it or stop the conflicting service."
+            lsof -i :5333 -sTCP:LISTEN -P -n | sed -n '1,5p'
+            exit 1
+        fi
+    fi
+
+    # Start dnsmasq on port 5333 (non-privileged, no sudo needed)
+    log "Starting dnsmasq on port 5333..."
+    /opt/homebrew/sbin/dnsmasq -C "$PROJECT_DIR/dnsmasq.conf"
     
     sleep 2
     
@@ -65,8 +74,8 @@ setup_dnsmasq() {
     if pgrep -f "dnsmasq.*$PROJECT_DIR" > /dev/null; then
         success "dnsmasq started successfully"
     else
-        error "Failed to start dnsmasq. Check if another process is using port 53:"
-        sudo lsof -i :53
+        error "Failed to start dnsmasq. Check if port 5333 is available:"
+        lsof -i :5333
         exit 1
     fi
 }

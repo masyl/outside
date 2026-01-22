@@ -8,6 +8,8 @@ import {
   placeObjectInGrid,
   removeObjectFromGrid,
   doesTerrainCoverPosition,
+  worldToGridIndex,
+  isPositionOccupied,
 } from './world';
 import { TerrainType, GameObject } from './types';
 
@@ -121,7 +123,7 @@ describe('World State Management - Edge Cases', () => {
         position: { x: 5, y: 3 },
       };
 
-      placeObjectInGrid(world.grid, object, { x: 5, y: 3 });
+      placeObjectInGrid(world.grid, object, { x: 5, y: 3 }, world.horizontalLimit);
 
       const retrieved = getObjectAtPosition(world, { x: 5, y: 3 });
       expect(retrieved).toBe(object);
@@ -136,24 +138,39 @@ describe('World State Management - Edge Cases', () => {
         position: { x: 0, y: 0 },
       };
 
-      // Place at exact boundaries
-      placeObjectInGrid(world.grid, object, { x: 19, y: 9 });
-      expect(world.grid[9][19]).toBe(object);
+      // Place at exact boundaries (using array indices)
+      const boundaryIndex = world.horizontalLimit;
+      const gridIndex = worldToGridIndex(boundaryIndex, world.horizontalLimit);
+      placeObjectInGrid(
+        world.grid,
+        object,
+        { x: boundaryIndex, y: boundaryIndex },
+        world.horizontalLimit
+      );
+      expect(world.grid[gridIndex][gridIndex]).toBe(object);
 
       // Place outside boundaries (should be ignored gracefully)
       placeObjectInGrid(
         world.grid,
         { id: 'bot-2', type: 'bot', position: { x: 0, y: 0 } },
-        { x: 20, y: 0 }
+        { x: world.horizontalLimit + 1, y: 0 },
+        world.horizontalLimit
       );
-      expect(world.grid[0][20]).toBeUndefined(); // Out of bounds, not modified
+      expect(world.grid[0][world.horizontalLimit * 2 + 1]).toBeUndefined(); // Out of bounds, not modified
 
       placeObjectInGrid(
         world.grid,
         { id: 'bot-3', type: 'bot', position: { x: 0, y: 0 } },
-        { x: 0, y: 10 }
+        { x: 0, y: world.horizontalLimit + 1 },
+        world.horizontalLimit
       );
-      expect(world.grid[10]).toBeUndefined(); // Out of bounds, not modified
+      // The grid should not be modified when trying to place out of bounds
+      // Since the function handles bounds safely, we just check the grid size is unchanged
+      expect(world.grid.length).toBe(world.horizontalLimit * 2 + 1);
+
+      placeObjectInGrid(world.grid, object, { x: 5, y: 3 }, world.horizontalLimit);
+      expect(isPositionOccupied(world, { x: 5, y: 3 })).toBe(true);
+      expect(isPositionOccupied(world, { x: 6, y: 3 })).toBe(false);
     });
 
     it('should safely remove from invalid positions', () => {
@@ -163,17 +180,33 @@ describe('World State Management - Edge Cases', () => {
         type: 'bot',
         position: { x: 5, y: 3 },
       };
-      placeObjectInGrid(world.grid, object, { x: 5, y: 3 });
+      placeObjectInGrid(world.grid, object, { x: 5, y: 3 }, world.horizontalLimit);
 
       // Remove from valid position
-      removeObjectFromGrid(world.grid, { x: 5, y: 3 });
-      expect(world.grid[3][5]).toBeNull();
+      removeObjectFromGrid(world.grid, { x: 5, y: 3 }, world.horizontalLimit);
+      expect(
+        world.grid[worldToGridIndex(3, world.horizontalLimit)][
+          worldToGridIndex(5, world.horizontalLimit)
+        ]
+      ).toBeNull();
 
       // Attempt to remove from invalid positions (should not throw)
       expect(() => {
-        removeObjectFromGrid(world.grid, { x: -1, y: 0 });
-        removeObjectFromGrid(world.grid, { x: 20, y: 0 });
-        removeObjectFromGrid(world.grid, { x: 0, y: 10 });
+        removeObjectFromGrid(
+          world.grid,
+          { x: -world.horizontalLimit - 1, y: 0 },
+          world.horizontalLimit
+        );
+        removeObjectFromGrid(
+          world.grid,
+          { x: world.horizontalLimit + 1, y: 0 },
+          world.horizontalLimit
+        );
+        removeObjectFromGrid(
+          world.grid,
+          { x: 0, y: world.horizontalLimit + 1 },
+          world.horizontalLimit
+        );
       }).not.toThrow();
     });
 

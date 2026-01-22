@@ -1,7 +1,14 @@
 import { Store } from '../store/store';
 import { WebRTCPeer } from './webrtc';
 import { SignalingClient } from './signaling';
-import { serializeNetworkMessage, deserializeNetworkMessage, NetworkMessage, InitialState, StateChangeEvent, BotAssignment } from './stateEvents';
+import {
+  serializeNetworkMessage,
+  deserializeNetworkMessage,
+  NetworkMessage,
+  InitialState,
+  StateChangeEvent,
+  BotAssignment,
+} from './stateEvents';
 import { serializeInputCommand, InputCommand, InputCommandType } from './inputCommands';
 import { actions } from '../store/actions';
 import { WorldState, createWorldState } from '@outside/core';
@@ -29,11 +36,7 @@ export class ClientMode {
   private lastStep: number = 0;
   private pendingState: WorldState | null = null;
 
-  constructor(
-    store: Store,
-    signalingClient: SignalingClient,
-    callbacks: ClientCallbacks = {}
-  ) {
+  constructor(store: Store, signalingClient: SignalingClient, callbacks: ClientCallbacks = {}) {
     this.store = store;
     this.signalingClient = signalingClient;
     this.clientId = signalingClient.getPeerId() || 'unknown';
@@ -77,7 +80,7 @@ export class ClientMode {
    */
   async reconnect(): Promise<void> {
     console.log('[Client] Attempting to reconnect...');
-    
+
     // Close existing connection if any
     if (this.hostPeer) {
       this.hostPeer.close();
@@ -106,7 +109,7 @@ export class ClientMode {
     // console.log('[Client] Initiating WebRTC connection to host...');
 
     this.hostPeer = new WebRTCPeer();
-    
+
     // Set up incoming data channel
     this.hostPeer.setupIncomingDataChannel();
 
@@ -239,11 +242,11 @@ export class ClientMode {
    */
   private handleInitialState(message: InitialState): void {
     // console.log('[Client] Received initial state');
-    
+
     // Create new world state from initial state
     const worldState = createWorldState();
-    worldState.width = message.gridData.width;
-    worldState.height = message.gridData.height;
+    worldState.horizontalLimit = message.gridData.horizontalLimit;
+    worldState.verticalLimit = message.gridData.verticalLimit;
 
     // Copy terrain from initial state if provided
     if (message.gridData.terrain) {
@@ -258,7 +261,12 @@ export class ClientMode {
       // Update grid if object has position
       if (obj.position) {
         const { x, y } = obj.position;
-        if (x >= 0 && x < worldState.width && y >= 0 && y < worldState.height) {
+        if (
+          x >= -worldState.horizontalLimit &&
+          x <= worldState.horizontalLimit &&
+          y >= -worldState.verticalLimit &&
+          y <= worldState.verticalLimit
+        ) {
           worldState.grid[y][x] = obj;
         }
       }
@@ -266,16 +274,16 @@ export class ClientMode {
 
     // Set world state
     this.store.dispatch(actions.setWorldState(worldState));
-    
+
     // Update step count from initial state
     const initialStep = message.step || 0;
     this.lastStep = initialStep;
-    
+
     // Update debug overlay with step count from host
     if (this.callbacks.onStepUpdate) {
       this.callbacks.onStepUpdate(initialStep);
     }
-    
+
     // If we have an assigned bot, set it as selected
     if (this.assignedBotId && worldState.objects.has(this.assignedBotId)) {
       // Trigger bot assignment callback to set selection
@@ -292,8 +300,10 @@ export class ClientMode {
     // Check if we're missing steps - if too far behind, request initial state
     if (message.step !== this.lastStep + 1) {
       const stepsBehind = message.step - this.lastStep;
-      console.warn(`[Client] Step mismatch: expected ${this.lastStep + 1}, got ${message.step} (${stepsBehind} steps behind)`);
-      
+      console.warn(
+        `[Client] Step mismatch: expected ${this.lastStep + 1}, got ${message.step} (${stepsBehind} steps behind)`
+      );
+
       // If we're more than 5 steps behind, request initial state
       if (stepsBehind > 5) {
         console.log('[Client] Too far behind, requesting initial state...');
@@ -311,8 +321,8 @@ export class ClientMode {
     // Create new world state from the state change event
     // Don't mutate the existing state (it's frozen by Immer)
     const newWorldState = createWorldState();
-    newWorldState.width = message.gridData.width;
-    newWorldState.height = message.gridData.height;
+    newWorldState.horizontalLimit = message.gridData.horizontalLimit;
+    newWorldState.verticalLimit = message.gridData.verticalLimit;
 
     // Copy terrain from current state (terrain doesn't change in state events, only objects)
     const currentState = this.store.getState();
@@ -324,12 +334,19 @@ export class ClientMode {
     // Add all objects from the state change event
     for (const obj of message.gridData.objects) {
       newWorldState.objects.set(obj.id, obj);
-      
+
       // Update grid if object has position
       if (obj.position) {
         const { x, y } = obj.position;
-        if (x >= 0 && x < newWorldState.width && y >= 0 && y < newWorldState.height) {
-          newWorldState.grid[y][x] = obj;
+        if (
+          x >= -newWorldState.horizontalLimit &&
+          x <= newWorldState.horizontalLimit &&
+          y >= -newWorldState.verticalLimit &&
+          y <= newWorldState.verticalLimit
+        ) {
+          const gridX = x + newWorldState.horizontalLimit;
+          const gridY = y + newWorldState.verticalLimit;
+          newWorldState.grid[gridY][gridX] = obj;
         }
       }
     }
@@ -354,7 +371,11 @@ export class ClientMode {
   /**
    * Send input command to host
    */
-  sendInputCommand(command: InputCommandType, selectedBotId?: string, data?: { x?: number; y?: number }): void {
+  sendInputCommand(
+    command: InputCommandType,
+    selectedBotId?: string,
+    data?: { x?: number; y?: number }
+  ): void {
     if (!this.hostPeer) {
       console.warn('[Client] Cannot send input: no peer connection');
       return;

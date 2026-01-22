@@ -1,0 +1,174 @@
+{
+  "name": "delivery-index-update",
+  "version": "1.0.0",
+  "description": "Updates the list of deliveries with the new completed delivery",
+  "category": "wrapup",
+  "metadata": {
+    "author": "AI Agent",
+    "created": "2026-01-20",
+    "processStep": 9,
+    "dependencies": ["file system"]
+  },
+  "inputs": {
+    "required": ["deliveryPath", "deliveryInfo"],
+    "optional": ["indexPath", "sectionName"]
+  },
+  "outputs": {
+    "updated": "boolean",
+    "indexPath": "string",
+    "addedSection": "string",
+    "status": "success|error"
+  },
+  "template": {
+    "indexLocations": [
+      "outside-design/docs/deliveries/README.md",
+      "outside-design/docs/deliveries/index.md",
+      "outside-design/docs/DELIVERIES.md"
+    ],
+    "sectionStructure": {
+      "completed": "## Completed Deliveries",
+      "inProgress": "## In Progress", 
+      "planned": "## Planned Deliveries"
+    },
+    "entryFormat": "- **{YYYY-MM-DD}** - [{Delivery Title}]({deliveryPath}/) - {Description}"
+  },
+  "steps": [
+    {
+      "name": "Locate delivery index",
+      "description": "Find the main deliveries list file",
+      "searchOrder": [
+        "outside-design/docs/deliveries/README.md",
+        "outside-design/docs/deliveries/index.md",
+        "outside-design/docs/DELIVERIES.md",
+        "Search for files with 'delivery' in name in docs directory"
+      ],
+      "fallback": "Ask user to specify the correct index file"
+    },
+    {
+      "name": "Check if index is dynamic",
+      "description": "Determine if index is manually maintained or dynamically generated",
+      "indicators": [
+        "Comments about automatic generation",
+        "Script references",
+        "Template markers",
+        "Build process integration"
+      ],
+      "dynamicAction": "Skip update if index is dynamically generated"
+    },
+    {
+      "name": "Analyze index structure",
+      "description": "Understand current index organization and sections",
+      "analysis": {
+        "sections": "Identify existing sections (Completed, In Progress, etc.)",
+        "format": "Document current entry format",
+        "ordering": "Understand sorting criteria (date, alphabetical, etc.)"
+      }
+    },
+    {
+      "name": "Create delivery entry",
+      "description": "Format new delivery entry according to index conventions",
+      "content": {
+        "date": "Extract from delivery folder name or README",
+        "title": "From delivery README title",
+        "path": "Relative path to delivery folder",
+        "description": "Brief one-line summary from delivery README"
+      },
+      "format": "{indexEntryFormat}"
+    },
+    {
+      "name": "Determine insertion point",
+      "description": "Find correct location and section for new entry",
+      "logic": {
+        "section": "Add to 'Completed' section if exists, otherwise create",
+        "position": "Insert in chronological order (newest first or oldest first)",
+        "maintenance": "Maintain existing sorting and grouping"
+      }
+    },
+    {
+      "name": "Update index content",
+      "description": "Add new entry to the deliveries list",
+      "action": {
+        "sectionExists": "Insert entry in appropriate existing section",
+        "sectionMissing": "Create 'Completed Deliveries' section and add entry",
+        "needsReorganization": "Move entry from 'In Progress' if present"
+      }
+    },
+    {
+      "name": "Update section organization",
+      "description": "Reorganize sections if delivery moved from in-progress",
+      "reorganization": {
+        "moveEntry": "Remove from 'In Progress' section",
+        "updateCounts": "Update delivery counts if present",
+        "maintainOrder": "Preserve existing sorting within sections"
+      }
+    },
+    {
+      "name": "Validate index update",
+      "description": "Ensure index is properly formatted and complete",
+      "validation": {
+        "markdownValid": "Index file remains valid markdown",
+        "linksWorking": "New entry links are correct",
+        "organizationIntact": "Existing structure maintained",
+        "noDuplicates": "No duplicate entries created"
+      }
+    },
+    {
+      "name": "Save updated index",
+      "description": "Write the updated index back to file",
+      "action": "Write to {indexPath}",
+      "backupStrategy": "Create backup before overwriting"
+    }
+  ],
+  "errorHandling": {
+    "indexNotFound": {
+      "message": "No deliveries index file found.",
+      "action": "Create basic index file with this delivery as first entry"
+    },
+    "indexIsDynamic": {
+      "message": "Index appears to be dynamically generated.",
+      "action": "Skip update and note for user that index is automatic"
+    },
+    "updateFailed": {
+      "message": "Failed to update index file.",
+      "action": "Restore from backup and retry with different approach"
+    },
+    "formatMismatch": {
+      "message": "Cannot determine index format conventions.",
+      "action": "Ask user for guidance on correct format"
+    }
+  },
+  "examples": {
+    "usage": "Use after delivery-readme to complete the wrapup process",
+    "input": {
+      "deliveryPath": "outside-design/docs/deliveries/2026-01-16-1000-timeline-playback-controls/",
+      "deliveryInfo": {
+        "date": "2026-01-16",
+        "title": "Timeline Playback Controls",
+        "description": "Implemented core playback controls and game loop integration"
+      }
+    },
+    "output": {
+      "updated": true,
+      "indexPath": "outside-design/docs/deliveries/README.md",
+      "addedSection": "Completed Deliveries",
+      "entry": "- **2026-01-16** - [Timeline Playback Controls](./2026-01-16-1000-timeline-playback-controls/) - Implemented core playback controls and game loop integration"
+    }
+  },
+  "integration": {
+    "previousSkill": "delivery-readme",
+    "nextSkill": null
+  },
+  "indexFormats": {
+    "simple": "- [{Title}]({path}) - {description}",
+    "dated": "- **{date}** - [{Title}]({path}) - {description}",
+    "categorized": "### {Category}\n- [{Title}]({path}) - {description}",
+    "table": "| Date | Title | Description |\n|------|------|-------------|\n| {date} | [{Title}]({path}) | {description} |"
+  },
+  "notes": [
+    "If index is dynamic, skip this step",
+    "Maintain existing index format and organization",
+    "Create backup before making changes",
+    "Validate all links after updating",
+    "Consider moving entries from 'In Progress' if they exist"
+  ]
+}

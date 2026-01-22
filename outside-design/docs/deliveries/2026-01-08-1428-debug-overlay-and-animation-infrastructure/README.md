@@ -3,8 +3,8 @@ Title: Debug Overlay and Animation Infrastructure
 DeliveryDate: 2026-01-08
 Summary: Added debug overlay with FPS counter, step counter, and version tracking. Implemented sprite index system in renderer and AnimationController for smooth animations. Infrastructure ready for animation system.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Debug Overlay and Animation Infrastructure

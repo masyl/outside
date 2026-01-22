@@ -1,6 +1,6 @@
 import { Sprite, Container, Texture, Renderer, Rectangle } from 'pixi.js';
 import { WorldState, GameObject, Direction } from '@outside/core';
-import { COORDINATE_SYSTEM, CoordinateConverter } from './coordinateSystem';
+import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
 
 const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
 
@@ -70,9 +70,9 @@ export function createBotSprite(texture: Texture): Sprite {
 
   const sprite = new Sprite(tileTexture);
 
-  // Scale 16x16 sprite to the needed ratio
-  sprite.width = DISPLAY_TILE_SIZE;
-  sprite.height = DISPLAY_TILE_SIZE;
+  // Set base scale to make 16x16 sprite match display tile size
+  const baseScale = DISPLAY_TILE_SIZE / 16;
+  sprite.scale.set(baseScale, baseScale);
 
   // Anchor point is top-left by default, which matches our grid system
 
@@ -112,12 +112,17 @@ export function createObjectsLayerWithIndex(
       }
 
       // Position sprite at object's grid position
-      const displayPos = CoordinateConverter.gridToDisplay({
-        x: object.position.x,
-        y: object.position.y,
-      });
+      const zoomScale = getZoomScale();
+      const displayPos = CoordinateConverter.gridToDisplay(
+        {
+          x: object.position.x,
+          y: object.position.y,
+        },
+        zoomScale
+      );
       sprite.x = displayPos.x;
       sprite.y = displayPos.y;
+      sprite.scale.set(zoomScale, zoomScale);
 
       container.addChild(sprite);
       spriteIndex.set(object.id, sprite);
@@ -171,12 +176,17 @@ export function updateObjectsLayerWithIndex(
         }
 
         // Only set initial position when creating - AnimationController handles updates
-        const displayPos = CoordinateConverter.gridToDisplay({
-          x: object.position.x,
-          y: object.position.y,
-        });
+        const zoomScale = getZoomScale();
+        const displayPos = CoordinateConverter.gridToDisplay(
+          {
+            x: object.position.x,
+            y: object.position.y,
+          },
+          zoomScale
+        );
         sprite.x = displayPos.x;
         sprite.y = displayPos.y;
+        sprite.scale.set(zoomScale, zoomScale);
 
         container.addChild(sprite);
         spriteIndex.set(object.id, sprite);
@@ -189,9 +199,10 @@ export function updateObjectsLayerWithIndex(
             // Replace placeholder with textured sprite
             const newSprite = createBotSprite(botTexture);
 
-            // Preserve position
+            // Preserve position and scaling
             newSprite.x = sprite.x;
             newSprite.y = sprite.y;
+            newSprite.scale.copyFrom(sprite.scale);
 
             // Swap sprites
             container.removeChild(sprite);
@@ -296,16 +307,20 @@ export function updateBotSpriteFrame(
   // To flip around the right edge of a 16px texture: pivot.x = 16
   sprite.anchor.set(0, 0);
 
+  // Get current zoom scale to preserve it when updating sprite frames
+  const zoomScale = getZoomScale();
+  const baseScale = (DISPLAY_TILE_SIZE / 16) * zoomScale;
+
   if (flipX) {
-    sprite.scale.x = -1 * (DISPLAY_TILE_SIZE / 16);
+    sprite.scale.x = -1 * baseScale;
     // Use pivot to flip around the right edge (16px = texture width)
     sprite.pivot.x = 16;
   } else {
-    sprite.scale.x = 1 * (DISPLAY_TILE_SIZE / 16);
+    sprite.scale.x = 1 * baseScale;
     sprite.pivot.x = 0;
   }
 
-  sprite.scale.y = DISPLAY_TILE_SIZE / 16;
+  sprite.scale.y = baseScale;
   sprite.pivot.y = 0;
 }
 

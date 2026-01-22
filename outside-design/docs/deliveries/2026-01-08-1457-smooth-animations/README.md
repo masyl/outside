@@ -3,8 +3,8 @@ Title: Smooth Animations
 DeliveryDate: 2026-01-08
 Summary: Implemented smooth bot movement animations with pixel-based interpolation. Animation system operates independently from the 500ms command loop, using manual requestAnimationFrame with cubic easing. Renderer updated to preserve sprites during state updates.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Smooth Animations

@@ -16,18 +16,17 @@ Whenever a bot is spawned, the system would pick a skin at random from the ones 
 
 ## Inclusions
 
-* Create a set of 8 character skins by swapping the sprite sheets
-* The initial character are the angler, blacksmith, chef, farmer, florist, inn keeper, merchant, and miner.
-* We will use the pre made sprite sheets from Hana Karaka (Source: https://otterisk.itch.io/hana-caraka-base-character)
-* Once 8 bots are already on the map, no more can be added. An warning is shown in the console if there is an attempt to add more. This default limit is saved in a configuration file.
+- Create a set of 8 character skins by swapping the sprite sheets
+- The initial character are the angler, blacksmith, chef, farmer, florist, inn keeper, merchant, and miner.
+- We will use the pre made sprite sheets from Hana Karaka (Source: https://otterisk.itch.io/hana-caraka-base-character)
+- Once 8 bots are already on the map, no more can be added. An warning is shown in the console if there is an attempt to add more. This default limit is saved in a configuration file.
 
 ## Exclusions
 
-* This aims to be a quick pitch. No additionnal game mechanic, controls or systems change is wanted.
+- This aims to be a quick pitch. No additionnal game mechanic, controls or systems change is wanted.
 
 ## Implementation details
 
-* Add the skin attributes on the bot entity.
-* While each skin has an index number, it should also have a text id (for debugging and persistance) and a user facing label for UIs.
-* The skin map should be stored as data and not hardcoded.
-
+- Add the skin attributes on the bot entity.
+- While each skin has an index number, it should also have a text id (for debugging and persistance) and a user facing label for UIs.
+- The skin map should be stored as data and not hardcoded.

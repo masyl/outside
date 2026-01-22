@@ -228,7 +228,7 @@ describe('EventLogger Timeline Features', () => {
     it('should handle complex action types in timeline context', () => {
       // Test various action types that might appear in timeline
       eventLogger.logEvent(actions.createBot('bot-1'), initialState, 0);
-      eventLogger.logEvent(actions.setWorldSize(25, 15), initialState, 1);
+      eventLogger.logEvent(actions.setWorldSize(12, 7), initialState, 1);
       eventLogger.logEvent(actions.setSeed(123), initialState, 2);
 
       const allEvents = eventLogger.getEventsUpTo(10);

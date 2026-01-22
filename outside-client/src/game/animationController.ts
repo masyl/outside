@@ -2,7 +2,7 @@ import { WorldState, GameObject, Position, Direction } from '@outside/core';
 import { Store } from '../store/store';
 import { GameRenderer } from '../renderer/renderer';
 import { animateObjectMovement } from './animations';
-import { COORDINATE_SYSTEM, CoordinateConverter } from '../renderer/coordinateSystem';
+import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from '../renderer/coordinateSystem';
 
 const { DISPLAY_TILE_SIZE, VERTICAL_OFFSET } = COORDINATE_SYSTEM;
 
@@ -70,16 +70,23 @@ export class AnimationController {
       const toPos = currentObj.position;
 
       // If bot was previously unpositioned, skip animation (appears instantly at new position)
-      if (!fromPos || !toPos) {
-        // Bot was just positioned - no animation needed, just update sprite position directly
-        if (!fromPos && toPos) {
-          const sprite = this.renderer.getSpriteForObject(id);
-          if (sprite) {
-            const displayPos = CoordinateConverter.gridToDisplay({ x: toPos.x, y: toPos.y });
-            sprite.x = displayPos.x;
-            sprite.y = displayPos.y + VERTICAL_OFFSET;
-          }
+      if (!fromPos && toPos) {
+        const sprite = this.renderer.getSpriteForObject(id);
+        if (sprite) {
+          const zoomScale = getZoomScale();
+          const displayPos = CoordinateConverter.gridToDisplay(
+            { x: toPos.x, y: toPos.y },
+            zoomScale
+          );
+          sprite.x = displayPos.x;
+          sprite.y = displayPos.y + VERTICAL_OFFSET;
+          sprite.scale.set(zoomScale, zoomScale);
         }
+        return;
+      }
+
+      // Need both positions to animate movement
+      if (!fromPos || !toPos) {
         return;
       }
 
@@ -159,8 +166,9 @@ export class AnimationController {
 
     // Convert current pixel position to grid coordinates for the animation function
     // The animation function expects grid coordinates and converts to pixels internally
-    const fromGridX = currentPixelX / DISPLAY_TILE_SIZE;
-    const fromGridY = (currentPixelY - VERTICAL_OFFSET) / DISPLAY_TILE_SIZE;
+    const zoomScale = getZoomScale();
+    const fromGridX = currentPixelX / (DISPLAY_TILE_SIZE * zoomScale);
+    const fromGridY = (currentPixelY - VERTICAL_OFFSET) / (DISPLAY_TILE_SIZE * zoomScale);
 
     // Animate from current position (in grid coords) to target position (in grid coords)
     // The animation function will handle pixel interpolation, allowing smooth sub-grid movement
@@ -179,7 +187,7 @@ export class AnimationController {
       },
       () => {
         // Animation complete - ensure sprite is exactly at target grid position
-        const displayPos = CoordinateConverter.gridToDisplay({ x: toPos.x, y: toPos.y });
+        const displayPos = CoordinateConverter.gridToDisplay({ x: toPos.x, y: toPos.y }, zoomScale);
         sprite.x = displayPos.x;
         sprite.y = displayPos.y + VERTICAL_OFFSET;
         this.activeAnimations.delete(id);

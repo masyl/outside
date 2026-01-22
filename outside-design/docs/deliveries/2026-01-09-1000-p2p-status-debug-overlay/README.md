@@ -3,8 +3,8 @@ Title: P2P Status in Debug Overlay
 DeliveryDate: 2026-01-09
 Summary: Implemented a real-time P2P connection status indicator in the debug overlay. Exposed WebRTC connection state changes from the low-level peer connection up to the UI through a callback chain. Works for both Host and Client modes, providing immediate visibility into connection health (connected, disconnected, failed).
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # P2P Status in Debug Overlay

@@ -3,8 +3,8 @@ Title: Player Input and Game Loop Optimization
 DeliveryDate: 2026-01-08
 Summary: Implemented complete player input system with bot selection and keyboard controls. Added SelectionManager and KeyboardHandler for Tab/Shift+Tab cycling and arrow key movement. Renderer updated to show selected bot in green, others in white. Game loop optimized from 500ms to 125ms for 4x faster command processing. Animation duration synchronized with new game loop speed.
 Status: DONE
-Branch: 
-Commit: 
+Branch:
+Commit:
 ---
 
 # Player Input and Game Loop Optimization

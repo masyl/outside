@@ -282,8 +282,11 @@ describe('Reducer Logic', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState.grid[5][10]).not.toBeNull();
-      const placedObject = newState.grid[5][10];
+      // Convert world coordinates (10, 5) to grid indices
+      const gridX = 10 + 30; // world.horizontalLimit (default 30)
+      const gridY = 5 + 30; // world.verticalLimit (default 30)
+      expect(newState.grid[gridY][gridX]).not.toBeNull();
+      const placedObject = newState.grid[gridY][gridX];
       expect(placedObject?.id).toBe('bot-1');
     });
 

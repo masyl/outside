@@ -1,4 +1,12 @@
-import { WorldState, Grid, GameObject, Position, GroundLayer, TerrainObject, TerrainType } from './types';
+import {
+  WorldState,
+  Grid,
+  GameObject,
+  Position,
+  GroundLayer,
+  TerrainObject,
+  TerrainType,
+} from './types';
 
 /**
  * Creates an empty ground layer
@@ -11,24 +19,41 @@ export function createGroundLayer(): GroundLayer {
 }
 
 /**
- * Creates an empty world state with a 20x10 grid
+ * Creates an empty world state with center-based limits
  */
-export function createWorldState(seed?: number): WorldState {
-  const width = 20;
-  const height = 10;
-  
-  const grid: Grid = Array(height)
+export function createWorldState(seed?: number, limit: number = 30): WorldState {
+  const horizontalLimit = limit;
+  const verticalLimit = limit;
+
+  // Grid size: (limit * 2 + 1) to account for negative coordinates
+  const gridSize = limit * 2 + 1;
+
+  const grid: Grid = Array(gridSize)
     .fill(null)
-    .map(() => Array(width).fill(null));
-  
+    .map(() => Array(gridSize).fill(null));
+
   return {
     grid,
     objects: new Map<string, GameObject>(),
     groundLayer: createGroundLayer(),
-    width,
-    height,
+    horizontalLimit,
+    verticalLimit,
     seed: seed ?? Math.floor(Math.random() * 2147483647), // Generate random seed if not provided
   };
+}
+
+/**
+ * Convert world coordinate to grid array index
+ */
+export function worldToGridIndex(worldCoord: number, limit: number): number {
+  return worldCoord + limit;
+}
+
+/**
+ * Convert grid array index to world coordinate
+ */
+export function gridIndexToWorld(index: number, limit: number): number {
+  return index - limit;
 }
 
 /**
@@ -36,21 +61,6 @@ export function createWorldState(seed?: number): WorldState {
  */
 function getPositionKey(position: Position): string {
   return `${position.x},${position.y}`;
-}
-
-/**
- * Check if a terrain object covers a given position
- */
-export function doesTerrainCoverPosition(
-  terrain: TerrainObject,
-  position: Position
-): boolean {
-  return (
-    position.x >= terrain.position.x &&
-    position.x < terrain.position.x + terrain.width &&
-    position.y >= terrain.position.y &&
-    position.y < terrain.position.y + terrain.height
-  );
 }
 
 /**
@@ -65,6 +75,30 @@ export function getTerrainObjectsAtPosition(
 }
 
 /**
+ * Check if a terrain object covers a given position
+ */
+export function doesTerrainCoverPosition(terrain: TerrainObject, position: Position): boolean {
+  return (
+    position.x >= terrain.position.x &&
+    position.x < terrain.position.x + terrain.width &&
+    position.y >= terrain.position.y &&
+    position.y < terrain.position.y + terrain.height
+  );
+}
+
+/**
+ * Gets the object at a specific position
+ */
+export function getObjectAtPosition(world: WorldState, position: Position): GameObject | null {
+  if (!isValidPosition(world, position)) {
+    return null;
+  }
+  const gridX = worldToGridIndex(position.x, world.horizontalLimit);
+  const gridY = worldToGridIndex(position.y, world.verticalLimit);
+  return world.grid[gridY][gridX];
+}
+
+/**
  * Get the top-most (most recently created) terrain object at a position
  */
 export function getTopMostTerrainAtPosition(
@@ -75,7 +109,7 @@ export function getTopMostTerrainAtPosition(
   if (terrainObjects.length === 0) {
     return null;
   }
-  
+
   // Sort by createdAt descending (most recent first)
   const sorted = [...terrainObjects].sort((a, b) => b.createdAt - a.createdAt);
   return sorted[0];
@@ -91,33 +125,27 @@ export function isTerrainTypeWalkable(terrainType: TerrainType): boolean {
 /**
  * Check if a position is walkable (has terrain AND top-most terrain is walkable)
  */
-export function isWalkable(
-  world: WorldState,
-  position: Position
-): boolean {
+export function isWalkable(world: WorldState, position: Position): boolean {
   if (!isValidPosition(world, position)) {
     return false;
   }
-  
+
   const topMostTerrain = getTopMostTerrainAtPosition(world.groundLayer, position);
   if (!topMostTerrain) {
     // No terrain = not walkable
     return false;
   }
-  
+
   return isTerrainTypeWalkable(topMostTerrain.type);
 }
 
 /**
  * Add a terrain object to the ground layer and update position index
  */
-export function addTerrainObject(
-  groundLayer: GroundLayer,
-  terrain: TerrainObject
-): void {
+export function addTerrainObject(groundLayer: GroundLayer, terrain: TerrainObject): void {
   // Add to terrain objects map
   groundLayer.terrainObjects.set(terrain.id, terrain);
-  
+
   // Update position index - add this terrain to all positions it covers
   for (let y = terrain.position.y; y < terrain.position.y + terrain.height; y++) {
     for (let x = terrain.position.x; x < terrain.position.x + terrain.width; x++) {
@@ -132,25 +160,22 @@ export function addTerrainObject(
 /**
  * Remove a terrain object from the ground layer and update position index
  */
-export function removeTerrainObject(
-  groundLayer: GroundLayer,
-  terrainId: string
-): void {
+export function removeTerrainObject(groundLayer: GroundLayer, terrainId: string): void {
   const terrain = groundLayer.terrainObjects.get(terrainId);
   if (!terrain) {
     return;
   }
-  
+
   // Remove from terrain objects map
   groundLayer.terrainObjects.delete(terrainId);
-  
+
   // Update position index - remove this terrain from all positions it covered
   for (let y = terrain.position.y; y < terrain.position.y + terrain.height; y++) {
     for (let x = terrain.position.x; x < terrain.position.x + terrain.width; x++) {
       const positionKey = `${x},${y}`;
       const existing = groundLayer.terrainObjectsByPosition.get(positionKey);
       if (existing) {
-        const filtered = existing.filter(t => t.id !== terrainId);
+        const filtered = existing.filter((t) => t.id !== terrainId);
         if (filtered.length === 0) {
           groundLayer.terrainObjectsByPosition.delete(positionKey);
         } else {
@@ -166,10 +191,10 @@ export function removeTerrainObject(
  */
 export function isValidPosition(world: WorldState, position: Position): boolean {
   return (
-    position.x >= 0 &&
-    position.x < world.width &&
-    position.y >= 0 &&
-    position.y < world.height
+    position.x >= -world.horizontalLimit &&
+    position.x <= world.horizontalLimit &&
+    position.y >= -world.verticalLimit &&
+    position.y <= world.verticalLimit
   );
 }
 
@@ -180,20 +205,9 @@ export function isPositionOccupied(world: WorldState, position: Position): boole
   if (!isValidPosition(world, position)) {
     return false;
   }
-  return world.grid[position.y][position.x] !== null;
-}
-
-/**
- * Gets the object at a specific position
- */
-export function getObjectAtPosition(
-  world: WorldState,
-  position: Position
-): GameObject | null {
-  if (!isValidPosition(world, position)) {
-    return null;
-  }
-  return world.grid[position.y][position.x];
+  const gridX = worldToGridIndex(position.x, world.horizontalLimit);
+  const gridY = worldToGridIndex(position.y, world.verticalLimit);
+  return world.grid[gridY][gridX] !== null;
 }
 
 /**
@@ -202,11 +216,15 @@ export function getObjectAtPosition(
 export function placeObjectInGrid(
   grid: Grid,
   object: GameObject,
-  position: Position
+  position: Position,
+  limit: number
 ): void {
-  if (position.y >= 0 && position.y < grid.length) {
-    if (position.x >= 0 && position.x < grid[position.y].length) {
-      grid[position.y][position.x] = object;
+  const gridX = worldToGridIndex(position.x, limit);
+  const gridY = worldToGridIndex(position.y, limit);
+
+  if (gridY >= 0 && gridY < grid.length) {
+    if (gridX >= 0 && gridX < grid[gridY].length) {
+      grid[gridY][gridX] = object;
     }
   }
 }
@@ -214,10 +232,13 @@ export function placeObjectInGrid(
 /**
  * Removes an object from a position in the grid
  */
-export function removeObjectFromGrid(grid: Grid, position: Position): void {
-  if (position.y >= 0 && position.y < grid.length) {
-    if (position.x >= 0 && position.x < grid[position.y].length) {
-      grid[position.y][position.x] = null;
+export function removeObjectFromGrid(grid: Grid, position: Position, limit: number): void {
+  const gridX = worldToGridIndex(position.x, limit);
+  const gridY = worldToGridIndex(position.y, limit);
+
+  if (gridY >= 0 && gridY < grid.length) {
+    if (gridX >= 0 && gridX < grid[gridY].length) {
+      grid[gridY][gridX] = null;
     }
   }
 }

@@ -18,7 +18,7 @@ export type Action =
       type: 'MOVE_OBJECT';
       payload: { id: string; direction: Direction; distance: number; originalValue?: Position };
     }
-  | { type: 'SET_WORLD_SIZE'; payload: { width: number; height: number } }
+  | { type: 'SET_WORLD_SIZE'; payload: { horizontalLimit: number; verticalLimit: number } }
   | { type: 'SET_SEED'; payload: { seed: number } }
   | { type: 'RESET_WORLD' }
   | { type: 'SET_WORLD_STATE'; payload: { worldState: WorldState | null } };
@@ -56,9 +56,9 @@ export const actions = {
     payload: { id, direction, distance, originalValue },
   }),
 
-  setWorldSize: (width: number, height: number): Action => ({
+  setWorldSize: (horizontalLimit: number, verticalLimit: number): Action => ({
     type: 'SET_WORLD_SIZE',
-    payload: { width, height },
+    payload: { horizontalLimit, verticalLimit },
   }),
 
   setSeed: (seed: number): Action => ({

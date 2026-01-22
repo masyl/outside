@@ -3,6 +3,7 @@
 Successfully implemented smooth bot movement animations with pixel-based interpolation. The animation system operates independently from the 500ms command loop, allowing sprites to move smoothly between grid positions at browser FPS. The implementation required replacing motion.dev's `animate()` function (which wasn't calling progress callbacks) with a manual `requestAnimationFrame` loop using cubic ease-in-out easing.
 
 **Key Achievements:**
+
 - Smooth pixel-based sprite animations that interpolate between grid positions
 - AnimationController that detects position changes and triggers animations
 - Renderer updated to preserve sprites during state updates (no position resets)
@@ -10,6 +11,7 @@ Successfully implemented smooth bot movement animations with pixel-based interpo
 - Animation interruption handling (cancels previous animation when new move starts)
 
 **Notable Challenges & Solutions:**
+
 - **Issue**: motion.dev's `animate()` function wasn't calling the progress callback
 - **Solution**: Implemented manual `requestAnimationFrame` loop with `performance.now()` timing and cubic ease-in-out easing
 - **Issue**: Renderer was recreating sprites and resetting positions on each update
@@ -47,10 +49,12 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
 ### 1. Extend Renderer to Track Sprites by ID
 
 **Files updated:**
+
 - `outside-client/src/renderer/objects.ts`
 - `outside-client/src/renderer/renderer.ts`
 
 **Changes implemented:**
+
 - Created `SpriteIndex` type: `Map<string, Sprite>`
 - Added `createObjectsLayerWithIndex()` function that returns `{ container, spriteIndex }`
 - Added `updateObjectsLayerWithIndex()` that preserves existing sprites and only creates/removes as needed
@@ -64,9 +68,11 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
 ### 2. Animation Controller
 
 **File created:**
+
 - `outside-client/src/game/animationController.ts`
 
 **Implementation:**
+
 - Subscribes to store state changes
 - Maintains `previousState: WorldState | null` for diffing
 - Maintains `activeAnimations: Map<string, CancelAnimation>` to track and cancel animations
@@ -77,6 +83,7 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
   - Starts new animation from sprite's current pixel position to target grid position
 
 **Algorithm (on state change):**
+
 - If `previousState` is `null`, set it and return (first state)
 - For each bot `id` in `currentState.objects`:
   - If it exists in `previousState.objects` and positions differ, trigger animation
@@ -85,9 +92,11 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
 ### 3. Animation Implementation
 
 **File updated:**
+
 - `outside-client/src/game/animations.ts`
 
 **Implementation:**
+
 - **Replaced motion.dev's `animate()`** with manual `requestAnimationFrame` loop
 - Uses `performance.now()` for precise timing
 - Implements cubic ease-in-out easing manually: `easeInOutCubic(t)`
@@ -96,6 +105,7 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
 - Calls `onComplete` when animation finishes
 
 **Why manual implementation?**
+
 - motion.dev's `animate()` function wasn't calling the progress callback
 - Manual `requestAnimationFrame` gives full control and works reliably
 - Cubic easing implemented directly for smooth movement
@@ -103,9 +113,11 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
 ### 4. Integrate AnimationController into App Bootstrap
 
 **File updated:**
+
 - `outside-client/src/main.ts`
 
 **Changes:**
+
 - Created `AnimationController` after `GameRenderer` and before `GameLoop`
 - Order of initialization:
   1. Create `Store`
@@ -119,11 +131,13 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
 ### 5. Keep Game Loop and Animation Loop Separate
 
 **Files involved:**
+
 - `outside-client/src/game/loop.ts`
 - `outside-client/src/game/animations.ts`
 - `outside-client/src/game/animationController.ts`
 
 **Implementation:**
+
 - `GameLoop` continues to run command/state loop every 500ms
 - `GameLoop` uses `requestAnimationFrame` for engine-level per-frame work (minimal)
 - `AnimationController` operates independently at browser FPS
@@ -133,6 +147,7 @@ Add **smooth, eased animations** for bot movement, while keeping the **500ms com
 ### 6. Debug Logging
 
 **Added during implementation:**
+
 - Extensive console logging in AnimationController to trace animation flow
 - Logs position changes, animation starts, frame updates, and completion
 - Helps verify animations are working correctly

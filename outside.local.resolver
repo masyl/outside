@@ -2,5 +2,5 @@
 # Run: sudo cp outside.local.resolver /etc/resolver/outside.local
 
 nameserver 127.0.0.1
-port 53
+port 5333
 timeout 5

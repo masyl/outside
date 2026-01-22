@@ -27,6 +27,7 @@ Analysis of similar games and their design approaches.
 ## Next Steps
 
 Based on our research, we will:
+
 - [ ] Define user personas
 - [ ] Create user journey maps
 - [ ] Identify key pain points
@@ -34,4 +35,3 @@ Based on our research, we will:
 ---
 
 [← Back to Design Process](/design-process/)
-

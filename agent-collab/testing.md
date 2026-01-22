@@ -8,14 +8,20 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 - Create an individual plan for each bug fix
 - After doing a fix, update this file with a prefix "TO TEST:" before passing it to me for retesting.
 
-## Current state
+## Current Sessions
+
+### Bugs
+
+- Bug: The vector line for the cardinal orientation is not resizing according to zoom levels
+- Bug: After a zoom level change and a full game reload, the bots did not resize until they where moved. Where was corrupted state persisted ?
+
 
 ### Needed improvement
 
 - A default ground should cover the entire level
 - The worlds center should be 0,0 and the dimensions/size be in both positive and negative directions.
 - The bots should be positionned according to sub-tiles for more precision.
-- 
+-
 
 ### Problems of current build
 
@@ -58,4 +64,4 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 
 - The animation system is not working well enough to be kept as is. Bots become visually offsync and the whole approach is not "reversible" when time travelling.
 
-- 
+-

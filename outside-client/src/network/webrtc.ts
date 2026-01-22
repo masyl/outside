@@ -10,9 +10,7 @@ export class WebRTCPeer {
 
   constructor(config?: RTCConfiguration) {
     const defaultConfig: RTCConfiguration = {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-      ],
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     };
 
     this.pc = new RTCPeerConnection(config || defaultConfig);
@@ -28,10 +26,14 @@ export class WebRTCPeer {
     // Handle connection state changes
     this.pc.onconnectionstatechange = () => {
       // Only log significant state changes (not every intermediate state)
-      if (this.pc.connectionState === 'connected' || this.pc.connectionState === 'failed' || this.pc.connectionState === 'disconnected') {
+      if (
+        this.pc.connectionState === 'connected' ||
+        this.pc.connectionState === 'failed' ||
+        this.pc.connectionState === 'disconnected'
+      ) {
         // console.log(`[WebRTC] Connection state: ${this.pc.connectionState}`);
       }
-      
+
       if (this.onConnectionStateChange) {
         this.onConnectionStateChange(this.pc.connectionState);
       }

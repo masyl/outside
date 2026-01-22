@@ -297,7 +297,6 @@ outside-client/src/
 - [x] Test event queue isolation
 - [x] Update pitches index
 
-
 ## Success Metrics
 
 - Game Loop pauses and resumes correctly

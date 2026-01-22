@@ -1,4 +1,3 @@
-
 # State Machine Selection - Research Q&A
 
 AI: To recommend state machine libraries that support rewind, replay, and forking, I need a few details:
@@ -61,7 +60,7 @@ Others could have the state offloaded elsewhere.
 
 #### Q: Real-time gameplay, or can replay be slower?
 
-Both. It could be synced in real-time, and played side-by-side or instead rewound by the user like a video timeline to pick a new resume location. 
+Both. It could be synced in real-time, and played side-by-side or instead rewound by the user like a video timeline to pick a new resume location.
 
 #### Q: Memory limits (especially for long replays)?
 
@@ -272,12 +271,8 @@ If you want more built-in features:
 - Compare performance with your expected state size
 - Test forking scenarios
 
-
 ---
 
 ## Follow-up questions
 
 Q: You list this as a con: "Not a pure state machine (reactive)". What would disqualify it as a pure state machine and Why is it a down side?
-
-
-

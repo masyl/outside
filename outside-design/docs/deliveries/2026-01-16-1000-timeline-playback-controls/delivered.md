@@ -7,18 +7,22 @@ This delivery implements the core logic for controlling the game's timeline play
 ## Delivered Features
 
 ### 1. Playback State Management
+
 - **States**: Implemented `PLAYING`, `PAUSED`, and `TRAVELING` states.
 - **Synchronization**: State changes are propagated instantly between `GameLoop`, `HostMode`, and `TimelineManager`.
 
 ### 2. Game Loop Integration
+
 - **Pause/Resume**: Capabilities added to stop the game update loop while keeping the application alive.
 - **Step-by-Step**: New `step()` command that executes a single timeline event and updates the renderer, useful for debugging and level design.
 - **Queue Isolation**: The command queue is automatically cleared and ignored when entering `TRAVELING` mode, preventing "live" commands from corrupting historical state viewing.
 
 ### 3. Autonomy Control
+
 - **Smart Bots**: Bot autonomy (random movement) is now state-aware. It automatically pauses when the game is paused or traversing the timeline, ensuring that bots don't "ghost walk" or generate new events while the user is inspecting the past.
 
 ### 4. Test Infrastructure Improvements
+
 - **Stability**: Fixed `EPERM` sandbox issues in the test runner by configuring Vitest for better process isolation (`forks` pool).
 - **Cleanliness**: Suppressed console noise in test reports for a clearer "green" signal.
 - **Fixes**: Resolved a build failure in `outside-storybook` and dead links in documentation.
@@ -36,6 +40,7 @@ This delivery implements the core logic for controlling the game's timeline play
 ## Next Steps
 
 With the engine now capable of time travel and pausing:
+
 1.  **Timeline UI Components**: Build the actual visual slider/bar for users to interact with this logic.
 2.  **Keystroke Integration**: Map the `space` (pause) and arrow keys (step) to these new commands (partially implemented in this delivery for testing convenience).
 
