@@ -1,9 +1,10 @@
 ---
-title: Negative Coordinate Cursor Tracking
-date: 2026-01-22
-description: Allow the visual debug cursor to render in negative world coordinates.
-tags: [debug, cursor-tracking, delivery/2026-01-22-1000-negative-cursor-tracking]
-status: Done
+Title: Negative Coordinate Cursor Tracking
+DeliveryDate: 2026-01-22
+Summary: Allow the visual debug cursor to render in negative world coordinates by using an explicit unset state instead of a negative guard.
+Status: DONE
+Branch: improved-level-boundaries
+Commit: 46eea78
 ---
 
 # Negative Coordinate Cursor Tracking
