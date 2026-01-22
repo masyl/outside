@@ -265,8 +265,8 @@ export class VisualDebugLayer extends Container {
           dy /= length;
         }
 
-        // Line length = half tile size (radius)
-        const length = DISPLAY_TILE_SIZE / 2;
+        // Line length = half tile size (radius), scaled by zoom
+        const length = (DISPLAY_TILE_SIZE / 2) * zoomScale;
 
         this.graphics.setStrokeStyle({ width: 2, color: COLORS.BOT_POSITION, alpha: 1 });
         this.graphics.beginPath();
@@ -274,8 +274,8 @@ export class VisualDebugLayer extends Container {
         this.graphics.lineTo(centerDisplay.x + dx * length, centerDisplay.y + dy * length);
         this.graphics.stroke();
 
-        // Draw small arrowhead
-        const arrowSize = 6;
+        // Draw small arrowhead, scaled by zoom
+        const arrowSize = 6 * zoomScale;
         const endX = centerDisplay.x + dx * length;
         const endY = centerDisplay.y + dy * length;
 
@@ -297,7 +297,7 @@ export class VisualDebugLayer extends Container {
       }
 
       // 3. Render coordinate label for bot
-      const labelPos = CoordinateConverter.gridToDisplay({ x: bot.x, y: bot.y });
+      const labelPos = CoordinateConverter.gridToDisplay({ x: bot.x, y: bot.y }, zoomScale);
       // Center horizontally on the tile
       labelPos.x += DISPLAY_TILE_SIZE / 2;
       // Position below the tile
