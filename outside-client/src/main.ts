@@ -100,8 +100,10 @@ async function init(options?: {
   // Create store early so it can be passed to React
   const store = options?.store || new Store();
 
-  // Declare timelineManager at init level so it's available for GameRoot
-  let timelineManager: TimelineManager | null = null;
+  // Create TimelineManager early so it's available for GameRoot
+  // This fixes the issue where Timeline UI never appears because timelineManager was null
+  const eventLogger = store.getEventLogger();
+  const timelineManager = new TimelineManager(store, eventLogger);
 
   // Game services that will be initialized when renderer is ready
   let renderer: GameRenderer | null = null;
@@ -120,8 +122,8 @@ async function init(options?: {
 
   // Note: hostMode will be set later, so we use a variable that gets updated
   let hostModeRef: HostMode | null = null;
-  // Note: timelineManager will be set later, so we use a variable that gets updated
-  let timelineManagerRef: TimelineManager | null = null;
+  // Store reference for resetLevel function
+  let timelineManagerRef: TimelineManager = timelineManager;
 
   // Callback when Pixi App is ready via React
   const onAppReady = async (app: PixiApplication) => {
@@ -477,9 +479,8 @@ async function init(options?: {
           debugOverlay.setStepCount(restoredStep);
         }
 
-        // Initialize Timeline Manager for time travel support
-        timelineManager = new TimelineManager(store, eventLogger);
-        timelineManagerRef = timelineManager; // Store reference for resetLevel
+        // Timeline Manager is already created early in init(), so just update reference
+        timelineManagerRef = timelineManager;
 
         // Subscribe to timeline state changes to update debug overlay
         timelineManager.onStateChange((state) => {
