@@ -105,14 +105,16 @@ export const Timeline: React.FC<TimelineProps> = ({ timelineManager }) => {
     }
   }, [isDragging]);
 
-  if (!isVisible || !app) return null;
-
+  // Calculate layout (always call hooks before early return)
   const screenWidth = app.screen.width;
   const screenHeight = app.screen.height;
   const barWidth = screenWidth - CONFIG.sideOffset * 2;
   const totalHeight = CONFIG.barHeight + CONFIG.padding * 2;
   const x = CONFIG.sideOffset;
   const y = screenHeight - CONFIG.bottomOffset - totalHeight;
+
+  // Early return after all hooks called (prevents hooks order error)
+  if (!isVisible || !app) return null;
 
   // Draw function
   const draw = useCallback(
