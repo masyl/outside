@@ -53,10 +53,13 @@ export const GameRoot: React.FC<GameRootProps> = ({
       autoDensity={true}
     >
       <AppInitializer onAppReady={onAppReady} />
-      <LevelViewport store={store} onRendererReady={onRendererReady} />
+      <LevelViewport
+        store={store}
+        onRendererReady={onRendererReady}
+        timelineManager={timelineManager}
+      />
       <DebugPanel />
       <KeystrokeHelp />
-      {timelineManager && <Timeline timelineManager={timelineManager} />}
     </Application>
   );
 };

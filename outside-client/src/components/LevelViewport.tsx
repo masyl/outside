@@ -3,13 +3,19 @@ import { useApplication } from '@pixi/react';
 import { GameRenderer } from '../renderer/renderer';
 import { useWorldState } from '../hooks/useStore';
 import { Store } from '../store/store';
+import { TimelineManager } from '../timeline/manager';
 
 interface LevelViewportProps {
   store: Store;
   onRendererReady?: (renderer: GameRenderer) => void;
+  timelineManager?: TimelineManager | null;
 }
 
-export const LevelViewport: React.FC<LevelViewportProps> = ({ store, onRendererReady }) => {
+export const LevelViewport: React.FC<LevelViewportProps> = ({
+  store,
+  onRendererReady,
+  timelineManager,
+}) => {
   const { app } = useApplication();
   const rendererRef = useRef<GameRenderer | null>(null);
   const world = useWorldState(store);
@@ -36,12 +42,6 @@ export const LevelViewport: React.FC<LevelViewportProps> = ({ store, onRendererR
       // Initial update
       renderer.setWorld(store.getState());
     });
-
-    // We don't need to cleanup the renderer specifically as it just manages containers on the stage
-    // But ideally we should destroy the containers when unmounting
-    return () => {
-      // TODO: Add destroy method to GameRenderer
-    };
   }, [app, store, onRendererReady]);
 
   // Update renderer when world state changes
@@ -50,6 +50,14 @@ export const LevelViewport: React.FC<LevelViewportProps> = ({ store, onRendererR
       rendererRef.current.update(world);
     }
   }, [world]);
+
+  // Add Timeline to GameRenderer when available
+  useEffect(() => {
+    if (timelineManager && rendererRef.current) {
+      console.log('[LevelViewport] Adding Timeline to GameRenderer');
+      rendererRef.current.addTimelineToRenderer(timelineManager);
+    }
+  }, [timelineManager]);
 
   return null; // This component doesn't render React nodes, it manages the imperative renderer
 };
