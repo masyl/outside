@@ -51,6 +51,18 @@ export class GameRenderer {
     this.visualDebugLayer = new VisualDebugLayer();
     this.objectsContainer = new Container();
 
+    // Configure containers for event handling
+    // Grid and terrain containers don't need to be interactive
+    this.gridContainer.eventMode = 'none';
+    this.terrainContainer.eventMode = 'none';
+    // Debug overlay can be interactive for debugging
+    this.debugOverlayContainer.eventMode = 'auto';
+    // Visual debug layer can be interactive
+    this.visualDebugLayer.eventMode = 'auto';
+    // Objects container should NOT capture events to allow Timeline to receive them
+    this.objectsContainer.eventMode = 'none';
+    this.objectsContainer.interactiveChildren = false;
+
     // Add containers in render order: grid (bottom), terrain (middle), debug overlay, visual debug, objects (top)
     this.rootContainer.addChild(this.gridContainer);
     this.rootContainer.addChild(this.terrainContainer);
