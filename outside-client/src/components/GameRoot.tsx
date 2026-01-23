@@ -60,6 +60,7 @@ export const GameRoot: React.FC<GameRootProps> = ({
       />
       <DebugPanel />
       <KeystrokeHelp />
+      {timelineManager && <Timeline timelineManager={timelineManager} />}
     </Application>
   );
 };

@@ -30,37 +30,7 @@ const CONFIG = {
 };
 
 export const Timeline: React.FC<TimelineProps> = ({ timelineManager }) => {
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      location: 'Timeline.tsx:33',
-      message: 'Component render start',
-      data: { hasTimelineManager: !!timelineManager },
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      runId: 'run1',
-      hypothesisId: 'C',
-    }),
-  }).catch(() => {});
-  // #endregion
   const { app } = useApplication();
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      location: 'Timeline.tsx:34',
-      message: 'useApplication hook called',
-      data: { hasApp: !!app, appScreenWidth: app?.screen?.width },
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      runId: 'run1',
-      hypothesisId: 'A',
-    }),
-  }).catch(() => {});
-  // #endregion
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [totalSteps, setTotalSteps] = useState(0);
@@ -69,40 +39,10 @@ export const Timeline: React.FC<TimelineProps> = ({ timelineManager }) => {
 
   // Subscribe to TimelineManager updates
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'Timeline.tsx:41',
-        message: 'useEffect for timelineManager subscription',
-        data: { hasTimelineManager: !!timelineManager },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'run1',
-        hypothesisId: 'D',
-      }),
-    }).catch(() => {});
-    // #endregion
     // Initial state
     const updateState = () => {
       const state = timelineManager.getState();
       const playbackState = timelineManager.getPlaybackState();
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'Timeline.tsx:47',
-          message: 'updateState called',
-          data: { currentStep: state.currentStep, totalSteps: state.totalSteps, playbackState },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'run1',
-          hypothesisId: 'D',
-        }),
-      }).catch(() => {});
-      // #endregion
 
       setCurrentStep(state.currentStep);
       setTotalSteps(state.totalSteps);
@@ -166,21 +106,6 @@ export const Timeline: React.FC<TimelineProps> = ({ timelineManager }) => {
   }, [isDragging]);
 
   // Calculate layout (always call hooks before early return)
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      location: 'Timeline.tsx:109',
-      message: 'Before layout calculation',
-      data: { hasApp: !!app, isVisible, willReturnEarly: !isVisible || !app },
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      runId: 'run1',
-      hypothesisId: 'A',
-    }),
-  }).catch(() => {});
-  // #endregion
   const screenWidth = app?.screen?.width ?? 0;
   const screenHeight = app?.screen?.height ?? 0;
   const barWidth = screenWidth - CONFIG.sideOffset * 2;
@@ -189,21 +114,6 @@ export const Timeline: React.FC<TimelineProps> = ({ timelineManager }) => {
   const y = screenHeight - CONFIG.bottomOffset - totalHeight;
 
   // Draw function callback (defined before early return)
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      location: 'Timeline.tsx:117',
-      message: 'Before draw useCallback',
-      data: { barWidth, totalHeight, isHovered, totalSteps, currentStep },
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      runId: 'run1',
-      hypothesisId: 'B',
-    }),
-  }).catch(() => {});
-  // #endregion
   const draw = useCallback(
     (g: Graphics) => {
       g.clear();
@@ -267,39 +177,9 @@ export const Timeline: React.FC<TimelineProps> = ({ timelineManager }) => {
     },
     [barWidth, totalHeight, isHovered, totalSteps, currentStep]
   );
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      location: 'Timeline.tsx:181',
-      message: 'After all hooks, before early return',
-      data: { isVisible, hasApp: !!app, willReturnEarly: !isVisible || !app, hookCount: 13 },
-      timestamp: Date.now(),
-      sessionId: 'debug-session',
-      runId: 'run1',
-      hypothesisId: 'C',
-    }),
-  }).catch(() => {});
-  // #endregion
 
   // Early return AFTER all hooks are called
   if (!isVisible || !app) {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/c24317a8-1790-427d-a3bc-82c53839c989', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'Timeline.tsx:185',
-        message: 'Early return executed',
-        data: { isVisible, hasApp: !!app },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'run1',
-        hypothesisId: 'C',
-      }),
-    }).catch(() => {});
-    // #endregion
     return null;
   }
 
