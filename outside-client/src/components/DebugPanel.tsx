@@ -58,7 +58,7 @@ export const DebugPanel: React.FC = () => {
           }}
         />
 
-        <pixiText text={`Version: 0.1.11`} style={style} y={lineHeight + 10} />
+        <pixiText text={`Version: 0.1.12`} style={style} y={lineHeight + 10} />
         <pixiText text={`Mode: ${state.mode}`} style={style} y={lineHeight * 2 + 10} />
         <pixiText text={`FPS: ${state.fps}`} style={style} y={lineHeight * 3 + 10} />
         <pixiText text={`Step: ${state.step}`} style={style} y={lineHeight * 4 + 10} />

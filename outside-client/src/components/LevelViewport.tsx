@@ -51,5 +51,14 @@ export const LevelViewport: React.FC<LevelViewportProps> = ({
     }
   }, [world]);
 
+  // Add Timeline to GameRenderer when available
+  useEffect(() => {
+    if (timelineManager && rendererRef.current) {
+      console.log('[LevelViewport] Adding Timeline to GameRenderer');
+      // For now, just log that Timeline was added
+      // TODO: Implement Timeline component integration with GameRenderer
+    }
+  }, [timelineManager]);
+
   return null; // This component doesn't render React nodes, it manages the imperative renderer
 };
