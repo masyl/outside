@@ -186,7 +186,7 @@ export function updateObjectsLayerWithIndex(
         );
         sprite.x = displayPos.x;
         sprite.y = displayPos.y;
-        sprite.scale.set(zoomScale, zoomScale);
+        // Note: zoomScale is already applied in gridToDisplay, so sprite scale stays at 1.0
 
         container.addChild(sprite);
         spriteIndex.set(object.id, sprite);
@@ -220,7 +220,7 @@ export function updateObjectsLayerWithIndex(
         );
         sprite.x = displayPos.x;
         sprite.y = displayPos.y + VERTICAL_OFFSET;
-        sprite.scale.set(zoomScale, zoomScale);
+        // Note: zoomScale is already applied in gridToDisplay, so sprite scale stays at 1.0
       }
     }
   });
