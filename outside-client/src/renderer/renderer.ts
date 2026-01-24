@@ -1,6 +1,7 @@
 import { Application, Container, Texture, Sprite, Assets, Graphics } from 'pixi.js';
 import { GameObject, WorldState, Direction } from '@outside/core';
 import { animate } from 'motion';
+
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
 import {
@@ -148,46 +149,6 @@ export class GameRenderer {
 
     // Update camera target based on initial state
     this.updateCameraTarget(world);
-
-    // Start animation loop for sprites
-    this.startSpriteAnimationLoop();
-  }
-
-  private animationFrameId: number | null = null;
-
-  private startSpriteAnimationLoop(): void {
-    const loop = () => {
-      const now = Date.now();
-
-      // Update camera viewport every frame for smooth animation
-      this.updateViewportTransform();
-
-      this.botAnimationStates.forEach((state, id) => {
-        // Update frame every 125ms
-        if (now - state.lastUpdate >= 125) {
-          state.frame = (state.frame + 1) % 4; // 4 frames per animation
-          state.lastUpdate = now;
-
-          // Update sprite texture
-          const sprite = this.spriteIndex.get(id);
-          if (sprite && this.botTexture && this.botWalkTexture) {
-            import('./objects').then(({ updateBotSpriteFrame }) => {
-              updateBotSpriteFrame(
-                sprite,
-                this.botTexture!,
-                this.botWalkTexture!,
-                state.direction,
-                state.isMoving,
-                state.frame
-              );
-            });
-          }
-        }
-      });
-
-      this.animationFrameId = requestAnimationFrame(loop);
-    };
-    loop();
   }
 
   /**
@@ -273,14 +234,12 @@ export class GameRenderer {
       .filter((obj) => obj.type === 'bot' && obj.position)
       .map((obj) => {
         // Access facing direction from animation state (real-time visual direction)
-        // Fallback to object property if not animating yet
-        const animState = this.botAnimationStates.get(obj.id);
         const bot = obj as any;
 
         return {
           x: obj.position!.x,
           y: obj.position!.y,
-          direction: animState?.direction || bot.facing,
+          direction: bot.facing || 'down',
         };
       });
 
@@ -435,26 +394,8 @@ export class GameRenderer {
     const sprite = this.spriteIndex.get(id);
     if (sprite && this.botTexture && this.botWalkTexture) {
       // We need to import updateBotSpriteAnimation from objects.ts
-      // But for now, let's just expose a method or forward the call
-      // Ideally objects.ts logic handles this.
-
-      // Since we can't easily add imports without reading file content again to find imports section,
-      // let's assume we can add a method here or rely on the fact we will update objects.ts soon.
-
-      // Let's store the state on the sprite or a map?
-      // Better: objects.ts exports a function updateBotAnimation(sprite, texture, walkTexture, direction, isMoving, frame)
-
-      // For now, let's create a placeholder or update the logic.
-      // We need to track animation frame state.
-      // GameRenderer will hold a map of bot animation states?
-      this.botAnimationStates.set(id, { direction, isMoving, frame: 0, lastUpdate: Date.now() });
     }
   }
-
-  private botAnimationStates: Map<
-    string,
-    { direction: Direction; isMoving: boolean; frame: number; lastUpdate: number }
-  > = new Map();
 
   /**
    * Resize handler (call when window resizes)

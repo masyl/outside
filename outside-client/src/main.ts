@@ -13,7 +13,7 @@ import { DebugBridge } from './debug/debugBridge'; // Replaces DebugOverlay
 import { ConnectionOverlay } from './debug/connectionOverlay';
 import { getZoomScale } from './renderer/coordinateSystem';
 // import { KeystrokeOverlay } from './debug/keystrokeOverlay'; // Replaced by KeystrokeBridge/KeystrokeHelp
-import { AnimationController } from './game/animationController';
+
 import { SelectionManager } from './input/selection';
 import { KeyboardHandler } from './input/keyboardHandler';
 import { TimelineManager } from './timeline/manager';
@@ -107,7 +107,7 @@ async function init(options?: {
 
   // Game services that will be initialized when renderer is ready
   let renderer: GameRenderer | null = null;
-  let animationController: AnimationController | null = null;
+
   let commandQueue: CommandQueue | null = null;
   let selectionManager: SelectionManager | null = null;
   let gameLoop: GameLoop | null = null;
@@ -193,9 +193,6 @@ async function init(options?: {
 
     // Ensure debug grid matches persisted visibility state
     renderer.updateBotDebugGrid(store.getState(), debugOverlay.isVisible());
-
-    // Create animation controller (subscribes to store and animates sprites)
-    animationController = new AnimationController(store, renderer);
 
     // Create command queue
     commandQueue = new CommandQueue();
@@ -382,9 +379,6 @@ async function init(options?: {
             // After replay completes, update renderer to create sprites for all objects
             // This ensures sprites exist before animation controller tries to animate them
             renderer!.update(store.getState());
-            // Reset animation controller's previous state so it doesn't try to animate restoration
-            // (The animation controller will see the final state as "previous" state)
-            animationController!.resetPreviousState();
           });
           console.log('[Init] Game state restored from persisted events');
 

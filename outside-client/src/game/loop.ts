@@ -17,7 +17,7 @@ export class GameLoop {
   private renderer: GameRenderer;
   private debugOverlay?: typeof DebugBridge; // Updated type to allow static class
   private stateUpdateIntervalId: number | null = null;
-  private animationFrameId: number | null = null;
+
   private isRunning: boolean = false;
   private playbackState: PlaybackState = PlaybackState.PLAYING;
   private timelineManager: TimelineManager | null = null;
@@ -106,9 +106,6 @@ export class GameLoop {
 
     // Start state update loop (125ms intervals)
     this.startStateUpdateLoop();
-
-    // Start animation loop (runs at 60fps)
-    this.startAnimationLoop();
   }
 
   /**
@@ -120,11 +117,6 @@ export class GameLoop {
     if (this.stateUpdateIntervalId !== null) {
       clearInterval(this.stateUpdateIntervalId);
       this.stateUpdateIntervalId = null;
-    }
-
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
     }
   }
 
@@ -161,24 +153,6 @@ export class GameLoop {
         }
       }
     }, STATE_UPDATE_INTERVAL);
-  }
-
-  /**
-   * Start the animation loop (runs independently for smooth animations)
-   */
-  private startAnimationLoop(): void {
-    const loop = () => {
-      if (!this.isRunning) {
-        return;
-      }
-
-      // Animation updates happen here if needed
-      // For now, motion.dev handles its own animation loop
-
-      this.animationFrameId = requestAnimationFrame(loop);
-    };
-
-    loop();
   }
 
   /**

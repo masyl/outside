@@ -2,7 +2,7 @@ import { Sprite, Container, Texture, Renderer, Rectangle } from 'pixi.js';
 import { WorldState, GameObject, Direction } from '@outside/core';
 import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
 
-const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
+const { DISPLAY_TILE_SIZE, VERTICAL_OFFSET } = COORDINATE_SYSTEM;
 
 /**
  * Create a placeholder sprite for a bot (until PNG is provided)
@@ -134,8 +134,8 @@ export function createObjectsLayerWithIndex(
 
 /**
  * Update object positions in the renderer and keep sprite index in sync
- * Does NOT set sprite positions - that's handled by AnimationController
- * Only creates new sprites for new objects and removes sprites for deleted objects
+ * Directly updates sprite positions since animations are removed
+ * Creates new sprites for new objects and removes sprites for deleted objects
  */
 export function updateObjectsLayerWithIndex(
   container: Container,
@@ -175,7 +175,7 @@ export function updateObjectsLayerWithIndex(
           sprite = createBotPlaceholder(renderer, isSelected);
         }
 
-        // Only set initial position when creating - AnimationController handles updates
+        // Set initial position when creating
         const zoomScale = getZoomScale();
         const displayPos = CoordinateConverter.gridToDisplay(
           {
@@ -211,8 +211,17 @@ export function updateObjectsLayerWithIndex(
           }
         }
       }
-      // If sprite exists, DO NOT update its position here
-      // AnimationController will handle position updates via animations
+      // Update sprite position directly since animations are removed
+      if (sprite && object.position) {
+        const zoomScale = getZoomScale();
+        const displayPos = CoordinateConverter.gridToDisplay(
+          { x: object.position.x, y: object.position.y },
+          zoomScale
+        );
+        sprite.x = displayPos.x;
+        sprite.y = displayPos.y + VERTICAL_OFFSET;
+        sprite.scale.set(zoomScale, zoomScale);
+      }
     }
   });
 
