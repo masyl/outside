@@ -137,6 +137,17 @@ Notes:
 - Unified renderer is now the only pipeline wired in `GameRenderer` (no `legacy`/`dual` paths in the runtime renderer).
 - Legacy terrain pipeline module removed (`outside-client/src/renderer/terrain.ts`). Legacy “object layer” helpers were removed from `objects.ts` (kept bot sprite helpers still used by unified adapter).
 
+### Phase 6: Continuous bot motion (deterministic, subtile)
+
+- [x] Add `WorldState.timeMs` + per-bot `velocity`/`motion` fields in `@outside/core`
+- [x] Make core grid helpers floor world positions for tile indexing (`toTilePosition`)
+- [x] Add deterministic `SIM_TICK` action to advance continuous bot motion (speed 0.5–2.0 tiles/sec, smooth turning, tile-based bounce)
+- [x] Drive `SIM_TICK` at a fixed cadence from the host loop (20Hz via a 50ms accumulator)
+- [x] Render bots at subtile positions and show velocity vectors whose **length encodes speed**
+
+Notes:
+- Continuous motion is deterministic/replayable because ticks are Actions and time is stored in `WorldState.timeMs`.
+
 ## Success Criteria (exit gates)
 
 ### Correctness
@@ -149,6 +160,7 @@ Notes:
 
 Notes:
 - Unified renderer now applies global zoom to bot visuals (texture + placeholder), so bot size changes with zoom like terrain.
+- [ ] **Continuous motion** (new): deterministic random-walk, bounce behavior, and velocity debug vectors are correct and stable.
 - [ ] **Selection/picking parity** (if applicable): unified pipeline supports the same selection/hover/debug affordances as legacy
 - [ ] **No simulation changes**: replay/time-travel and reducer invariants remain correct
 
@@ -171,4 +183,3 @@ Notes:
 - **Asset resolution**: rules for sprite sheets, tiling sprites, and placeholder fallbacks
 - **Interaction model**: unified hit-testing + selection overlays (bots and terrain)
 - **Parity thresholds**: numeric tolerances for position comparisons under zoom/offsets
-
