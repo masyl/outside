@@ -286,6 +286,24 @@ export class GameRenderer {
     const legacyTerrainCount = this.terrainContainer.children.length;
     const unifiedTerrainCount = expectedTerrainCount;
 
+    // Terrain ordering (legacy tagged via sprite.name = "terrain:<id>")
+    const legacyTerrainOrder = this.terrainContainer.children
+      .map((c) => c.name)
+      .filter((name) => name.startsWith('terrain:'))
+      .map((name) => name.slice('terrain:'.length));
+    const expectedTerrainOrder = renderables
+      .filter((r) => r.kind === 'terrain')
+      .map((r) => r.id);
+
+    // Unified lifecycle/leak check: display index should match expected ids (bots + terrain).
+    const expectedAllIds = new Set(renderables.map((r) => r.id));
+    const unifiedExtraIds: string[] = [];
+    for (const id of unifiedIndex.keys()) {
+      if (!expectedAllIds.has(id)) {
+        unifiedExtraIds.push(id);
+      }
+    }
+
     const summary = computeParitySummary({
       expectedBotIds,
       expectedTerrainCount,
@@ -297,7 +315,12 @@ export class GameRenderer {
     });
 
     // Throttle logs to avoid spamming console while running in dual mode.
-    if (!summary.ok) {
+    const orderingOk =
+      legacyTerrainOrder.length === expectedTerrainOrder.length &&
+      legacyTerrainOrder.every((id, i) => id === expectedTerrainOrder[i]);
+    unifiedExtraIds.sort();
+
+    if (!summary.ok || !orderingOk || unifiedExtraIds.length > 0) {
       const now = performance.now();
       if (now - this.lastParityLogAtMs > 2000) {
         this.lastParityLogAtMs = now;
@@ -310,7 +333,17 @@ export class GameRenderer {
             missingInUnified: summary.bot.missingInUnified.slice(0, 5),
             positionMismatches: summary.bot.positionMismatches.slice(0, 3),
           },
-          terrain: summary.terrain,
+          terrain: {
+            ...summary.terrain,
+            orderingOk,
+            legacyFirstIds: legacyTerrainOrder.slice(0, 5),
+            expectedFirstIds: expectedTerrainOrder.slice(0, 5),
+          },
+          unified: {
+            extraIds: unifiedExtraIds.slice(0, 5),
+            indexSize: unifiedIndex.size,
+            expectedSize: expectedAllIds.size,
+          },
         });
       }
     }

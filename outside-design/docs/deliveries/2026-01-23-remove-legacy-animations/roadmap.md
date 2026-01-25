@@ -109,14 +109,14 @@ Notes:
 - [ ] Debug parity checks (debug-only):
   - [x] **Counts parity**: bots + terrain count parity (terrain is count-only for now)
   - [x] **Position parity**: per-bot position match within tolerance (pixels)
-  - [ ] **Ordering parity**: terrain stacking and bot-over-terrain consistency
-  - [ ] **Lifecycle parity**: create/remove events match (no orphan DisplayObjects)
-  - [ ] **Memory / perf**: no unbounded growth in display indices
+  - [x] **Ordering parity**: terrain order parity (via legacy sprite tagging); bot-over-terrain is ensured by z-base
+  - [x] **Lifecycle parity**: unified display index contains no unexpected ids (extraIds = leak signal)
+  - [x] **Memory / perf**: unified index size should match expected ids (extraIds + size mismatch)
 
 Notes:
 - Dual mode parity logging is throttled to avoid console spam.
 - Implemented pure parity helper with unit tests in `outside-client/src/renderer/unified/parity.ts`.
-- Terrain parity is count-only for now (legacy terrain sprites are not keyed by terrain id yet).
+- Terrain parity now includes ordering via `sprite.name = "terrain:<id>"` tagging in `terrain.ts`.
 
 ### Phase 4: Late swap (flip default, keep rollback)
 

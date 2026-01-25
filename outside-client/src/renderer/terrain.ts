@@ -134,6 +134,9 @@ export function createTerrainLayer(world: WorldState, terrainTexture?: Texture):
   // Render all terrain objects
   for (const terrain of sortedTerrains) {
     const sprite = createTerrainSprite(terrain, terrainTexture);
+    // Tag the display object with a stable id for dual-mode parity checks.
+    // This does not affect rendering; it helps compare ordering/lifecycle with unified pipeline.
+    sprite.name = `terrain:${terrain.id}`;
     const displayPos = CoordinateConverter.gridToDisplay(
       {
         x: terrain.position.x,
