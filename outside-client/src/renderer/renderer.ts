@@ -37,6 +37,7 @@ export class GameRenderer {
   private lastBotVelocity: Map<string, { x: number; y: number }> = new Map();
   private lastBotFacing: Map<string, Direction> = new Map();
   private lastBotIsMoving: Map<string, boolean> = new Map();
+  private botWalkDistanceTiles: Map<string, number> = new Map();
 
   // Camera state (Grid Coordinates)
   private cameraPos = { x: 0, y: 0 };
@@ -75,11 +76,11 @@ export class GameRenderer {
           const world = this.currentWorld;
           if (!world) return 0;
           if (!(this.lastBotIsMoving.get(id) ?? false)) return 0;
-          const obj = world.objects.get(id);
-          const velocity = obj?.velocity;
-          if (!velocity) return 0;
-          const speedTilesPerSec = Math.hypot(velocity.x, velocity.y);
-          return computeWalkFrameIndex({ timeMs: world.timeMs, speedTilesPerSec, frames: 4 });
+          const frames = 4;
+          const cyclesPerTile = 1.5;
+          const dist = this.botWalkDistanceTiles.get(id) ?? 0;
+          const idx = Math.floor(dist * frames * cyclesPerTile) % frames;
+          return idx < 0 ? idx + frames : idx;
         },
         getTerrainTexture: () => this.terrainTexture,
         renderer: this.app.renderer,
@@ -166,6 +167,7 @@ export class GameRenderer {
     this.lastBotVelocity.clear();
     this.lastBotFacing.clear();
     this.lastBotIsMoving.clear();
+    this.botWalkDistanceTiles.clear();
     for (const obj of world.objects.values()) {
       if (obj.type !== 'bot') continue;
       if (!obj.position) continue;
@@ -277,6 +279,13 @@ export class GameRenderer {
       const speed = Math.hypot(velocity.x, velocity.y);
       this.lastBotIsMoving.set(obj.id, speed > 0.0001);
 
+      if (prev) {
+        const d = Math.hypot(pos.x - prev.x, pos.y - prev.y);
+        if (d > 0) {
+          this.botWalkDistanceTiles.set(obj.id, (this.botWalkDistanceTiles.get(obj.id) ?? 0) + d);
+        }
+      }
+
       if (obj.facing) {
         this.lastBotFacing.set(obj.id, obj.facing);
       } else if (speed > 0.0001) {
@@ -296,6 +305,7 @@ export class GameRenderer {
         this.lastBotVelocity.delete(id);
         this.lastBotFacing.delete(id);
         this.lastBotIsMoving.delete(id);
+        this.botWalkDistanceTiles.delete(id);
       }
     }
   }

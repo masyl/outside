@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Application as PixiApplication } from 'pixi.js';
+import { Application as PixiApplication, Ticker } from 'pixi.js';
 import { LevelViewport } from './LevelViewport';
 import { DebugPanel } from './DebugPanel';
 import { KeystrokeHelp } from './KeystrokeHelp';
@@ -29,6 +29,8 @@ const AppInitializer: React.FC<{ onAppReady: (app: PixiApplication) => void }> =
       // Cap FPS to 60 to avoid runaway render loops on high refresh displays.
       // (Pixi's ticker is still vsync-driven, but this clamps the maximum update rate.)
       app.ticker.maxFPS = 60;
+      // @pixi/react often uses the shared ticker; cap it as well.
+      Ticker.shared.maxFPS = 60;
       console.log('[GameRoot] AppInitializer: App ready, calling onAppReady');
       onAppReady(app);
     }
