@@ -9,6 +9,10 @@ export class DebugBridge {
     debugStore.update({ mode: mode });
   }
 
+  static setRendererMode(mode: 'legacy' | 'unified' | 'dual'): void {
+    debugStore.update({ rendererMode: mode });
+  }
+
   static setObjectCounts(surface: number, ground: number): void {
     debugStore.update({ surfaceCount: surface, groundCount: ground });
   }

@@ -58,28 +58,29 @@ export const DebugPanel: React.FC = () => {
           }}
         />
 
-        <pixiText text={`Version: 0.1.12`} style={style} y={lineHeight + 10} />
-        <pixiText text={`Mode: ${state.mode}`} style={style} y={lineHeight * 2 + 10} />
-        <pixiText text={`FPS: ${state.fps}`} style={style} y={lineHeight * 3 + 10} />
-        <pixiText text={`Step: ${state.step}`} style={style} y={lineHeight * 4 + 10} />
+        <pixiText text={`Version: 0.1.13`} style={style} y={lineHeight + 10} />
+        <pixiText text={`Renderer: ${state.rendererMode}`} style={style} y={lineHeight * 2 + 10} />
+        <pixiText text={`Mode: ${state.mode}`} style={style} y={lineHeight * 3 + 10} />
+        <pixiText text={`FPS: ${state.fps}`} style={style} y={lineHeight * 4 + 10} />
+        <pixiText text={`Step: ${state.step}`} style={style} y={lineHeight * 5 + 10} />
         <pixiText
           text={`Objects: ${state.surfaceCount} (Surf) / ${state.groundCount} (Gnd)`}
           style={style}
-          y={lineHeight * 5 + 10}
+          y={lineHeight * 6 + 10}
         />
-        <pixiText text={`Clients: ${state.clientCount}`} style={style} y={lineHeight * 6 + 10} />
-        <pixiText text={`Events: ${state.eventCount}`} style={style} y={lineHeight * 7 + 10} />
-        <pixiText text={`P2P: ${state.p2pStatus}`} style={style} y={lineHeight * 8 + 10} />
-        <pixiText text={`Playback: ${state.playbackMode}`} style={style} y={lineHeight * 9 + 10} />
+        <pixiText text={`Clients: ${state.clientCount}`} style={style} y={lineHeight * 7 + 10} />
+        <pixiText text={`Events: ${state.eventCount}`} style={style} y={lineHeight * 8 + 10} />
+        <pixiText text={`P2P: ${state.p2pStatus}`} style={style} y={lineHeight * 9 + 10} />
+        <pixiText text={`Playback: ${state.playbackMode}`} style={style} y={lineHeight * 10 + 10} />
         <pixiText
           text={`Timeline: ${state.timelineCursor} / ${state.timelineTotal}`}
           style={style}
-          y={lineHeight * 10 + 10}
+          y={lineHeight * 11 + 10}
         />
         <pixiText
           text={`Zoom: ${state.zoomLevel} (${state.zoomScale.toFixed(1)}x)`}
           style={style}
-          y={lineHeight * 11 + 10}
+          y={lineHeight * 12 + 10}
         />
       </container>
     </container>

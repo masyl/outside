@@ -6,6 +6,7 @@ export interface DebugState {
   fps: number;
   step: number;
   mode: string;
+  rendererMode: 'legacy' | 'unified' | 'dual' | 'unknown';
   surfaceCount: number;
   groundCount: number;
   eventCount: number;
@@ -24,6 +25,7 @@ const INITIAL_STATE: DebugState = {
   fps: 0,
   step: 0,
   mode: 'unknown',
+  rendererMode: 'unknown',
   surfaceCount: 0,
   groundCount: 0,
   eventCount: 0,

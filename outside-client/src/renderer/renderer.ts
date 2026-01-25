@@ -18,6 +18,9 @@ import { buildRenderables } from './unified/renderables';
 import { createPixiDisplayAdapter } from './unified/pixiAdapter';
 import { UnifiedRenderer } from './unified/unifiedRenderer';
 import { computeParitySummary } from './unified/parity';
+// Note: keep viewport math local to avoid module-resolution flakiness in some editors.
+// (We still test the equivalent pure function in `viewport.test.ts`.)
+import { debugStore } from '../debug/debugStore';
 
 /**
  * Main renderer for the game
@@ -84,11 +87,18 @@ export class GameRenderer {
 
     // Apply initial visibility based on default mode.
     this.applyRendererVisibility();
+    debugStore.update({ rendererMode: this.rendererMode });
 
     // Listen for zoom changes and force redraw
     zoomManager.addZoomChangeListener((level, scale) => {
       console.log(`[Renderer] Zoom changed to level ${level} (${scale}x), forcing redraw`);
       this.forceCompleteRedraw();
+    });
+
+    // Keep viewport transform updated as camera springs animate.
+    // Without this, cameraPos can change but the world container won't move.
+    this.app.ticker.add(() => {
+      this.updateViewportTransform();
     });
   }
 
@@ -239,6 +249,7 @@ export class GameRenderer {
     if (this.rendererMode === mode) return;
     this.rendererMode = mode;
     this.applyRendererVisibility();
+    debugStore.update({ rendererMode: mode });
   }
 
   getRendererMode(): 'legacy' | 'unified' | 'dual' {
