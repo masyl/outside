@@ -4,6 +4,10 @@ import { useSyncExternalStore } from 'react';
 // Define the shape of debug data
 export interface DebugState {
   fps: number;
+  rafFps: number;
+  tickerFps: number;
+  tickerMaxFps: number;
+  tickerMinFps: number;
   step: number;
   mode: string;
   rendererMode: 'legacy' | 'unified' | 'dual' | 'unknown';
@@ -23,6 +27,10 @@ export interface DebugState {
 // Initial default state
 const INITIAL_STATE: DebugState = {
   fps: 0,
+  rafFps: 0,
+  tickerFps: 0,
+  tickerMaxFps: 0,
+  tickerMinFps: 0,
   step: 0,
   mode: 'unknown',
   rendererMode: 'unknown',

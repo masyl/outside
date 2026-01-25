@@ -6,20 +6,50 @@ import { useDebugState, debugStore } from '../debug/debugStore';
 export const DebugPanel: React.FC = () => {
   const { app } = useApplication();
   const state = useDebugState();
-  const frameCountRef = useRef(0);
-  const lastFpsUpdateRef = useRef(0);
+  const tickerFrameCountRef = useRef(0);
+  const lastTickerFpsUpdateRef = useRef(0);
+  const rafFrameCountRef = useRef(0);
+  const lastRafFpsUpdateRef = useRef(0);
 
   // Measure FPS using Pixi ticker hook
-  useTick((ticker) => {
-    frameCountRef.current++;
+  useTick(() => {
+    tickerFrameCountRef.current++;
     const now = performance.now();
 
-    if (now - lastFpsUpdateRef.current >= 1000) {
-      debugStore.update({ fps: frameCountRef.current });
-      frameCountRef.current = 0;
-      lastFpsUpdateRef.current = now;
+    if (now - lastTickerFpsUpdateRef.current >= 1000) {
+      debugStore.update({
+        fps: tickerFrameCountRef.current, // keep existing label for backward compatibility
+        tickerFps: app?.ticker?.FPS ?? 0,
+        tickerMaxFps: app?.ticker?.maxFPS ?? 0,
+        tickerMinFps: app?.ticker?.minFPS ?? 0,
+      });
+      tickerFrameCountRef.current = 0;
+      lastTickerFpsUpdateRef.current = now;
     }
   });
+
+  // Measure raw browser rAF FPS (independent of Pixi ticker)
+  useEffect(() => {
+    let rafId = 0;
+    let mounted = true;
+    const loop = (now: number) => {
+      if (!mounted) return;
+      rafId = requestAnimationFrame(loop);
+      rafFrameCountRef.current++;
+
+      if (now - lastRafFpsUpdateRef.current >= 1000) {
+        debugStore.update({ rafFps: rafFrameCountRef.current });
+        rafFrameCountRef.current = 0;
+        lastRafFpsUpdateRef.current = now;
+      }
+    };
+
+    rafId = requestAnimationFrame(loop);
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   if (!state.visible) return null;
 
@@ -61,26 +91,37 @@ export const DebugPanel: React.FC = () => {
         <pixiText text={`Version: 0.1.13`} style={style} y={lineHeight + 10} />
         <pixiText text={`Renderer: ${state.rendererMode}`} style={style} y={lineHeight * 2 + 10} />
         <pixiText text={`Mode: ${state.mode}`} style={style} y={lineHeight * 3 + 10} />
-        <pixiText text={`FPS: ${state.fps}`} style={style} y={lineHeight * 4 + 10} />
-        <pixiText text={`Step: ${state.step}`} style={style} y={lineHeight * 5 + 10} />
+        <pixiText text={`FPS (rAF): ${state.rafFps}`} style={style} y={lineHeight * 4 + 10} />
+        <pixiText text={`FPS (ticker): ${state.fps}`} style={style} y={lineHeight * 5 + 10} />
         <pixiText
-          text={`Objects: ${state.surfaceCount} (Surf) / ${state.groundCount} (Gnd)`}
+          text={`Ticker.FPS: ${state.tickerFps.toFixed(1)}`}
           style={style}
           y={lineHeight * 6 + 10}
         />
-        <pixiText text={`Clients: ${state.clientCount}`} style={style} y={lineHeight * 7 + 10} />
-        <pixiText text={`Events: ${state.eventCount}`} style={style} y={lineHeight * 8 + 10} />
-        <pixiText text={`P2P: ${state.p2pStatus}`} style={style} y={lineHeight * 9 + 10} />
-        <pixiText text={`Playback: ${state.playbackMode}`} style={style} y={lineHeight * 10 + 10} />
+        <pixiText
+          text={`Ticker max/min: ${state.tickerMaxFps} / ${state.tickerMinFps}`}
+          style={style}
+          y={lineHeight * 7 + 10}
+        />
+        <pixiText text={`Step: ${state.step}`} style={style} y={lineHeight * 8 + 10} />
+        <pixiText
+          text={`Objects: ${state.surfaceCount} (Surf) / ${state.groundCount} (Gnd)`}
+          style={style}
+          y={lineHeight * 9 + 10}
+        />
+        <pixiText text={`Clients: ${state.clientCount}`} style={style} y={lineHeight * 10 + 10} />
+        <pixiText text={`Events: ${state.eventCount}`} style={style} y={lineHeight * 11 + 10} />
+        <pixiText text={`P2P: ${state.p2pStatus}`} style={style} y={lineHeight * 12 + 10} />
+        <pixiText text={`Playback: ${state.playbackMode}`} style={style} y={lineHeight * 13 + 10} />
         <pixiText
           text={`Timeline: ${state.timelineCursor} / ${state.timelineTotal}`}
           style={style}
-          y={lineHeight * 11 + 10}
+          y={lineHeight * 14 + 10}
         />
         <pixiText
           text={`Zoom: ${state.zoomLevel} (${state.zoomScale.toFixed(1)}x)`}
           style={style}
-          y={lineHeight * 12 + 10}
+          y={lineHeight * 15 + 10}
         />
       </container>
     </container>
