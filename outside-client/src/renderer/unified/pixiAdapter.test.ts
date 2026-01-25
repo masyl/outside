@@ -15,6 +15,7 @@ describe('createPixiDisplayAdapter (bot zoom scaling)', () => {
       getBotWalkTexture: () => undefined,
       getBotFacing: () => 'down',
       getBotIsMoving: () => false,
+      getBotWalkFrameIndex: () => 0,
       getTerrainTexture: () => undefined,
       // Canvas placeholder path does not require a real Pixi renderer.
       renderer: undefined as any,
@@ -51,6 +52,7 @@ describe('createPixiDisplayAdapter (bot zoom scaling)', () => {
       getBotWalkTexture: () => Texture.EMPTY,
       getBotFacing: () => 'right',
       getBotIsMoving: () => false,
+      getBotWalkFrameIndex: () => 0,
       getTerrainTexture: () => undefined,
       renderer: undefined as any,
     });

@@ -37,6 +37,7 @@ export function createPixiDisplayAdapter(
     getBotWalkTexture: () => Texture | undefined;
     getBotFacing: (id: string) => import('@outside/core').Direction;
     getBotIsMoving: (id: string) => boolean;
+    getBotWalkFrameIndex: (id: string) => number;
     getTerrainTexture: () => Texture | undefined;
     renderer: Renderer;
   }
@@ -75,7 +76,8 @@ export function createPixiDisplayAdapter(
         if (idleTexture && walkTexture && sprite.texture.source === idleTexture.source) {
           const direction = opts.getBotFacing(renderable.id);
           const isMoving = opts.getBotIsMoving(renderable.id);
-          updateBotSpriteFrame(sprite, idleTexture, walkTexture, direction, isMoving, 0);
+          const frameIndex = opts.getBotWalkFrameIndex(renderable.id);
+          updateBotSpriteFrame(sprite, idleTexture, walkTexture, direction, isMoving, frameIndex);
         } else if (idleTexture && sprite.texture.source !== idleTexture.source) {
           // Upgrade placeholder -> textured sprite once assets load.
           c.removeChildren().forEach((child) => child.destroy({ children: true }));
@@ -85,7 +87,8 @@ export function createPixiDisplayAdapter(
           if (walkTexture) {
             const direction = opts.getBotFacing(renderable.id);
             const isMoving = opts.getBotIsMoving(renderable.id);
-            updateBotSpriteFrame(sprite, idleTexture, walkTexture, direction, isMoving, 0);
+            const frameIndex = opts.getBotWalkFrameIndex(renderable.id);
+            updateBotSpriteFrame(sprite, idleTexture, walkTexture, direction, isMoving, frameIndex);
           } else {
             // At least apply zoom if walk texture isn't available yet.
             sprite.scale.set(sprite.scale.x * zoomScale, sprite.scale.y * zoomScale);

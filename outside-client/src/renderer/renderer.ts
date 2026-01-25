@@ -70,6 +70,16 @@ export class GameRenderer {
         getBotWalkTexture: () => this.botWalkTexture,
         getBotFacing: (id: string) => this.lastBotFacing.get(id) ?? 'down',
         getBotIsMoving: (id: string) => this.lastBotIsMoving.get(id) ?? false,
+        getBotWalkFrameIndex: (id: string) => {
+          const world = this.currentWorld;
+          if (!world) return 0;
+          if (!(this.lastBotIsMoving.get(id) ?? false)) return 0;
+          // Fixed-rate walk cycle for now; speed matching is handled next.
+          const frames = 4;
+          const walkFps = 8;
+          const idx = Math.floor((world.timeMs / 1000) * walkFps) % frames;
+          return idx < 0 ? idx + frames : idx;
+        },
         getTerrainTexture: () => this.terrainTexture,
         renderer: this.app.renderer,
       })
