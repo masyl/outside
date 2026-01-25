@@ -14,6 +14,7 @@ import { UnifiedRenderer } from './unified/unifiedRenderer';
 // (We still test the equivalent pure function in `viewport.test.ts`.)
 import { debugStore } from '../debug/debugStore';
 import { directionFromVelocity } from '../utils/direction';
+import { computeWalkFrameIndex } from '../utils/animation';
 
 /**
  * Main renderer for the game
@@ -74,11 +75,11 @@ export class GameRenderer {
           const world = this.currentWorld;
           if (!world) return 0;
           if (!(this.lastBotIsMoving.get(id) ?? false)) return 0;
-          // Fixed-rate walk cycle for now; speed matching is handled next.
-          const frames = 4;
-          const walkFps = 8;
-          const idx = Math.floor((world.timeMs / 1000) * walkFps) % frames;
-          return idx < 0 ? idx + frames : idx;
+          const obj = world.objects.get(id);
+          const velocity = obj?.velocity;
+          if (!velocity) return 0;
+          const speedTilesPerSec = Math.hypot(velocity.x, velocity.y);
+          return computeWalkFrameIndex({ timeMs: world.timeMs, speedTilesPerSec, frames: 4 });
         },
         getTerrainTexture: () => this.terrainTexture,
         renderer: this.app.renderer,
