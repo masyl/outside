@@ -5,7 +5,8 @@
 - [x] The cardinal direction vector is no longer update to reflect the direction the bots is facing after moving.
 - [x] The viewport point-of-view is no longer following the currently selected bot.
 - [ ] When the state of the bot is walking, it should cycle through the walk animation sprites.
-- [ ] The transition between ticks should be smoothened using the Motion animation library at 60fpt, but not store those values in the state (purely visual on the client)
+- [ ] The transition between ticks should be smoothened using the Motion animation library at 60fps, but not store those values in the state (purely visual on the client)
+- [ ] Limit the max FPS to 60
 - [x] The velocity vector has disapeared from the debug layer
 - [ ] The exact speed of the walk animation should match the speed.
 
