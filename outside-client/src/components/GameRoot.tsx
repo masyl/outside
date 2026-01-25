@@ -30,8 +30,6 @@ const AppInitializer: React.FC<{ onAppReady: (app: PixiApplication) => void }> =
       // we should use a robust strategy (59.99 workaround) rather than stopping the ticker.
       app.ticker.maxFPS = 59.99;
       app.ticker.start();
-
-      console.log('[GameRoot] AppInitializer: App ready, calling onAppReady');
       onAppReady(app);
     }
     return;
@@ -55,7 +53,8 @@ export const GameRoot: React.FC<GameRootProps> = ({
       backgroundColor={0x1a1a1a}
       antialias={false}
       resolution={1}
-      preference="webgpu"
+      // WebGPU can be jittery on some machines/browsers; prefer WebGL for stable frame pacing.
+      preference="webgl"
       autoDensity={true}
       sharedTicker={false}
     >

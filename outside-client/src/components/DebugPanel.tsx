@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { TextStyle } from 'pixi.js';
 import { useApplication } from '@pixi/react';
 import { useDebugState, debugStore } from '../debug/debugStore';
@@ -14,6 +14,7 @@ export const DebugPanel: React.FC = () => {
   // Measure FPS using the actual app ticker (not useTick, which may be bound to a different ticker).
   useEffect(() => {
     if (!app) return;
+    if (!state.visible) return;
     const onTick = () => {
       appTickerFrameCountRef.current++;
       const now = performance.now();
@@ -33,10 +34,11 @@ export const DebugPanel: React.FC = () => {
     return () => {
       app.ticker.remove(onTick);
     };
-  }, [app]);
+  }, [app, state.visible]);
 
   // Measure raw browser rAF FPS (independent of Pixi ticker)
   useEffect(() => {
+    if (!state.visible) return;
     let rafId = 0;
     let mounted = true;
     const loop = (now: number) => {
@@ -56,19 +58,62 @@ export const DebugPanel: React.FC = () => {
       mounted = false;
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [state.visible]);
 
   if (!state.visible) return null;
 
-  const style = new TextStyle({
-    fontFamily: 'monospace', // 'Minecraft' font might need loading, falling back to monospace
-    fontSize: 16,
-    fill: '#00ff00',
-    stroke: { color: '#000000', width: 1 },
-  });
+  // Creating many `Text` nodes (or recreating styles) can be expensive on Safari because
+  // each changing string can trigger a texture regen. Prefer a single multiline text node.
+  const style = useMemo(() => {
+    return new TextStyle({
+      fontFamily: 'monospace', // 'Minecraft' font might need loading, falling back to monospace
+      fontSize: 16,
+      lineHeight: 20,
+      fill: '#00ff00',
+      stroke: { color: '#000000', width: 1 },
+    });
+  }, []);
 
-  const lineHeight = 20;
-  const padding = 0;
+  const debugText = useMemo(() => {
+    const lines: string[] = [];
+    lines.push('Debug Panel');
+    lines.push('');
+    lines.push(`Version: 0.1.13`);
+    lines.push(`Renderer: ${state.rendererMode}`);
+    lines.push(`Mode: ${state.mode}`);
+    lines.push(`FPS (rAF): ${state.rafFps}`);
+    lines.push(`FPS (ticker): ${state.fps}`);
+    lines.push(`Ticker.FPS: ${state.tickerFps.toFixed(1)}`);
+    lines.push(`Ticker max/min: ${state.tickerMaxFps} / ${state.tickerMinFps}`);
+    lines.push(`Step: ${state.step}`);
+    lines.push(`Objects: ${state.surfaceCount} (Surf) / ${state.groundCount} (Gnd)`);
+    lines.push(`Clients: ${state.clientCount}`);
+    lines.push(`Events: ${state.eventCount}`);
+    lines.push(`P2P: ${state.p2pStatus}`);
+    lines.push(`Playback: ${state.playbackMode}`);
+    lines.push(`Timeline: ${state.timelineCursor} / ${state.timelineTotal}`);
+    lines.push(`Zoom: ${state.zoomLevel} (${state.zoomScale.toFixed(1)}x)`);
+    return lines.join('\n');
+  }, [
+    state.clientCount,
+    state.eventCount,
+    state.fps,
+    state.mode,
+    state.p2pStatus,
+    state.playbackMode,
+    state.rafFps,
+    state.rendererMode,
+    state.step,
+    state.surfaceCount,
+    state.groundCount,
+    state.tickerFps,
+    state.tickerMaxFps,
+    state.tickerMinFps,
+    state.timelineCursor,
+    state.timelineTotal,
+    state.zoomLevel,
+    state.zoomScale,
+  ]);
 
   // Background box
   // Note: We can draw a graphics rect behind the text if needed,
@@ -76,7 +121,7 @@ export const DebugPanel: React.FC = () => {
   // For now, let's just render the text with a stroke/shadow for readability.
 
   return (
-    <container x={padding} y={padding} zIndex={10000}>
+    <container x={0} y={0} zIndex={10000}>
       <graphics
         draw={(g: any) => {
           g.clear();
@@ -86,50 +131,7 @@ export const DebugPanel: React.FC = () => {
         }}
       />
       <container x={10} y={10}>
-        <pixiText text={`Debug Panel`} style={style} y={0} />
-        <graphics
-          draw={(g: any) => {
-            g.moveTo(0, 22);
-            g.lineTo(230, 22);
-            g.stroke({ width: 1, color: 0x00ff00 });
-          }}
-        />
-
-        <pixiText text={`Version: 0.1.13`} style={style} y={lineHeight + 10} />
-        <pixiText text={`Renderer: ${state.rendererMode}`} style={style} y={lineHeight * 2 + 10} />
-        <pixiText text={`Mode: ${state.mode}`} style={style} y={lineHeight * 3 + 10} />
-        <pixiText text={`FPS (rAF): ${state.rafFps}`} style={style} y={lineHeight * 4 + 10} />
-        <pixiText text={`FPS (ticker): ${state.fps}`} style={style} y={lineHeight * 5 + 10} />
-        <pixiText
-          text={`Ticker.FPS: ${state.tickerFps.toFixed(1)}`}
-          style={style}
-          y={lineHeight * 6 + 10}
-        />
-        <pixiText
-          text={`Ticker max/min: ${state.tickerMaxFps} / ${state.tickerMinFps}`}
-          style={style}
-          y={lineHeight * 7 + 10}
-        />
-        <pixiText text={`Step: ${state.step}`} style={style} y={lineHeight * 8 + 10} />
-        <pixiText
-          text={`Objects: ${state.surfaceCount} (Surf) / ${state.groundCount} (Gnd)`}
-          style={style}
-          y={lineHeight * 9 + 10}
-        />
-        <pixiText text={`Clients: ${state.clientCount}`} style={style} y={lineHeight * 10 + 10} />
-        <pixiText text={`Events: ${state.eventCount}`} style={style} y={lineHeight * 11 + 10} />
-        <pixiText text={`P2P: ${state.p2pStatus}`} style={style} y={lineHeight * 12 + 10} />
-        <pixiText text={`Playback: ${state.playbackMode}`} style={style} y={lineHeight * 13 + 10} />
-        <pixiText
-          text={`Timeline: ${state.timelineCursor} / ${state.timelineTotal}`}
-          style={style}
-          y={lineHeight * 14 + 10}
-        />
-        <pixiText
-          text={`Zoom: ${state.zoomLevel} (${state.zoomScale.toFixed(1)}x)`}
-          style={style}
-          y={lineHeight * 15 + 10}
-        />
+        <pixiText text={debugText} style={style} x={0} y={0} />
       </container>
     </container>
   );

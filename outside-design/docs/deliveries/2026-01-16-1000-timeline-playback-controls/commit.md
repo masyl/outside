@@ -9,5 +9,5 @@ feat(timeline): implement playback controls and game loop integration
 
 This delivery fulfills the "Timeline Playback Controls" pitch, enabling time travel debugging and pause capabilities.
 
-Ref: [pitch](../pitches/timeline-playback-controls.md)
+Ref: [pitch](../../pitches/timeline-playback-controls.md)
 Ref: [plan](./plan.md)

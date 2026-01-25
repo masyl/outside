@@ -1,20 +1,26 @@
 ---
-title: 'Remove Legacy Animations'
-delivery_date: '2026-01-23'
-status: 'completed'
-type: 'delivery'
-related_issues: []
+Title: Remove Legacy Animations
+DeliveryDate: 2026-01-23
+Summary: Unify terrain + bot rendering, introduce deterministic continuous bot motion, and fix key regressions (camera follow, layering, zoom scaling, sprite facing, walk cycle, debug/FPS stability).
+Status: DONE
+Branch: remove-legacy-animations
+Commit: 7361ff6
 ---
 
-# Remove Legacy Animations
+## Remove Legacy Animations
 
 ## Overview
 
-Remove the problematic animation loop for bots and implement direct position updates without smooth transitions.
+Remove the problematic animation loop for bots and implement direct position updates without smooth transitions. Adopt an ECS architecture.
 
 ## Documents
 
+- [Pitch](./pitch.md)
 - [Implementation Plan](./plan.md)
+- [Technical Recommendation: ECS Transition](./ecs-technical-recommendstion.md)
+- [ECS / Renderer Transition Roadmap](./roadmap.md)
+- [Testing Report](./testing.md)
+- [Delivery Report](./delivered.md)
 
 ## Summary
 
