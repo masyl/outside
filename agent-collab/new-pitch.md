@@ -1,4 +1,4 @@
-# {Pitch Name Goes Here}
+# Tappable Entities and Events
 
 ## Motivation
 
@@ -20,10 +20,14 @@
 
 - TBD
 
+## Open Questions
+
+- TBD
+
 ## Next Logical Pitches
 
 - TBD
 
-## Review questions
+## Implementation Details (use sparingly)
 
 - TBD
