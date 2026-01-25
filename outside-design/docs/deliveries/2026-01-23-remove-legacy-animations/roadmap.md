@@ -127,11 +127,14 @@ Notes:
 
 ### Phase 5: Remove legacy (only after stable swap)
 
-- [ ] Remove legacy update paths (`terrain.ts`/`objects.ts` pipeline usage) after swap is stable
+- [x] Remove legacy update paths (`terrain.ts`/`objects.ts` pipeline usage) after swap is stable
 - [ ] Delete or deprecate legacy helpers only after:
   - [ ] unified mode has been default for a while
   - [ ] rollback is no longer needed
 - [ ] Remove feature flag and dual-mode scaffolding
+
+Notes:
+- In `unified` mode, `GameRenderer` now skips legacy terrain/object updates entirely (while keeping dual/legacy modes functional for rollback).
 
 ## Success Criteria (exit gates)
 

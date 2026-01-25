@@ -151,27 +151,35 @@ export class GameRenderer {
     const grid = createGrid(world);
     this.gridContainer.addChild(grid);
 
-    // Create terrain layer (ground layer, renders above grid)
-    this.terrainContainer.removeChildren();
-    if (this.terrainTexture) {
-      const terrainLayer = createTerrainLayer(world, this.terrainTexture);
-      this.terrainContainer.addChild(terrainLayer);
-    } else {
-      // Fallback if textures not loaded yet (or failed)
-      const terrainLayer = createTerrainLayer(world);
-      this.terrainContainer.addChild(terrainLayer);
-    }
+    // Legacy pipeline initialization (only when legacy pipeline is active).
+    if (this.rendererMode !== 'unified') {
+      // Create terrain layer (ground layer, renders above grid)
+      this.terrainContainer.removeChildren();
+      if (this.terrainTexture) {
+        const terrainLayer = createTerrainLayer(world, this.terrainTexture);
+        this.terrainContainer.addChild(terrainLayer);
+      } else {
+        // Fallback if textures not loaded yet (or failed)
+        const terrainLayer = createTerrainLayer(world);
+        this.terrainContainer.addChild(terrainLayer);
+      }
 
-    // Create objects layer and sprite index (surface layer, renders above terrain)
-    this.objectsContainer.removeChildren();
-    const { container, spriteIndex } = createObjectsLayerWithIndex(
-      world,
-      this.botTexture,
-      this.app.renderer,
-      this.selectedBotId
-    );
-    this.objectsContainer.addChild(container);
-    this.spriteIndex = spriteIndex;
+      // Create objects layer and sprite index (surface layer, renders above terrain)
+      this.objectsContainer.removeChildren();
+      const { container, spriteIndex } = createObjectsLayerWithIndex(
+        world,
+        this.botTexture,
+        this.app.renderer,
+        this.selectedBotId
+      );
+      this.objectsContainer.addChild(container);
+      this.spriteIndex = spriteIndex;
+    } else {
+      // In unified mode, ensure legacy containers are not holding stale visuals.
+      this.terrainContainer.removeChildren();
+      this.objectsContainer.removeChildren();
+      this.spriteIndex = new Map();
+    }
 
     // Update camera target based on initial state
     this.updateCameraTarget(world);
@@ -190,23 +198,26 @@ export class GameRenderer {
     // Update visual debug layer with new world state
     this.visualDebugLayer.setWorld(world);
 
-    // Always update terrain layer when world state changes
-    // This ensures terrain is rendered correctly as it's added incrementally
-    if (this.terrainTexture) {
-      updateTerrainLayer(this.terrainContainer, world, this.terrainTexture);
-    } else {
-      updateTerrainLayer(this.terrainContainer, world);
-    }
+    // Legacy pipeline updates (skip entirely in unified mode).
+    if (this.rendererMode !== 'unified') {
+      // Always update terrain layer when world state changes
+      // This ensures terrain is rendered correctly as it's added incrementally
+      if (this.terrainTexture) {
+        updateTerrainLayer(this.terrainContainer, world, this.terrainTexture);
+      } else {
+        updateTerrainLayer(this.terrainContainer, world);
+      }
 
-    // Update objects layer and sprite index
-    updateObjectsLayerWithIndex(
-      this.objectsContainer,
-      world,
-      this.botTexture,
-      this.app.renderer,
-      this.spriteIndex,
-      this.selectedBotId
-    );
+      // Update objects layer and sprite index
+      updateObjectsLayerWithIndex(
+        this.objectsContainer,
+        world,
+        this.botTexture,
+        this.app.renderer,
+        this.spriteIndex,
+        this.selectedBotId
+      );
+    }
 
     // Update debug grid if enabled
     if (this.isDebugEnabled) {
@@ -368,20 +379,25 @@ export class GameRenderer {
 
     this.selectedBotId = selectedBotId;
 
-    // Update sprite colors based on new selection
-    if (!this.botTexture) {
-      updateSpriteColors(
-        this.objectsContainer,
-        world,
-        this.botTexture,
-        this.app.renderer,
-        this.spriteIndex,
-        this.selectedBotId
-      );
+    // Update sprite colors based on new selection (legacy pipeline only).
+    if (this.rendererMode !== 'unified') {
+      if (!this.botTexture) {
+        updateSpriteColors(
+          this.objectsContainer,
+          world,
+          this.botTexture,
+          this.app.renderer,
+          this.spriteIndex,
+          this.selectedBotId
+        );
+      }
     }
 
     // Update camera target to follow new selection
     this.updateCameraTarget(world);
+
+    // Ensure unified pipeline gets a chance to refresh if selection affects visuals later.
+    this.updateUnified(world);
   }
 
   /**
@@ -436,7 +452,19 @@ export class GameRenderer {
    * Get sprite for a given object id
    */
   getSpriteForObject(id: string): Sprite | undefined {
-    return this.spriteIndex.get(id);
+    // Legacy pipeline: spriteIndex maps objectId -> Sprite.
+    const legacy = this.spriteIndex.get(id);
+    if (legacy) return legacy;
+
+    // Unified pipeline: display index maps entityId -> Container (wrapping visual).
+    const display: any = this.unifiedRenderer.getIndex().get(id);
+    if (!display) return undefined;
+    if (display instanceof Sprite) return display;
+    if (display instanceof Container) {
+      const child = display.children[0];
+      if (child instanceof Sprite) return child;
+    }
+    return undefined;
   }
 
   /**
@@ -452,28 +480,35 @@ export class GameRenderer {
       this.gridContainer.addChild(grid);
     }
 
-    // Recreate terrain layer with new zoom scale
-    if (this.currentWorld && this.terrainTexture) {
-      this.terrainContainer.removeChildren();
-      const terrainLayer = createTerrainLayer(this.currentWorld, this.terrainTexture);
-      this.terrainContainer.addChild(terrainLayer);
-    }
+    if (this.rendererMode !== 'unified') {
+      // Recreate terrain layer with new zoom scale
+      if (this.currentWorld && this.terrainTexture) {
+        this.terrainContainer.removeChildren();
+        const terrainLayer = createTerrainLayer(this.currentWorld, this.terrainTexture);
+        this.terrainContainer.addChild(terrainLayer);
+      }
 
-    // Update all existing bot sprites' scales and positions
-    if (this.currentWorld) {
-      const world = this.currentWorld; // Create local const to satisfy TypeScript
-      this.spriteIndex.forEach((sprite, objectId) => {
-        // Apply zoom scaling to sprite
-        sprite.scale.set(zoomScale, zoomScale);
+      // Update all existing bot sprites' scales and positions
+      if (this.currentWorld) {
+        const world = this.currentWorld; // Create local const to satisfy TypeScript
+        this.spriteIndex.forEach((sprite, objectId) => {
+          // Apply zoom scaling to sprite
+          sprite.scale.set(zoomScale, zoomScale);
 
-        // Update position to match new zoom scale
-        const gameObject = world.objects.get(objectId);
-        if (gameObject?.position) {
-          const displayPos = CoordinateConverter.gridToDisplay(gameObject.position, zoomScale);
-          sprite.x = displayPos.x;
-          sprite.y = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
-        }
-      });
+          // Update position to match new zoom scale
+          const gameObject = world.objects.get(objectId);
+          if (gameObject?.position) {
+            const displayPos = CoordinateConverter.gridToDisplay(gameObject.position, zoomScale);
+            sprite.x = displayPos.x;
+            sprite.y = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
+          }
+        });
+      }
+    } else {
+      // Unified pipeline: re-render with the new zoom scale applied by adapter.
+      if (this.currentWorld) {
+        this.updateUnified(this.currentWorld);
+      }
     }
 
     // Force visual debug layer to redraw with new zoom
