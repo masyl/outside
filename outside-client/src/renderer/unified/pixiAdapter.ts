@@ -62,6 +62,9 @@ export function createPixiDisplayAdapter(
       if (renderable.kind === 'bot') {
         const botTexture = opts.getBotTexture();
         const sprite = botTexture ? createBotSprite(botTexture) : createBotPlaceholder(opts.renderer);
+        // `createBotSprite` sets a base scale so 16px frames render as 64px tiles.
+        // Apply global zoom multiplicatively so bots scale consistently with terrain/viewport.
+        sprite.scale.set(sprite.scale.x * zoomScale, sprite.scale.y * zoomScale);
         c.addChild(sprite);
         c.y += COORDINATE_SYSTEM.VERTICAL_OFFSET;
       } else {

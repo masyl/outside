@@ -145,6 +145,9 @@ Notes:
   - [ ] terrain rendering + stacking order
   - [ ] bot-over-terrain layering (z-order)
   - [ ] zoom behavior (no size regressions)
+
+Notes:
+- Unified renderer now applies global zoom to bot visuals (texture + placeholder), so bot size changes with zoom like terrain.
 - [ ] **Selection/picking parity** (if applicable): unified pipeline supports the same selection/hover/debug affordances as legacy
 - [ ] **No simulation changes**: replay/time-travel and reducer invariants remain correct
 
