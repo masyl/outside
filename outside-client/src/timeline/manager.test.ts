@@ -147,6 +147,11 @@ describe('TimelineManager', () => {
     });
 
     it('should handle navigation to current step', () => {
+      // Timeline reconstruction replays actions through the reducer.
+      // CREATE_TERRAIN assigns createdAt via Date.now(), which can vary between reconstructions.
+      // Pin time so the reconstructed states are deterministic for deep-equality.
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1234567890);
+      try {
       timelineManager.goToStep(2);
       const stateBefore = store.getState();
 
@@ -159,6 +164,9 @@ describe('TimelineManager', () => {
       const { seed: seedBefore, ...restBefore } = stateBefore;
       const { seed: seedAfter, ...restAfter } = stateAfter;
       expect(restBefore).toEqual(restAfter);
+      } finally {
+        nowSpy.mockRestore();
+      }
     });
   });
 
