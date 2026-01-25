@@ -224,14 +224,14 @@ export class VisualDebugLayer extends Container {
 
         const rawX = bot.velocity.x;
         const rawY = bot.velocity.y;
-        const mag = Math.sqrt(rawX * rawX + rawY * rawY);
-        if (mag > 0) {
-          const dx = rawX / mag;
-          const dy = rawY / mag;
+        const speedTilesPerSec = Math.sqrt(rawX * rawX + rawY * rawY);
+        if (speedTilesPerSec > 0) {
+          const dx = rawX / speedTilesPerSec;
+          const dy = rawY / speedTilesPerSec;
 
-          // Line length = half tile size (radius), scaled by zoom, 50% longer for better visibility.
-          // Scale by magnitude so multi-tile moves are visible.
-          const length = (DISPLAY_TILE_SIZE / 2) * zoomScale * 1.5 * Math.min(2, mag);
+          // Line length encodes velocity magnitude (tiles/sec).
+          // Base length is ~half tile; we scale by speed for intuition.
+          const length = (DISPLAY_TILE_SIZE / 2) * zoomScale * 1.5 * speedTilesPerSec;
 
           this.graphics.setStrokeStyle({ width: 2, color: 0xffffff, alpha: 1 }); // White
           this.graphics.beginPath();

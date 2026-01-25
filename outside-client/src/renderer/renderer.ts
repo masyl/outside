@@ -258,19 +258,21 @@ export class GameRenderer {
 
       const pos = obj.position;
       const prev = this.lastBotPositions.get(obj.id);
-      const instantVelocity = prev ? { x: pos.x - prev.x, y: pos.y - prev.y } : { x: 0, y: 0 };
+      const fallbackDelta = prev ? { x: pos.x - prev.x, y: pos.y - prev.y } : { x: 0, y: 0 };
+      const velocity = obj.velocity ?? fallbackDelta;
 
-      // Persist the last non-zero velocity so debug vectors don't flicker.
-      if (instantVelocity.x !== 0 || instantVelocity.y !== 0) {
-        this.lastBotVelocity.set(obj.id, instantVelocity);
+      this.lastBotVelocity.set(obj.id, velocity);
+
+      const speed = Math.hypot(velocity.x, velocity.y);
+      this.lastBotIsMoving.set(obj.id, speed > 0.0001);
+
+      if (obj.facing) {
+        this.lastBotFacing.set(obj.id, obj.facing);
+      } else if (speed > 0.0001) {
         this.lastBotFacing.set(
           obj.id,
-          directionFromVelocity(instantVelocity, this.lastBotFacing.get(obj.id) ?? 'down')
+          directionFromVelocity(velocity, this.lastBotFacing.get(obj.id) ?? 'down')
         );
-        this.lastBotIsMoving.set(obj.id, true);
-      } else {
-        // Not moving this tick (keep last velocity + last facing).
-        this.lastBotIsMoving.set(obj.id, false);
       }
 
       this.lastBotPositions.set(obj.id, { x: pos.x, y: pos.y });
