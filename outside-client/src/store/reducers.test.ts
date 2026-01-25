@@ -180,6 +180,59 @@ describe('Reducer Logic', () => {
     });
   });
 
+  describe('SIM_TICK Action', () => {
+    beforeEach(() => {
+      // Create terrain first (walkable region)
+      initialState = reducer(initialState, {
+        type: 'CREATE_TERRAIN',
+        payload: {
+          id: 'ground',
+          terrainType: 'grass',
+          x: -5,
+          y: -5,
+          width: 20,
+          height: 20,
+        },
+      });
+
+      // Create and place a bot
+      initialState = reducer(initialState, { type: 'CREATE_BOT', payload: { id: 'bot-sim' } });
+      initialState = reducer(initialState, {
+        type: 'PLACE_OBJECT',
+        payload: { id: 'bot-sim', position: { x: 0, y: 0 } },
+      });
+    });
+
+    it('advances timeMs and updates bot position continuously', () => {
+      const before = initialState.objects.get('bot-sim')!;
+      expect(before.position).toEqual({ x: 0, y: 0 });
+      expect(initialState.timeMs).toBe(0);
+
+      const next = reducer(initialState, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+      expect(next.timeMs).toBe(50);
+
+      const bot = next.objects.get('bot-sim')!;
+      expect(bot.position).toBeDefined();
+      expect(bot.velocity).toBeDefined();
+      expect(bot.motion).toBeDefined();
+      expect(bot.position).not.toEqual({ x: 0, y: 0 });
+    });
+
+    it('is deterministic for the same starting state and ticks', () => {
+      const run = (s: typeof initialState) => {
+        let cur = s;
+        for (let i = 0; i < 10; i++) {
+          cur = reducer(cur, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+        }
+        return cur;
+      };
+
+      const a = run(initialState);
+      const b = run(initialState);
+      expect(a).toEqual(b);
+    });
+  });
+
   describe('PLACE_TERRAIN Action', () => {
     it('should add terrain to ground layer', () => {
       const action: Action = {

@@ -7,6 +7,8 @@ import {
   TerrainObject,
   isValidPosition,
   isPositionOccupied,
+  getObjectAtPosition,
+  toTilePosition,
   placeObjectInGrid,
   removeObjectFromGrid,
   addTerrainObject,
@@ -15,6 +17,8 @@ import {
   createWorldState,
 } from '@outside/core';
 import { Action } from './actions';
+import { stepBotMotion } from './botMotion';
+import { directionFromVelocity } from '../utils/direction';
 
 /**
  * Reducer function that handles state updates using Immer
@@ -44,6 +48,103 @@ export function reducer(state: WorldState, action: Action): WorldState {
         };
 
         draft.objects.set(id, bot);
+        break;
+      }
+
+      case 'SIM_TICK': {
+        const { dtMs } = action.payload;
+        const dtSec = dtMs / 1000;
+        if (!(dtSec > 0)) {
+          return state;
+        }
+
+        const clampPos = (p: Position): Position => {
+          // Keep positions inside the world so flooring doesn't exceed bounds.
+          const maxX = draft.horizontalLimit + 0.999999;
+          const maxY = draft.verticalLimit + 0.999999;
+          return {
+            x: Math.max(-draft.horizontalLimit, Math.min(maxX, p.x)),
+            y: Math.max(-draft.verticalLimit, Math.min(maxY, p.y)),
+          };
+        };
+
+        const isBlocked = (botId: string, pos: Position): boolean => {
+          if (!isWalkable(draft, pos)) return true;
+          const occ = getObjectAtPosition(draft, pos);
+          if (occ && occ.id !== botId) return true;
+          return false;
+        };
+
+        // Deterministic tick: update time after stepping.
+        const timeMs = draft.timeMs;
+
+        for (const object of draft.objects.values()) {
+          if (object.type !== 'bot') continue;
+          if (!object.position) continue;
+
+          const prevPos = object.position;
+          const key = { seed: draft.seed, botId: object.id };
+          const update = stepBotMotion({
+            key,
+            timeMs,
+            dtMs,
+            previousMotion: object.motion,
+            previousFacing: object.facing,
+          });
+
+          let velocity = { ...update.velocity };
+          let nextPos: Position = {
+            x: prevPos.x + velocity.x * dtSec,
+            y: prevPos.y + velocity.y * dtSec,
+          };
+          nextPos = clampPos(nextPos);
+
+          // Tile-based collision / bounce (axis-separated).
+          let resolvedPos: Position = { ...prevPos };
+          let collidedX = false;
+          let collidedY = false;
+
+          const tryX: Position = { x: nextPos.x, y: resolvedPos.y };
+          if (!isBlocked(object.id, tryX)) {
+            resolvedPos.x = tryX.x;
+          } else {
+            velocity.x = -velocity.x;
+            collidedX = true;
+          }
+
+          const tryY: Position = { x: resolvedPos.x, y: nextPos.y };
+          if (!isBlocked(object.id, tryY)) {
+            resolvedPos.y = tryY.y;
+          } else {
+            velocity.y = -velocity.y;
+            collidedY = true;
+          }
+
+          // If we collided, keep position clamped and re-sync motion heading to new velocity.
+          resolvedPos = clampPos(resolvedPos);
+
+          object.position = resolvedPos;
+          object.velocity = velocity;
+          object.motion =
+            collidedX || collidedY
+              ? {
+                  ...update.motion,
+                  headingRad: Math.atan2(velocity.y, velocity.x),
+                  angularVelocityRadPerSec: -update.motion.angularVelocityRadPerSec * 0.5,
+                }
+              : update.motion;
+          object.facing = directionFromVelocity(velocity, object.facing ?? update.facing);
+
+          // Update grid occupancy only if tile changed.
+          const fromTile = toTilePosition(prevPos);
+          const toTile = toTilePosition(resolvedPos);
+          if (fromTile.x !== toTile.x || fromTile.y !== toTile.y) {
+            removeObjectFromGrid(draft.grid, prevPos, draft.horizontalLimit);
+            placeObjectInGrid(draft.grid, object, resolvedPos, draft.horizontalLimit);
+          }
+        }
+
+        draft.timeMs += dtMs;
         break;
       }
 
