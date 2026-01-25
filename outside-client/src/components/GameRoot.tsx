@@ -26,6 +26,9 @@ const AppInitializer: React.FC<{ onAppReady: (app: PixiApplication) => void }> =
 
   useEffect(() => {
     if (app) {
+      // Cap FPS to 60 to avoid runaway render loops on high refresh displays.
+      // (Pixi's ticker is still vsync-driven, but this clamps the maximum update rate.)
+      app.ticker.maxFPS = 60;
       console.log('[GameRoot] AppInitializer: App ready, calling onAppReady');
       onAppReady(app);
     }
