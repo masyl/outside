@@ -1,4 +1,4 @@
-# Urge system for Follow, Wander and Wait
+# {Pitch Name Goes Here}
 
 ## Motivation
 
@@ -20,14 +20,10 @@
 
 - TBD
 
-## Open Questions
-
-- TBD
-
 ## Next Logical Pitches
 
 - TBD
 
-## Implementation Details (use sparingly)
+## Review questions
 
 - TBD
