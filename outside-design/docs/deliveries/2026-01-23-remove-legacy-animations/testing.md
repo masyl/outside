@@ -8,7 +8,9 @@
 - [x] Limit the max FPS to 60
 - [x] When the state of the bot is walking, it should cycle through the walk animation sprites.
 - [x] The exact speed of the walk animation should match the speed.
-- [ ] The transition between ticks should be smoothened using the Motion animation library at 60fps, but not store those values in the state (purely visual on the client)
+- [ ] The current FPS seems to stop at 30 instead of 60
+- [ ] The walking animation seems to not realy cycle smoothly, as if it would keep reseting when changing direction or speed.
+- [x] The transition between ticks should be smoothened using the Motion animation library at 60fps, but not store those values in the state (purely visual on the client)
 
 ## Check for later
 

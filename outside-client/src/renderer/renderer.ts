@@ -41,6 +41,8 @@ export class GameRenderer {
 
   // Camera state (Grid Coordinates)
   private cameraPos = { x: 0, y: 0 };
+  private lastWorldUpdateAtMs: number = performance.now();
+  private botVisualCancels: Map<string, () => void> = new Map();
 
   constructor(app: Application) {
     this.app = app;
@@ -187,6 +189,10 @@ export class GameRenderer {
     // Store current world state for resize handler
     this.currentWorld = world;
 
+    const now = performance.now();
+    const dtSec = Math.max(1 / 60, Math.min(0.25, (now - this.lastWorldUpdateAtMs) / 1000));
+    this.lastWorldUpdateAtMs = now;
+
     // Update visual debug layer with new world state
     this.visualDebugLayer.setWorld(world);
 
@@ -201,12 +207,29 @@ export class GameRenderer {
     // Update camera target to follow selected bot or return to center
     this.updateCameraTarget(world);
 
-    this.updateUnified(world);
+    this.updateUnified(world, dtSec);
   }
 
-  private updateUnified(world: WorldState): void {
+  private updateUnified(world: WorldState, dtSec: number = 0): void {
     const renderables = buildRenderables(world);
     this.unifiedRenderer.render(renderables);
+
+    // Smooth bot transitions between world snapshots (purely visual).
+    // This is especially important for remote clients that receive state at ~125ms intervals.
+    for (const r of renderables) {
+      if (r.kind !== 'bot') continue;
+      const display: any = this.unifiedRenderer.getIndex().get(r.id);
+      if (!display) continue;
+      const targetX = display.__targetX;
+      const targetY = display.__targetY;
+      if (typeof targetX !== 'number' || typeof targetY !== 'number') continue;
+
+      const cancelPrev = this.botVisualCancels.get(r.id);
+      if (cancelPrev) cancelPrev();
+
+      const controls = animate(display, { x: targetX, y: targetY }, { duration: dtSec });
+      this.botVisualCancels.set(r.id, () => controls.cancel());
+    }
   }
 
   /**

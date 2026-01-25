@@ -55,10 +55,19 @@ export function createPixiDisplayAdapter(
     update(c: Container, renderable: Renderable): void {
       const zoomScale = getZoomScale();
       const displayPos = CoordinateConverter.gridToDisplay(renderable.position, zoomScale);
-      c.x = displayPos.x;
-      c.y = displayPos.y;
 
       if (renderable.kind === 'bot') {
+        const targetX = displayPos.x;
+        const targetY = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
+        const anyC: any = c as any;
+        anyC.__targetX = targetX;
+        anyC.__targetY = targetY;
+        if (anyC.__hasPos !== true) {
+          c.x = targetX;
+          c.y = targetY;
+          anyC.__hasPos = true;
+        }
+
         const idleTexture = opts.getBotTexture();
         const walkTexture = opts.getBotWalkTexture();
 
@@ -98,8 +107,11 @@ export function createPixiDisplayAdapter(
           sprite.scale.set(zoomScale, zoomScale);
         }
 
-        c.y += COORDINATE_SYSTEM.VERTICAL_OFFSET;
       } else {
+        // Terrain is not smoothed; snap to exact position.
+        c.x = displayPos.x;
+        c.y = displayPos.y;
+
         // Terrain: clear children and rebuild visuals (simple, safe; optimize later).
         c.removeChildren().forEach((child) => child.destroy({ children: true }));
 
