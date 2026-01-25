@@ -31,7 +31,7 @@ export class GameRenderer {
   private visualDebugLayer: VisualDebugLayer;
   private rootContainer: Container;
   private unifiedRoot: Container;
-  private rendererMode: 'legacy' | 'unified' | 'dual' = 'legacy';
+  private rendererMode: 'legacy' | 'unified' | 'dual' = 'unified';
   private unifiedRenderer: UnifiedRenderer<any>;
   private lastParityLogAtMs: number = 0;
   private botTexture?: Texture;
@@ -81,6 +81,9 @@ export class GameRenderer {
         renderer: this.app.renderer,
       })
     );
+
+    // Apply initial visibility based on default mode.
+    this.applyRendererVisibility();
 
     // Listen for zoom changes and force redraw
     zoomManager.addZoomChangeListener((level, scale) => {

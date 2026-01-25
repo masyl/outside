@@ -121,8 +121,8 @@ Notes:
 
 ### Phase 4: Late swap (flip default, keep rollback)
 
-- [ ] Flip default to `"unified"`
-- [ ] Keep `"legacy"` and `"dual"` for quick rollback/diagnosis
+- [x] Flip default to `"unified"`
+- [x] Keep `"legacy"` and `"dual"` for quick rollback/diagnosis
 - [ ] Bake period while monitoring parity metrics and player-visible regressions
 
 ### Phase 5: Remove legacy (only after stable swap)
