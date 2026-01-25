@@ -80,7 +80,6 @@ export class AnimationController {
           );
           sprite.x = displayPos.x;
           sprite.y = displayPos.y + VERTICAL_OFFSET;
-          sprite.scale.set(zoomScale, zoomScale);
         }
         return;
       }
@@ -112,16 +111,7 @@ export class AnimationController {
 
     let sprite = this.renderer.getSpriteForObject(id);
     if (!sprite) {
-      const world = this.store.getState();
-      // Try to force-creation for missing sprite (race condition between color swap + animation)
-      const object = world.objects.get(id);
-      if (object) {
-        sprite = this.renderer.ensureSpriteForObject(object);
-      }
-    }
-
-    if (!sprite) {
-      console.warn(`[AnimationController] Sprite not found for object ${id}`);
+      // Sprite might not be created yet (render/update ordering). Skip animation for this tick.
       return;
     }
 

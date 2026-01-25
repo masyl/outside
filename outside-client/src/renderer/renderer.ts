@@ -1,23 +1,15 @@
 import { Application, Container, Texture, Sprite, Assets, Graphics } from 'pixi.js';
-import { GameObject, WorldState, Direction } from '@outside/core';
+import { WorldState, Direction } from '@outside/core';
 import { animate } from 'motion';
 
 import { DISPLAY_TILE_SIZE, createGrid, getGridDimensions } from './grid';
 import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
-import {
-  createBotPlaceholder,
-  createObjectsLayerWithIndex,
-  updateObjectsLayerWithIndex,
-  updateSpriteColors,
-  SpriteIndex,
-} from './objects';
-import { createTerrainLayer, updateTerrainLayer } from './terrain';
+import { updateBotSpriteFrame } from './objects';
 import { VisualDebugLayer } from './visualDebugLayer';
 import { zoomManager } from '../zoom/zoomState';
 import { buildRenderables } from './unified/renderables';
 import { createPixiDisplayAdapter } from './unified/pixiAdapter';
 import { UnifiedRenderer } from './unified/unifiedRenderer';
-import { computeParitySummary } from './unified/parity';
 // Note: keep viewport math local to avoid module-resolution flakiness in some editors.
 // (We still test the equivalent pure function in `viewport.test.ts`.)
 import { debugStore } from '../debug/debugStore';
@@ -28,21 +20,15 @@ import { debugStore } from '../debug/debugStore';
 export class GameRenderer {
   private app: Application;
   private gridContainer: Container;
-  private terrainContainer: Container;
-  private objectsContainer: Container;
   private debugOverlayContainer!: Container;
   private visualDebugLayer: VisualDebugLayer;
   private rootContainer: Container;
   private unifiedRoot: Container;
-  private rendererMode: 'legacy' | 'unified' | 'dual' = 'unified';
   private unifiedRenderer: UnifiedRenderer<any>;
-  private lastParityLogAtMs: number = 0;
   private botTexture?: Texture;
   private botWalkTexture?: Texture;
   private terrainTexture?: Texture;
-  private spriteIndex: SpriteIndex = new Map();
   private selectedBotId: string | null = null;
-  private previousGroundLayerSize: number = 0;
   private currentWorld: WorldState | null = null;
   private isDebugEnabled: boolean = false;
 
@@ -56,23 +42,18 @@ export class GameRenderer {
     this.rootContainer = new Container();
     this.app.stage.addChild(this.rootContainer);
 
-    // Create containers for each layer (rendered in order: grid, terrain, debug, objects)
+    // Create containers for each layer
     this.gridContainer = new Container();
-    this.terrainContainer = new Container();
     this.debugOverlayContainer = new Container();
     this.visualDebugLayer = new VisualDebugLayer();
-    this.objectsContainer = new Container();
 
-    // Unified renderer root (parallel pipeline). Hidden by default.
+    // Unified renderer root (single pipeline).
     this.unifiedRoot = new Container();
-    this.unifiedRoot.visible = false;
+    this.unifiedRoot.visible = true;
     this.unifiedRoot.sortableChildren = true;
 
-    // Add containers in render order: grid (bottom), terrain, objects, unified root, debug overlays (top).
-    // Debug overlays should always draw above both legacy and unified pipelines.
+    // Add containers in render order: grid (bottom), unified world, debug overlays (top).
     this.rootContainer.addChild(this.gridContainer);
-    this.rootContainer.addChild(this.terrainContainer);
-    this.rootContainer.addChild(this.objectsContainer);
     this.rootContainer.addChild(this.unifiedRoot);
     this.rootContainer.addChild(this.debugOverlayContainer);
     this.rootContainer.addChild(this.visualDebugLayer);
@@ -86,9 +67,8 @@ export class GameRenderer {
       })
     );
 
-    // Apply initial visibility based on default mode.
-    this.applyRendererVisibility();
-    debugStore.update({ rendererMode: this.rendererMode });
+    // Unified-only renderer mode.
+    debugStore.update({ rendererMode: 'unified' });
 
     // Listen for zoom changes and force redraw
     zoomManager.addZoomChangeListener((level, scale) => {
@@ -162,40 +142,9 @@ export class GameRenderer {
     const grid = createGrid(world);
     this.gridContainer.addChild(grid);
 
-    // Legacy pipeline initialization (only when legacy pipeline is active).
-    if (this.rendererMode !== 'unified') {
-      // Create terrain layer (ground layer, renders above grid)
-      this.terrainContainer.removeChildren();
-      if (this.terrainTexture) {
-        const terrainLayer = createTerrainLayer(world, this.terrainTexture);
-        this.terrainContainer.addChild(terrainLayer);
-      } else {
-        // Fallback if textures not loaded yet (or failed)
-        const terrainLayer = createTerrainLayer(world);
-        this.terrainContainer.addChild(terrainLayer);
-      }
-
-      // Create objects layer and sprite index (surface layer, renders above terrain)
-      this.objectsContainer.removeChildren();
-      const { container, spriteIndex } = createObjectsLayerWithIndex(
-        world,
-        this.botTexture,
-        this.app.renderer,
-        this.selectedBotId
-      );
-      this.objectsContainer.addChild(container);
-      this.spriteIndex = spriteIndex;
-    } else {
-      // In unified mode, ensure legacy containers are not holding stale visuals.
-      this.terrainContainer.removeChildren();
-      this.objectsContainer.removeChildren();
-      this.spriteIndex = new Map();
-    }
-
     // Update camera target based on initial state
     this.updateCameraTarget(world);
 
-    // Optional: also update unified renderer if enabled (no visible change by default).
     this.updateUnified(world);
   }
 
@@ -209,27 +158,6 @@ export class GameRenderer {
     // Update visual debug layer with new world state
     this.visualDebugLayer.setWorld(world);
 
-    // Legacy pipeline updates (skip entirely in unified mode).
-    if (this.rendererMode !== 'unified') {
-      // Always update terrain layer when world state changes
-      // This ensures terrain is rendered correctly as it's added incrementally
-      if (this.terrainTexture) {
-        updateTerrainLayer(this.terrainContainer, world, this.terrainTexture);
-      } else {
-        updateTerrainLayer(this.terrainContainer, world);
-      }
-
-      // Update objects layer and sprite index
-      updateObjectsLayerWithIndex(
-        this.objectsContainer,
-        world,
-        this.botTexture,
-        this.app.renderer,
-        this.spriteIndex,
-        this.selectedBotId
-      );
-    }
-
     // Update debug grid if enabled
     if (this.isDebugEnabled) {
       this.updateBotDebugGrid(world, true);
@@ -238,147 +166,12 @@ export class GameRenderer {
     // Update camera target to follow selected bot or return to center
     this.updateCameraTarget(world);
 
-    // Optional: also update unified renderer if enabled (no visible change by default).
     this.updateUnified(world);
   }
 
-  /**
-   * Switch between legacy/unified/dual renderer modes.
-   * Default is legacy. Dual mode updates both (unified hidden).
-   */
-  setRendererMode(mode: 'legacy' | 'unified' | 'dual'): void {
-    if (this.rendererMode === mode) return;
-    this.rendererMode = mode;
-    this.applyRendererVisibility();
-    debugStore.update({ rendererMode: mode });
-  }
-
-  getRendererMode(): 'legacy' | 'unified' | 'dual' {
-    return this.rendererMode;
-  }
-
-  private applyRendererVisibility(): void {
-    if (this.rendererMode === 'legacy') {
-      this.terrainContainer.visible = true;
-      this.objectsContainer.visible = true;
-      this.unifiedRoot.visible = false;
-      return;
-    }
-
-    if (this.rendererMode === 'unified') {
-      this.terrainContainer.visible = false;
-      this.objectsContainer.visible = false;
-      this.unifiedRoot.visible = true;
-      return;
-    }
-
-    // dual
-    this.terrainContainer.visible = true;
-    this.objectsContainer.visible = true;
-    this.unifiedRoot.visible = false; // shadow-run
-  }
-
   private updateUnified(world: WorldState): void {
-    if (this.rendererMode === 'legacy') {
-      return;
-    }
-
     const renderables = buildRenderables(world);
     this.unifiedRenderer.render(renderables);
-
-    if (this.rendererMode === 'dual') {
-      this.checkDualModeParity(renderables);
-    }
-  }
-
-  private checkDualModeParity(renderables: ReturnType<typeof buildRenderables>): void {
-    // Collect expected ids/counts from renderables.
-    const expectedBotIds = renderables.filter((r) => r.kind === 'bot').map((r) => r.id);
-    const expectedTerrainCount = renderables.filter((r) => r.kind === 'terrain').length;
-
-    // Legacy bot positions: from spriteIndex.
-    const legacyBotPositions = new Map<string, { x: number; y: number }>();
-    for (const [id, sprite] of this.spriteIndex) {
-      legacyBotPositions.set(id, { x: sprite.x, y: sprite.y });
-    }
-
-    // Unified bot positions: from unified renderer display index.
-    const unifiedBotPositions = new Map<string, { x: number; y: number }>();
-    const unifiedIndex = this.unifiedRenderer.getIndex();
-    for (const id of expectedBotIds) {
-      const display: any = unifiedIndex.get(id);
-      if (display && typeof display.x === 'number' && typeof display.y === 'number') {
-        unifiedBotPositions.set(id, { x: display.x, y: display.y });
-      }
-    }
-
-    // Terrain counts:
-    // - legacy: terrainContainer children are terrain sprites (updateTerrainLayer rebuilds children)
-    // - unified: count from renderables (since unified display index includes bots too)
-    const legacyTerrainCount = this.terrainContainer.children.length;
-    const unifiedTerrainCount = expectedTerrainCount;
-
-    // Terrain ordering (legacy tagged via sprite.name = "terrain:<id>")
-    const legacyTerrainOrder = this.terrainContainer.children
-      .map((c) => c.name)
-      .filter((name) => name.startsWith('terrain:'))
-      .map((name) => name.slice('terrain:'.length));
-    const expectedTerrainOrder = renderables
-      .filter((r) => r.kind === 'terrain')
-      .map((r) => r.id);
-
-    // Unified lifecycle/leak check: display index should match expected ids (bots + terrain).
-    const expectedAllIds = new Set(renderables.map((r) => r.id));
-    const unifiedExtraIds: string[] = [];
-    for (const id of unifiedIndex.keys()) {
-      if (!expectedAllIds.has(id)) {
-        unifiedExtraIds.push(id);
-      }
-    }
-
-    const summary = computeParitySummary({
-      expectedBotIds,
-      expectedTerrainCount,
-      legacyBotPositions,
-      unifiedBotPositions,
-      legacyTerrainCount,
-      unifiedTerrainCount,
-      tolerancePx: 0.5,
-    });
-
-    // Throttle logs to avoid spamming console while running in dual mode.
-    const orderingOk =
-      legacyTerrainOrder.length === expectedTerrainOrder.length &&
-      legacyTerrainOrder.every((id, i) => id === expectedTerrainOrder[i]);
-    unifiedExtraIds.sort();
-
-    if (!summary.ok || !orderingOk || unifiedExtraIds.length > 0) {
-      const now = performance.now();
-      if (now - this.lastParityLogAtMs > 2000) {
-        this.lastParityLogAtMs = now;
-        console.warn('[UnifiedRenderer][dual] parity mismatch', {
-          bot: {
-            expected: summary.bot.expectedCount,
-            legacy: summary.bot.legacyCount,
-            unified: summary.bot.unifiedCount,
-            missingInLegacy: summary.bot.missingInLegacy.slice(0, 5),
-            missingInUnified: summary.bot.missingInUnified.slice(0, 5),
-            positionMismatches: summary.bot.positionMismatches.slice(0, 3),
-          },
-          terrain: {
-            ...summary.terrain,
-            orderingOk,
-            legacyFirstIds: legacyTerrainOrder.slice(0, 5),
-            expectedFirstIds: expectedTerrainOrder.slice(0, 5),
-          },
-          unified: {
-            extraIds: unifiedExtraIds.slice(0, 5),
-            indexSize: unifiedIndex.size,
-            expectedSize: expectedAllIds.size,
-          },
-        });
-      }
-    }
   }
 
   /**
@@ -390,20 +183,6 @@ export class GameRenderer {
     }
 
     this.selectedBotId = selectedBotId;
-
-    // Update sprite colors based on new selection (legacy pipeline only).
-    if (this.rendererMode !== 'unified') {
-      if (!this.botTexture) {
-        updateSpriteColors(
-          this.objectsContainer,
-          world,
-          this.botTexture,
-          this.app.renderer,
-          this.spriteIndex,
-          this.selectedBotId
-        );
-      }
-    }
 
     // Update camera target to follow new selection
     this.updateCameraTarget(world);
@@ -464,10 +243,6 @@ export class GameRenderer {
    * Get sprite for a given object id
    */
   getSpriteForObject(id: string): Sprite | undefined {
-    // Legacy pipeline: spriteIndex maps objectId -> Sprite.
-    const legacy = this.spriteIndex.get(id);
-    if (legacy) return legacy;
-
     // Unified pipeline: display index maps entityId -> Container (wrapping visual).
     const display: any = this.unifiedRenderer.getIndex().get(id);
     if (!display) return undefined;
@@ -492,35 +267,9 @@ export class GameRenderer {
       this.gridContainer.addChild(grid);
     }
 
-    if (this.rendererMode !== 'unified') {
-      // Recreate terrain layer with new zoom scale
-      if (this.currentWorld && this.terrainTexture) {
-        this.terrainContainer.removeChildren();
-        const terrainLayer = createTerrainLayer(this.currentWorld, this.terrainTexture);
-        this.terrainContainer.addChild(terrainLayer);
-      }
-
-      // Update all existing bot sprites' scales and positions
-      if (this.currentWorld) {
-        const world = this.currentWorld; // Create local const to satisfy TypeScript
-        this.spriteIndex.forEach((sprite, objectId) => {
-          // Apply zoom scaling to sprite
-          sprite.scale.set(zoomScale, zoomScale);
-
-          // Update position to match new zoom scale
-          const gameObject = world.objects.get(objectId);
-          if (gameObject?.position) {
-            const displayPos = CoordinateConverter.gridToDisplay(gameObject.position, zoomScale);
-            sprite.x = displayPos.x;
-            sprite.y = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
-          }
-        });
-      }
-    } else {
-      // Unified pipeline: re-render with the new zoom scale applied by adapter.
-      if (this.currentWorld) {
-        this.updateUnified(this.currentWorld);
-      }
+    // Unified pipeline: re-render with the new zoom scale applied by adapter.
+    if (this.currentWorld) {
+      this.updateUnified(this.currentWorld);
     }
 
     // Force visual debug layer to redraw with new zoom
@@ -606,12 +355,12 @@ export class GameRenderer {
    * Update bot visual state (direction and animation)
    */
   updateBotDirection(id: string, direction: Direction, isMoving: boolean): void {
-    // This will be implemented in objects.ts or handled by updating sprite textures
-    // We need to pass this state to a helper that updates the specific sprite
-    const sprite = this.spriteIndex.get(id);
-    if (sprite && this.botTexture && this.botWalkTexture) {
-      // We need to import updateBotSpriteAnimation from objects.ts
-    }
+    const sprite = this.getSpriteForObject(id);
+    if (!sprite) return;
+    if (!this.botTexture || !this.botWalkTexture) return;
+
+    // Frame selection is still simplistic (Phase 5 cleanup). Direction + moving/idle are respected.
+    updateBotSpriteFrame(sprite, this.botTexture, this.botWalkTexture, direction, isMoving, 0);
   }
 
   /**
@@ -631,38 +380,5 @@ export class GameRenderer {
     this.updateViewportTransform();
   }
 
-  /**
-   * Ensure a sprite exists for the given object, creating a placeholder if needed.
-   */
-  ensureSpriteForObject(object: GameObject): Sprite | undefined {
-    if (object.type !== 'bot') {
-      return undefined;
-    }
-
-    // Don't create sprites for bots without a position
-    if (!object.position) {
-      return undefined;
-    }
-
-    let sprite = this.spriteIndex.get(object.id);
-    if (sprite) {
-      return sprite;
-    }
-
-    sprite = createBotPlaceholder(this.app.renderer, false);
-    const zoomScale = getZoomScale();
-    const displayPos = CoordinateConverter.gridToDisplay(
-      {
-        x: object.position.x,
-        y: object.position.y,
-      },
-      zoomScale
-    );
-    sprite.x = displayPos.x;
-    sprite.y = displayPos.y + COORDINATE_SYSTEM.VERTICAL_OFFSET;
-    this.objectsContainer.addChild(sprite);
-    this.spriteIndex.set(object.id, sprite);
-
-    return sprite;
-  }
+  // Note: legacy `ensureSpriteForObject` removed. The unified renderer owns sprite lifecycle.
 }

@@ -131,10 +131,10 @@ Notes:
 - [ ] Delete or deprecate legacy helpers only after:
   - [ ] unified mode has been default for a while
   - [ ] rollback is no longer needed
-- [ ] Remove feature flag and dual-mode scaffolding
+- [x] Remove feature flag and dual-mode scaffolding
 
 Notes:
-- In `unified` mode, `GameRenderer` now skips legacy terrain/object updates entirely (while keeping dual/legacy modes functional for rollback).
+- Unified renderer is now the only pipeline wired in `GameRenderer` (no `legacy`/`dual` paths in the runtime renderer).
 
 ## Success Criteria (exit gates)
 
