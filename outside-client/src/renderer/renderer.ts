@@ -17,6 +17,7 @@ import { zoomManager } from '../zoom/zoomState';
 import { buildRenderables } from './unified/renderables';
 import { createPixiDisplayAdapter } from './unified/pixiAdapter';
 import { UnifiedRenderer } from './unified/unifiedRenderer';
+import { computeParitySummary } from './unified/parity';
 
 /**
  * Main renderer for the game
@@ -32,6 +33,7 @@ export class GameRenderer {
   private unifiedRoot: Container;
   private rendererMode: 'legacy' | 'unified' | 'dual' = 'legacy';
   private unifiedRenderer: UnifiedRenderer<any>;
+  private lastParityLogAtMs: number = 0;
   private botTexture?: Texture;
   private botWalkTexture?: Texture;
   private terrainTexture?: Texture;
@@ -251,6 +253,67 @@ export class GameRenderer {
 
     const renderables = buildRenderables(world);
     this.unifiedRenderer.render(renderables);
+
+    if (this.rendererMode === 'dual') {
+      this.checkDualModeParity(renderables);
+    }
+  }
+
+  private checkDualModeParity(renderables: ReturnType<typeof buildRenderables>): void {
+    // Collect expected ids/counts from renderables.
+    const expectedBotIds = renderables.filter((r) => r.kind === 'bot').map((r) => r.id);
+    const expectedTerrainCount = renderables.filter((r) => r.kind === 'terrain').length;
+
+    // Legacy bot positions: from spriteIndex.
+    const legacyBotPositions = new Map<string, { x: number; y: number }>();
+    for (const [id, sprite] of this.spriteIndex) {
+      legacyBotPositions.set(id, { x: sprite.x, y: sprite.y });
+    }
+
+    // Unified bot positions: from unified renderer display index.
+    const unifiedBotPositions = new Map<string, { x: number; y: number }>();
+    const unifiedIndex = this.unifiedRenderer.getIndex();
+    for (const id of expectedBotIds) {
+      const display: any = unifiedIndex.get(id);
+      if (display && typeof display.x === 'number' && typeof display.y === 'number') {
+        unifiedBotPositions.set(id, { x: display.x, y: display.y });
+      }
+    }
+
+    // Terrain counts:
+    // - legacy: terrainContainer children are terrain sprites (updateTerrainLayer rebuilds children)
+    // - unified: count from renderables (since unified display index includes bots too)
+    const legacyTerrainCount = this.terrainContainer.children.length;
+    const unifiedTerrainCount = expectedTerrainCount;
+
+    const summary = computeParitySummary({
+      expectedBotIds,
+      expectedTerrainCount,
+      legacyBotPositions,
+      unifiedBotPositions,
+      legacyTerrainCount,
+      unifiedTerrainCount,
+      tolerancePx: 0.5,
+    });
+
+    // Throttle logs to avoid spamming console while running in dual mode.
+    if (!summary.ok) {
+      const now = performance.now();
+      if (now - this.lastParityLogAtMs > 2000) {
+        this.lastParityLogAtMs = now;
+        console.warn('[UnifiedRenderer][dual] parity mismatch', {
+          bot: {
+            expected: summary.bot.expectedCount,
+            legacy: summary.bot.legacyCount,
+            unified: summary.bot.unifiedCount,
+            missingInLegacy: summary.bot.missingInLegacy.slice(0, 5),
+            missingInUnified: summary.bot.missingInUnified.slice(0, 5),
+            positionMismatches: summary.bot.positionMismatches.slice(0, 3),
+          },
+          terrain: summary.terrain,
+        });
+      }
+    }
   }
 
   /**

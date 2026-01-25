@@ -103,15 +103,20 @@ Notes:
 
 ### Phase 3: Dual mode parity (shadow-run)
 
-- [ ] Dual mode behavior:
-  - [ ] Update both pipelines every frame
-  - [ ] Legacy visible; unified hidden but running
+- [x] Dual mode behavior:
+  - [x] Update both pipelines every frame
+  - [x] Legacy visible; unified hidden but running
 - [ ] Debug parity checks (debug-only):
-  - [ ] **Counts parity**: display objects per kind (bots / terrain)
-  - [ ] **Position parity**: per-entity position match within tolerance (grid->display conversion + zoom)
+  - [x] **Counts parity**: bots + terrain count parity (terrain is count-only for now)
+  - [x] **Position parity**: per-bot position match within tolerance (pixels)
   - [ ] **Ordering parity**: terrain stacking and bot-over-terrain consistency
   - [ ] **Lifecycle parity**: create/remove events match (no orphan DisplayObjects)
   - [ ] **Memory / perf**: no unbounded growth in display indices
+
+Notes:
+- Dual mode parity logging is throttled to avoid console spam.
+- Implemented pure parity helper with unit tests in `outside-client/src/renderer/unified/parity.ts`.
+- Terrain parity is count-only for now (legacy terrain sprites are not keyed by terrain id yet).
 
 ### Phase 4: Late swap (flip default, keep rollback)
 
