@@ -39,6 +39,7 @@ export function createWorldState(seed?: number, limit: number = 30): WorldState 
     horizontalLimit,
     verticalLimit,
     seed: seed ?? Math.floor(Math.random() * 2147483647), // Generate random seed if not provided
+    timeMs: 0,
   };
 }
 
