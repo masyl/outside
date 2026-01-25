@@ -74,7 +74,13 @@ export class GameRenderer {
     this.rootContainer.addChild(this.unifiedRoot);
 
     // Renderer-agnostic unified renderer core with a Pixi adapter.
-    this.unifiedRenderer = new UnifiedRenderer(createPixiDisplayAdapter(this.unifiedRoot));
+    this.unifiedRenderer = new UnifiedRenderer(
+      createPixiDisplayAdapter(this.unifiedRoot, {
+        getBotTexture: () => this.botTexture,
+        getTerrainTexture: () => this.terrainTexture,
+        renderer: this.app.renderer,
+      })
+    );
 
     // Listen for zoom changes and force redraw
     zoomManager.addZoomChangeListener((level, scale) => {

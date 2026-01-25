@@ -83,12 +83,13 @@ Notes:
   - [x] `displayIndex: Map<EntityId, DisplayObject>` (single index for bots + terrain)
   - [x] Create/update/delete lifecycle
   - [x] Z-ordering strategy (`zIndex`, sorting, container structure)
-  - [ ] Asset resolution policy (`SpriteSpec.textureKey` -> texture/slice/tiling)
+  - [x] Asset resolution policy (`SpriteSpec.textureKey` -> texture/slice/tiling)
 - [x] Ensure **no coupling** to simulation; renderer consumes only `Renderable[]` (derived view)
 
 Notes:
 - Implemented core lifecycle in `outside-client/src/renderer/unified/unifiedRenderer.ts` with adapter abstraction (Pixi integration comes later).
 - Unit tests added in `unifiedRenderer.test.ts` to lock ordering + lifecycle behavior.
+- Pixi adapter now resolves bot/terrain visuals from existing textures when available, with safe fallbacks.
 
 ### Phase 2: Parallel integration (feature-flagged)
 
