@@ -13,6 +13,7 @@ import { UnifiedRenderer } from './unified/unifiedRenderer';
 // Note: keep viewport math local to avoid module-resolution flakiness in some editors.
 // (We still test the equivalent pure function in `viewport.test.ts`.)
 import { debugStore } from '../debug/debugStore';
+import { directionFromVelocity } from '../utils/direction';
 
 /**
  * Main renderer for the game
@@ -31,6 +32,8 @@ export class GameRenderer {
   private selectedBotId: string | null = null;
   private currentWorld: WorldState | null = null;
   private isDebugEnabled: boolean = false;
+  private lastBotPositions: Map<string, { x: number; y: number }> = new Map();
+  private lastBotFacing: Map<string, Direction> = new Map();
 
   // Camera state (Grid Coordinates)
   private cameraPos = { x: 0, y: 0 };
@@ -206,21 +209,29 @@ export class GameRenderer {
     // Enable visual debug layer when debug is on
     this.visualDebugLayer.setVisible(true);
 
-    // Update visual debug layer with bot positions and directions
+    // Update visual debug layer with bot positions and velocities.
     const botPositions = Array.from(world.objects.values())
       .filter((obj) => obj.type === 'bot' && obj.position)
       .map((obj) => {
-        // Access facing direction from animation state (real-time visual direction)
-        const bot = obj as any;
+        const pos = obj.position!;
+        const prev = this.lastBotPositions.get(obj.id);
+        const velocity = prev ? { x: pos.x - prev.x, y: pos.y - prev.y } : { x: 0, y: 0 };
 
         return {
-          x: obj.position!.x,
-          y: obj.position!.y,
-          direction: bot.facing || 'down',
+          x: pos.x,
+          y: pos.y,
+          velocity,
         };
       });
 
     this.visualDebugLayer.updateBotPositions(botPositions);
+
+    // Update last positions after computing velocities.
+    for (const obj of world.objects.values()) {
+      if (obj.type !== 'bot') continue;
+      if (!obj.position) continue;
+      this.lastBotPositions.set(obj.id, { x: obj.position.x, y: obj.position.y });
+    }
   }
 
   /**
@@ -354,10 +365,21 @@ export class GameRenderer {
   /**
    * Update bot visual state (direction and animation)
    */
-  updateBotDirection(id: string, direction: Direction, isMoving: boolean): void {
+  updateBotVelocity(id: string, velocity: { x: number; y: number }, isMoving: boolean): void {
     const sprite = this.getSpriteForObject(id);
     if (!sprite) return;
     if (!this.botTexture || !this.botWalkTexture) return;
+
+    // Convert velocity to an 8-way direction. Preserve last facing when velocity is zero.
+    const nextFacing =
+      velocity.x === 0 && velocity.y === 0 ? this.lastBotFacing.get(id) ?? 'down' : undefined;
+
+    const direction =
+      velocity.x === 0 && velocity.y === 0
+        ? (nextFacing ?? 'down')
+        : directionFromVelocity(velocity);
+
+    this.lastBotFacing.set(id, direction);
 
     // Frame selection is still simplistic (Phase 5 cleanup). Direction + moving/idle are respected.
     updateBotSpriteFrame(sprite, this.botTexture, this.botWalkTexture, direction, isMoving, 0);
