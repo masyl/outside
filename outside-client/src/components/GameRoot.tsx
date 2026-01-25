@@ -26,12 +26,40 @@ const AppInitializer: React.FC<{ onAppReady: (app: PixiApplication) => void }> =
 
   useEffect(() => {
     if (app) {
-      // Cap FPS to 60 to avoid runaway render loops on high refresh displays.
-      // (Pixi's ticker is still vsync-driven, but this clamps the maximum update rate.)
-      app.ticker.maxFPS = 60;
+      // Manual 60 FPS cap (robust on 120Hz displays).
+      // We stop Pixi's automatic ticker and drive it ourselves via requestAnimationFrame,
+      // only calling `ticker.update(now)` when enough time has elapsed.
+      const FPS = 60;
+      const fpsInterval = 1000 / FPS;
+
+      app.ticker.maxFPS = 0; // disable Pixi's internal maxFPS gate (we gate manually)
+      app.ticker.stop();
+
+      let then = performance.now();
+      let rafId = 0;
+
+      const animate = (now: number) => {
+        rafId = requestAnimationFrame(animate);
+
+        const elapsed = now - then;
+        if (elapsed > fpsInterval) {
+          then = now - (elapsed % fpsInterval);
+          app.ticker.update(now);
+        }
+      };
+
+      rafId = requestAnimationFrame(animate);
+
       console.log('[GameRoot] AppInitializer: App ready, calling onAppReady');
       onAppReady(app);
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        // Restore default behavior if this component unmounts.
+        app.ticker.start();
+      };
     }
+    return;
   }, [app, onAppReady]);
 
   return null;
