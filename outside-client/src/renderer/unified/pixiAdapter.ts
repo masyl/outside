@@ -2,7 +2,7 @@ import { Container, Graphics, Rectangle, Sprite, Texture, TilingSprite, type Ren
 
 import type { Renderable } from './renderables';
 import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from '../coordinateSystem';
-import { createBotPlaceholder, createBotSprite } from '../objects';
+import { createBotPlaceholder, createBotSprite, updateBotSpriteFrame } from '../objects';
 
 function getTerrainColor(textureKey: string): number {
   // textureKey format: "terrain:<type>"
@@ -34,6 +34,9 @@ export function createPixiDisplayAdapter(
   root: Container,
   opts: {
     getBotTexture: () => Texture | undefined;
+    getBotWalkTexture: () => Texture | undefined;
+    getBotFacing: (id: string) => import('@outside/core').Direction;
+    getBotIsMoving: (id: string) => boolean;
     getTerrainTexture: () => Texture | undefined;
     renderer: Renderer;
   }
@@ -49,23 +52,54 @@ export function createPixiDisplayAdapter(
     },
 
     update(c: Container, renderable: Renderable): void {
-      // Clear children and rebuild visuals (simple, safe; optimize later).
-      c.removeChildren().forEach((child) => child.destroy({ children: true }));
-
       const zoomScale = getZoomScale();
       const displayPos = CoordinateConverter.gridToDisplay(renderable.position, zoomScale);
       c.x = displayPos.x;
       c.y = displayPos.y;
 
       if (renderable.kind === 'bot') {
-        const botTexture = opts.getBotTexture();
-        const sprite = botTexture ? createBotSprite(botTexture) : createBotPlaceholder(opts.renderer);
-        // `createBotSprite` sets a base scale so 16px frames render as 64px tiles.
-        // Apply global zoom multiplicatively so bots scale consistently with terrain/viewport.
-        sprite.scale.set(sprite.scale.x * zoomScale, sprite.scale.y * zoomScale);
-        c.addChild(sprite);
+        const idleTexture = opts.getBotTexture();
+        const walkTexture = opts.getBotWalkTexture();
+
+        const existing = c.children[0];
+        let sprite: Sprite;
+
+        if (existing instanceof Sprite) {
+          sprite = existing;
+        } else {
+          c.removeChildren().forEach((child) => child.destroy({ children: true }));
+          sprite = idleTexture ? createBotSprite(idleTexture) : createBotPlaceholder(opts.renderer);
+          c.addChild(sprite);
+        }
+
+        if (idleTexture && walkTexture && sprite.texture.source === idleTexture.source) {
+          const direction = opts.getBotFacing(renderable.id);
+          const isMoving = opts.getBotIsMoving(renderable.id);
+          updateBotSpriteFrame(sprite, idleTexture, walkTexture, direction, isMoving, 0);
+        } else if (idleTexture && sprite.texture.source !== idleTexture.source) {
+          // Upgrade placeholder -> textured sprite once assets load.
+          c.removeChildren().forEach((child) => child.destroy({ children: true }));
+          sprite = createBotSprite(idleTexture);
+          c.addChild(sprite);
+
+          if (walkTexture) {
+            const direction = opts.getBotFacing(renderable.id);
+            const isMoving = opts.getBotIsMoving(renderable.id);
+            updateBotSpriteFrame(sprite, idleTexture, walkTexture, direction, isMoving, 0);
+          } else {
+            // At least apply zoom if walk texture isn't available yet.
+            sprite.scale.set(sprite.scale.x * zoomScale, sprite.scale.y * zoomScale);
+          }
+        } else if (!idleTexture) {
+          // Placeholder is 64x64 already; scale by zoom.
+          sprite.scale.set(zoomScale, zoomScale);
+        }
+
         c.y += COORDINATE_SYSTEM.VERTICAL_OFFSET;
       } else {
+        // Terrain: clear children and rebuild visuals (simple, safe; optimize later).
+        c.removeChildren().forEach((child) => child.destroy({ children: true }));
+
         const widthTiles = renderable.size?.width ?? 1;
         const heightTiles = renderable.size?.height ?? 1;
         const terrainTexture = opts.getTerrainTexture();

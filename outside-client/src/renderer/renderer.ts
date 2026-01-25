@@ -33,7 +33,9 @@ export class GameRenderer {
   private currentWorld: WorldState | null = null;
   private isDebugEnabled: boolean = false;
   private lastBotPositions: Map<string, { x: number; y: number }> = new Map();
+  private lastBotVelocity: Map<string, { x: number; y: number }> = new Map();
   private lastBotFacing: Map<string, Direction> = new Map();
+  private lastBotIsMoving: Map<string, boolean> = new Map();
 
   // Camera state (Grid Coordinates)
   private cameraPos = { x: 0, y: 0 };
@@ -65,6 +67,9 @@ export class GameRenderer {
     this.unifiedRenderer = new UnifiedRenderer(
       createPixiDisplayAdapter(this.unifiedRoot, {
         getBotTexture: () => this.botTexture,
+        getBotWalkTexture: () => this.botWalkTexture,
+        getBotFacing: (id: string) => this.lastBotFacing.get(id) ?? 'down',
+        getBotIsMoving: (id: string) => this.lastBotIsMoving.get(id) ?? false,
         getTerrainTexture: () => this.terrainTexture,
         renderer: this.app.renderer,
       })
@@ -145,6 +150,17 @@ export class GameRenderer {
     const grid = createGrid(world);
     this.gridContainer.addChild(grid);
 
+    // Reset derived bot state (for velocity/facing/debug rendering).
+    this.lastBotPositions.clear();
+    this.lastBotVelocity.clear();
+    this.lastBotFacing.clear();
+    this.lastBotIsMoving.clear();
+    for (const obj of world.objects.values()) {
+      if (obj.type !== 'bot') continue;
+      if (!obj.position) continue;
+      this.lastBotPositions.set(obj.id, { x: obj.position.x, y: obj.position.y });
+    }
+
     // Update camera target based on initial state
     this.updateCameraTarget(world);
 
@@ -160,6 +176,9 @@ export class GameRenderer {
 
     // Update visual debug layer with new world state
     this.visualDebugLayer.setWorld(world);
+
+    // Derive per-bot velocity/facing from movement deltas.
+    this.updateDerivedBotMotion(world);
 
     // Update debug grid if enabled
     if (this.isDebugEnabled) {
@@ -209,13 +228,15 @@ export class GameRenderer {
     // Enable visual debug layer when debug is on
     this.visualDebugLayer.setVisible(true);
 
+    // Ensure derived velocity/facing is up to date even if debug is toggled on mid-game.
+    this.updateDerivedBotMotion(world);
+
     // Update visual debug layer with bot positions and velocities.
     const botPositions = Array.from(world.objects.values())
       .filter((obj) => obj.type === 'bot' && obj.position)
       .map((obj) => {
         const pos = obj.position!;
-        const prev = this.lastBotPositions.get(obj.id);
-        const velocity = prev ? { x: pos.x - prev.x, y: pos.y - prev.y } : { x: 0, y: 0 };
+        const velocity = this.lastBotVelocity.get(obj.id) ?? { x: 0, y: 0 };
 
         return {
           x: pos.x,
@@ -225,12 +246,44 @@ export class GameRenderer {
       });
 
     this.visualDebugLayer.updateBotPositions(botPositions);
+  }
 
-    // Update last positions after computing velocities.
+  private updateDerivedBotMotion(world: WorldState): void {
+    const currentBotIds = new Set<string>();
+
     for (const obj of world.objects.values()) {
       if (obj.type !== 'bot') continue;
       if (!obj.position) continue;
-      this.lastBotPositions.set(obj.id, { x: obj.position.x, y: obj.position.y });
+      currentBotIds.add(obj.id);
+
+      const pos = obj.position;
+      const prev = this.lastBotPositions.get(obj.id);
+      const instantVelocity = prev ? { x: pos.x - prev.x, y: pos.y - prev.y } : { x: 0, y: 0 };
+
+      // Persist the last non-zero velocity so debug vectors don't flicker.
+      if (instantVelocity.x !== 0 || instantVelocity.y !== 0) {
+        this.lastBotVelocity.set(obj.id, instantVelocity);
+        this.lastBotFacing.set(
+          obj.id,
+          directionFromVelocity(instantVelocity, this.lastBotFacing.get(obj.id) ?? 'down')
+        );
+        this.lastBotIsMoving.set(obj.id, true);
+      } else {
+        // Not moving this tick (keep last velocity + last facing).
+        this.lastBotIsMoving.set(obj.id, false);
+      }
+
+      this.lastBotPositions.set(obj.id, { x: pos.x, y: pos.y });
+    }
+
+    // Prune removed bots to keep maps bounded.
+    for (const id of this.lastBotPositions.keys()) {
+      if (!currentBotIds.has(id)) {
+        this.lastBotPositions.delete(id);
+        this.lastBotVelocity.delete(id);
+        this.lastBotFacing.delete(id);
+        this.lastBotIsMoving.delete(id);
+      }
     }
   }
 
@@ -366,6 +419,11 @@ export class GameRenderer {
    * Update bot visual state (direction and animation)
    */
   updateBotVelocity(id: string, velocity: { x: number; y: number }, isMoving: boolean): void {
+    this.lastBotIsMoving.set(id, isMoving);
+    if (velocity.x !== 0 || velocity.y !== 0) {
+      this.lastBotVelocity.set(id, velocity);
+    }
+
     const sprite = this.getSpriteForObject(id);
     if (!sprite) return;
     if (!this.botTexture || !this.botWalkTexture) return;
