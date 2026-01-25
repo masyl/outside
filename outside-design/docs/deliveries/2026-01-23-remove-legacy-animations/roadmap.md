@@ -128,13 +128,14 @@ Notes:
 ### Phase 5: Remove legacy (only after stable swap)
 
 - [x] Remove legacy update paths (`terrain.ts`/`objects.ts` pipeline usage) after swap is stable
-- [ ] Delete or deprecate legacy helpers only after:
-  - [ ] unified mode has been default for a while
-  - [ ] rollback is no longer needed
+- [x] Delete or deprecate legacy helpers only after:
+  - [x] unified mode has been default for a while
+  - [x] rollback is no longer needed
 - [x] Remove feature flag and dual-mode scaffolding
 
 Notes:
 - Unified renderer is now the only pipeline wired in `GameRenderer` (no `legacy`/`dual` paths in the runtime renderer).
+- Legacy terrain pipeline module removed (`outside-client/src/renderer/terrain.ts`). Legacy “object layer” helpers were removed from `objects.ts` (kept bot sprite helpers still used by unified adapter).
 
 ## Success Criteria (exit gates)
 

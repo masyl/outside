@@ -1,5 +1,4 @@
 import { Container, Graphics, Rectangle, Sprite, Texture, TilingSprite, type Renderer } from 'pixi.js';
-import type { DisplayObject } from 'pixi.js';
 
 import type { Renderable } from './renderables';
 import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from '../coordinateSystem';
@@ -40,7 +39,7 @@ export function createPixiDisplayAdapter(
   }
 ) {
   return {
-    create(renderable: Renderable): DisplayObject {
+    create(renderable: Renderable): Container {
       // Use a stable Container wrapper so we can swap child visuals when assets become available.
       const g = new Container();
       // Keep interaction off for now; parity/selection comes later.
@@ -49,8 +48,7 @@ export function createPixiDisplayAdapter(
       return g;
     },
 
-    update(display: DisplayObject, renderable: Renderable): void {
-      const c = display as Container;
+    update(c: Container, renderable: Renderable): void {
       // Clear children and rebuild visuals (simple, safe; optimize later).
       c.removeChildren().forEach((child) => child.destroy({ children: true }));
 
@@ -81,12 +79,12 @@ export function createPixiDisplayAdapter(
       }
     },
 
-    destroy(display: DisplayObject): void {
+    destroy(display: Container): void {
       root.removeChild(display);
       display.destroy();
     },
 
-    setZIndex(display: DisplayObject, z: number): void {
+    setZIndex(display: Container, z: number): void {
       // Note: zIndex requires container.sortableChildren = true on the parent.
       (display as any).zIndex = z;
     },
@@ -97,7 +95,7 @@ function createTerrainFallback(
   widthTiles: number,
   heightTiles: number,
   textureKey: string
-): DisplayObject {
+): Graphics {
   const zoomScale = getZoomScale();
   const pxW = widthTiles * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * zoomScale;
   const pxH = heightTiles * COORDINATE_SYSTEM.DISPLAY_TILE_SIZE * zoomScale;
@@ -112,7 +110,7 @@ function createTerrainVisual(
   widthTiles: number,
   heightTiles: number,
   terrainTexture: Texture
-): DisplayObject {
+): Sprite | TilingSprite | Graphics {
   // Mirror legacy mapping from terrain.ts (only grass/water supported for now).
   const [, terrainType] = textureKey.split(':');
 
