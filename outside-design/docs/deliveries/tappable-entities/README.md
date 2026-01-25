@@ -1,7 +1,7 @@
 ---
 Title: Tappable Entities and Events
 DeliveryDate: 2026-01-25
-Summary: Add tap/click interactions (mouse + touch) and route them through host-side handling into deterministic command-based reactions (demo: followTheLeader).
+Summary: Add tap/click interactions (mouse + touch) and route them through host-side handling into deterministic command-based reactions.
 Status: TODO
 Branch: feature/tappable-entities
 Commit: a8455ce
@@ -15,3 +15,4 @@ This delivery introduces a basic “tap” interaction primitive so bots/terrain
 
 - [Pitch](./pitch.md)
 - [Implementation Plan](./plan.md)
+- [Roadmap](./roadmap.md)

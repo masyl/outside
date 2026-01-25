@@ -9,7 +9,8 @@ Introduce a basic “tap” interaction primitive so bots and terrain can be tap
 - **Determinism**: raw “tap” is UI/input; the simulation only changes via explicit Actions/Commands.
 - **Client mode included**: clients can tap; host performs world lookups + emits simulation commands.
 - **No new networking protocol**: reuse existing input plumbing (notably `CLICK_TILE`).
-- **No Pixi hit-testing yet**: unified adapter currently sets `eventMode = 'none'`; use tile-based picking.
+- **Use Pixi’s built-in interaction/events**: rely on Pixi’s event system rather than custom window listeners.
+  - Pixi v8 uses the federated event system (`eventMode`, `pointer*` events). `PIXI.InteractionManager` exists as a legacy module, but the recommended approach in v8 is the event system.
 
 ## Phase 0: Decide the tap payload (tile-based)
 
@@ -20,11 +21,13 @@ Introduce a basic “tap” interaction primitive so bots and terrain can be tap
 
 ## Phase 1: Client input → send tap to host
 
-- Implement pointer/touch handling in the client that:
+- Implement pointer/touch handling using Pixi’s event system (no custom DOM listeners):
+  - Use `pointertap` / `pointerup` from the Pixi stage (or a full-screen hitArea) to capture taps.
   - computes tapped tile coordinate from screen pointer location
   - sends `CLICK_TILE` input command with `{x, y}`
 - Cursor hover:
-  - compute hovered tile and set cursor to pointer/hand when it is “tappable”
+  - Use `pointermove` via Pixi events to update hover state.
+  - Change cursor to pointer/hand when hovered tile is tappable (bot present OR walkable terrain).
 
 ## Phase 2: Host tap routing (input → game commands)
 
