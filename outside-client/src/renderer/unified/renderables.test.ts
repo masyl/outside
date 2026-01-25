@@ -71,6 +71,29 @@ describe('buildRenderables', () => {
     });
   });
 
+  it('keeps bots above terrain by z-order', () => {
+    const world = createWorldState(0) as WorldState;
+
+    addTerrainObject(world.groundLayer, {
+      id: 't-epoch',
+      type: 'grass',
+      position: { x: 0, y: 0 },
+      width: 1,
+      height: 1,
+      // Simulate a realistic Date.now()-style timestamp.
+      createdAt: 2_000_000_000_000,
+    });
+
+    world.objects.set('bot-placed', { id: 'bot-placed', type: 'bot', position: { x: 1, y: 1 } });
+    placeObjectInGrid(world.grid, world.objects.get('bot-placed')!, { x: 1, y: 1 }, world.horizontalLimit);
+
+    const renderables = buildRenderables(world);
+    const terrain = renderables.find((r) => r.kind === 'terrain')!;
+    const bot = renderables.find((r) => r.kind === 'bot')!;
+
+    expect(bot.z).toBeGreaterThan(terrain.z);
+  });
+
   it('sorts by z then id for deterministic ordering', () => {
     const world = createWorldState(0) as WorldState;
 

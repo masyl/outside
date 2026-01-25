@@ -143,6 +143,7 @@ Notes:
 - [ ] **Visual parity** in dual mode for:
   - [ ] bot placement/movement
   - [ ] terrain rendering + stacking order
+  - [ ] bot-over-terrain layering (z-order)
   - [ ] zoom behavior (no size regressions)
 - [ ] **Selection/picking parity** (if applicable): unified pipeline supports the same selection/hover/debug affordances as legacy
 - [ ] **No simulation changes**: replay/time-travel and reducer invariants remain correct

@@ -21,7 +21,9 @@ export interface Renderable {
   size?: { width: number; height: number }; // terrain rectangles
 }
 
-const BOT_Z_BASE = 1_000_000_000_000; // keep bots above any terrain createdAt timestamps
+// Terrain z uses `createdAt` which is currently ms since epoch (Date.now()).
+// That value is ~1.7e12 today, so keep bot z safely above it.
+const BOT_Z_BASE = 10_000_000_000_000;
 
 function terrainToRenderable(terrain: TerrainObject): Renderable {
   return {

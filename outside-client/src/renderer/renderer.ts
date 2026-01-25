@@ -63,18 +63,19 @@ export class GameRenderer {
     this.visualDebugLayer = new VisualDebugLayer();
     this.objectsContainer = new Container();
 
-    // Add containers in render order: grid (bottom), terrain (middle), debug overlay, visual debug, objects (top)
-    this.rootContainer.addChild(this.gridContainer);
-    this.rootContainer.addChild(this.terrainContainer);
-    this.rootContainer.addChild(this.debugOverlayContainer);
-    this.rootContainer.addChild(this.visualDebugLayer);
-    this.rootContainer.addChild(this.objectsContainer);
-
     // Unified renderer root (parallel pipeline). Hidden by default.
     this.unifiedRoot = new Container();
     this.unifiedRoot.visible = false;
     this.unifiedRoot.sortableChildren = true;
+
+    // Add containers in render order: grid (bottom), terrain, objects, unified root, debug overlays (top).
+    // Debug overlays should always draw above both legacy and unified pipelines.
+    this.rootContainer.addChild(this.gridContainer);
+    this.rootContainer.addChild(this.terrainContainer);
+    this.rootContainer.addChild(this.objectsContainer);
     this.rootContainer.addChild(this.unifiedRoot);
+    this.rootContainer.addChild(this.debugOverlayContainer);
+    this.rootContainer.addChild(this.visualDebugLayer);
 
     // Renderer-agnostic unified renderer core with a Pixi adapter.
     this.unifiedRenderer = new UnifiedRenderer(
