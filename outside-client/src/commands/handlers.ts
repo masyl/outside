@@ -51,6 +51,24 @@ export function executeCommand(store: Store, command: ParsedCommand, step?: numb
       break;
     }
 
+    case 'wander':
+      store.dispatch(actions.setBotUrge(command.id, 'wander'), step);
+      break;
+
+    case 'wait':
+      store.dispatch(actions.setBotUrge(command.id, 'wait'), step);
+      break;
+
+    case 'follow':
+      store.dispatch(
+        actions.setBotUrge(command.id, 'follow', {
+          followTargetId: command.targetId,
+          tightness: command.tightness,
+        }),
+        step
+      );
+      break;
+
     case 'set-world-size':
       store.dispatch(actions.setWorldSize(command.width, command.height), step);
       break;

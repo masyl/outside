@@ -19,10 +19,25 @@ create terrain hole hole1 7 5 2 2
 ## Bots
 
 ```cmd
-create bot fido
-place fido 2 2
-create bot alice
-place alice 7 2
-create bot bob
-place bob 2 7
+create bot leader
+place leader 2 2
+
+create bot follow1
+place follow1 6 2
+
+create bot follow2
+place follow2 2 6
+
+create bot follow3
+place follow3 6 6
+
+create bot follow4
+place follow4 10 6
+
+# Configure urges (leader wanders; others follow in a chain)
+wander leader
+follow follow1 leader 0.5
+follow follow2 follow1 0.5
+follow follow3 follow2 0.5
+follow follow4 follow3 0.5
 ```

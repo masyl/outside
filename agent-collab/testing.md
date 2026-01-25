@@ -8,6 +8,11 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 - Create an individual plan for each bug fix
 - After doing a fix, update this file with a prefix "TO TEST:" before passing it to me for retesting.
 
+## Global Observations
+
+- [ ] The design documentation does not render the checkboxes in markdown.
+- [ ] The title of the browser window should not mention "Client". It should instead say "Go play Outside"
+
 ## Current Sessions
 
 ### Bugs
@@ -45,4 +50,3 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 ### Timeline keystrokes
 
 - [ ] Bug: The time passing counted as number of steps and as number of events is not always in sync when moving on the timeline.
-

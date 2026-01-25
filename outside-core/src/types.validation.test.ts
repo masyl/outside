@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { createWorldState } from './world';
 import {
   Position,
   Direction,
@@ -237,6 +238,21 @@ describe('Type System Validation', () => {
       expect(worldState.seed).toBe(42);
       expect(worldState.objects.size).toBe(0);
       expect(worldState.groundLayer.terrainObjects.size).toBe(0);
+    });
+
+    it('should support urge state on bots', () => {
+      const worldState = createWorldState(42);
+
+      worldState.objects.set('bot-1', {
+        id: 'bot-1',
+        type: 'bot',
+        position: { x: 1, y: 2 },
+        urge: { urge: 'follow', followTargetId: 'bot-2', tightness: 0.5 },
+      });
+
+      const bot = worldState.objects.get('bot-1');
+      expect(bot?.urge?.urge).toBe('follow');
+      expect(bot?.urge?.followTargetId).toBe('bot-2');
     });
   });
 

@@ -1,4 +1,4 @@
-import { WorldState, Position, Direction, TerrainType } from '@outside/core';
+import { WorldState, Position, Direction, TerrainType, type BotUrgeState, type Urge } from '@outside/core';
 
 export type Action =
   | { type: 'CREATE_BOT'; payload: { id: string } }
@@ -19,6 +19,10 @@ export type Action =
       payload: { id: string; direction: Direction; distance: number; originalValue?: Position };
     }
   | { type: 'SIM_TICK'; payload: { dtMs: number } }
+  | {
+      type: 'SET_BOT_URGE';
+      payload: { id: string; urge: Urge; followTargetId?: string; tightness?: number };
+    }
   | { type: 'SET_WORLD_SIZE'; payload: { horizontalLimit: number; verticalLimit: number } }
   | { type: 'SET_SEED'; payload: { seed: number } }
   | { type: 'RESET_WORLD' }
@@ -60,6 +64,16 @@ export const actions = {
   simTick: (dtMs: number): Action => ({
     type: 'SIM_TICK',
     payload: { dtMs },
+  }),
+
+  setBotUrge: (id: string, urge: Urge, opts?: Partial<BotUrgeState>): Action => ({
+    type: 'SET_BOT_URGE',
+    payload: {
+      id,
+      urge,
+      followTargetId: opts?.followTargetId,
+      tightness: opts?.tightness,
+    },
   }),
 
   setWorldSize: (horizontalLimit: number, verticalLimit: number): Action => ({

@@ -17,7 +17,7 @@ import {
   createWorldState,
 } from '@outside/core';
 import { Action } from './actions';
-import { stepBotMotion } from './botMotion';
+import { initBotMotion, stepBotMotion } from './botMotion';
 import { directionFromVelocity } from '../utils/direction';
 
 /**
@@ -45,6 +45,7 @@ export function reducer(state: WorldState, action: Action): WorldState {
           id,
           type: 'bot',
           // No position - bot is invisible until placed
+          urge: { urge: 'wander' },
         };
 
         draft.objects.set(id, bot);
@@ -78,19 +79,110 @@ export function reducer(state: WorldState, action: Action): WorldState {
         // Deterministic tick: update time after stepping.
         const timeMs = draft.timeMs;
 
+        const clamp01 = (n: number): number => Math.max(0, Math.min(1, n));
+
         for (const object of draft.objects.values()) {
           if (object.type !== 'bot') continue;
           if (!object.position) continue;
 
           const prevPos = object.position;
           const key = { seed: draft.seed, botId: object.id };
-          const update = stepBotMotion({
-            key,
-            timeMs,
-            dtMs,
-            previousMotion: object.motion,
-            previousFacing: object.facing,
-          });
+          const urge = object.urge?.urge ?? 'wander';
+
+          const update = (() => {
+            if (urge === 'wander') {
+              return stepBotMotion({
+                key,
+                timeMs,
+                dtMs,
+                previousMotion: object.motion,
+                previousFacing: object.facing,
+              });
+            }
+
+            if (urge === 'follow') {
+              const followTargetId = object.urge?.followTargetId;
+              const target =
+                followTargetId ? draft.objects.get(followTargetId) : undefined;
+
+              // If target missing/unplaced, revert to wander (deterministically).
+              if (!target || target.type !== 'bot' || !target.position) {
+                object.urge = { urge: 'wander' };
+                return stepBotMotion({
+                  key,
+                  timeMs,
+                  dtMs,
+                  previousMotion: object.motion,
+                  previousFacing: object.facing,
+                });
+              }
+
+              const dx = target.position.x - prevPos.x;
+              const dy = target.position.y - prevPos.y;
+              const dist = Math.hypot(dx, dy);
+
+              // Defaults from pitch.
+              const stopDist = 2;
+              const speedUpDist = 3;
+              const maxSpeed = 2;
+
+              const speed =
+                dist <= stopDist
+                  ? 0
+                  : dist >= speedUpDist
+                    ? maxSpeed
+                    : maxSpeed * ((dist - stopDist) / (speedUpDist - stopDist));
+
+              // Direction toward target (for both movement and "look at" behavior).
+              const angle = Math.atan2(dy, dx);
+              const unit = dist > 1e-9 ? { x: dx / dist, y: dy / dist } : { x: 0, y: 0 };
+              const desiredVel = { x: unit.x * speed, y: unit.y * speed };
+
+              // Tightness semantics: time constant in seconds (smaller = tighter).
+              // 0 or less means instant.
+              const tightness = object.urge?.tightness ?? 0.5;
+              const lerp = tightness <= 0 ? 1 : clamp01(dtSec / tightness);
+              const prevVel = object.velocity ?? { x: 0, y: 0 };
+              const velocity = {
+                x: prevVel.x + (desiredVel.x - prevVel.x) * lerp,
+                y: prevVel.y + (desiredVel.y - prevVel.y) * lerp,
+              };
+
+              const baseMotion = object.motion ?? initBotMotion(key).motion;
+              const motion = {
+                ...baseMotion,
+                headingRad: angle,
+                angularVelocityRadPerSec: 0,
+                speedTilesPerSec: speed,
+              };
+
+              // When speed is 0, we still want the bot to orient toward target.
+              const facingFallback = object.facing ?? 'down';
+              const facing =
+                speed > 0.001
+                  ? directionFromVelocity(velocity, facingFallback)
+                  : directionFromVelocity({ x: Math.cos(angle), y: Math.sin(angle) }, facingFallback);
+
+              return {
+                motion,
+                velocity,
+                facing,
+                isMoving: speed > 0.001,
+              };
+            }
+
+            // wait (and any unknown urge): stop movement with stable facing.
+            return {
+              motion: {
+                ...(object.motion ?? initBotMotion(key).motion),
+                angularVelocityRadPerSec: 0,
+                speedTilesPerSec: 0,
+              },
+              velocity: { x: 0, y: 0 },
+              facing: object.facing ?? 'down',
+              isMoving: false,
+            };
+          })();
 
           let velocity = { ...update.velocity };
           let nextPos: Position = {
@@ -145,6 +237,32 @@ export function reducer(state: WorldState, action: Action): WorldState {
         }
 
         draft.timeMs += dtMs;
+        break;
+      }
+
+      case 'SET_BOT_URGE': {
+        const { id, urge, followTargetId, tightness } = action.payload;
+        const bot = draft.objects.get(id);
+        if (!bot) {
+          console.warn(`Object with id "${id}" not found`);
+          return state;
+        }
+        if (bot.type !== 'bot') {
+          console.warn(`Object with id "${id}" is not a bot`);
+          return state;
+        }
+
+        if (urge === 'follow') {
+          bot.urge = {
+            urge,
+            followTargetId,
+            tightness,
+          };
+        } else {
+          // wander / wait
+          bot.urge = { urge };
+        }
+
         break;
       }
 

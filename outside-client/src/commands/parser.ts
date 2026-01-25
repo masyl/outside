@@ -15,6 +15,9 @@ export type ParsedCommand =
     }
   | { type: 'place'; id: string; x: number; y: number; raw?: string }
   | { type: 'move'; id: string; direction: Direction; distance: number; raw?: string }
+  | { type: 'wander'; id: string; raw?: string }
+  | { type: 'wait'; id: string; raw?: string }
+  | { type: 'follow'; id: string; targetId: string; tightness?: number; raw?: string }
   | { type: 'set-world-size'; width: number; height: number; raw?: string }
   | { type: 'set-seed'; seed: number; raw?: string }
   | { type: 'reset-world'; raw?: string }
@@ -98,6 +101,30 @@ export function parseCommand(commandString: string): ParsedCommand {
       if (validDirections.includes(direction) && !isNaN(distance)) {
         return { type: 'move', id: args[1], direction, distance, raw: trimmed };
       }
+    }
+
+    // Handle wander command: "wander <id>"
+    if (cmd === 'wander' && args.length === 2) {
+      return { type: 'wander', id: args[1], raw: trimmed };
+    }
+
+    // Handle wait command: "wait <id>"
+    if (cmd === 'wait' && args.length === 2) {
+      return { type: 'wait', id: args[1], raw: trimmed };
+    }
+
+    // Handle follow command: "follow <id> <targetId> [tightness]"
+    if (cmd === 'follow' && (args.length === 3 || args.length === 4)) {
+      const id = args[1];
+      const targetId = args[2];
+      if (args.length === 3) {
+        return { type: 'follow', id, targetId, raw: trimmed };
+      }
+      const tightness = Number(args[3]);
+      if (!Number.isFinite(tightness)) {
+        return { type: 'unknown', raw: trimmed };
+      }
+      return { type: 'follow', id, targetId, tightness, raw: trimmed };
     }
 
     // Handle set-world-size command: "set-world-size <width> <height>"

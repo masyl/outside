@@ -288,6 +288,7 @@ export class GameRenderer {
         const velocity = this.lastBotVelocity.get(obj.id) ?? { x: 0, y: 0 };
 
         return {
+          id: obj.id,
           x: pos.x,
           y: pos.y,
           velocity,

@@ -23,13 +23,19 @@ export class VisualDebugLayer extends Container {
     MOUSE_CIRCLE: 0x0088ff, // Blue
     CURSOR_TILE: 0xffff00, // Yellow
     BOT_POSITION: 0x00ff00, // Green (maintain existing)
+    FOLLOW_LINK: 0x00ffff, // Cyan
   };
 
   // Mouse tracking (using floating-point world coordinates)
   private mousePos: WorldPosition | null = null;
 
   // Bot tracking
-  private bots: Array<{ x: number; y: number; velocity?: { x: number; y: number } }> = [];
+  private bots: Array<{
+    id: string;
+    x: number;
+    y: number;
+    velocity?: { x: number; y: number };
+  }> = [];
 
   // Debug options
   private showSubGrid: boolean = false;
@@ -94,7 +100,9 @@ export class VisualDebugLayer extends Container {
   /**
    * Update bot positions from game state
    */
-  updateBotPositions(bots: Array<{ x: number; y: number; velocity?: { x: number; y: number } }>): void {
+  updateBotPositions(
+    bots: Array<{ id: string; x: number; y: number; velocity?: { x: number; y: number } }>
+  ): void {
     this.bots = bots;
     if (this.isVisible) {
       this.render();
@@ -262,7 +270,33 @@ export class VisualDebugLayer extends Container {
         }
       }
 
-      // 3. Render coordinate label for bot
+      // 3. Draw follow link (follower -> target) if applicable.
+      const follower = this.world?.objects.get(bot.id);
+      if (
+        follower?.type === 'bot' &&
+        follower.urge?.urge === 'follow' &&
+        follower.urge.followTargetId
+      ) {
+        const target = this.world?.objects.get(follower.urge.followTargetId);
+        if (target?.type === 'bot' && target.position) {
+          const fromCenter = CoordinateConverter.getTileCenter(bot.x, bot.y, zoomScale);
+          const toCenter = CoordinateConverter.getTileCenter(
+            target.position.x,
+            target.position.y,
+            zoomScale
+          );
+          const from = CoordinateConverter.worldToDisplay(fromCenter, zoomScale);
+          const to = CoordinateConverter.worldToDisplay(toCenter, zoomScale);
+
+          this.graphics.setStrokeStyle({ width: 2, color: COLORS.FOLLOW_LINK, alpha: 0.8 });
+          this.graphics.beginPath();
+          this.graphics.moveTo(from.x, from.y);
+          this.graphics.lineTo(to.x, to.y);
+          this.graphics.stroke();
+        }
+      }
+
+      // 4. Render coordinate label for bot
       const labelPos = CoordinateConverter.gridToDisplay({ x: bot.x, y: bot.y }, zoomScale);
       // Center horizontally on the tile
       labelPos.x += DISPLAY_TILE_SIZE / 2;

@@ -24,6 +24,26 @@ export type Velocity = {
   y: number;
 };
 
+/**
+ * High-level autonomy intent for a bot.
+ *
+ * This is stored in simulation state so Timeline replay/time-travel remains deterministic.
+ */
+export type Urge = 'wander' | 'follow' | 'wait';
+
+/**
+ * Per-bot urge state.
+ *
+ * Notes:
+ * - `followTargetId` is an entity id (another bot for now).
+ * - Parameters are optional so we can introduce defaults incrementally.
+ */
+export interface BotUrgeState {
+  urge: Urge;
+  followTargetId?: string;
+  tightness?: number;
+}
+
 export type Direction =
   | 'left'
   | 'right'
@@ -53,6 +73,7 @@ export interface GameObject {
   position?: WorldPosition; // Optional - bots can exist without a position until placed
   velocity?: Velocity; // Optional - continuous velocity in tiles/sec
   motion?: BotMotionState; // Optional - internal motion state for deterministic simulation
+  urge?: BotUrgeState; // Optional - autonomy intent (defaults applied in reducer)
   facing?: Direction; // Optional facing direction (typically derived from velocity)
 }
 

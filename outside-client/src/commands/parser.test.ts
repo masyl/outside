@@ -111,6 +111,39 @@ describe('Command Parser', () => {
     });
   });
 
+  describe('Urge Commands', () => {
+    it('should parse wander command', () => {
+      const result = parseCommand('wander bot-1');
+      expect(result).toEqual({ type: 'wander', id: 'bot-1', raw: 'wander bot-1' });
+    });
+
+    it('should parse wait command', () => {
+      const result = parseCommand('wait bot-1');
+      expect(result).toEqual({ type: 'wait', id: 'bot-1', raw: 'wait bot-1' });
+    });
+
+    it('should parse follow command without tightness', () => {
+      const result = parseCommand('follow bot-1 bot-2');
+      expect(result).toEqual({ type: 'follow', id: 'bot-1', targetId: 'bot-2', raw: 'follow bot-1 bot-2' });
+    });
+
+    it('should parse follow command with tightness', () => {
+      const result = parseCommand('follow bot-1 bot-2 0.5');
+      expect(result).toEqual({
+        type: 'follow',
+        id: 'bot-1',
+        targetId: 'bot-2',
+        tightness: 0.5,
+        raw: 'follow bot-1 bot-2 0.5',
+      });
+    });
+
+    it('should reject follow command with invalid tightness', () => {
+      const result = parseCommand('follow bot-1 bot-2 nope');
+      expect(result).toEqual({ type: 'unknown', raw: 'follow bot-1 bot-2 nope' });
+    });
+  });
+
   describe('Command Edge Cases', () => {
     it('should handle empty command', () => {
       const result = parseCommand('');

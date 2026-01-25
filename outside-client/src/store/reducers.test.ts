@@ -30,6 +30,7 @@ describe('Reducer Logic', () => {
         id: 'bot-1',
         type: 'bot',
         // Bots are created without a position and are invisible until placed
+        urge: { urge: 'wander' },
       });
     });
 
@@ -65,6 +66,39 @@ describe('Reducer Logic', () => {
       expect(bot?.position).toBeUndefined();
       expect(bot?.id).toBe('test-bot');
       expect(bot?.type).toBe('bot');
+    });
+  });
+
+  describe('SET_BOT_URGE Action', () => {
+    it('should set wander urge on a bot', () => {
+      const withBot = reducer(initialState, { type: 'CREATE_BOT', payload: { id: 'bot-1' } });
+      const next = reducer(withBot, {
+        type: 'SET_BOT_URGE',
+        payload: { id: 'bot-1', urge: 'wander' },
+      });
+      expect(next.objects.get('bot-1')?.urge).toEqual({ urge: 'wander' });
+    });
+
+    it('should set wait urge on a bot', () => {
+      const withBot = reducer(initialState, { type: 'CREATE_BOT', payload: { id: 'bot-1' } });
+      const next = reducer(withBot, {
+        type: 'SET_BOT_URGE',
+        payload: { id: 'bot-1', urge: 'wait' },
+      });
+      expect(next.objects.get('bot-1')?.urge).toEqual({ urge: 'wait' });
+    });
+
+    it('should set follow urge with target and tightness', () => {
+      const withBot = reducer(initialState, { type: 'CREATE_BOT', payload: { id: 'bot-1' } });
+      const next = reducer(withBot, {
+        type: 'SET_BOT_URGE',
+        payload: { id: 'bot-1', urge: 'follow', followTargetId: 'bot-2', tightness: 0.25 },
+      });
+      expect(next.objects.get('bot-1')?.urge).toEqual({
+        urge: 'follow',
+        followTargetId: 'bot-2',
+        tightness: 0.25,
+      });
     });
   });
 
@@ -217,6 +251,65 @@ describe('Reducer Logic', () => {
       expect(bot.velocity).toBeDefined();
       expect(bot.motion).toBeDefined();
       expect(bot.position).not.toEqual({ x: 0, y: 0 });
+    });
+
+    it('does not move when urge is wait', () => {
+      const withWait = reducer(initialState, {
+        type: 'SET_BOT_URGE',
+        payload: { id: 'bot-sim', urge: 'wait' },
+      });
+
+      const next = reducer(withWait, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+      const bot = next.objects.get('bot-sim')!;
+
+      expect(bot.position).toEqual({ x: 0, y: 0 });
+      expect(bot.velocity).toEqual({ x: 0, y: 0 });
+    });
+
+    it('follow moves toward target and slows to a stop when close enough', () => {
+      let s = initialState;
+      s = reducer(s, { type: 'CREATE_BOT', payload: { id: 'leader' } });
+      s = reducer(s, { type: 'PLACE_OBJECT', payload: { id: 'leader', position: { x: 5, y: 0 } } });
+
+      // follower at origin follows leader instantly (tightness 0) so we can assert direction easily.
+      s = reducer(s, {
+        type: 'SET_BOT_URGE',
+        payload: { id: 'bot-sim', urge: 'follow', followTargetId: 'leader', tightness: 0 },
+      });
+
+      const dist0 = Math.hypot(5 - 0, 0 - 0);
+
+      // Run enough ticks for the follower to reduce distance significantly.
+      for (let i = 0; i < 20; i++) {
+        s = reducer(s, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+      }
+
+      const follower = s.objects.get('bot-sim')!;
+      const dist1 = Math.hypot(5 - follower.position!.x, 0 - follower.position!.y);
+
+      expect(dist1).toBeLessThan(dist0);
+
+      // Now move leader close so follower should stop (<= 2 tiles).
+      s = reducer(s, {
+        type: 'PLACE_OBJECT',
+        payload: { id: 'leader', position: { x: follower.position!.x + 1, y: follower.position!.y } },
+      });
+      s = reducer(s, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+
+      const follower2 = s.objects.get('bot-sim')!;
+      expect(follower2.velocity).toEqual({ x: 0, y: 0 });
+    });
+
+    it('follow reverts to wander when target is missing', () => {
+      let s = initialState;
+      s = reducer(s, {
+        type: 'SET_BOT_URGE',
+        payload: { id: 'bot-sim', urge: 'follow', followTargetId: 'missing', tightness: 0 },
+      });
+
+      const next = reducer(s, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+      const bot = next.objects.get('bot-sim')!;
+      expect(bot.urge?.urge).toBe('wander');
     });
 
     it('is deterministic for the same starting state and ticks', () => {
