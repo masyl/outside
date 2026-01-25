@@ -1,32 +1,39 @@
 import React, { useEffect, useRef } from 'react';
 import { TextStyle } from 'pixi.js';
-import { useApplication, useTick } from '@pixi/react';
+import { useApplication } from '@pixi/react';
 import { useDebugState, debugStore } from '../debug/debugStore';
 
 export const DebugPanel: React.FC = () => {
   const { app } = useApplication();
   const state = useDebugState();
-  const tickerFrameCountRef = useRef(0);
-  const lastTickerFpsUpdateRef = useRef(0);
+  const appTickerFrameCountRef = useRef(0);
+  const lastAppTickerFpsUpdateRef = useRef(0);
   const rafFrameCountRef = useRef(0);
   const lastRafFpsUpdateRef = useRef(0);
 
-  // Measure FPS using Pixi ticker hook
-  useTick(() => {
-    tickerFrameCountRef.current++;
-    const now = performance.now();
+  // Measure FPS using the actual app ticker (not useTick, which may be bound to a different ticker).
+  useEffect(() => {
+    if (!app) return;
+    const onTick = () => {
+      appTickerFrameCountRef.current++;
+      const now = performance.now();
+      if (now - lastAppTickerFpsUpdateRef.current >= 1000) {
+        debugStore.update({
+          fps: appTickerFrameCountRef.current, // keep existing label for backward compatibility
+          tickerFps: app.ticker.FPS ?? 0,
+          tickerMaxFps: app.ticker.maxFPS ?? 0,
+          tickerMinFps: app.ticker.minFPS ?? 0,
+        });
+        appTickerFrameCountRef.current = 0;
+        lastAppTickerFpsUpdateRef.current = now;
+      }
+    };
 
-    if (now - lastTickerFpsUpdateRef.current >= 1000) {
-      debugStore.update({
-        fps: tickerFrameCountRef.current, // keep existing label for backward compatibility
-        tickerFps: app?.ticker?.FPS ?? 0,
-        tickerMaxFps: app?.ticker?.maxFPS ?? 0,
-        tickerMinFps: app?.ticker?.minFPS ?? 0,
-      });
-      tickerFrameCountRef.current = 0;
-      lastTickerFpsUpdateRef.current = now;
-    }
-  });
+    app.ticker.add(onTick);
+    return () => {
+      app.ticker.remove(onTick);
+    };
+  }, [app]);
 
   // Measure raw browser rAF FPS (independent of Pixi ticker)
   useEffect(() => {
