@@ -92,10 +92,14 @@ Notes:
 
 ### Phase 2: Parallel integration (feature-flagged)
 
-- [ ] Add `rendererMode = "legacy" | "unified" | "dual"` to `GameRenderer`
-- [ ] Mount two roots:
+- [x] Add `rendererMode = "legacy" | "unified" | "dual"` to `GameRenderer`
+- [x] Mount two roots:
   - [ ] `legacyRoot` (current `terrain.ts` + `objects.ts`)
-  - [ ] `unifiedRoot` (new unified pipeline)
+  - [x] `unifiedRoot` (new unified pipeline)
+
+Notes:
+- `GameRenderer` now supports `setRendererMode(...)`. Default remains `"legacy"` (no behavior change).
+- Unified pipeline is wired behind the mode switch and uses a minimal Graphics-based Pixi adapter (`pixiAdapter.ts`) as a placeholder until proper asset resolution is implemented.
 
 ### Phase 3: Dual mode parity (shadow-run)
 

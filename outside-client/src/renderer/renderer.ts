@@ -14,6 +14,9 @@ import {
 import { createTerrainLayer, updateTerrainLayer } from './terrain';
 import { VisualDebugLayer } from './visualDebugLayer';
 import { zoomManager } from '../zoom/zoomState';
+import { buildRenderables } from './unified/renderables';
+import { createPixiDisplayAdapter } from './unified/pixiAdapter';
+import { UnifiedRenderer } from './unified/unifiedRenderer';
 
 /**
  * Main renderer for the game
@@ -26,6 +29,9 @@ export class GameRenderer {
   private debugOverlayContainer!: Container;
   private visualDebugLayer: VisualDebugLayer;
   private rootContainer: Container;
+  private unifiedRoot: Container;
+  private rendererMode: 'legacy' | 'unified' | 'dual' = 'legacy';
+  private unifiedRenderer: UnifiedRenderer<any>;
   private botTexture?: Texture;
   private botWalkTexture?: Texture;
   private terrainTexture?: Texture;
@@ -58,6 +64,15 @@ export class GameRenderer {
     this.rootContainer.addChild(this.debugOverlayContainer);
     this.rootContainer.addChild(this.visualDebugLayer);
     this.rootContainer.addChild(this.objectsContainer);
+
+    // Unified renderer root (parallel pipeline). Hidden by default.
+    this.unifiedRoot = new Container();
+    this.unifiedRoot.visible = false;
+    this.unifiedRoot.sortableChildren = true;
+    this.rootContainer.addChild(this.unifiedRoot);
+
+    // Renderer-agnostic unified renderer core with a Pixi adapter.
+    this.unifiedRenderer = new UnifiedRenderer(createPixiDisplayAdapter(this.unifiedRoot));
 
     // Listen for zoom changes and force redraw
     zoomManager.addZoomChangeListener((level, scale) => {
@@ -149,6 +164,9 @@ export class GameRenderer {
 
     // Update camera target based on initial state
     this.updateCameraTarget(world);
+
+    // Optional: also update unified renderer if enabled (no visible change by default).
+    this.updateUnified(world);
   }
 
   /**
@@ -186,6 +204,53 @@ export class GameRenderer {
 
     // Update camera target to follow selected bot or return to center
     this.updateCameraTarget(world);
+
+    // Optional: also update unified renderer if enabled (no visible change by default).
+    this.updateUnified(world);
+  }
+
+  /**
+   * Switch between legacy/unified/dual renderer modes.
+   * Default is legacy. Dual mode updates both (unified hidden).
+   */
+  setRendererMode(mode: 'legacy' | 'unified' | 'dual'): void {
+    if (this.rendererMode === mode) return;
+    this.rendererMode = mode;
+    this.applyRendererVisibility();
+  }
+
+  getRendererMode(): 'legacy' | 'unified' | 'dual' {
+    return this.rendererMode;
+  }
+
+  private applyRendererVisibility(): void {
+    if (this.rendererMode === 'legacy') {
+      this.terrainContainer.visible = true;
+      this.objectsContainer.visible = true;
+      this.unifiedRoot.visible = false;
+      return;
+    }
+
+    if (this.rendererMode === 'unified') {
+      this.terrainContainer.visible = false;
+      this.objectsContainer.visible = false;
+      this.unifiedRoot.visible = true;
+      return;
+    }
+
+    // dual
+    this.terrainContainer.visible = true;
+    this.objectsContainer.visible = true;
+    this.unifiedRoot.visible = false; // shadow-run
+  }
+
+  private updateUnified(world: WorldState): void {
+    if (this.rendererMode === 'legacy') {
+      return;
+    }
+
+    const renderables = buildRenderables(world);
+    this.unifiedRenderer.render(renderables);
   }
 
   /**
