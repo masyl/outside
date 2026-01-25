@@ -1,8 +1,8 @@
-import { Sprite, Container, Texture, Renderer, Rectangle } from 'pixi.js';
-import { WorldState, GameObject, Direction } from '@outside/core';
-import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from './coordinateSystem';
+import { Sprite, Texture, Renderer, Rectangle } from 'pixi.js';
+import { Direction } from '@outside/core';
+import { COORDINATE_SYSTEM, getZoomScale } from './coordinateSystem';
 
-const { DISPLAY_TILE_SIZE } = COORDINATE_SYSTEM;
+const { DISPLAY_TILE_SIZE, VERTICAL_OFFSET } = COORDINATE_SYSTEM;
 
 /**
  * Create a placeholder sprite for a bot (until PNG is provided)
@@ -77,152 +77,6 @@ export function createBotSprite(texture: Texture): Sprite {
   // Anchor point is top-left by default, which matches our grid system
 
   return sprite;
-}
-
-export type SpriteIndex = Map<string, Sprite>;
-
-/**
- * Render all objects in the world and build a sprite index by object id
- */
-export function createObjectsLayerWithIndex(
-  world: WorldState,
-  botTexture: Texture | undefined,
-  renderer: Renderer | undefined,
-  selectedBotId: string | null = null
-): { container: Container; spriteIndex: SpriteIndex } {
-  const container = new Container();
-  const spriteIndex: SpriteIndex = new Map();
-
-  // Create sprites for each object (only if they have a position)
-  world.objects.forEach((object) => {
-    // Skip objects without a position (they're invisible until placed)
-    if (!object.position) {
-      return;
-    }
-
-    let sprite: Sprite;
-
-    if (object.type === 'bot') {
-      if (botTexture) {
-        sprite = createBotSprite(botTexture);
-      } else {
-        // Selected bot: white with blue outline, unselected: light gray
-        const isSelected = object.id === selectedBotId;
-        sprite = createBotPlaceholder(renderer, isSelected);
-      }
-
-      // Position sprite at object's grid position
-      const zoomScale = getZoomScale();
-      const displayPos = CoordinateConverter.gridToDisplay(
-        {
-          x: object.position.x,
-          y: object.position.y,
-        },
-        zoomScale
-      );
-      sprite.x = displayPos.x;
-      sprite.y = displayPos.y;
-      sprite.scale.set(zoomScale, zoomScale);
-
-      container.addChild(sprite);
-      spriteIndex.set(object.id, sprite);
-    }
-  });
-
-  return { container, spriteIndex };
-}
-
-/**
- * Update object positions in the renderer and keep sprite index in sync
- * Does NOT set sprite positions - that's handled by AnimationController
- * Only creates new sprites for new objects and removes sprites for deleted objects
- */
-export function updateObjectsLayerWithIndex(
-  container: Container,
-  world: WorldState,
-  botTexture: Texture | undefined,
-  renderer: Renderer | undefined,
-  spriteIndex: SpriteIndex,
-  selectedBotId: string | null = null
-): void {
-  // Track which objects exist in the new state
-  const currentObjectIds = new Set<string>();
-
-  // Create or update sprites for existing objects
-  world.objects.forEach((object) => {
-    currentObjectIds.add(object.id);
-
-    if (object.type === 'bot') {
-      // If bot has no position, remove its sprite if it exists (shouldn't happen, but safety check)
-      if (!object.position) {
-        const sprite = spriteIndex.get(object.id);
-        if (sprite) {
-          container.removeChild(sprite);
-          spriteIndex.delete(object.id);
-        }
-        return; // Skip bots without position
-      }
-
-      let sprite = spriteIndex.get(object.id);
-
-      // Create sprite if it doesn't exist
-      if (!sprite) {
-        if (botTexture) {
-          sprite = createBotSprite(botTexture);
-        } else {
-          // Selected bot: white with blue outline, unselected: light gray
-          const isSelected = object.id === selectedBotId;
-          sprite = createBotPlaceholder(renderer, isSelected);
-        }
-
-        // Only set initial position when creating - AnimationController handles updates
-        const zoomScale = getZoomScale();
-        const displayPos = CoordinateConverter.gridToDisplay(
-          {
-            x: object.position.x,
-            y: object.position.y,
-          },
-          zoomScale
-        );
-        sprite.x = displayPos.x;
-        sprite.y = displayPos.y;
-        sprite.scale.set(zoomScale, zoomScale);
-
-        container.addChild(sprite);
-        spriteIndex.set(object.id, sprite);
-      } else {
-        // Sprite exists, check if we need to upgrade it from placeholder to texture
-        if (botTexture) {
-          // Check if current sprite is using the bot texture
-          // We can check if the sprite's texture source matches the bot texture source
-          if (sprite.texture.source !== botTexture.source) {
-            // Replace placeholder with textured sprite
-            const newSprite = createBotSprite(botTexture);
-
-            // Preserve position and scaling
-            newSprite.x = sprite.x;
-            newSprite.y = sprite.y;
-            newSprite.scale.copyFrom(sprite.scale);
-
-            // Swap sprites
-            container.removeChild(sprite);
-            container.addChild(newSprite);
-            spriteIndex.set(object.id, newSprite);
-          }
-        }
-      }
-      // If sprite exists, DO NOT update its position here
-      // AnimationController will handle position updates via animations
-    }
-  });
-
-  // Remove sprites for objects that no longer exist
-  spriteIndex.forEach((sprite, id) => {
-    if (!currentObjectIds.has(id)) {
-      container.removeChild(sprite);
-      spriteIndex.delete(id);
-    }
-  });
 }
 
 /**
@@ -324,38 +178,4 @@ export function updateBotSpriteFrame(
   sprite.pivot.y = 0;
 }
 
-/**
- * Update sprite colors based on selection
- * Recreates sprites with new colors
- */
-export function updateSpriteColors(
-  container: Container,
-  world: WorldState,
-  botTexture: Texture | undefined,
-  renderer: Renderer | undefined,
-  spriteIndex: SpriteIndex,
-  selectedBotId: string | null
-): void {
-  world.objects.forEach((object) => {
-    if (object.type === 'bot') {
-      const sprite = spriteIndex.get(object.id);
-      if (sprite) {
-        // Only update appearance if using placeholder (not texture)
-        if (!botTexture) {
-          const isSelected = object.id === selectedBotId;
-
-          // Remove old sprite
-          container.removeChild(sprite);
-
-          // Create new sprite with correct selection state
-          const newSprite = createBotPlaceholder(renderer, isSelected);
-          newSprite.x = sprite.x;
-          newSprite.y = sprite.y;
-
-          container.addChild(newSprite);
-          spriteIndex.set(object.id, newSprite);
-        }
-      }
-    }
-  });
-}
+// Legacy selection-color swapping helper removed (unified renderer owns selection visuals now).

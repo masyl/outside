@@ -10,19 +10,19 @@ The following skills implement the 9-step wrapup process documented in `/outside
 
 #### Core Wrapup Skills
 
-1. **[wrapup-prerequisites](./wrapup-prerequisites.skill)** - Validates pre-requisites before starting wrapup
-2. **[wrapup-folder-setup](./wrapup-folder-setup.skill)** - Creates delivery folder structure
-3. **[plan-update](./plan-update.skill)** - Updates implementation plan to reflect reality
-4. **[testing-report](./testing-report.skill)** - Generates comprehensive testing report
-5. **[delivery-summary](./delivery-summary.skill)** - Creates detailed delivery report
-6. **[pitch-relocation](./pitch-relocation.skill)** - Copies original pitch to delivery folder
-7. **[commit-preparation](./commit-preparation.skill)** - Prepares commit message and tags
-8. **[delivery-readme](./delivery-readme.skill)** - Creates README.md with frontmatter
-9. **[delivery-index-update](./delivery-index-update.skill)** - Updates deliveries list index
+1. **`wrapup-prerequisites.skill`** - Validates pre-requisites before starting wrapup
+2. **`wrapup-folder-setup.skill`** - Creates delivery folder structure
+3. **`plan-update.skill`** - Updates implementation plan to reflect reality
+4. **`testing-report.skill`** - Generates comprehensive testing report
+5. **`delivery-summary.skill`** - Creates detailed delivery report
+6. **`pitch-relocation.skill`** - Copies original pitch to delivery folder
+7. **`commit-preparation.skill`** - Prepares commit message and tags
+8. **`delivery-readme.skill`** - Creates README.md with frontmatter
+9. **`delivery-index-update.skill`** - Updates deliveries list index
 
 #### Workflow Skills
 
-10. **[wrapup-workflow](./wrapup-workflow.skill)** - Complete 9-step wrapup workflow that orchestrates all skills
+10. **`wrapup-workflow.skill`** - Complete 9-step wrapup workflow that orchestrates all skills
 
 ## Usage Patterns
 

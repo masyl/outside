@@ -51,4 +51,4 @@
 - [Outside Game Server](./outside-game-server.md)
 - [Persistent Game State](./persistent-game-state.md)
 - [Client Connection Stability](./host-and-client-reconnection.md)
-- [Bot Autonomy](./bot-autonomy.md)
+- Bot Autonomy

@@ -28,6 +28,20 @@ export class ZoomManager {
   }
 
   /**
+   * Get current zoom level
+   */
+  getLevel(): number {
+    return this.level;
+  }
+
+  /**
+   * Get current zoom scale
+   */
+  getScale(): number {
+    return this.ZOOM_SCALES[this.ZOOM_LEVELS.indexOf(this.level)];
+  }
+
+  /**
    * Set zoom level
    */
   setLevel(level: 1 | 2 | 3 | 4 | 5): void {

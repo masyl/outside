@@ -17,6 +17,11 @@ export class BotAutonomy {
    * Returns a command or null if no action should be taken
    */
   decideAction(bot: GameObject, world: WorldState): ParsedCommand | null {
+    // Bot must have a position to be moved
+    if (!bot.position) {
+      return null;
+    }
+
     // 1/6th chance to wait (do nothing)
     if (this.random.chance(1 / 6)) {
       return null;

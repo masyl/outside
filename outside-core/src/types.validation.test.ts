@@ -227,6 +227,7 @@ describe('Type System Validation', () => {
         horizontalLimit: 30,
         verticalLimit: 30,
         seed: 42,
+        timeMs: 0,
       };
 
       expect(worldState.grid).toHaveLength(gridSize);

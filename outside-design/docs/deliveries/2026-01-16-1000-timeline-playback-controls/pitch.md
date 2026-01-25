@@ -50,8 +50,8 @@ The step-by-step processing will use `TimelineManager.stepForward()` to advance 
 
 ## Related Pitches
 
-- **Prerequisite**: [Timeline Engine Core (Timeline series: 2)](../pitches/timeline-engine-core.md)
-- **Next**: [Timeline UI Components (Timeline series: 4)](../pitches/timeline-ui-components.md)
+- **Prerequisite**: [Timeline Engine Core (Timeline series: 2)](../../pitches/timeline-engine-core.md)
+- **Next**: [Timeline UI Components (Timeline series: 4)](../../pitches/timeline-ui-components.md)
 - **Depends on**: GameLoop, HostMode, TimelineManager
 
 ## Prerequisites
@@ -60,9 +60,9 @@ The step-by-step processing will use `TimelineManager.stepForward()` to advance 
 
 ## Next Logical Pitches
 
-- [Timeline UI Components (Timeline series: 4)](../pitches/timeline-ui-components.md)
-- [Timeline Keystrokes Integration (Timeline series: 5)](../pitches/timeline-keystrokes-integration.md)
-- [Timeline Network Synchronization (Timeline series: 6)](../pitches/timeline-network-synchronization.md)
+- [Timeline UI Components (Timeline series: 4)](../../pitches/timeline-ui-components.md)
+- [Timeline Keystrokes Integration (Timeline series: 5)](../../pitches/timeline-keystrokes-integration.md)
+- [Timeline Network Synchronization (Timeline series: 6)](../../pitches/timeline-network-synchronization.md)
 
 ## Open Questions
 

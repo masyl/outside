@@ -6,7 +6,19 @@ import {
   GroundLayer,
   TerrainObject,
   TerrainType,
+  TilePosition,
 } from './types';
+
+/**
+ * Convert a potentially continuous world position into an integer tile position.
+ *
+ * Conventions:
+ * - We use `Math.floor` so that positions in [n, n+1) map to tile n.
+ * - Works for negatives as well (e.g. -0.1 -> -1).
+ */
+export function toTilePosition(position: Position): TilePosition {
+  return { x: Math.floor(position.x), y: Math.floor(position.y) };
+}
 
 /**
  * Creates an empty ground layer
@@ -39,6 +51,7 @@ export function createWorldState(seed?: number, limit: number = 30): WorldState 
     horizontalLimit,
     verticalLimit,
     seed: seed ?? Math.floor(Math.random() * 2147483647), // Generate random seed if not provided
+    timeMs: 0,
   };
 }
 
@@ -60,7 +73,8 @@ export function gridIndexToWorld(index: number, limit: number): number {
  * Get position key for indexing terrain by position
  */
 function getPositionKey(position: Position): string {
-  return `${position.x},${position.y}`;
+  const p = toTilePosition(position);
+  return `${p.x},${p.y}`;
 }
 
 /**
@@ -90,11 +104,12 @@ export function doesTerrainCoverPosition(terrain: TerrainObject, position: Posit
  * Gets the object at a specific position
  */
 export function getObjectAtPosition(world: WorldState, position: Position): GameObject | null {
-  if (!isValidPosition(world, position)) {
+  const p = toTilePosition(position);
+  if (!isValidPosition(world, p)) {
     return null;
   }
-  const gridX = worldToGridIndex(position.x, world.horizontalLimit);
-  const gridY = worldToGridIndex(position.y, world.verticalLimit);
+  const gridX = worldToGridIndex(p.x, world.horizontalLimit);
+  const gridY = worldToGridIndex(p.y, world.verticalLimit);
   return world.grid[gridY][gridX];
 }
 
@@ -126,11 +141,12 @@ export function isTerrainTypeWalkable(terrainType: TerrainType): boolean {
  * Check if a position is walkable (has terrain AND top-most terrain is walkable)
  */
 export function isWalkable(world: WorldState, position: Position): boolean {
-  if (!isValidPosition(world, position)) {
+  const p = toTilePosition(position);
+  if (!isValidPosition(world, p)) {
     return false;
   }
 
-  const topMostTerrain = getTopMostTerrainAtPosition(world.groundLayer, position);
+  const topMostTerrain = getTopMostTerrainAtPosition(world.groundLayer, p);
   if (!topMostTerrain) {
     // No terrain = not walkable
     return false;
@@ -202,11 +218,12 @@ export function isValidPosition(world: WorldState, position: Position): boolean 
  * Checks if a position is occupied
  */
 export function isPositionOccupied(world: WorldState, position: Position): boolean {
-  if (!isValidPosition(world, position)) {
+  const p = toTilePosition(position);
+  if (!isValidPosition(world, p)) {
     return false;
   }
-  const gridX = worldToGridIndex(position.x, world.horizontalLimit);
-  const gridY = worldToGridIndex(position.y, world.verticalLimit);
+  const gridX = worldToGridIndex(p.x, world.horizontalLimit);
+  const gridY = worldToGridIndex(p.y, world.verticalLimit);
   return world.grid[gridY][gridX] !== null;
 }
 
@@ -219,8 +236,9 @@ export function placeObjectInGrid(
   position: Position,
   limit: number
 ): void {
-  const gridX = worldToGridIndex(position.x, limit);
-  const gridY = worldToGridIndex(position.y, limit);
+  const p = toTilePosition(position);
+  const gridX = worldToGridIndex(p.x, limit);
+  const gridY = worldToGridIndex(p.y, limit);
 
   if (gridY >= 0 && gridY < grid.length) {
     if (gridX >= 0 && gridX < grid[gridY].length) {
@@ -233,8 +251,9 @@ export function placeObjectInGrid(
  * Removes an object from a position in the grid
  */
 export function removeObjectFromGrid(grid: Grid, position: Position, limit: number): void {
-  const gridX = worldToGridIndex(position.x, limit);
-  const gridY = worldToGridIndex(position.y, limit);
+  const p = toTilePosition(position);
+  const gridX = worldToGridIndex(p.x, limit);
+  const gridY = worldToGridIndex(p.y, limit);
 
   if (gridY >= 0 && gridY < grid.length) {
     if (gridX >= 0 && gridX < grid[gridY].length) {

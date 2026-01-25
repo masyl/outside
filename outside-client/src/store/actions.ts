@@ -18,6 +18,7 @@ export type Action =
       type: 'MOVE_OBJECT';
       payload: { id: string; direction: Direction; distance: number; originalValue?: Position };
     }
+  | { type: 'SIM_TICK'; payload: { dtMs: number } }
   | { type: 'SET_WORLD_SIZE'; payload: { horizontalLimit: number; verticalLimit: number } }
   | { type: 'SET_SEED'; payload: { seed: number } }
   | { type: 'RESET_WORLD' }
@@ -54,6 +55,11 @@ export const actions = {
   ): Action => ({
     type: 'MOVE_OBJECT',
     payload: { id, direction, distance, originalValue },
+  }),
+
+  simTick: (dtMs: number): Action => ({
+    type: 'SIM_TICK',
+    payload: { dtMs },
   }),
 
   setWorldSize: (horizontalLimit: number, verticalLimit: number): Action => ({

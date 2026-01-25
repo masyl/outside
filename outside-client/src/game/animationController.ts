@@ -3,6 +3,7 @@ import { Store } from '../store/store';
 import { GameRenderer } from '../renderer/renderer';
 import { animateObjectMovement } from './animations';
 import { COORDINATE_SYSTEM, CoordinateConverter, getZoomScale } from '../renderer/coordinateSystem';
+import { directionFromVelocity } from '../utils/direction';
 
 const { DISPLAY_TILE_SIZE, VERTICAL_OFFSET } = COORDINATE_SYSTEM;
 
@@ -80,7 +81,6 @@ export class AnimationController {
           );
           sprite.x = displayPos.x;
           sprite.y = displayPos.y + VERTICAL_OFFSET;
-          sprite.scale.set(zoomScale, zoomScale);
         }
         return;
       }
@@ -112,16 +112,7 @@ export class AnimationController {
 
     let sprite = this.renderer.getSpriteForObject(id);
     if (!sprite) {
-      const world = this.store.getState();
-      // Try to force-creation for missing sprite (race condition between color swap + animation)
-      const object = world.objects.get(id);
-      if (object) {
-        sprite = this.renderer.ensureSpriteForObject(object);
-      }
-    }
-
-    if (!sprite) {
-      console.warn(`[AnimationController] Sprite not found for object ${id}`);
+      // Sprite might not be created yet (render/update ordering). Skip animation for this tick.
       return;
     }
 
@@ -132,19 +123,10 @@ export class AnimationController {
       this.activeAnimations.delete(id);
     }
 
-    // Determine direction
     const dx = toPos.x - fromPos.x;
     const dy = toPos.y - fromPos.y;
-    let direction: Direction = 'down';
-
-    if (dx === 0 && dy === -1) direction = 'up';
-    else if (dx === 0 && dy === 1) direction = 'down';
-    else if (dx === -1 && dy === 0) direction = 'left';
-    else if (dx === 1 && dy === 0) direction = 'right';
-    else if (dx === 1 && dy === -1) direction = 'up-right';
-    else if (dx === -1 && dy === -1) direction = 'up-left';
-    else if (dx === 1 && dy === 1) direction = 'down-right';
-    else if (dx === -1 && dy === 1) direction = 'down-left';
+    const velocity = { x: dx, y: dy };
+    const direction: Direction = directionFromVelocity(velocity);
 
     // Update facing direction in store
     // Note: This dispatches an action which might trigger another state update,
@@ -157,7 +139,7 @@ export class AnimationController {
     // But we need to persist "facing" state for idle animations.
 
     // Let's call a method on renderer to set the facing direction for this bot
-    this.renderer.updateBotDirection(id, direction, true); // true = moving
+    this.renderer.updateBotVelocity(id, velocity, true); // true = moving
 
     // Always start from the sprite's CURRENT pixel position (which may be mid-animation)
     // This allows smooth continuation if an animation is interrupted
@@ -193,7 +175,7 @@ export class AnimationController {
         this.activeAnimations.delete(id);
 
         // Update state to idle
-        this.renderer.updateBotDirection(id, direction, false); // false = idle
+        this.renderer.updateBotVelocity(id, velocity, false); // false = idle
       }
     );
 

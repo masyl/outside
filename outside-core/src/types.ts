@@ -7,6 +7,23 @@ export type Position = {
   y: number;
 };
 
+/**
+ * Semantics-only aliases (same shape, different intent).
+ *
+ * - TilePosition: integer tile coordinates (grid indexing, collisions, terrain lookup)
+ * - WorldPosition: continuous coordinates in tile units (rendering + continuous motion)
+ */
+export type TilePosition = Position;
+export type WorldPosition = Position;
+
+/**
+ * Velocity in tiles per second, in world coordinates.
+ */
+export type Velocity = {
+  x: number;
+  y: number;
+};
+
 export type Direction =
   | 'left'
   | 'right'
@@ -19,11 +36,24 @@ export type Direction =
 
 export type ObjectType = 'bot';
 
+/**
+ * Continuous motion state for bots.
+ *
+ * Stored on the entity so simulation ticks are deterministic/replayable.
+ */
+export interface BotMotionState {
+  headingRad: number;
+  angularVelocityRadPerSec: number;
+  speedTilesPerSec: number;
+}
+
 export interface GameObject {
   id: string;
   type: ObjectType;
-  position?: Position; // Optional - bots can exist without a position until placed
-  facing?: Direction; // Optional facing direction
+  position?: WorldPosition; // Optional - bots can exist without a position until placed
+  velocity?: Velocity; // Optional - continuous velocity in tiles/sec
+  motion?: BotMotionState; // Optional - internal motion state for deterministic simulation
+  facing?: Direction; // Optional facing direction (typically derived from velocity)
 }
 
 export interface Bot extends GameObject {
@@ -55,4 +85,5 @@ export interface WorldState {
   horizontalLimit: number; // Tiles from -limit to +limit on X axis
   verticalLimit: number; // Tiles from -limit to +limit on Y axis
   seed: number; // Master seed for RNG
+  timeMs: number; // Deterministic simulation time
 }

@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { enableMapSet } from 'immer';
 import { reducer } from './reducers';
 import { createWorldState } from '@outside/core';
 import { Action } from './actions';
+import { initBotMotion } from './botMotion';
 
 // Enable Immer MapSet plugin
 enableMapSet();
@@ -177,6 +178,103 @@ describe('Reducer Logic', () => {
       // Position should be unchanged
       const bot = newState.objects.get('bot-1');
       expect(bot?.position).toEqual({ x: 5, y: 3 });
+    });
+  });
+
+  describe('SIM_TICK Action', () => {
+    beforeEach(() => {
+      // Create terrain first (walkable region)
+      initialState = reducer(initialState, {
+        type: 'CREATE_TERRAIN',
+        payload: {
+          id: 'ground',
+          terrainType: 'grass',
+          x: -5,
+          y: -5,
+          width: 20,
+          height: 20,
+        },
+      });
+
+      // Create and place a bot
+      initialState = reducer(initialState, { type: 'CREATE_BOT', payload: { id: 'bot-sim' } });
+      initialState = reducer(initialState, {
+        type: 'PLACE_OBJECT',
+        payload: { id: 'bot-sim', position: { x: 0, y: 0 } },
+      });
+    });
+
+    it('advances timeMs and updates bot position continuously', () => {
+      const before = initialState.objects.get('bot-sim')!;
+      expect(before.position).toEqual({ x: 0, y: 0 });
+      expect(initialState.timeMs).toBe(0);
+
+      const next = reducer(initialState, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+      expect(next.timeMs).toBe(50);
+
+      const bot = next.objects.get('bot-sim')!;
+      expect(bot.position).toBeDefined();
+      expect(bot.velocity).toBeDefined();
+      expect(bot.motion).toBeDefined();
+      expect(bot.position).not.toEqual({ x: 0, y: 0 });
+    });
+
+    it('is deterministic for the same starting state and ticks', () => {
+      const run = (s: typeof initialState) => {
+        let cur = s;
+        for (let i = 0; i < 10; i++) {
+          cur = reducer(cur, { type: 'SIM_TICK', payload: { dtMs: 50 } });
+        }
+        return cur;
+      };
+
+      const a = run(initialState);
+      const b = run(initialState);
+      expect(a).toEqual(b);
+    });
+
+    it('bounces off non-walkable terrain by reflecting velocity', () => {
+      const seed = 42;
+
+      // Find a bot id whose initial heading points mostly to the right.
+      let botId = '';
+      for (let i = 0; i < 2000; i++) {
+        const candidate = `bot-right-${i}`;
+        const v = initBotMotion({ seed, botId: candidate }).velocity;
+        if (v.x > 0.9 && Math.abs(v.y) < 0.2) {
+          botId = candidate;
+          break;
+        }
+      }
+      expect(botId).not.toBe('');
+
+      let s = createWorldState(seed);
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValueOnce(1).mockReturnValueOnce(2);
+      try {
+        // Walkable grass region
+        s = reducer(s, {
+          type: 'CREATE_TERRAIN',
+          payload: { id: 'grass', terrainType: 'grass', x: -5, y: -5, width: 20, height: 20 },
+        });
+        // Non-walkable hole at tile (1,0) (created after grass)
+        s = reducer(s, {
+          type: 'CREATE_TERRAIN',
+          payload: { id: 'hole', terrainType: 'hole', x: 1, y: 0, width: 1, height: 1 },
+        });
+      } finally {
+        nowSpy.mockRestore();
+      }
+      s = reducer(s, { type: 'CREATE_BOT', payload: { id: botId } });
+      s = reducer(s, { type: 'PLACE_OBJECT', payload: { id: botId, position: { x: 0.9, y: 0.1 } } });
+
+      const next = reducer(s, { type: 'SIM_TICK', payload: { dtMs: 200 } });
+      const bot = next.objects.get(botId)!;
+
+      // We attempted to move into tile (1,0) which is a hole → expect x velocity reflected.
+      expect(bot.velocity).toBeDefined();
+      expect(bot.velocity!.x).toBeLessThan(0);
+      // Position should not have crossed into the hole tile.
+      expect(bot.position!.x).toBeLessThan(1);
     });
   });
 

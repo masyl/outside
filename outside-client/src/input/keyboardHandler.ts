@@ -5,7 +5,7 @@ import { parseCommand } from '../commands/parser';
 import { GameRenderer } from '../renderer/renderer';
 import { Store } from '../store/store';
 import { InputCommandType } from '../network/inputCommands';
-import { KeystrokeOverlay } from '../debug/keystrokeOverlay';
+import { KeystrokeBridge } from '../debug/keystrokeBridge';
 import { TimelineManager } from '../timeline/manager';
 import { GameLoop } from '../game/loop';
 import { PlaybackState } from '../timeline/types';
@@ -28,7 +28,7 @@ export class KeyboardHandler {
   private keyHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
   private inputCommandSender: InputCommandSender | null = null;
   private isClientMode: boolean = false;
-  private keystrokeOverlay: KeystrokeOverlay;
+  // private keystrokeOverlay: KeystrokeOverlay; // Replaced by KeystrokeBridge
   private timelineManager: TimelineManager | null;
   private gameLoop: GameLoop | null = null;
   private debugOverlay: any = null;
@@ -51,7 +51,7 @@ export class KeyboardHandler {
     this.inputCommandSender = inputCommandSender || null;
     this.isClientMode = inputCommandSender !== undefined;
     this.timelineManager = timelineManager || null;
-    this.keystrokeOverlay = new KeystrokeOverlay();
+    // this.keystrokeOverlay = new KeystrokeOverlay();
 
     this.setupKeyHandlers();
 
@@ -301,14 +301,14 @@ export class KeyboardHandler {
     // ?: Toggle keystroke overlay
     this.keyHandlers.set('?', (event) => {
       event.preventDefault();
-      this.keystrokeOverlay.toggle();
+      KeystrokeBridge.toggle();
     });
 
     // ESC: Hide keystroke overlay (when visible)
     this.keyHandlers.set('Escape', (event) => {
-      if (this.keystrokeOverlay['isVisible']) {
+      if (KeystrokeBridge.isVisible()) {
         event.preventDefault();
-        this.keystrokeOverlay.hide();
+        KeystrokeBridge.hide();
       }
     });
 

@@ -15,6 +15,7 @@ import { BotAutonomy } from '../game/autonomy';
 import { PlaybackState } from '../timeline/types';
 import { GameLoop } from '../game/loop';
 import { TimelineManager } from '../timeline/manager';
+import { actions } from '../store/actions';
 
 export interface HostCallbacks {
   onClientConnected?: (clientId: string) => void;
@@ -39,6 +40,7 @@ export class HostMode {
   private botLastMovedStep: Map<string, number> = new Map();
   private autonomyEnabled: boolean = false; // Default to disabled for manual control
   private playbackState: PlaybackState = PlaybackState.PLAYING;
+  private simAccumulatorMs: number = 0;
 
   constructor(
     store: Store,
@@ -178,6 +180,7 @@ export class HostMode {
    */
   private startStepCounter(): void {
     const STEP_INTERVAL = 125; // 125ms, same as game loop
+    const SIM_DT_MS = 50; // 20Hz simulation tick for smoother continuous motion
 
     this.stepIntervalId = window.setInterval(() => {
       // Always increment step count for UI purposes?
@@ -189,6 +192,14 @@ export class HostMode {
       }
 
       this.currentStep++;
+
+      // Drive deterministic continuous simulation at a fixed cadence.
+      // We may run multiple SIM_TICK steps per UI step to keep motion smooth.
+      this.simAccumulatorMs += STEP_INTERVAL;
+      while (this.simAccumulatorMs >= SIM_DT_MS) {
+        this.store.dispatch(actions.simTick(SIM_DT_MS), this.currentStep);
+        this.simAccumulatorMs -= SIM_DT_MS;
+      }
 
       // Handle autonomous bot movement
       this.processAutonomy();

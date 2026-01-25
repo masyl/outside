@@ -5,7 +5,7 @@ import {
   WorldPosition,
   getZoomScale,
 } from './coordinateSystem';
-import { WorldState, Direction } from '@outside/core';
+import { WorldState } from '@outside/core';
 
 /**
  * VisualDebugLayer - renders debug visualizations between ground and surface layers
@@ -29,14 +29,14 @@ export class VisualDebugLayer extends Container {
   private mousePos: WorldPosition | null = null;
 
   // Bot tracking
-  private bots: Array<{ x: number; y: number; direction?: Direction }> = [];
+  private bots: Array<{ x: number; y: number; velocity?: { x: number; y: number } }> = [];
 
   // Debug options
   private showSubGrid: boolean = false;
 
   constructor() {
     super();
-    console.log('[VisualDebugLayer] Constructor called, showSubGrid:', this.showSubGrid);
+    // console.log('[VisualDebugLayer] Constructor called, showSubGrid:', this.showSubGrid);
     this.graphics = new Graphics();
     this.addChild(this.graphics);
     this.visible = false;
@@ -56,7 +56,11 @@ export class VisualDebugLayer extends Container {
    * Toggle debug layer visibility
    */
   setVisible(visible: boolean): void {
-    console.log(`[VisualDebugLayer] setVisible called with: ${visible}`);
+    // Only log if visibility actually changes to reduce console spam
+    if (this.isVisible !== visible) {
+      console.log(`[VisualDebugLayer] setVisible changed to: ${visible}`);
+    }
+
     this.isVisible = visible;
     this.visible = visible;
     if (visible) {
@@ -90,7 +94,7 @@ export class VisualDebugLayer extends Container {
   /**
    * Update bot positions from game state
    */
-  updateBotPositions(bots: Array<{ x: number; y: number; direction?: Direction }>): void {
+  updateBotPositions(bots: Array<{ x: number; y: number; velocity?: { x: number; y: number } }>): void {
     this.bots = bots;
     if (this.isVisible) {
       this.render();
@@ -213,81 +217,49 @@ export class VisualDebugLayer extends Container {
 
       this.graphics.stroke();
 
-      // 2. Draw direction vector if available
-      if (bot.direction) {
+      // 2. Draw velocity vector if available
+      if (bot.velocity) {
         const center = CoordinateConverter.getTileCenter(bot.x, bot.y, zoomScale);
         const centerDisplay = CoordinateConverter.worldToDisplay(center, zoomScale);
 
-        let dx = 0;
-        let dy = 0;
+        const rawX = bot.velocity.x;
+        const rawY = bot.velocity.y;
+        const speedTilesPerSec = Math.sqrt(rawX * rawX + rawY * rawY);
+        if (speedTilesPerSec > 0) {
+          const dx = rawX / speedTilesPerSec;
+          const dy = rawY / speedTilesPerSec;
 
-        switch (bot.direction) {
-          case 'up':
-            dy = -1;
-            break;
-          case 'down':
-            dy = 1;
-            break;
-          case 'left':
-            dx = -1;
-            break;
-          case 'right':
-            dx = 1;
-            break;
-          case 'up-left':
-            dx = -1;
-            dy = -1;
-            break;
-          case 'up-right':
-            dx = 1;
-            dy = -1;
-            break;
-          case 'down-left':
-            dx = -1;
-            dy = 1;
-            break;
-          case 'down-right':
-            dx = 1;
-            dy = 1;
-            break;
+          // Line length encodes velocity magnitude (tiles/sec).
+          // Base length is ~half tile; we scale by speed for intuition.
+          const length = (DISPLAY_TILE_SIZE / 2) * zoomScale * 1.5 * speedTilesPerSec;
+
+          this.graphics.setStrokeStyle({ width: 2, color: 0xffffff, alpha: 1 }); // White
+          this.graphics.beginPath();
+          this.graphics.moveTo(centerDisplay.x, centerDisplay.y);
+          this.graphics.lineTo(centerDisplay.x + dx * length, centerDisplay.y + dy * length);
+          this.graphics.stroke();
+
+          // Draw small arrowhead, scaled by zoom
+          const arrowSize = 6 * zoomScale;
+          const endX = centerDisplay.x + dx * length;
+          const endY = centerDisplay.y + dy * length;
+
+          // Calculate angle
+          const angle = Math.atan2(dy, dx);
+
+          this.graphics.beginPath();
+          this.graphics.moveTo(endX, endY);
+          this.graphics.lineTo(
+            endX - arrowSize * Math.cos(angle - Math.PI / 6),
+            endY - arrowSize * Math.sin(angle - Math.PI / 6)
+          );
+          this.graphics.moveTo(endX, endY);
+          this.graphics.lineTo(
+            endX - arrowSize * Math.cos(angle + Math.PI / 6),
+            endY - arrowSize * Math.sin(angle + Math.PI / 6)
+          );
+          this.graphics.stroke();
         }
-
-        // Normalize diagonal vectors
-        if (dx !== 0 && dy !== 0) {
-          const length = Math.sqrt(dx * dx + dy * dy);
-          dx /= length;
-          dy /= length;
-        }
-
-        // Line length = half tile size (radius), scaled by zoom, 50% longer for better visibility
-        const length = (DISPLAY_TILE_SIZE / 2) * zoomScale * 1.5;
-
-        this.graphics.setStrokeStyle({ width: 2, color: 0xffffff, alpha: 1 }); // White
-        this.graphics.beginPath();
-        this.graphics.moveTo(centerDisplay.x, centerDisplay.y);
-        this.graphics.lineTo(centerDisplay.x + dx * length, centerDisplay.y + dy * length);
-        this.graphics.stroke();
-
-        // Draw small arrowhead, scaled by zoom
-        const arrowSize = 6 * zoomScale;
-        const endX = centerDisplay.x + dx * length;
-        const endY = centerDisplay.y + dy * length;
-
-        // Calculate angle
-        const angle = Math.atan2(dy, dx);
-
-        this.graphics.beginPath();
-        this.graphics.moveTo(endX, endY);
-        this.graphics.lineTo(
-          endX - arrowSize * Math.cos(angle - Math.PI / 6),
-          endY - arrowSize * Math.sin(angle - Math.PI / 6)
-        );
-        this.graphics.moveTo(endX, endY);
-        this.graphics.lineTo(
-          endX - arrowSize * Math.cos(angle + Math.PI / 6),
-          endY - arrowSize * Math.sin(angle + Math.PI / 6)
-        );
-        this.graphics.stroke();
       }
 
       // 3. Render coordinate label for bot
