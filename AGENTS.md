@@ -20,30 +20,7 @@ Non trivial work typically starts by writing a pitch, before writing an implemen
 - [Design Process - Pitch Phase](outside-design/docs/design-process/pitch-phase.md)
 - Find examples in the [Pitches Directory](outside-design/docs/pitches/)
 
-## Agent Skills
-
-The project includes a comprehensive skills system that implements development workflows:
-
-- [Skills Documentation](outside-design/docs/skills/README.md)
-- Skills are located in `outside-design/docs/skills/`
-- **Wrapup Workflow**: Complete 9-step wrapup process automation
-- Individual skills can be used for partial workflows
-- Skills integrate with existing build commands and project conventions
-
-### Using Agent Skills
-
-Skills are designed to be user-initiated and can be run individually or as complete workflows:
-
-```bash
-# Complete wrapup workflow (when implemented)
-skill run wrapup-workflow --deliveryName="feature-name" --branchName="feature/branch-name"
-
-# Individual skill usage
-skill run wrapup-prerequisites --branchName="feature/branch-name"
-skill run testing-report --deliveryPath="path/to/delivery" --testedFeatures="feature1,feature2"
-```
-
-### Available Wrapup Skills
+### Available Skills
 
 1. **wrapup-prerequisites** - Validates pre-requisites (tests, builds, coverage)
 2. **wrapup-folder-setup** - Creates delivery folder structure

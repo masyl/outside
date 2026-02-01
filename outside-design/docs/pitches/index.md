@@ -12,6 +12,7 @@
 
 ## Core features
 
+- [New Simulation Core in ECS](./new-simulation-core-ecs.md)
 - [Player Nicknames](./player-nicknames.md)
 - [Sound Effects](./sound-effects.md)
 - [Spawning Bots](./spawning-bots.md)
