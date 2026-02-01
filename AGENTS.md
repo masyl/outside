@@ -20,27 +20,6 @@ Non trivial work typically starts by writing a pitch, before writing an implemen
 - [Design Process - Pitch Phase](outside-design/docs/design-process/pitch-phase.md)
 - Find examples in the [Pitches Directory](outside-design/docs/pitches/)
 
-### Available Skills
-
-1. **wrapup-prerequisites** - Validates pre-requisites (tests, builds, coverage)
-2. **wrapup-folder-setup** - Creates delivery folder structure
-3. **plan-update** - Updates implementation plan to reflect reality
-4. **testing-report** - Generates comprehensive testing report
-5. **delivery-summary** - Creates detailed delivery report
-6. **pitch-relocation** - Copies original pitch to delivery folder
-7. **commit-preparation** - Prepares commit message and tags
-8. **delivery-readme** - Creates README.md with frontmatter
-9. **delivery-index-update** - Updates deliveries list index
-10. **wrapup-workflow** - Orchestrates all 9 steps
-
-### Wrapup Process Integration
-
-Skills implement the complete wrapup process from [wrapup documentation](outside-design/docs/wrapup.md):
-
-- **User-initiated**: Never automatic, always requires user confirmation
-- **Quality gates**: Enforces 80%+ coverage, green builds, passing tests
-- **Documentation standards**: Creates structured delivery folders with required documents
-- **Human collaboration**: Confirmation points at critical steps
 
 ## Build Commands
 
