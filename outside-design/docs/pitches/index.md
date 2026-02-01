@@ -25,6 +25,7 @@
 
 ## One-line Pitch Ideas
 
+- Add a blocky/mblock/scratch UI to add events to "command blocks" or entities
 - Default terrain object
   - Add a default terrain type for level.
   - Use this default terrain as a first object added to ground layer.

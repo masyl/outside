@@ -26,6 +26,8 @@ import { SignalingClient } from './network/signaling';
 import { HostMode } from './network/host';
 import { ClientMode } from './network/client';
 import { CoordinateConverter } from './renderer/coordinateSystem';
+import { isTileTappable, routeTileTapToCommands } from './input/tapRouting';
+import { pickWorldAndTileFromScreen } from './input/tilePicking';
 import { zoomManager } from './zoom/zoomState'; // Import zoomManager to sync debug
 import { setupPixiReact } from './pixi-setup';
 
@@ -135,6 +137,8 @@ async function init(options?: {
     app.stage.hitArea = app.screen;
     app.stage.on('pointermove', (event) => {
       if (!renderer) return;
+      // Ignore moves over interactive UI (e.g. timeline) to avoid fighting its cursor/drag logic.
+      if ((event as any).target && (event as any).target !== app.stage) return;
 
       // Get global position
       const globalPos = event.global;
@@ -144,15 +148,70 @@ async function init(options?: {
 
       // Use unified coordinate conversion - preserves floating point precision
       const zoomScale = getZoomScale();
-      const worldPos = CoordinateConverter.screenToWorld(globalPos, rootPos, zoomScale);
+      const { world: worldPos, tile } = pickWorldAndTileFromScreen({
+        screen: globalPos,
+        rootPos,
+        zoomScale,
+      });
 
       // Update visual debug layer with floating-point position
       // Note: gridX/gridY logging retained but we pass full precision to renderer
-      const gridX = Math.floor(worldPos.x);
-      const gridY = Math.floor(worldPos.y);
+      const gridX = tile.x;
+      const gridY = tile.y;
 
       // Removed noisy mouse position logging
       renderer.updateMousePosition(worldPos.x, worldPos.y);
+
+      // Hover cursor for tappable tiles (bots or walkable terrain).
+      const tappable = isTileTappable(store.getState(), { x: gridX, y: gridY });
+      const canvas: HTMLCanvasElement | undefined = (app as any).canvas ?? (app as any).view;
+      if (canvas) {
+        const nextCursor = tappable ? 'pointer' : 'default';
+        if (canvas.style.cursor !== nextCursor) {
+          canvas.style.cursor = nextCursor;
+        }
+      }
+    });
+
+    // Tap/click support (mouse + touch). Tile-based picking via stage events.
+    app.stage.on('pointertap', (event) => {
+      if (!renderer) return;
+      // Ignore taps on interactive UI children (e.g. timeline).
+      if ((event as any).target && (event as any).target !== app.stage) return;
+
+      const globalPos = event.global;
+      const rootPos = renderer.getRootContainerPosition();
+      const zoomScale = getZoomScale();
+      const { tile } = pickWorldAndTileFromScreen({ screen: globalPos, rootPos, zoomScale });
+      const x = tile.x;
+      const y = tile.y;
+
+      if (connectionMode === 'client') {
+        console.log(`[Tap] client: send CLICK_TILE (${x}, ${y})`);
+        // TODO: Implement client mode sendInputCommand
+        // ClientMode?.sendInputCommand('CLICK_TILE', undefined, { x, y });
+        return;
+      }
+
+      // Local/host mode: route to deterministic commands and enqueue locally.
+      if (!commandQueue || !hostModeRef) return;
+      const world = store.getState();
+      const routed = routeTileTapToCommands({
+        world,
+        tile: { x, y },
+        step: hostModeRef.getCurrentStep(),
+      });
+      if (routed.commands.length === 0) return;
+
+      if (routed.resolved.kind === 'bot') {
+        const next = routed.commands[0]?.type;
+        console.log(`[Tap] local: bot ${routed.resolved.botId} → ${String(next)}`);
+      } else if (routed.resolved.kind === 'walkable-terrain') {
+        console.log(
+          `[Tap] local: tile (${x}, ${y}) → spawn ${routed.resolved.spawnedBotId} follow ${routed.resolved.targetBotId}`
+        );
+      }
+      commandQueue.enqueueMany(routed.commands);
     });
 
     // Toggle debug grid when debug overlay visibility changes
@@ -184,7 +243,7 @@ async function init(options?: {
     updateEventCount();
     setInterval(updateEventCount, 500);
 
-    console.log('Outside Game Client - POC initialized');
+    console.log('Outside platform initialized. Enjoy!');
   };
 
   // Callback when Renderer is ready from LevelViewport
@@ -386,7 +445,7 @@ async function init(options?: {
           // Ensure seed is present.
           const world = store.getState();
           if (world.seed === undefined) {
-            console.warn('[Init] Restored state is missing seed, generating new one...');
+            console.info('[Init] Restored state is missing seed, generating new one...');
             // We need to update of the state with a seed without triggering a new event
             // But Store doesn't allow direct state mutation outside actions.
             // We can dispatch a SET_WORLD_STATE action with the same state + seed.

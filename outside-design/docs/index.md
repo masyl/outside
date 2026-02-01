@@ -22,6 +22,10 @@ Proposals for new features, game mechanics or anything that should be considered
 
 Learn about our design methodology, research findings, and ideation process.
 
+### [Software Architecture](./architecture/index.md)
+
+Articles relating to software architecture, such as code design patterns, choosing libraries, refactroring, etc...
+
 ### 📋 [Deliveries](./deliveries/)
 
 Completed implementation plans that have been archived. These documents reflect the actual work that was done, including work summaries, implementation details, and commit references.

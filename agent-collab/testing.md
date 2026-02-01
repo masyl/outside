@@ -50,3 +50,15 @@ This file contains notes on the latest round of QA done by the meat sack dev wor
 ### Timeline keystrokes
 
 - [ ] Bug: The time passing counted as number of steps and as number of events is not always in sync when moving on the timeline.
+
+### Tappable Entities
+
+While the game is working, you implementation is very bad, for the following reasons:
+
+- You did not use the appropriate PixiJS interaction handling apis. You have to use pointer events and not re-invent some other system or the native browser DOM events.
+- You don't seem to have extended the existing ECS system for composability and instead you added a bunch of needlesly complex and specific code to handle Bots and Tiles specifically.
+- I was expecting you to create new "Systems" in the same sense as ECS implies.
+- The current combination of the ECS+Flux architecture is relying on direct use of reducers instead of having a real collection of Systems in the sense of ECS. This is a coupling of concerns that is problematic. It merges the concept of game logic and state changes.
+- The whole concept of Bot autonomy should simply be removed and not compatible with the ECS pattern
+- Systems should be decoupled from reducers and structured to have the least boilerplate code as possible.
+- Commands are higher level interface that should be better defined in their purpose and role. Especially in the way they work in relationship with events, reducers, entities and components.

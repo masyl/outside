@@ -16,6 +16,7 @@ import { PlaybackState } from '../timeline/types';
 import { GameLoop } from '../game/loop';
 import { TimelineManager } from '../timeline/manager';
 import { actions } from '../store/actions';
+import { routeTileTapToCommands } from '../input/tapRouting';
 
 export interface HostCallbacks {
   onClientConnected?: (clientId: string) => void;
@@ -573,11 +574,38 @@ export class HostMode {
         );
         return;
       case 'CLICK_TILE':
-        // Future: handle tile clicks
-        console.log(
-          `[Host] Client ${clientId} clicked tile at (${inputCommand.data?.x}, ${inputCommand.data?.y})`
-        );
-        return;
+        {
+          const x = Math.floor(Number(inputCommand.data?.x));
+          const y = Math.floor(Number(inputCommand.data?.y));
+          const world = this.store.getState();
+
+          const routed = routeTileTapToCommands({ world, tile: { x, y }, step: this.currentStep });
+          if (routed.commands.length === 0) {
+            console.log(
+              `[Host] Client ${clientId} tapped tile (${x}, ${y}) → noop (${
+                routed.resolved.kind === 'noop' ? routed.resolved.reason : 'unknown'
+              })`
+            );
+            return;
+          }
+
+          if (routed.resolved.kind === 'bot') {
+            const next = routed.commands[0]?.type;
+            console.log(
+              `[Host] Client ${clientId} tapped bot ${routed.resolved.botId} → ${String(next)}`
+            );
+          } else if (routed.resolved.kind === 'walkable-terrain') {
+            console.log(
+              `[Host] Client ${clientId} tapped walkable tile (${x}, ${y}) → spawn ${routed.resolved.spawnedBotId} follow ${routed.resolved.targetBotId}`
+            );
+          } else {
+            console.log(
+              `[Host] Client ${clientId} tapped tile (${x}, ${y}) → enqueued ${routed.commands.length} command(s)`
+            );
+          }
+          this.commandQueue.enqueueMany(routed.commands);
+          return;
+        }
       default:
         console.warn(`[Host] Unknown input command: ${inputCommand.command}`);
         return;

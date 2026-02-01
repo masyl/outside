@@ -2,6 +2,8 @@
 
 ## Open Questions
 
+- [The Meaning of Outside](./meanings-of-outside.md)
+- [Choosing and ECS Library](../architecture/choosing-ecs-library.md)
 - If the server implement CQRS to record state changes and offer time travel features, what needs to actually be sent to the thin client ? Juste display data? Or more information on internal state ?
 - Which state machine should we use to have the ability to rewing, replay and fork the playback of a level ?
   - [State Machine Selection](./tech/state-machine-selection.md)

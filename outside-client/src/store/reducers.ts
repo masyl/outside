@@ -38,7 +38,7 @@ export function reducer(state: WorldState, action: Action): WorldState {
         if (draft.objects.has(id)) {
           console.warn(`Object with id "${id}" already exists`);
           return state;
-        }
+        } 
 
         // Create new bot without a position - will be positioned later via PLACE_OBJECT
         const bot: Bot = {
@@ -353,7 +353,7 @@ export function reducer(state: WorldState, action: Action): WorldState {
 
         // Check if target position is occupied by another object
         if (isPositionOccupied(draft, position)) {
-          console.warn(`Position (${position.x}, ${position.y}) is occupied`);
+          console.log(`Position (${position.x}, ${position.y}) is occupied`);
           return state;
         }
 
