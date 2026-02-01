@@ -36,6 +36,7 @@ Thumbs.db
 .vscode/
 .idea/
 .cursor/
+!.cursor/skills/**
 *.swp
 *.swo
 *~

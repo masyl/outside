@@ -5,14 +5,11 @@ Random notes taken during development.
 
 ## Yak Stack
 
-- [ ] Delivery of clickable entities
-- [x] Architecture Review for proper ECS implementstion
-- [ ] Validate Vitest setup
-  - [ ] Reporter useful while coding
-  - [x] Install Vitest UI
+[ ] Create a new simulation core module
+[ ] Design Skill: Pitch Review
 
 
-## NExt pitch
+## Next pitch
 
 Lets create a new feature branch and a pitch for this idea:
 
