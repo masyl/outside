@@ -35,8 +35,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-.cursor/
-!.cursor/skills/**
+.cursor/*
+!.cursor/skills/
 *.swp
 *.swo
 *~
