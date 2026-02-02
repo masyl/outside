@@ -14,7 +14,7 @@ import {
   RandomWalk,
 } from './components';
 import type { SimulatorEvent } from './events';
-import { registerPipelineObservers } from './run';
+import { registerPipelineObservers } from './observers';
 
 /** Default tic duration in milliseconds (e.g. 50 ms) */
 export const DEFAULT_TIC_DURATION_MS = 50;

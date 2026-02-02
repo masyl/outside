@@ -13,9 +13,17 @@ import {
   type CollisionEvent,
 } from '@outside/simulator';
 
-const SVG_WIDTH = 400;
-const SVG_HEIGHT = 300;
+/** Logical size of the SVG viewBox (4x zoom-out vs original 400×300) */
+const VIEWBOX_WIDTH = 1600;
+const VIEWBOX_HEIGHT = 1200;
 const PIXELS_PER_TILE = 20;
+
+/** Deterministic 0..1 from seed; same seed + index gives same cloud. */
+function seededUnit(seed: number, index: number): number {
+  const n = (seed + index * 7919) | 0;
+  const t = Math.sin(n * 12.9898 + index * 78.233) * 43758.5453;
+  return t - Math.floor(t);
+}
 
 interface SimulatorRendererProps {
   seed?: number;
@@ -43,12 +51,17 @@ export function SimulatorRenderer({
 
   const initWorld = useCallback(() => {
     const world = createWorld({ seed, ticDurationMs: 50 });
+    const maxRadius = entityCount <= 1 ? 0 : 2 + Math.sqrt(entityCount) * 2;
     for (let i = 0; i < entityCount; i++) {
+      const t = entityCount <= 1 ? 0 : i / (entityCount - 1);
+      const angle = seededUnit(seed, i * 2) * Math.PI * 2;
+      const r = Math.sqrt(seededUnit(seed, i * 2 + 1));
+      const radius = (0.15 + 0.85 * t) * maxRadius * r;
       spawnBot(world, {
-        x: (i - entityCount / 2) * 3,
-        y: (i % 2) * 2 - 1,
+        x: radius * Math.cos(angle),
+        y: radius * Math.sin(angle),
         diameter: 1.5,
-        directionRad: (i / entityCount) * Math.PI * 2,
+        directionRad: seededUnit(seed, i * 3) * Math.PI * 2,
         tilesPerSec: 0.5 + (i % 3) * 0.3,
       });
     }
@@ -80,7 +93,14 @@ export function SimulatorRenderer({
       });
       setCollisionEids(eids);
       setState({
-        entityIds: [...query(world, [Position, Size, Direction, Speed])],
+        entityIds: [
+          ...query(world, [
+            components.Position,
+            components.Size,
+            components.Direction,
+            components.Speed,
+          ]),
+        ],
         seed: world.seed,
         ticDurationMs: world.ticDurationMs,
       });
@@ -90,15 +110,29 @@ export function SimulatorRenderer({
 
   if (!state) return <div>Loading...</div>;
 
-  const toX = (x: number) => SVG_WIDTH / 2 + x * PIXELS_PER_TILE;
-  const toY = (y: number) => SVG_HEIGHT / 2 - y * PIXELS_PER_TILE;
+  const toX = (x: number) => VIEWBOX_WIDTH / 2 + x * PIXELS_PER_TILE;
+  const toY = (y: number) => VIEWBOX_HEIGHT / 2 - y * PIXELS_PER_TILE;
 
   return (
-    <div>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <svg
-        width={SVG_WIDTH}
-        height={SVG_HEIGHT}
-        style={{ border: '1px solid #333', background: '#1a1a1a' }}
+        viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+        preserveAspectRatio="xMidYMid meet"
+        style={{
+          flex: 1,
+          width: '100%',
+          minHeight: 0,
+          border: '1px solid #333',
+          background: '#1a1a1a',
+        }}
       >
         {worldRef.current &&
           state.entityIds.map((eid) => {
@@ -119,7 +153,15 @@ export function SimulatorRenderer({
             );
           })}
       </svg>
-      <p style={{ marginTop: 8, fontSize: 12, color: '#888' }}>
+      <p
+        style={{
+          margin: 0,
+          padding: 8,
+          fontSize: 12,
+          color: '#888',
+          flexShrink: 0,
+        }}
+      >
         Seed: {state.seed} · Entities: {state.entityIds.length} · Green = normal,
         Red = just collided
       </p>

@@ -20,6 +20,8 @@ export type { SimulatorWorld, CreateWorldOptions } from './world';
 
 export { runTics } from './run';
 
+export { registerPipelineObservers, registerComponentForPipelineObserver } from './observers';
+
 export { query } from './state';
 
 export { getComponent, setComponent, set } from 'bitecs';
@@ -70,11 +72,4 @@ export { configureTicDurationMs } from './configure';
 
 export type { SimulatorEvent, CollisionEvent } from './events';
 
-export {
-  Position,
-  Size,
-  Direction,
-  Speed,
-  RandomWalk,
-  Observed,
-} from './components';
+export * from './components';

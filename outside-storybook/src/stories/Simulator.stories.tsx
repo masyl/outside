@@ -6,7 +6,7 @@ const meta: Meta<typeof SimulatorRenderer> = {
   title: 'Simulator/ECS Core',
   component: SimulatorRenderer,
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
     docs: {
       description: {
         component:
