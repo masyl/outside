@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   createWorld,
-  addSimEntity,
-  addMovementComponents,
   runTics,
   query,
   getComponent,
@@ -39,10 +37,8 @@ describe('Simulator API', () => {
 
   it('should emit collision events when entities overlap', () => {
     const world = createWorld({ seed: 42, ticDurationMs: 50 });
-    const a = addSimEntity(world);
-    addMovementComponents(world, a, 0, 0, 2, 0, 0);
-    const b = addSimEntity(world);
-    addMovementComponents(world, b, 1, 0, 2, 0, 0); // distance 1, radii 1+1=2 => overlap
+    const a = spawnBot(world, { x: 0, y: 0, diameter: 2 });
+    const b = spawnBot(world, { x: 1, y: 0, diameter: 2 }); // distance 1, radii 1+1=2 => overlap
     runTics(world, 1);
     const events = drainEventQueue(world);
     expect(events).toHaveLength(1);
@@ -55,10 +51,8 @@ describe('Simulator API', () => {
 
   it('should drain event queue and clear it', () => {
     const world = createWorld({ seed: 42, ticDurationMs: 50 });
-    const a = addSimEntity(world);
-    addMovementComponents(world, a, 0, 0, 2, 0, 0);
-    const b = addSimEntity(world);
-    addMovementComponents(world, b, 1, 0, 2, 0, 0);
+    spawnBot(world, { x: 0, y: 0, diameter: 2 });
+    spawnBot(world, { x: 1, y: 0, diameter: 2 });
     runTics(world, 1);
     const first = drainEventQueue(world);
     expect(first).toHaveLength(1);

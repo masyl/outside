@@ -9,13 +9,7 @@
 
 export const VERSION = '0.1.0';
 
-export {
-  createWorld,
-  addSimEntity,
-  addMovementComponents,
-  addRandomWalk,
-  DEFAULT_TIC_DURATION_MS,
-} from './world';
+export { createWorld, DEFAULT_TIC_DURATION_MS } from './world';
 export type { SimulatorWorld, CreateWorldOptions } from './world';
 
 export { runTics } from './run';

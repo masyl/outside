@@ -1,8 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   createWorld,
-  addSimEntity,
-  addMovementComponents,
   runTics,
   query,
   getComponent,
@@ -47,10 +45,8 @@ describe('Determinism', () => {
     const world2 = createWorld({ seed: 999, ticDurationMs: 50 });
 
     for (const world of [world1, world2]) {
-      const a = addSimEntity(world);
-      addMovementComponents(world, a, 0, 0, 2, 0, 0.5);
-      const b = addSimEntity(world);
-      addMovementComponents(world, b, 5, 0, 2, Math.PI, 0.5);
+      spawnBot(world, { x: 0, y: 0, diameter: 2, directionRad: 0, tilesPerSec: 0.5 });
+      spawnBot(world, { x: 5, y: 0, diameter: 2, directionRad: Math.PI, tilesPerSec: 0.5 });
     }
 
     runTics(world1, 20);
