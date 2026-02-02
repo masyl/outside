@@ -8,11 +8,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "storybook": "storybook dev --port 6007",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "storybook:clear-cache": "rm -rf node_modules/.cache/storybook node_modules/.cache/vite 2>/dev/null; echo Cache cleared"
   },
   "dependencies": {
     "@outside/client": "workspace:*",
     "@outside/core": "workspace:*",
+    "@outside/simulator": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

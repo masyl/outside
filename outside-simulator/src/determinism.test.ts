@@ -1,0 +1,71 @@
+import { describe, it, expect } from 'vitest';
+import {
+  createWorld,
+  addSimEntity,
+  addMovementComponents,
+  runTics,
+  query,
+  getComponent,
+  spawnBot,
+  drainEventQueue,
+  Position,
+  Size,
+  Direction,
+  Speed,
+} from './index';
+
+describe('Determinism', () => {
+  it('should produce identical state for same seed and tic count', () => {
+    const world1 = createWorld({ seed: 12345, ticDurationMs: 50 });
+    const world2 = createWorld({ seed: 12345, ticDurationMs: 50 });
+
+    spawnBot(world1, { x: 0, y: 0, diameter: 1, directionRad: 0, tilesPerSec: 1 });
+    spawnBot(world2, { x: 0, y: 0, diameter: 1, directionRad: 0, tilesPerSec: 1 });
+
+    runTics(world1, 10);
+    runTics(world2, 10);
+
+    const ents1 = query(world1, [Position, Size, Direction, Speed]);
+    const ents2 = query(world2, [Position, Size, Direction, Speed]);
+
+    expect(ents1).toHaveLength(1);
+    expect(ents2).toHaveLength(1);
+    const pos1 = getComponent(world1, ents1[0], Position);
+    const pos2 = getComponent(world2, ents2[0], Position);
+    const dir1 = getComponent(world1, ents1[0], Direction);
+    const dir2 = getComponent(world2, ents2[0], Direction);
+    const speed1 = getComponent(world1, ents1[0], Speed);
+    const speed2 = getComponent(world2, ents2[0], Speed);
+    expect(pos1.x).toBe(pos2.x);
+    expect(pos1.y).toBe(pos2.y);
+    expect(dir1.angle).toBe(dir2.angle);
+    expect(speed1.tilesPerSec).toBe(speed2.tilesPerSec);
+  });
+
+  it('should produce identical event sequence for same seed and tic count when collisions occur', () => {
+    const world1 = createWorld({ seed: 999, ticDurationMs: 50 });
+    const world2 = createWorld({ seed: 999, ticDurationMs: 50 });
+
+    for (const world of [world1, world2]) {
+      const a = addSimEntity(world);
+      addMovementComponents(world, a, 0, 0, 2, 0, 0.5);
+      const b = addSimEntity(world);
+      addMovementComponents(world, b, 5, 0, 2, Math.PI, 0.5);
+    }
+
+    runTics(world1, 20);
+    runTics(world2, 20);
+
+    const events1 = drainEventQueue(world1);
+    const events2 = drainEventQueue(world2);
+
+    expect(events1.length).toBe(events2.length);
+    for (let i = 0; i < events1.length; i++) {
+      expect(events1[i].type).toBe(events2[i].type);
+      if (events1[i].type === 'collision') {
+        expect(events1[i].entityA).toBe(events2[i].entityA);
+        expect(events1[i].entityB).toBe(events2[i].entityB);
+      }
+    }
+  });
+});

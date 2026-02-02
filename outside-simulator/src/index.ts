@@ -1,0 +1,80 @@
+/**
+ * Outside Simulator - Headless ECS simulation core
+ *
+ * Fixed-tic API: parent runs N tics, drains event queue between calls.
+ * Systems run in order: movement → collision → randomWalk.
+ *
+ * @packageDocumentation
+ */
+
+export const VERSION = '0.1.0';
+
+export {
+  createWorld,
+  addSimEntity,
+  addMovementComponents,
+  addRandomWalk,
+  DEFAULT_TIC_DURATION_MS,
+} from './world';
+export type { SimulatorWorld, CreateWorldOptions } from './world';
+
+export { runTics } from './run';
+
+export { query } from './state';
+
+export { getComponent, setComponent, set } from 'bitecs';
+
+export { spawnBot, getOrCreateBotPrefab } from './prefabs/bot';
+export type { SpawnBotOptions } from './prefabs/bot';
+
+export {
+  createSoASerializer,
+  createSoADeserializer,
+  createSnapshotSerializer,
+  createSnapshotDeserializer,
+  createObserverSerializer,
+  createObserverDeserializer,
+  f32,
+  f64,
+  u8,
+  i8,
+  u16,
+  i16,
+  u32,
+  i32,
+  str,
+  array,
+  ref,
+  $i8,
+  $u16,
+  $i16,
+  $u32,
+  $i32,
+  $f32,
+  $f64,
+  $u8,
+  $str,
+  $ref,
+} from './serialization';
+export type {
+  ObserverSerializerOptions,
+  ObserverDeserializerOptions,
+  AoSSerializerOptions,
+  AoSDeserializerOptions,
+  PrimitiveBrand,
+} from './serialization';
+
+export { getEventQueue, drainEventQueue } from './events-api';
+
+export { configureTicDurationMs } from './configure';
+
+export type { SimulatorEvent, CollisionEvent } from './events';
+
+export {
+  Position,
+  Size,
+  Direction,
+  Speed,
+  RandomWalk,
+  Observed,
+} from './components';

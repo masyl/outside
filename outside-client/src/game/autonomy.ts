@@ -1,5 +1,5 @@
 import { GameObject, WorldState, Direction } from '@outside/core';
-import { Random } from './random';
+import { Random } from '@outside/utils';
 import { ParsedCommand } from '../commands/parser';
 
 /**

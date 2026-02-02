@@ -21,7 +21,19 @@ outside/
 ├── .gitignore                # Git ignore rules
 ├── .cursorignore            # AI context reduction
 │
-├── outside-core/            # 🎯 SHARED CODE - Core game logic
+├── outside-utils/            # 🔧 SHARED UTILS - RNG, movement/time helpers
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       └── index.ts
+│
+├── outside-core/            # 🎯 SHARED CODE - Core game logic (depends on @outside/utils)
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       └── index.ts
+│
+├── outside-simulator/       # 🎮 SIMULATOR - Headless ECS (depends on @outside/utils, bitecs)
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── src/
@@ -36,6 +48,9 @@ outside/
 ├── outside-design/          # 🎨 DESIGN - UI components & design system
 │   └── package.json
 │
+├── outside-storybook/       # 📖 STORYBOOK - Component docs (depends on @outside/simulator, etc.)
+│   └── package.json
+│
 └── outside-doc/             # 📚 DOCS - Documentation
     └── package.json
 ```
@@ -45,11 +60,20 @@ outside/
 ### Dependency Flow
 
 ```
-outside-core (no dependencies on other packages)
+outside-utils (no dependencies on other packages)
+    ↑
+    ├── outside-core depends on @outside/utils
+    └── outside-simulator depends on @outside/utils, bitecs
+
+outside-core (depends on @outside/utils)
     ↑
     ├── outside-client depends on @outside/core
     ├── outside-server depends on @outside/core
     └── outside-design depends on @outside/core
+
+outside-simulator (depends on @outside/utils, bitecs)
+    ↑
+    └── outside-storybook depends on @outside/simulator (for ECS demo stories)
 ```
 
 ### Workspace Protocol

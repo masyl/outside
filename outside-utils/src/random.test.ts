@@ -56,4 +56,23 @@ describe('Random', () => {
 
     expect(sequence).toEqual(sequence2);
   });
+
+  it('chance(p) returns boolean; same seed gives same sequence', () => {
+    const random = new Random(42);
+    const results = Array.from({ length: 20 }, () => random.chance(0.5));
+    expect(results.every((r) => typeof r === 'boolean')).toBe(true);
+    const random2 = new Random(42);
+    const results2 = Array.from({ length: 20 }, () => random2.chance(0.5));
+    expect(results).toEqual(results2);
+  });
+
+  it('choice returns element from array or undefined if empty', () => {
+    const random = new Random(42);
+    const arr = [1, 2, 3];
+    for (let i = 0; i < 50; i++) {
+      const v = random.choice(arr);
+      expect(arr).toContain(v);
+    }
+    expect(random.choice([])).toBeUndefined();
+  });
 });

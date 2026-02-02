@@ -49,6 +49,9 @@ importers:
       '@outside/core':
         specifier: workspace:*
         version: link:../outside-core
+      '@outside/utils':
+        specifier: workspace:*
+        version: link:../outside-utils
       '@pixi/react':
         specifier: ^8.0.5
         version: 8.0.5(@types/react@19.2.9)(pixi.js@8.15.0)(react@18.3.1)
@@ -149,6 +152,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  outside-simulator:
+    dependencies:
+      '@outside/utils':
+        specifier: workspace:*
+        version: link:../outside-utils
+      bitecs:
+        specifier: ^0.4.0
+        version: 0.4.0
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.17
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
+
   outside-storybook:
     dependencies:
       '@outside/client':
@@ -157,6 +176,9 @@ importers:
       '@outside/core':
         specifier: workspace:*
         version: link:../outside-core
+      '@outside/simulator':
+        specifier: workspace:*
+        version: link:../outside-simulator
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -200,6 +222,15 @@ importers:
       vite:
         specifier: ^6.0.1
         version: 6.4.1(@types/node@25.0.9)(tsx@4.21.0)
+
+  outside-utils:
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.17
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
 
 packages:
 
@@ -1649,6 +1680,9 @@ packages:
 
   birpc@2.9.0:
     resolution: {integrity: sha512-KrayHS5pBi69Xi9JmvoqrIgYGDkD6mcSe/i6YKi3w5kekCLzrX4+nawcXqrj2tIp50Kw/mT/s3p+GVK0A0sKxw==}
+
+  bitecs@0.4.0:
+    resolution: {integrity: sha512-ho6Zop/L79DRTnBAfakPpGPuX7y0+lAjX06CpaAW+5tnAc7BH3L3RlSrWAXAqwnQGDZ10GsoxaxyTTsddlun3g==}
 
   body-parser@1.20.4:
     resolution: {integrity: sha512-ZTgYYLMOXY9qKU/57FAo8F+HA2dGX7bqGc71txDRC1rS4frdFI5R7NhluHxH6M0YItAP0sHB4uqAOcYKxO6uGA==}
@@ -4998,6 +5032,8 @@ snapshots:
   baseline-browser-mapping@2.9.14: {}
 
   birpc@2.9.0: {}
+
+  bitecs@0.4.0: {}
 
   body-parser@1.20.4:
     dependencies:

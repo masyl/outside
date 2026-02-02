@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@outside/core": "workspace:*",
+    "@outside/utils": "workspace:*",
     "@pixi/react": "^8.0.5",
     "@pixi/ui": "^2.3.2",
     "immer": "^10.1.1",

@@ -60,16 +60,16 @@ The following architectural constraints should be respected:
 - Q: Should this pitch mean full migration of current game logic into the new core, or new ECS core plus a defined subset of mechanics? If subset, which mechanics are in scope?
   - A: New ECS core + minimum subset (position, movement, collision, randomWalk); more added during implementation depending on progress.
 
-- Q: RNG compatibility: same algorithm, same public API (seed + next), or both? Should the new core call outside-core’s RNG or reimplement the same contract?
+- Q: RNG compatibility: same algorithm, same public API (seed + next), or both? Should the new core call outside-core's RNG or reimplement the same contract?
   - A: Move the RNG into a proper utility module that can be imported alone. Unsure if "core" is the appropriate sub project.
 
-- Q: Component/system list: leave “a few basic” as-is for the plan, or lock the list?
+- Q: Component/system list: leave "a few basic" as-is for the plan, or lock the list?
   - A: Focus on the list: components position, size (diameter), direction, speed; systems movement, collision, randomWalk.
 
 - Q: Demo app location: new package under repo (inside or next to outside-simulator), or reuse existing client? How is it run?
   - A: Add this test renderer into the Storybook documentation, in order to enable testing the new simulation core visible.
 
-- Q: Is system order “movement → collision → randomWalk” fixed, or can the plan propose a different order?
+- Q: Is system order "movement → collision → randomWalk" fixed, or can the plan propose a different order?
   - A: Try this order first. The rationale is that collision detection should be done after movement and then react accordingly (e.g. apply damage, bounce the entity, or emit a sound effect event). The collision system cannot simply guess the result of the movement system in advance without running it.
 
 - Q: Confirm outside-simulator is a new package in the existing pnpm workspace (outside-*), same tooling as other packages.
@@ -78,7 +78,7 @@ The following architectural constraints should be respected:
 - Q: Any requirement for tests in this pitch (unit tests for systems, determinism tests, API tests), or assume same as rest of repo?
   - A: Same as rest of repo (e.g. 80%+ coverage, unit tests) and also include determinism tests (same seed + tics ⇒ same state) and API tests for the public surface.
 
-- Q: Determinism: same seed + tic count ⇒ identical world state (and event stream), or looser “reproducible under same conditions”?
+- Q: Determinism: same seed + tic count ⇒ identical world state (and event stream), or looser "reproducible under same conditions"?
   - A: Looser: meaning the new core does not need to match the legacy POC, but the new core itself is deterministic.
 
 - Q: How does a "tic" relate to the legacy time model (timeMs, dtMs)? The Implementation Detail says use the same "time to ticks" conversion when calculating distance moved during a tick — does each tic carry a delta-time (ms) for movement, or is one tic a fixed time unit?
