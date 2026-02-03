@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
 import { StoreWrapper } from '../components/wrappers/StoreWrapper';
 import { GameWrapper } from '../components/wrappers/GameRendererWrapper';
 

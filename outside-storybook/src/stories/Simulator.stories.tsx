@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
 import { SimulatorRenderer } from '../components/SimulatorRenderer';
 
 const meta: Meta<typeof SimulatorRenderer> = {
