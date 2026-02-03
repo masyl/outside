@@ -2,7 +2,7 @@
  * Outside Simulator - Headless ECS simulation core
  *
  * Fixed-tic API: parent runs N tics, drains event queue between calls.
- * Systems run in order: movement → collision → randomWalk.
+ * Systems run in order: urge → movement → collision.
  *
  * @packageDocumentation
  */

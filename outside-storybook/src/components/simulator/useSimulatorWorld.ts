@@ -10,7 +10,13 @@ import {
   Speed,
   type CollisionEvent,
 } from '@outside/simulator';
-import { spawnBotsInWorld } from './spawnCloud';
+import { spawnScatteredWithLeaders } from './spawnCloud';
+
+export type SpawnFn = (
+  world: ReturnType<typeof createWorld>,
+  seed: number,
+  entityCount: number
+) => void;
 
 export interface UseSimulatorWorldResult {
   world: ReturnType<typeof createWorld> | null;
@@ -23,7 +29,8 @@ export interface UseSimulatorWorldResult {
 export function useSimulatorWorld(
   seed: number,
   entityCount: number,
-  ticsPerSecond: number
+  ticsPerSecond: number,
+  spawnFn: SpawnFn = spawnScatteredWithLeaders
 ): UseSimulatorWorldResult {
   const worldRef = useRef<ReturnType<typeof createWorld> | null>(null);
   const [state, setState] = useState<{
@@ -35,7 +42,7 @@ export function useSimulatorWorld(
 
   const initWorld = useCallback(() => {
     const world = createWorld({ seed, ticDurationMs: 50 });
-    spawnBotsInWorld(world, seed, entityCount);
+    spawnFn(world, seed, entityCount);
     worldRef.current = world;
     setState({
       entityIds: [...query(world, [Position, Size, Direction, Speed])],
@@ -43,7 +50,7 @@ export function useSimulatorWorld(
       ticDurationMs: world.ticDurationMs,
     });
     setCollisionEids(new Set());
-  }, [seed, entityCount]);
+  }, [seed, entityCount, spawnFn]);
 
   useEffect(() => {
     initWorld();
@@ -51,9 +58,20 @@ export function useSimulatorWorld(
 
   useEffect(() => {
     if (!worldRef.current) return;
+    const ticDurationMs = worldRef.current.ticDurationMs;
+    const intervalMs = 1000 / ticsPerSecond;
+    let accumulatedMs = 0;
     const interval = setInterval(() => {
       const world = worldRef.current!;
-      runTics(world, 1);
+      accumulatedMs += intervalMs;
+      let ticsToRun = 0;
+      while (accumulatedMs >= ticDurationMs) {
+        accumulatedMs -= ticDurationMs;
+        ticsToRun += 1;
+      }
+      if (ticsToRun > 0) {
+        runTics(world, ticsToRun);
+      }
       const events = drainEventQueue(world);
       const eids = new Set<number>();
       events.forEach((ev: CollisionEvent) => {
@@ -68,7 +86,7 @@ export function useSimulatorWorld(
         seed: world.seed,
         ticDurationMs: world.ticDurationMs,
       });
-    }, 1000 / ticsPerSecond);
+    }, intervalMs);
     return () => clearInterval(interval);
   }, [ticsPerSecond]);
 

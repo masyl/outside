@@ -1,17 +1,17 @@
 /**
- * Run simulation tics: movement → collision → randomWalk (fixed order).
+ * Run simulation tics: urge → movement → collision (fixed order).
  * @packageDocumentation
  */
 
+import { urgeSystem } from './systems/urge';
 import { movementSystem } from './systems/movement';
 import { collisionSystem } from './systems/collision';
-import { randomWalkSystem } from './systems/randomWalk';
 import type { SimulatorWorld } from './world';
 
 const pipeline = (world: SimulatorWorld) => {
+  urgeSystem(world);
   movementSystem(world);
   collisionSystem(world);
-  randomWalkSystem(world);
   return world;
 };
 
