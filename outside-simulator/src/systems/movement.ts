@@ -3,9 +3,9 @@
  * @packageDocumentation
  */
 
-import { query, getComponent, setComponent } from 'bitecs';
+import { query, getComponent, setComponent, addComponent } from 'bitecs';
 import { distancePerTic, stepPosition } from '@outside/utils';
-import { Position, Direction, Speed, MaxSpeed } from '../components';
+import { Position, Direction, Speed, MaxSpeed, PreviousPosition } from '../components';
 import type { SimulatorWorld } from '../world';
 
 export function movementSystem(world: SimulatorWorld): SimulatorWorld {
@@ -15,6 +15,8 @@ export function movementSystem(world: SimulatorWorld): SimulatorWorld {
   for (let i = 0; i < ents.length; i++) {
     const eid = ents[i];
     const pos = getComponent(world, eid, Position);
+    addComponent(world, eid, PreviousPosition);
+    setComponent(world, eid, PreviousPosition, { x: pos.x, y: pos.y });
     const dir = getComponent(world, eid, Direction);
     const speed = getComponent(world, eid, Speed);
     let tilesPerSec = speed.tilesPerSec;

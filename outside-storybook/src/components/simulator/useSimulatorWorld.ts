@@ -5,7 +5,7 @@ import {
   query,
   drainEventQueue,
   Position,
-  Size,
+  VisualSize,
   Direction,
   Speed,
   type CollisionEvent,
@@ -45,7 +45,7 @@ export function useSimulatorWorld(
     spawnFn(world, seed, entityCount);
     worldRef.current = world;
     setState({
-      entityIds: [...query(world, [Position, Size, Direction, Speed])],
+      entityIds: [...query(world, [Position, VisualSize, Direction, Speed])],
       seed: world.seed,
       ticDurationMs: world.ticDurationMs,
     });
@@ -82,7 +82,7 @@ export function useSimulatorWorld(
       });
       setCollisionEids(eids);
       setState({
-        entityIds: [...query(world, [Position, Size, Direction, Speed])],
+        entityIds: [...query(world, [Position, VisualSize, Direction, Speed])],
         seed: world.seed,
         ticDurationMs: world.ticDurationMs,
       });

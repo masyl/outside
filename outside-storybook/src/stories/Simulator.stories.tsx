@@ -4,6 +4,8 @@ import {
   spawnFollowChain,
   spawnBotsInWorld,
   spawnScatteredWithLeaders,
+  spawnFloorRectThenScattered,
+  spawnDungeonThenScattered,
 } from '../components/simulator/spawnCloud';
 
 const meta: Meta<typeof SimulatorRenderer> = {
@@ -78,5 +80,25 @@ export const FollowChain: StoryObj<typeof SimulatorRenderer> = {
     ticsPerSecond: 10,
     entityCount: 5,
     spawnFn: spawnFollowChain,
+  },
+};
+
+/** Floor rect + grid: walkable floor tiles in a rectangle, entities scattered. Grid lines (floor + sub-snap) and dark grey tiles visible. */
+export const FloorGridRect: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 42,
+    ticsPerSecond: 10,
+    entityCount: 15,
+    spawnFn: spawnFloorRectThenScattered,
+  },
+};
+
+/** Dungeon layout: rooms + tunnels as floor tiles, entities on floor. Pan/zoom to see full 80×50 layout. */
+export const FloorGridDungeon: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 123,
+    ticsPerSecond: 10,
+    entityCount: 20,
+    spawnFn: spawnDungeonThenScattered,
   },
 };

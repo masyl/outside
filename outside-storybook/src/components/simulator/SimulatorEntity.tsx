@@ -5,6 +5,8 @@ export interface SimulatorEntityProps {
   fill: string;
   stroke: string;
   strokeWidth?: number;
+  fillOpacity?: number;
+  strokeOpacity?: number;
 }
 
 /**
@@ -17,6 +19,8 @@ export function SimulatorEntity({
   fill,
   stroke,
   strokeWidth = 2,
+  fillOpacity,
+  strokeOpacity,
 }: SimulatorEntityProps) {
   return (
     <circle
@@ -26,6 +30,8 @@ export function SimulatorEntity({
       fill={fill}
       stroke={stroke}
       strokeWidth={strokeWidth}
+      {...(fillOpacity != null && { fillOpacity })}
+      {...(strokeOpacity != null && { strokeOpacity })}
     />
   );
 }

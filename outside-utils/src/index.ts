@@ -16,3 +16,4 @@ export {
   stepPosition,
   type Position,
 } from './movement';
+export { snapToGrid } from './grid';

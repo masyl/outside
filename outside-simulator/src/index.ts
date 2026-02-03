@@ -11,6 +11,11 @@ export const VERSION = '0.1.0';
 
 export { createWorld, DEFAULT_TIC_DURATION_MS } from './world';
 export type { SimulatorWorld, CreateWorldOptions } from './world';
+export {
+  addDefaultGrids,
+  FLOOR_TILES_RESOLUTION,
+  SUB_POSITION_SNAP_RESOLUTION,
+} from './world-defaults';
 
 export { runTics } from './run';
 
@@ -22,6 +27,7 @@ export { getComponent, setComponent, set } from 'bitecs';
 
 export { spawnBot, getOrCreateBotPrefab } from './prefabs/bot';
 export type { SpawnBotOptions } from './prefabs/bot';
+export { spawnFloorTile, spawnFloorRect, spawnWall } from './prefabs/floor';
 
 export {
   createSoASerializer,

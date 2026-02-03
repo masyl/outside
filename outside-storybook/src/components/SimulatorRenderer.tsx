@@ -2,24 +2,40 @@ import {
   getComponent,
   query,
   Position,
-  Size,
+  VisualSize,
   Direction,
   Speed,
   Follow,
   FollowTarget,
+  Collided,
 } from '@outside/simulator';
 import { useSimulatorWorld, type SpawnFn } from './simulator/useSimulatorWorld';
 import { spawnScatteredWithLeaders } from './simulator/spawnCloud';
 import { SimulatorViewport } from './simulator/SimulatorViewport';
 import { SimulatorEntity } from './simulator/SimulatorEntity';
 import { SimulatorCaption } from './simulator/SimulatorCaption';
+import { FloorTilesLayer } from './simulator/FloorTilesLayer';
+import { GridOverlay } from './simulator/GridOverlay';
 
 /** Logical size of the SVG viewBox (4x zoom-out vs original 400×300) */
 const VIEWBOX_WIDTH = 1600;
 const VIEWBOX_HEIGHT = 1200;
 const PIXELS_PER_TILE = 20;
 /** Scale for velocity arrow length (tiles per unit speed). */
-const ARROW_SCALE = 2;
+const ARROW_SCALE = 1;
+/** Arrowhead length and half-width in pixels. */
+const ARROW_HEAD_LEN = 8;
+const ARROW_HEAD_HALF_W = 4;
+/** Max Collided cooldown tics (matches obstacle check interval) for fade. */
+const COLLIDED_COOLDOWN_MAX = 2;
+
+/** Viewport bounds in world coordinates (for grid/floor clipping) */
+const VIEW_WORLD = {
+  xMin: -VIEWBOX_WIDTH / 2 / PIXELS_PER_TILE,
+  xMax: VIEWBOX_WIDTH / 2 / PIXELS_PER_TILE,
+  yMin: -VIEWBOX_HEIGHT / 2 / PIXELS_PER_TILE,
+  yMax: VIEWBOX_HEIGHT / 2 / PIXELS_PER_TILE,
+};
 
 interface SimulatorRendererProps {
   seed?: number;
@@ -54,6 +70,7 @@ export function SimulatorRenderer({
 
   const toX = (x: number) => VIEWBOX_WIDTH / 2 + x * PIXELS_PER_TILE;
   const toY = (y: number) => VIEWBOX_HEIGHT / 2 - y * PIXELS_PER_TILE;
+  const transform = { toX, toY };
 
   return (
     <div
@@ -66,8 +83,16 @@ export function SimulatorRenderer({
       }}
     >
       <SimulatorViewport viewBoxWidth={VIEWBOX_WIDTH} viewBoxHeight={VIEWBOX_HEIGHT}>
+        {/* Floor tiles (dark grey squares, under grid and entities) */}
+        <FloorTilesLayer
+          world={world}
+          transform={transform}
+          pixelsPerTile={PIXELS_PER_TILE}
+        />
+        {/* Grid lines (viewport-clipped; floorTiles 30% white solid, subPositionSnap 10% dotted) */}
+        <GridOverlay world={world} bounds={VIEW_WORLD} transform={transform} />
         {/* Follow lines: follower → target */}
-        {query(world, [Follow, FollowTarget]).map((eid) => {
+        {Array.from(query(world, [Follow, FollowTarget])).map((eid) => {
           const pos = getComponent(world, eid, Position);
           const targetEid = getComponent(world, eid, FollowTarget).eid;
           const targetPos = getComponent(world, targetEid, Position);
@@ -85,7 +110,7 @@ export function SimulatorRenderer({
             />
           );
         })}
-        {/* Velocity arrows */}
+        {/* Velocity arrows (line + pointy arrowhead at tip) */}
         {entityIds.map((eid) => {
           const pos = getComponent(world, eid, Position);
           const dir = getComponent(world, eid, Direction);
@@ -93,33 +118,70 @@ export function SimulatorRenderer({
           const cx = toX(pos.x);
           const cy = toY(pos.y);
           const len = speed.tilesPerSec * PIXELS_PER_TILE * ARROW_SCALE;
-          const ex = cx + Math.cos(dir.angle) * len;
-          const ey = cy - Math.sin(dir.angle) * len;
+          const cos = Math.cos(dir.angle);
+          const sin = Math.sin(dir.angle);
+          const ex = cx + cos * len;
+          const ey = cy - sin * len;
+          const tipX = ex;
+          const tipY = ey;
+          const backX = ex - cos * ARROW_HEAD_LEN;
+          const backY = ey + sin * ARROW_HEAD_LEN;
+          const leftX = backX + sin * ARROW_HEAD_HALF_W;
+          const leftY = backY + cos * ARROW_HEAD_HALF_W;
+          const rightX = backX - sin * ARROW_HEAD_HALF_W;
+          const rightY = backY - cos * ARROW_HEAD_HALF_W;
+          const arrowPoints = `${tipX},${tipY} ${leftX},${leftY} ${rightX},${rightY}`;
           return (
-            <line
-              key={`arrow-${eid}`}
-              x1={cx}
-              y1={cy}
-              x2={ex}
-              y2={ey}
-              stroke="#fc6"
-              strokeWidth={1.5}
-              strokeOpacity={0.9}
-            />
+            <g key={`arrow-${eid}`}>
+              <line
+                x1={cx}
+                y1={cy}
+                x2={backX}
+                y2={backY}
+                stroke="#fc6"
+                strokeWidth={1.5}
+                strokeOpacity={0.9}
+              />
+              <polygon
+                points={arrowPoints}
+                fill="#fc6"
+                fillOpacity={0.9}
+                stroke="none"
+              />
+            </g>
           );
         })}
         {entityIds.map((eid) => {
           const pos = getComponent(world, eid, Position);
-          const size = getComponent(world, eid, Size);
+          const visualSize = getComponent(world, eid, VisualSize);
           const inCollision = collisionEids.has(eid);
+          const collidedComp = getComponent(world, eid, Collided);
+          const collidedTicks = collidedComp?.ticksRemaining ?? 0;
+          const inCollidedCooldown = collidedTicks > 0;
+          const collidedOpacity =
+            inCollidedCooldown ? collidedTicks / COLLIDED_COOLDOWN_MAX : 0;
+          const fill =
+            inCollidedCooldown
+              ? '#44f'
+              : inCollision
+                ? '#f44'
+                : '#4a4';
+          const stroke =
+            inCollidedCooldown
+              ? '#88f'
+              : inCollision
+                ? '#f88'
+                : '#6c6';
           return (
             <SimulatorEntity
               key={eid}
               cx={toX(pos.x)}
               cy={toY(pos.y)}
-              r={(size.diameter / 2) * PIXELS_PER_TILE}
-              fill={inCollision ? '#f44' : '#4a4'}
-              stroke={inCollision ? '#f88' : '#6c6'}
+              r={(visualSize.diameter / 2) * PIXELS_PER_TILE}
+              fill={fill}
+              fillOpacity={inCollidedCooldown ? collidedOpacity : 1}
+              stroke={stroke}
+              strokeOpacity={inCollidedCooldown ? collidedOpacity : 1}
             />
           );
         })}

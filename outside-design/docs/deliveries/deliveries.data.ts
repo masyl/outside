@@ -11,7 +11,7 @@ export default createContentLoader('deliveries/*/README.md', {
           Title: page.frontmatter.Title,
           DeliveryDate: page.frontmatter.DeliveryDate,
           Summary: page.frontmatter.Summary,
-          Status: page.frontmatter.Status || 'DONE',
+          Status: (page.frontmatter.Status || 'DONE').toString().toUpperCase(),
           Branch: page.frontmatter.Branch,
           Commit: page.frontmatter.Commit,
           path: page.url,

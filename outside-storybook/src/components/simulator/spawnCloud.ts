@@ -1,5 +1,6 @@
-import { spawnBot } from '@outside/simulator';
+import { spawnBot, spawnFloorRect, spawnFloorTile, spawnWall } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
+import { generateDungeon } from '../../utils/dungeonLayout';
 
 /**
  * Spawns count bots in a follow chain: first is leader (Wander), rest Follow previous.
@@ -67,9 +68,115 @@ export function spawnBotsInWorld(
     spawnBot(world, {
       x: p.x,
       y: p.y,
-      diameter: 1.5,
       directionRad: p.angle,
       tilesPerSec: 1 + (i % 3) * 0.3,
+    });
+  }
+}
+
+/**
+ * Spawns a walkable floor rectangle with wall perimeter, then entities scattered with leaders.
+ * Floor rect -30..30 x -20..20; walls drawn around the border.
+ */
+export function spawnFloorRectThenScattered(
+  world: SimulatorWorld,
+  seed: number,
+  entityCount: number
+): void {
+  const xMin = -30;
+  const yMin = -20;
+  const xMax = 30;
+  const yMax = 20;
+  spawnFloorRect(world, xMin, yMin, xMax, yMax, true);
+  for (let x = xMin - 1; x <= xMax + 1; x++) {
+    spawnWall(world, x, yMin - 1);
+    spawnWall(world, x, yMax + 1);
+  }
+  for (let y = yMin; y <= yMax; y++) {
+    spawnWall(world, xMin - 1, y);
+    spawnWall(world, xMax + 1, y);
+  }
+  spawnScatteredWithLeaders(world, seed, entityCount);
+}
+
+function key(x: number, y: number): string {
+  return `${x},${y}`;
+}
+
+/**
+ * After floor tiles are spawned from grid, add walls around every room and corridor:
+ * build an index of floor coordinates, then for each floor cell add a wall at any
+ * adjacent empty cell; update the index as walls are added.
+ */
+function spawnWallsAroundFloor(
+  world: SimulatorWorld,
+  grid: boolean[][],
+  width: number,
+  height: number,
+  offsetX: number,
+  offsetY: number
+): void {
+  const filled = new Set<string>();
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) filled.add(key(x, y));
+    }
+  }
+  const neighbors = [
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1],
+  ];
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (!grid[x][y]) continue;
+      for (const [dx, dy] of neighbors) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (filled.has(key(nx, ny))) continue;
+        spawnWall(world, nx + offsetX, ny + offsetY);
+        filled.add(key(nx, ny));
+      }
+    }
+  }
+}
+
+/**
+ * Spawns a dungeon layout (rooms + 2-tile corridors) as floor tiles, walls around each room and corridor, then entities only inside rooms (all Wander).
+ * Dungeon is 80×50 cells, centered at world (0,0). Bots are sprinkled in room cells only; no follow mechanic.
+ */
+export function spawnDungeonThenScattered(
+  world: SimulatorWorld,
+  seed: number,
+  entityCount: number
+): void {
+  const width = 80;
+  const height = 50;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+  const { grid, roomCells } = generateDungeon(width, height, seed);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) {
+        spawnFloorTile(world, x + offsetX, y + offsetY, true);
+      }
+    }
+  }
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+  if (roomCells.length === 0) return;
+  for (let i = 0; i < entityCount; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+    const p = roomCells[idx];
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, i * 2) * Math.PI * 2;
+    spawnBot(world, {
+      x: cx,
+      y: cy,
+      directionRad: angle,
+      urge: 'wander',
     });
   }
 }
@@ -91,7 +198,6 @@ export function spawnScatteredWithLeaders(
       lastLeaderEid = spawnBot(world, {
         x: p.x,
         y: p.y,
-        diameter: 1.5,
         directionRad: p.angle,
         urge: 'wander',
       });
@@ -99,7 +205,6 @@ export function spawnScatteredWithLeaders(
       spawnBot(world, {
         x: p.x,
         y: p.y,
-        diameter: 1.5,
         directionRad: p.angle,
         urge: 'follow',
         followTargetEid: lastLeaderEid!,

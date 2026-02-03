@@ -2,7 +2,7 @@
 Title: Migrate urge mechanics to ECS
 DeliveryDate: 2026-02-01
 Summary: Wait, wander, follow urge behaviors in outside-simulator; smooth Wander, tic-synced Storybook, scatter + 1-in-5 leaders demo.
-Status: Done
+Status: DONE
 Branch: feature/migrate-urge-mechanics-ecs
 Commit: f6278b0
 ---

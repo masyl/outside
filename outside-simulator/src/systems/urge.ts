@@ -29,9 +29,11 @@ const MAX_VELOCITY_TPS = 4;
 /** Wander speed range (tiles per second). */
 const WANDER_SPEED_MIN = 1;
 const WANDER_SPEED_MAX = 4;
-/** Wander: tics between direction/speed changes (≈1–3 s at 50 ms/tic). */
-const WANDER_TICS_MIN = 20;
-const WANDER_TICS_MAX = 60;
+/** Wander: tics between direction/speed changes (≈0.5–1.5 s at 50 ms/tic, twice as often). */
+const WANDER_TICS_MIN = 10;
+const WANDER_TICS_MAX = 30;
+/** Wander: max direction change per step (radians). */
+const WANDER_ANGLE_DELTA_MAX = (15 * Math.PI) / 180;
 
 function angleToward(x: number, y: number, toX: number, toY: number): number {
   return Math.atan2(toY - y, toX - x);
@@ -122,7 +124,12 @@ export function urgeSystem(world: SimulatorWorld): SimulatorWorld {
       continue;
     }
     addComponent(world, eid, WanderPersistence);
-    const angle = rng.nextFloat() * Math.PI * 2;
+    const curDir = getComponent(world, eid, Direction);
+    const delta =
+      (rng.nextFloat() * 2 - 1) * WANDER_ANGLE_DELTA_MAX;
+    let angle = curDir.angle + delta;
+    while (angle > Math.PI) angle -= Math.PI * 2;
+    while (angle < -Math.PI) angle += Math.PI * 2;
     let tilesPerSec = WANDER_SPEED_MIN + rng.nextFloat() * (WANDER_SPEED_MAX - WANDER_SPEED_MIN);
     const maxSpeed = getComponent(world, eid, MaxSpeed);
     if (maxSpeed && maxSpeed.tilesPerSec != null) {

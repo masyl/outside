@@ -8,7 +8,7 @@ import {
   drainEventQueue,
   configureTicDurationMs,
   Position,
-  Size,
+  VisualSize,
   Direction,
   Speed,
 } from './index';
@@ -17,11 +17,11 @@ describe('Simulator API', () => {
   it('should create world and spawn entity', () => {
     const world = createWorld({ seed: 42, ticDurationMs: 50 });
     spawnBot(world, { x: 0, y: 0, diameter: 1 });
-    const entities = query(world, [Position, Size, Direction, Speed]);
+    const entities = query(world, [Position, VisualSize, Direction, Speed]);
     expect(entities).toHaveLength(1);
     expect(getComponent(world, entities[0], Position).x).toBe(0);
     expect(getComponent(world, entities[0], Position).y).toBe(0);
-    expect(getComponent(world, entities[0], Size).diameter).toBe(1);
+    expect(getComponent(world, entities[0], VisualSize).diameter).toBe(1);
     expect(world.seed).toBe(42);
     expect(world.ticDurationMs).toBe(50);
   });
@@ -30,7 +30,7 @@ describe('Simulator API', () => {
     const world = createWorld({ seed: 42, ticDurationMs: 1000 });
     spawnBot(world, { x: 0, y: 0 }); // Wander (default) sets direction/speed each tic
     runTics(world, 1);
-    const entities = query(world, [Position, Size, Direction, Speed]);
+    const entities = query(world, [Position, VisualSize, Direction, Speed]);
     const pos = getComponent(world, entities[0], Position);
     const dist = Math.hypot(pos.x, pos.y);
     expect(dist).toBeGreaterThan(0);
@@ -53,8 +53,8 @@ describe('Simulator API', () => {
 
   it('should drain event queue and clear it', () => {
     const world = createWorld({ seed: 42, ticDurationMs: 50 });
-    spawnBot(world, { x: 0, y: 0, diameter: 2 });
-    spawnBot(world, { x: 1, y: 0, diameter: 2 });
+    spawnBot(world, { x: 0, y: 0, diameter: 2, urge: 'none', tilesPerSec: 0 });
+    spawnBot(world, { x: 1, y: 0, diameter: 2, urge: 'none', tilesPerSec: 0 });
     runTics(world, 1);
     const first = drainEventQueue(world);
     expect(first).toHaveLength(1);
@@ -68,7 +68,7 @@ describe('Simulator API', () => {
     expect(world.ticDurationMs).toBe(500);
     spawnBot(world, { x: 0, y: 0 });
     runTics(world, 1);
-    const entities = query(world, [Position, Size, Direction, Speed]);
+    const entities = query(world, [Position, VisualSize, Direction, Speed]);
     const pos = getComponent(world, entities[0], Position);
     expect(Math.hypot(pos.x, pos.y)).toBeGreaterThan(0); // entity moved (Wander)
   });

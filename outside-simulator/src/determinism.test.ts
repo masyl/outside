@@ -7,7 +7,7 @@ import {
   spawnBot,
   drainEventQueue,
   Position,
-  Size,
+  VisualSize,
   Direction,
   Speed,
 } from './index';
@@ -23,8 +23,8 @@ describe('Determinism', () => {
     runTics(world1, 10);
     runTics(world2, 10);
 
-    const ents1 = query(world1, [Position, Size, Direction, Speed]);
-    const ents2 = query(world2, [Position, Size, Direction, Speed]);
+    const ents1 = query(world1, [Position, VisualSize, Direction, Speed]);
+    const ents2 = query(world2, [Position, VisualSize, Direction, Speed]);
 
     expect(ents1).toHaveLength(1);
     expect(ents2).toHaveLength(1);
@@ -45,8 +45,22 @@ describe('Determinism', () => {
     const world2 = createWorld({ seed: 999, ticDurationMs: 50 });
 
     for (const world of [world1, world2]) {
-      spawnBot(world, { x: 0, y: 0, diameter: 2, directionRad: 0, tilesPerSec: 0.5 });
-      spawnBot(world, { x: 5, y: 0, diameter: 2, directionRad: Math.PI, tilesPerSec: 0.5 });
+      spawnBot(world, {
+        x: 0,
+        y: 0,
+        diameter: 2,
+        directionRad: 0,
+        tilesPerSec: 0.5,
+        urge: 'none',
+      });
+      spawnBot(world, {
+        x: 5,
+        y: 0,
+        diameter: 2,
+        directionRad: Math.PI,
+        tilesPerSec: 0.5,
+        urge: 'none',
+      });
     }
 
     runTics(world1, 20);

@@ -5,12 +5,15 @@
 
 import { urgeSystem } from './systems/urge';
 import { movementSystem } from './systems/movement';
+import { obstacleCollisionSystem } from './systems/obstacleCollision';
 import { collisionSystem } from './systems/collision';
 import type { SimulatorWorld } from './world';
 
 const pipeline = (world: SimulatorWorld) => {
+  world.ticCount = (world.ticCount ?? 0) + 1;
   urgeSystem(world);
   movementSystem(world);
+  obstacleCollisionSystem(world);
   collisionSystem(world);
   return world;
 };

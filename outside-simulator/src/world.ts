@@ -8,21 +8,24 @@ import { createWorld as bitecsCreateWorld } from 'bitecs';
 import { Random } from '@outside/utils';
 import type { SimulatorEvent } from './events';
 import { registerPipelineObservers } from './observers';
+import { addDefaultGrids } from './world-defaults';
 
 /** Default tic duration in milliseconds (e.g. 50 ms) */
 export const DEFAULT_TIC_DURATION_MS = 50;
 
 /**
- * Extended world state: ECS world plus event queue, tic config, and RNG.
+ * Extended world state: ECS world plus event queue, tic config, tic count, and RNG.
  */
 export interface SimulatorWorld extends World<{
   eventQueue: SimulatorEvent[];
   ticDurationMs: number;
+  ticCount: number;
   seed: number;
   random: Random;
 }> {
   eventQueue: SimulatorEvent[];
   ticDurationMs: number;
+  ticCount: number;
   seed: number;
   random: Random;
 }
@@ -48,9 +51,11 @@ export function createWorld(options?: CreateWorldOptions): SimulatorWorld {
   const world = bitecsCreateWorld({
     eventQueue: [] as SimulatorEvent[],
     ticDurationMs: options?.ticDurationMs ?? DEFAULT_TIC_DURATION_MS,
+    ticCount: 0,
     seed,
     random: new Random(seed),
   }) as SimulatorWorld;
   registerPipelineObservers(world);
+  addDefaultGrids(world);
   return world;
 }

@@ -47,11 +47,11 @@ describe('Urge system', () => {
     runTics(world, 1);
     const dirAfter1 = getComponent(world, eid, Direction).angle;
     const speedAfter1 = getComponent(world, eid, Speed).tilesPerSec;
-    runTics(world, 10); // 11 tics total; persistence is 20–60 tics so no change yet
-    const dirAfter11 = getComponent(world, eid, Direction).angle;
-    const speedAfter11 = getComponent(world, eid, Speed).tilesPerSec;
-    expect(dirAfter11).toBe(dirAfter1);
-    expect(speedAfter11).toBe(speedAfter1);
+    runTics(world, 5); // 6 tics total; persistence is 10–30 tics so no change yet
+    const dirAfter6 = getComponent(world, eid, Direction).angle;
+    const speedAfter6 = getComponent(world, eid, Speed).tilesPerSec;
+    expect(dirAfter6).toBe(dirAfter1);
+    expect(speedAfter6).toBe(speedAfter1);
   });
 
   it('Follow: entity moves toward target when beyond close-enough', () => {
