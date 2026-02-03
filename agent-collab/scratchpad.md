@@ -3,11 +3,35 @@
 Random notes taken during development.
 
 
+## Definitions
+
+- **Tic:** A complete synchronous pass through the simulator loop which outputs a new state state.
+- **Step:** A player movement during a tick
+- ...
+
+
+## Review
+
+- During the last delivery, the process skipped the creation of the feature branch. This should be added to the skill set.
+- There is a lot of untracked+changed files in the project... doh!
+- Update: Why is the project not on the latest typescript version ?
+- Add: Need to add a linter to the whole project
+- Add: Check for cyclomatic complexity
+- Lookup: meaning of : "@outside/utils": "workspace:*"
+- Refactor: Put each components in components.ts into their own file.
+- Refator: Put the distance function of the collision detection into the utilities
+- Improve: Upgrade the randomWalk to a better wander system
+- Validate: Why do systems functions return the "world" ?
+- Validate: The main package exports each systems, types and everything directly at the root, instead of a systems module or other sub modules. That seems like polution.
+- Improve: Convert the SimulatorRenderer routine into multiple React components.
+- Refactor: world.ts is a mess of responsabilities and exports.
+- Refactor: The "options" mechanic in the spawnBot method seems like a weird coupling made way too early.
+- Improve: Make the pipeline more opinionated by adding "phases", so that systems can be loaded dynamically.
+
+
 ## Yak Stack
 
-[ ] Create a new simulation core module
-[ ] Design Skill: Pitch Review
-
+[ ] Review first draft of the new ECS Core
 
 ## Next pitch
 
