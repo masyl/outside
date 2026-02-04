@@ -7,11 +7,13 @@ Random notes taken during development.
 
 - **Tic:** A complete synchronous pass through the simulator loop which outputs a new state state.
 - **Step:** A player movement during a tick
-- ...
-
+- **Bots:** A basic prefab entity that can move and has all the basic properties of an NPC.
+- **Grid:** A system thatr uses the integer part of the coordinate system to create a native grid to lay out entities such as floor tiles, etc.
+- **Sub-Grid:** A system that uses the fraction part of the coordinate system for fine grained operations while still "snapping" to a fine grid that is aligned with the resolution of the pixel art assets and rendering mechanisms. Useful for placing entities more precisely, path finding, collision detection, hit boxes, etc.
 
 ## Review
 
+- Improve: The agent decided to adopt a new approach when migrating the "urge" system. Instead of doing a mode switching, he uses empty components as tags, which would allow for overlapping/competing urges. It's interesting, but he current approach is lacking a clear direction. The concept of "urges/goals/objectives" needs to be improved.
 - During the last delivery, the process skipped the creation of the feature branch. This should be added to the skill set.
 - There is a lot of untracked+changed files in the project... doh!
 - Update: Why is the project not on the latest typescript version ?
@@ -20,18 +22,18 @@ Random notes taken during development.
 - Lookup: meaning of : "@outside/utils": "workspace:*"
 - Refactor: Put each components in components.ts into their own file.
 - Refator: Put the distance function of the collision detection into the utilities
-- Improve: Upgrade the randomWalk to a better wander system
 - Validate: Why do systems functions return the "world" ?
 - Validate: The main package exports each systems, types and everything directly at the root, instead of a systems module or other sub modules. That seems like polution.
 - Improve: Convert the SimulatorRenderer routine into multiple React components.
 - Refactor: world.ts is a mess of responsabilities and exports.
 - Refactor: The "options" mechanic in the spawnBot method seems like a weird coupling made way too early.
 - Improve: Make the pipeline more opinionated by adding "phases", so that systems can be loaded dynamically.
+- There is a need for a documentation agent mode.
 
 
 ## Yak Stack
 
-[ ] Review first draft of the new ECS Core
+[ ] Layered Floor System (aka Ground, TileMap, Terrain). To track where entities are allowed to spawn and move.
 
 ## Next pitch
 

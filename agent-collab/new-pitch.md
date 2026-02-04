@@ -1,4 +1,4 @@
-# Tappable Entities and Events
+# Pitch Name Goes Here
 
 ## Motivation
 
