@@ -6,6 +6,7 @@ import {
   spawnScatteredWithLeaders,
   spawnFloorRectThenScattered,
   spawnDungeonThenScattered,
+  spawnDungeonWithFood,
 } from '../components/simulator/spawnCloud';
 
 const meta: Meta<typeof SimulatorRenderer> = {
@@ -100,5 +101,15 @@ export const FloorGridDungeon: StoryObj<typeof SimulatorRenderer> = {
     ticsPerSecond: 10,
     entityCount: 20,
     spawnFn: spawnDungeonThenScattered,
+  },
+};
+
+/** Dungeon + food: green circles are food; bots consume on overlap and food disappears. */
+export const FloorGridDungeonWithFood: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 123,
+    ticsPerSecond: 10,
+    entityCount: 20,
+    spawnFn: spawnDungeonWithFood,
   },
 };

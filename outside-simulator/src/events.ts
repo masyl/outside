@@ -13,4 +13,15 @@ export interface CollisionEvent {
   entityB: number;
 }
 
-export type SimulatorEvent = CollisionEvent;
+/**
+ * Consumed event: a bot overlapped a food entity; food was removed.
+ */
+export interface ConsumedEvent {
+  type: 'consumed';
+  entity: number;
+  foodEntity: number;
+  x: number;
+  y: number;
+}
+
+export type SimulatorEvent = CollisionEvent | ConsumedEvent;

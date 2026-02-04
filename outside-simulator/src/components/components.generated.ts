@@ -6,6 +6,7 @@ import FloorTile from './FloorTile';
 import Follow from './Follow';
 import FollowTarget from './FollowTarget';
 import FollowTightness from './FollowTightness';
+import Food from './Food';
 import Grid from './Grid';
 import GridResolution from './GridResolution';
 import MaxSpeed from './MaxSpeed';
@@ -30,6 +31,7 @@ export interface SimulatorComponents {
   Follow: typeof Follow;
   FollowTarget: typeof FollowTarget;
   FollowTightness: typeof FollowTightness;
+  Food: typeof Food;
   Grid: typeof Grid;
   GridResolution: typeof GridResolution;
   MaxSpeed: typeof MaxSpeed;
@@ -48,4 +50,4 @@ export interface SimulatorComponents {
   WanderPersistence: typeof WanderPersistence;
 }
 
-export { Collided, Direction, FloorTile, Follow, FollowTarget, FollowTightness, Grid, GridResolution, MaxSpeed, Observed, Obstacle, ObstacleSize, Position, PreviousPosition, RandomWalk, Size, Speed, VisualSize, Wait, Walkable, Wander, WanderPersistence };
+export { Collided, Direction, FloorTile, Follow, FollowTarget, FollowTightness, Food, Grid, GridResolution, MaxSpeed, Observed, Obstacle, ObstacleSize, Position, PreviousPosition, RandomWalk, Size, Speed, VisualSize, Wait, Walkable, Wander, WanderPersistence };

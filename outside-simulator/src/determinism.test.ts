@@ -71,10 +71,12 @@ describe('Determinism', () => {
 
     expect(events1.length).toBe(events2.length);
     for (let i = 0; i < events1.length; i++) {
-      expect(events1[i].type).toBe(events2[i].type);
-      if (events1[i].type === 'collision') {
-        expect(events1[i].entityA).toBe(events2[i].entityA);
-        expect(events1[i].entityB).toBe(events2[i].entityB);
+      const e1 = events1[i];
+      const e2 = events2[i];
+      expect(e1.type).toBe(e2.type);
+      if (e1.type === 'collision' && e2.type === 'collision') {
+        expect(e1.entityA).toBe(e2.entityA);
+        expect(e1.entityB).toBe(e2.entityB);
       }
     }
   });

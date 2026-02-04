@@ -28,6 +28,8 @@ export { getComponent, setComponent, set } from 'bitecs';
 export { spawnBot, getOrCreateBotPrefab } from './prefabs/bot';
 export type { SpawnBotOptions } from './prefabs/bot';
 export { spawnFloorTile, spawnFloorRect, spawnWall } from './prefabs/floor';
+export { spawnFood } from './prefabs/food';
+export type { SpawnFoodOptions } from './prefabs/food';
 
 export {
   createSoASerializer,
@@ -70,6 +72,6 @@ export { getEventQueue, drainEventQueue } from './events-api';
 
 export { configureTicDurationMs } from './configure';
 
-export type { SimulatorEvent, CollisionEvent } from './events';
+export type { SimulatorEvent, CollisionEvent, ConsumedEvent } from './events';
 
 export * from './components';

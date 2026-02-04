@@ -5,12 +5,14 @@ import {
   query,
   getComponent,
   spawnBot,
+  spawnFood,
   drainEventQueue,
   configureTicDurationMs,
   Position,
   VisualSize,
   Direction,
   Speed,
+  Food,
 } from './index';
 
 describe('Simulator API', () => {
@@ -45,10 +47,35 @@ describe('Simulator API', () => {
     const events = drainEventQueue(world);
     expect(events).toHaveLength(1);
     expect(events[0].type).toBe('collision');
+    const ev = events[0];
+    if (ev.type !== 'collision') throw new Error('expected collision');
     expect(
-      (events[0].entityA === a && events[0].entityB === b) ||
-        (events[0].entityA === b && events[0].entityB === a)
+      (ev.entityA === a && ev.entityB === b) || (ev.entityA === b && ev.entityB === a)
     ).toBe(true);
+  });
+
+  it('should emit consumed event when bot overlaps food and remove food', () => {
+    const world = createWorld({ seed: 42, ticDurationMs: 50 });
+    const botEid = spawnBot(world, {
+      x: 0,
+      y: 0,
+      diameter: 1,
+      urge: 'none',
+      tilesPerSec: 0,
+    });
+    const foodEid = spawnFood(world, { x: 0, y: 0 }); // same position => overlap
+    expect(query(world, [Position, Food])).toHaveLength(1);
+    runTics(world, 1);
+    const events = drainEventQueue(world);
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe('consumed');
+    const ev = events[0];
+    if (ev.type !== 'consumed') throw new Error('expected consumed');
+    expect(ev.entity).toBe(botEid);
+    expect(ev.foodEntity).toBe(foodEid);
+    expect(ev.x).toBe(0);
+    expect(ev.y).toBe(0);
+    expect(query(world, [Position, Food])).toHaveLength(0);
   });
 
   it('should drain event queue and clear it', () => {

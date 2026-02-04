@@ -1,4 +1,10 @@
-import { spawnBot, spawnFloorRect, spawnFloorTile, spawnWall } from '@outside/simulator';
+import {
+  spawnBot,
+  spawnFloorRect,
+  spawnFloorTile,
+  spawnWall,
+  spawnFood,
+} from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import { generateDungeon } from '../../utils/dungeonLayout';
 
@@ -178,6 +184,34 @@ export function spawnDungeonThenScattered(
       directionRad: angle,
       urge: 'wander',
     });
+  }
+}
+
+/** Number of food items to spawn in dungeon-with-food demo. */
+const DUNGEON_FOOD_COUNT = 12;
+
+/**
+ * Same as spawnDungeonThenScattered plus food items in room cells.
+ * Bots can overlap food to consume it; food disappears and consumed events fire.
+ */
+export function spawnDungeonWithFood(
+  world: SimulatorWorld,
+  seed: number,
+  entityCount: number
+): void {
+  spawnDungeonThenScattered(world, seed, entityCount);
+  const { roomCells } = generateDungeon(80, 50, seed);
+  if (roomCells.length === 0) return;
+  const offsetX = -40;
+  const offsetY = -25;
+  for (let i = 0; i < DUNGEON_FOOD_COUNT; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
+      roomCells.length;
+    const p = roomCells[idx];
+    const x = p.x + offsetX + 0.5;
+    const y = p.y + offsetY + 0.5;
+    spawnFood(world, { x, y });
   }
 }
 

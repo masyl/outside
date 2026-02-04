@@ -2,12 +2,14 @@ import {
   getComponent,
   query,
   Position,
+  Size,
   VisualSize,
   Direction,
   Speed,
   Follow,
   FollowTarget,
   Collided,
+  Food,
 } from '@outside/simulator';
 import { useSimulatorWorld, type SpawnFn } from './simulator/useSimulatorWorld';
 import { spawnScatteredWithLeaders } from './simulator/spawnCloud';
@@ -91,6 +93,24 @@ export function SimulatorRenderer({
         />
         {/* Grid lines (viewport-clipped; floorTiles 30% white solid, subPositionSnap 10% dotted) */}
         <GridOverlay world={world} bounds={VIEW_WORLD} transform={transform} />
+        {/* Food entities (distinct color, above floor/grid, below bots) */}
+        {Array.from(query(world, [Position, Size, Food])).map((eid) => {
+          const pos = getComponent(world, eid, Position);
+          const size = getComponent(world, eid, Size);
+          const r = (size.diameter / 2) * PIXELS_PER_TILE;
+          return (
+            <SimulatorEntity
+              key={`food-${eid}`}
+              cx={toX(pos.x)}
+              cy={toY(pos.y)}
+              r={r}
+              fill="#8b5"
+              stroke="#6a4"
+              fillOpacity={1}
+              strokeOpacity={1}
+            />
+          );
+        })}
         {/* Follow lines: follower → target */}
         {Array.from(query(world, [Follow, FollowTarget])).map((eid) => {
           const pos = getComponent(world, eid, Position);
