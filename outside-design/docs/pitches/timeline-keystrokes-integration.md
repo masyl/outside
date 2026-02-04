@@ -1,3 +1,9 @@
+---
+Title: "Timeline Keystrokes Integration (Timeline series: 5)"
+Category: Timeline
+DeliveryLink: /deliveries/2026-01-16-1000-timeline-keystrokes-integration/
+---
+
 # Timeline Keystrokes Integration (Timeline series: 5)
 
 ## Motivation

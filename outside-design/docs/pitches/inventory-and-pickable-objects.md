@@ -1,3 +1,8 @@
+---
+Title: Inventory and Pickable Objects
+Category: Ideas
+---
+
 # Inventory and Pickable Objects
 
 ## Motivation

@@ -1,3 +1,9 @@
+---
+Title: "Keystroke Help Menu (Timeline series: 1)"
+Category: Timeline
+DeliveryLink: /deliveries/2026-01-16-1430-keystroke-help-menu/
+---
+
 # Keystroke Help Menu (Timeline series: 1)
 
 ## Motivation

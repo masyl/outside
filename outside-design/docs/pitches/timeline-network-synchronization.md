@@ -1,3 +1,8 @@
+---
+Title: "Timeline Network Synchronization (Timeline series: 6)"
+Category: Timeline
+---
+
 # Timeline Network Synchronization (Timeline series: 6)
 
 ## Motivation

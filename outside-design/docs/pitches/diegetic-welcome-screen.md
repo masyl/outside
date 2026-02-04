@@ -1,3 +1,8 @@
+---
+Title: Diegetic Welcome Screen
+Category: Core
+---
+
 # Diegetic Welcome Screen
 
 ## Motivation

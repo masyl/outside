@@ -1,3 +1,9 @@
+---
+Title: Spawning Bots
+Category: Core
+DeliveryLink: /deliveries/2026-01-09-1045-bot-autonomy/
+---
+
 # Spawning Bots
 
 ## Motivation

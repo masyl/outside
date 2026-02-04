@@ -1,3 +1,8 @@
+---
+Title: Mini Game Chess
+Category: Games
+---
+
 ## Mini-game: Chess
 
 A special grid could host a game of chess as a mini-game, with the help of a chess bot.

@@ -1,3 +1,9 @@
+---
+Title: New Simulation Core in ECS
+Category: Core
+DeliveryLink: /deliveries/2026-02-01-1200-new-simulation-core-ecs/
+---
+
 # New Simulation Core in ECS
 
 ## Motivation

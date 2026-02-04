@@ -1,3 +1,8 @@
+---
+Title: Player Nickname
+Category: Core
+---
+
 # Player Nickname
 
 ## Motivation

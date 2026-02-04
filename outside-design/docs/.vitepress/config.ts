@@ -31,6 +31,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Deliveries', link: '/deliveries/' },
+      { text: 'Pitches', link: '/pitches/' },
       { text: 'Design Process', link: '/design-process/' },
       { text: 'Components', link: '/components/' },
     ],
@@ -40,6 +41,12 @@ export default defineConfig({
         {
           text: 'Deliveries',
           items: [{ text: 'Overview', link: '/deliveries/' }],
+        },
+      ],
+      '/pitches/': [
+        {
+          text: 'Pitches',
+          items: [{ text: 'Overview', link: '/pitches/' }],
         },
       ],
       '/design-process/': [

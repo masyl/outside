@@ -1,3 +1,8 @@
+---
+Title: Mini Game Beach Sweeper
+Category: Games
+---
+
 # Mini Game: Beach sweeper
 
 - Messages in bottles:

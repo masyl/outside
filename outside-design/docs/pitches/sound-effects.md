@@ -1,3 +1,8 @@
+---
+Title: Sound Effects
+Category: Core
+---
+
 # Sound Effects
 
 ## Motivation

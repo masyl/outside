@@ -1,3 +1,8 @@
+---
+Title: Multiple Character Skins
+Category: Games
+---
+
 https://otterisk.itch.io/hana-caraka-base-character
 
 # Support for PixelArt Visuals

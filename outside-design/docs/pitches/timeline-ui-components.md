@@ -1,3 +1,9 @@
+---
+Title: "Timeline UI Components (Timeline series: 4)"
+Category: Timeline
+DeliveryLink: /deliveries/2026-01-16-1000-timeline-ui-components/
+---
+
 # Timeline UI Components (Timeline series: 4)
 
 ## Motivation

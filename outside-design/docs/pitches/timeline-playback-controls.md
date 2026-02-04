@@ -1,3 +1,9 @@
+---
+Title: "Playback Controls & Game Loop Integration (Timeline series: 3)"
+Category: Timeline
+DeliveryLink: /deliveries/2026-01-16-1000-timeline-playback-controls/
+---
+
 # Playback Controls & Game Loop Integration (Timeline series: 3)
 
 ## Motivation

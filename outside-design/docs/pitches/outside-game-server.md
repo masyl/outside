@@ -1,3 +1,8 @@
+---
+Title: Outside Game Server
+Category: Core
+---
+
 # Outside Game Server
 
 ## Motivation

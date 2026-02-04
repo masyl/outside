@@ -1,3 +1,8 @@
+---
+Title: Prompt 0001 First POC
+Category: Ideas
+---
+
 Let's start building the first POC for the core games architecture and game loop.
 
 We will start by implementing the game client.

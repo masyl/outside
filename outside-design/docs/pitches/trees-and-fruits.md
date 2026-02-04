@@ -1,3 +1,8 @@
+---
+Title: Trees and Fruits
+Category: Ideas
+---
+
 # Trees and Fruits
 
 ## Motivation

@@ -1,3 +1,8 @@
+---
+Title: Chickens and Eggs
+Category: Ideas
+---
+
 # Chickens and Eggs
 
 ## Motivation

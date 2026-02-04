@@ -1,3 +1,8 @@
+---
+Title: Persistent Game state
+Category: Core
+---
+
 # Persistent Game state
 
 ## Motivation

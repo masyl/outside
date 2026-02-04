@@ -1,3 +1,8 @@
+---
+Title: Dingle Brawl
+Category: Games
+---
+
 # Dingle Brawl
 
 ## Motivation

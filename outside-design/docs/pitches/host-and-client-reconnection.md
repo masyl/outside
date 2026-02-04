@@ -1,3 +1,9 @@
+---
+Title: Client Connection Stability
+Category: Core
+DeliveryLink: /deliveries/2026-01-09-1020-client-reconnection/
+---
+
 # Client Connection Stability
 
 ## Motivation

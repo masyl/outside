@@ -1,3 +1,9 @@
+---
+Title: "Timeline Engine Core (Timeline series: 2)"
+Category: Timeline
+DeliveryLink: /deliveries/2026-01-16-1000-timeline-engine-core/
+---
+
 # Timeline Engine Core (Timeline series: 2)
 
 ## Motivation
