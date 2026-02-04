@@ -29,6 +29,7 @@ import {
   FollowTarget,
   FollowTightness,
   MaxSpeed,
+  PointerTarget,
 } from '../components';
 import type { SimulatorWorld } from '../world';
 
@@ -64,6 +65,7 @@ export function getOrCreateBotPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, set(Direction, { angle: DEFAULTS.directionRad }));
   addComponent(world, prefabEid, set(Speed, { tilesPerSec: DEFAULTS.tilesPerSec }));
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
+  addComponent(world, prefabEid, PointerTarget);
   // Wander + WanderPersistence are added per-entity in spawnBot so each bot has its own slot (no prefab inheritance for urge state)
 
   prefabByWorld.set(world, prefabEid);

@@ -8,7 +8,7 @@ import { createWorld as bitecsCreateWorld } from 'bitecs';
 import { Random } from '@outside/utils';
 import type { SimulatorEvent } from './events';
 import { registerPipelineObservers } from './observers';
-import { addDefaultGrids } from './world-defaults';
+import { addDefaultGrids, addViewEntity, addPointerEntity } from './world-defaults';
 
 /** Default tic duration in milliseconds (e.g. 50 ms) */
 export const DEFAULT_TIC_DURATION_MS = 50;
@@ -57,5 +57,7 @@ export function createWorld(options?: CreateWorldOptions): SimulatorWorld {
   }) as SimulatorWorld;
   registerPipelineObservers(world);
   addDefaultGrids(world);
+  addViewEntity(world);
+  addPointerEntity(world);
   return world;
 }

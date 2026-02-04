@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { SimulatorRenderer } from '../components/SimulatorRenderer';
 import {
@@ -9,9 +10,26 @@ import {
   spawnDungeonWithFood,
 } from '../components/simulator/spawnCloud';
 
+/** Wrapper so the simulator fills the canvas and resizes with the viewport. */
+function FullHeightDecorator(Story: React.ComponentType) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
+    >
+      <Story />
+    </div>
+  );
+}
+
 const meta: Meta<typeof SimulatorRenderer> = {
   title: 'Simulator/ECS Core',
   component: SimulatorRenderer,
+  decorators: [FullHeightDecorator],
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -111,5 +129,27 @@ export const FloorGridDungeonWithFood: StoryObj<typeof SimulatorRenderer> = {
     ticsPerSecond: 10,
     entityCount: 20,
     spawnFn: spawnDungeonWithFood,
+  },
+};
+
+/** Pointer system: hover to see cursor (dotted tile). Empty=50%, floor/wall=100%, bot=green. Click empty→floor, floor→wall, wall→remove. */
+export const PointerBasicCursor: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 42,
+    ticsPerSecond: 10,
+    entityCount: 6,
+    spawnFn: spawnFloorRectThenScattered,
+    captionLegend: 'Hover: pointer tile. Click empty→floor, floor→wall, wall→remove, bot→follow.',
+  },
+};
+
+/** Pointer system: click a bot to follow it with the camera. The viewport will center on the clicked bot. */
+export const PointerClickBot: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 42,
+    ticsPerSecond: 10,
+    entityCount: 8,
+    spawnFn: spawnFloorRectThenScattered,
+    captionLegend: 'Click a bot to follow it. Camera centers on the followed bot.',
   },
 };

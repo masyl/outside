@@ -24,6 +24,8 @@ export interface UseSimulatorWorldResult {
   collisionEids: Set<number>;
   seed: number;
   ticDurationMs: number;
+  /** Call after mutating world or pointer state to force re-render. */
+  invalidate: () => void;
 }
 
 export function useSimulatorWorld(
@@ -39,6 +41,8 @@ export function useSimulatorWorld(
     ticDurationMs: number;
   } | null>(null);
   const [collisionEids, setCollisionEids] = useState<Set<number>>(new Set());
+  const [, setVersion] = useState(0);
+  const invalidate = useCallback(() => setVersion((v) => v + 1), []);
 
   const initWorld = useCallback(() => {
     const world = createWorld({ seed, ticDurationMs: 50 });
@@ -96,5 +100,6 @@ export function useSimulatorWorld(
     collisionEids,
     seed: state?.seed ?? seed,
     ticDurationMs: state?.ticDurationMs ?? 50,
+    invalidate,
   };
 }

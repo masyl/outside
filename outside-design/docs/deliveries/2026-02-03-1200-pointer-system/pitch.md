@@ -61,7 +61,7 @@ Storybook and the game client are **consumers** of this simulation state: they r
   - A: A single tag
 - Q: Demo: "viewport centers and follows bot"—is that Storybook-only camera behavior, or should the pitch allow a hook for outside-client later?
   - A: Make the renderer viewport center an invisible entity.
-  - A: Also, add a isViewportFocus a component that point to the bot (using bitecs relationships) 
+  - A: Also, add a isViewportFocus a component that point to the bot (using bitecs relationships)
 - Q: Naming: confirm canonical name—**pointable** vs pointableAt vs pointerTarget.
   - A: Use pointerTarget
 

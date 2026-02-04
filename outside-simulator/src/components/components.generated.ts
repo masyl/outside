@@ -9,15 +9,20 @@ import FollowTightness from './FollowTightness';
 import Food from './Food';
 import Grid from './Grid';
 import GridResolution from './GridResolution';
+import IsViewportFocus from './IsViewportFocus';
 import MaxSpeed from './MaxSpeed';
 import Observed from './Observed';
 import Obstacle from './Obstacle';
 import ObstacleSize from './ObstacleSize';
+import Pointer from './Pointer';
+import PointerTarget from './PointerTarget';
+import PointerTile from './PointerTile';
 import Position from './Position';
 import PreviousPosition from './PreviousPosition';
 import RandomWalk from './RandomWalk';
 import Size from './Size';
 import Speed from './Speed';
+import View from './View';
 import VisualSize from './VisualSize';
 import Wait from './Wait';
 import Walkable from './Walkable';
@@ -34,15 +39,20 @@ export interface SimulatorComponents {
   Food: typeof Food;
   Grid: typeof Grid;
   GridResolution: typeof GridResolution;
+  IsViewportFocus: typeof IsViewportFocus;
   MaxSpeed: typeof MaxSpeed;
   Observed: typeof Observed;
   Obstacle: typeof Obstacle;
   ObstacleSize: typeof ObstacleSize;
+  Pointer: typeof Pointer;
+  PointerTarget: typeof PointerTarget;
+  PointerTile: typeof PointerTile;
   Position: typeof Position;
   PreviousPosition: typeof PreviousPosition;
   RandomWalk: typeof RandomWalk;
   Size: typeof Size;
   Speed: typeof Speed;
+  View: typeof View;
   VisualSize: typeof VisualSize;
   Wait: typeof Wait;
   Walkable: typeof Walkable;
@@ -50,4 +60,4 @@ export interface SimulatorComponents {
   WanderPersistence: typeof WanderPersistence;
 }
 
-export { Collided, Direction, FloorTile, Follow, FollowTarget, FollowTightness, Food, Grid, GridResolution, MaxSpeed, Observed, Obstacle, ObstacleSize, Position, PreviousPosition, RandomWalk, Size, Speed, VisualSize, Wait, Walkable, Wander, WanderPersistence };
+export { Collided, Direction, FloorTile, Follow, FollowTarget, FollowTightness, Food, Grid, GridResolution, IsViewportFocus, MaxSpeed, Observed, Obstacle, ObstacleSize, Pointer, PointerTarget, PointerTile, Position, PreviousPosition, RandomWalk, Size, Speed, View, VisualSize, Wait, Walkable, Wander, WanderPersistence };

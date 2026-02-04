@@ -4,7 +4,7 @@
  */
 
 import { addEntity, addComponent, setComponent } from 'bitecs';
-import { Grid, GridResolution } from './components';
+import { Grid, GridResolution, View, IsViewportFocus, Pointer, PointerTile } from './components';
 import type { SimulatorWorld } from './world';
 
 /** Resolution for floor tiles grid (1 = integer cells). */
@@ -26,4 +26,29 @@ export function addDefaultGrids(world: SimulatorWorld): void {
   addComponent(world, subSnapEid, Grid);
   addComponent(world, subSnapEid, GridResolution);
   GridResolution.value[subSnapEid] = SUB_POSITION_SNAP_RESOLUTION;
+}
+
+/**
+ * Adds the View entity (View + IsViewportFocus). The viewport renderer centers on the follow target when set.
+ * Called from createWorld.
+ */
+export function addViewEntity(world: SimulatorWorld): number {
+  const viewEid = addEntity(world);
+  addComponent(world, viewEid, View);
+  addComponent(world, viewEid, IsViewportFocus);
+  IsViewportFocus.eid[viewEid] = 0;
+  return viewEid;
+}
+
+/**
+ * Adds the Pointer entity (Pointer + PointerTile). Holds current pointer tile (x, y) in floor grid resolution.
+ * Called from createWorld.
+ */
+export function addPointerEntity(world: SimulatorWorld): number {
+  const pointerEid = addEntity(world);
+  addComponent(world, pointerEid, Pointer);
+  addComponent(world, pointerEid, PointerTile);
+  PointerTile.tileX[pointerEid] = Number.NaN;
+  PointerTile.tileY[pointerEid] = Number.NaN;
+  return pointerEid;
 }

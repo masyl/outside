@@ -1,6 +1,9 @@
 import {
   getComponent,
   query,
+  addComponent,
+  removeComponent,
+  removeEntity,
   Position,
   Size,
   VisualSize,
@@ -10,7 +13,18 @@ import {
   FollowTarget,
   Collided,
   Food,
+  Obstacle,
+  Walkable,
+  setPointerTile,
+  getPointerTile,
+  clearPointerTile,
+  resolveEntityAt,
+  getViewportFollowTarget,
+  setViewportFollowTarget,
+  spawnFloorTile,
 } from '@outside/simulator';
+import type { ResolveEntityKind } from '@outside/simulator';
+import { useCallback } from 'react';
 import { useSimulatorWorld, type SpawnFn } from './simulator/useSimulatorWorld';
 import { spawnScatteredWithLeaders } from './simulator/spawnCloud';
 import { SimulatorViewport } from './simulator/SimulatorViewport';
@@ -46,6 +60,8 @@ interface SimulatorRendererProps {
   entityCount?: number;
   /** Optional custom spawn function (e.g. spawnFollowChain for follow-chain demo). */
   spawnFn?: SpawnFn;
+  /** Optional legend for caption. */
+  captionLegend?: string;
 }
 
 /**
@@ -53,38 +69,130 @@ interface SimulatorRendererProps {
  * Composes useSimulatorWorld (tick loop, state) with presentational Viewport, Entity, and Caption.
  * Draws follow lines (blue) and velocity arrows (orange) when applicable.
  */
+/** Convert viewBox coordinates to world tile using current view center. */
+function viewBoxToTile(
+  viewBoxX: number,
+  viewBoxY: number,
+  viewCenterX: number,
+  viewCenterY: number
+): { x: number; y: number } {
+  const worldX = viewCenterX + (viewBoxX - VIEWBOX_WIDTH / 2) / PIXELS_PER_TILE;
+  const worldY = viewCenterY - (viewBoxY - VIEWBOX_HEIGHT / 2) / PIXELS_PER_TILE;
+  return { x: Math.floor(worldX), y: Math.floor(worldY) };
+}
+
 export function SimulatorRenderer({
   seed = 42,
   ticsPerSecond = 10,
   entityCount = 5,
   spawnFn,
+  captionLegend,
 }: SimulatorRendererProps) {
-  const { world, entityIds, collisionEids, seed: stateSeed } = useSimulatorWorld(
-    seed,
-    entityCount,
-    ticsPerSecond,
-    spawnFn ?? spawnScatteredWithLeaders
+  const { world, entityIds, collisionEids, seed: stateSeed, invalidate } =
+    useSimulatorWorld(
+      seed,
+      entityCount,
+      ticsPerSecond,
+      spawnFn ?? spawnScatteredWithLeaders
+    );
+
+  const followEid = world ? getViewportFollowTarget(world) : 0;
+  const viewCenter = world && followEid
+    ? getComponent(world, followEid, Position)
+    : { x: 0, y: 0 };
+  const viewCenterX = viewCenter?.x ?? 0;
+  const viewCenterY = viewCenter?.y ?? 0;
+
+  const toX = useCallback(
+    (x: number) => VIEWBOX_WIDTH / 2 + (x - viewCenterX) * PIXELS_PER_TILE,
+    [viewCenterX]
   );
+  const toY = useCallback(
+    (y: number) => VIEWBOX_HEIGHT / 2 - (y - viewCenterY) * PIXELS_PER_TILE,
+    [viewCenterY]
+  );
+  const transform = { toX, toY };
+
+  const handlePointerMove = useCallback(
+    (viewBoxX: number, viewBoxY: number) => {
+      if (!world) return;
+      const { x: tx, y: ty } = viewBoxToTile(
+        viewBoxX,
+        viewBoxY,
+        viewCenterX,
+        viewCenterY
+      );
+      setPointerTile(world, tx, ty);
+      invalidate();
+    },
+    [world, viewCenterX, viewCenterY, invalidate]
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    if (!world) return;
+    clearPointerTile(world);
+    invalidate();
+  }, [world, invalidate]);
+
+  const handlePointerDown = useCallback(
+    (viewBoxX: number, viewBoxY: number) => {
+      if (!world) return;
+      const { x: tx, y: ty } = viewBoxToTile(
+        viewBoxX,
+        viewBoxY,
+        viewCenterX,
+        viewCenterY
+      );
+      const resolved = resolveEntityAt(world, tx, ty);
+      if (resolved.kind === 'empty') {
+        spawnFloorTile(world, tx, ty, true);
+      } else if (resolved.kind === 'floor' && resolved.eid != null) {
+        removeComponent(world, resolved.eid, Walkable);
+        addComponent(world, resolved.eid, Obstacle);
+      } else if (resolved.kind === 'wall' && resolved.eid != null) {
+        removeEntity(world, resolved.eid);
+      } else if (resolved.kind === 'bot' && resolved.eid != null) {
+        setViewportFollowTarget(world, resolved.eid);
+      }
+      invalidate();
+    },
+    [world, viewCenterX, viewCenterY, invalidate]
+  );
+
+  const pointerTile = world ? getPointerTile(world) : { x: NaN, y: NaN };
+  const pointerVisible =
+    Number.isFinite(pointerTile.x) && Number.isFinite(pointerTile.y);
+  const resolved =
+    world && pointerVisible
+      ? resolveEntityAt(world, pointerTile.x, pointerTile.y)
+      : { kind: 'empty' as ResolveEntityKind };
+  const pointerCursor =
+    pointerVisible && resolved.kind !== 'empty' ? 'pointer' : 'default';
 
   if (!world) {
     return <div>Loading...</div>;
   }
 
-  const toX = (x: number) => VIEWBOX_WIDTH / 2 + x * PIXELS_PER_TILE;
-  const toY = (y: number) => VIEWBOX_HEIGHT / 2 - y * PIXELS_PER_TILE;
-  const transform = { toX, toY };
-
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
         height: '100%',
         minHeight: 0,
         display: 'flex',
         flexDirection: 'column',
+        overflow: 'hidden',
       }}
     >
-      <SimulatorViewport viewBoxWidth={VIEWBOX_WIDTH} viewBoxHeight={VIEWBOX_HEIGHT}>
+      <SimulatorViewport
+        viewBoxWidth={VIEWBOX_WIDTH}
+        viewBoxHeight={VIEWBOX_HEIGHT}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        onPointerDown={handlePointerDown}
+        cursor={pointerCursor}
+      >
         {/* Floor tiles (dark grey squares, under grid and entities) */}
         <FloorTilesLayer
           world={world}
@@ -205,8 +313,38 @@ export function SimulatorRenderer({
             />
           );
         })}
+        {/* Pointer tile highlight when hovering: default 50% dotted; floor/wall 100% dotted; bot solid green */}
+        {pointerVisible &&
+          (() => {
+            const tx = pointerTile.x;
+            const ty = pointerTile.y;
+            const rx = toX(tx);
+            const ry = toY(ty + 1);
+            const isBot = resolved.kind === 'bot';
+            const opacity = resolved.kind === 'empty' ? 0.5 : 1;
+            return (
+              <rect
+                x={rx}
+                y={ry}
+                width={PIXELS_PER_TILE}
+                height={PIXELS_PER_TILE}
+                fill={isBot ? '#4a4' : 'none'}
+                fillOpacity={isBot ? 0.4 : 0}
+                stroke="white"
+                strokeOpacity={opacity}
+                strokeWidth={1}
+                strokeDasharray={isBot ? 'none' : '4 2'}
+                pointerEvents="none"
+              />
+            );
+          })()}
       </SimulatorViewport>
-      <SimulatorCaption seed={stateSeed} entityCount={entityIds.length} />
+      <SimulatorCaption
+        seed={stateSeed}
+        entityCount={entityIds.length}
+        legend={captionLegend}
+        overlay
+      />
     </div>
   );
 }

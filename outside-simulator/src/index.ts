@@ -13,6 +13,8 @@ export { createWorld, DEFAULT_TIC_DURATION_MS } from './world';
 export type { SimulatorWorld, CreateWorldOptions } from './world';
 export {
   addDefaultGrids,
+  addViewEntity,
+  addPointerEntity,
   FLOOR_TILES_RESOLUTION,
   SUB_POSITION_SNAP_RESOLUTION,
 } from './world-defaults';
@@ -23,13 +25,23 @@ export { registerPipelineObservers, registerComponentForPipelineObserver } from 
 
 export { query } from './state';
 
-export { getComponent, setComponent, set } from 'bitecs';
+export { getComponent, setComponent, set, addComponent, removeComponent, removeEntity } from 'bitecs';
 
 export { spawnBot, getOrCreateBotPrefab } from './prefabs/bot';
 export type { SpawnBotOptions } from './prefabs/bot';
 export { spawnFloorTile, spawnFloorRect, spawnWall } from './prefabs/floor';
 export { spawnFood } from './prefabs/food';
 export type { SpawnFoodOptions } from './prefabs/food';
+
+export {
+  setPointerTile,
+  getPointerTile,
+  clearPointerTile,
+  resolveEntityAt,
+  getViewportFollowTarget,
+  setViewportFollowTarget,
+} from './pointer';
+export type { ResolveEntityKind, ResolveEntityResult } from './pointer';
 
 export {
   createSoASerializer,

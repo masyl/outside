@@ -4,7 +4,7 @@
  */
 
 import { addEntity, addComponent, setComponent } from 'bitecs';
-import { Position, Size, FloorTile, Walkable, Obstacle } from '../components';
+import { Position, Size, FloorTile, Walkable, Obstacle, PointerTarget } from '../components';
 import type { SimulatorWorld } from '../world';
 
 /** Default floor tile cell size (1 unit = floor grid resolution). */
@@ -31,6 +31,7 @@ export function spawnFloorTile(
   addComponent(world, eid, Size);
   setComponent(world, eid, Size, { diameter: FLOOR_CELL_SIZE });
   addComponent(world, eid, FloorTile);
+  addComponent(world, eid, PointerTarget);
   if (walkable) {
     addComponent(world, eid, Walkable);
   }
@@ -58,6 +59,7 @@ export function spawnWall(
   setComponent(world, eid, Size, { diameter: FLOOR_CELL_SIZE });
   addComponent(world, eid, FloorTile);
   addComponent(world, eid, Obstacle);
+  addComponent(world, eid, PointerTarget);
   return eid;
 }
 
