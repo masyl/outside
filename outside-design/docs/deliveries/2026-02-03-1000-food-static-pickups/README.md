@@ -4,7 +4,7 @@ DeliveryDate: 2026-02-03
 Summary: Static food pickups on the floor; bots consume on overlap and a consumed event fires. No hunger or seeking.
 Status: DONE
 Branch: feature/food-static-pickups
-Commit: 126d507
+Commit: acc3483
 ---
 
 # Food in the Dungeon — Static Pickups
