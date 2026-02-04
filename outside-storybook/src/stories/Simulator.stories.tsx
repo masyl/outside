@@ -5,7 +5,6 @@ import {
   spawnFollowChain,
   spawnBotsInWorld,
   spawnScatteredWithLeaders,
-  spawnFloorRectThenScattered,
   spawnDungeonThenScattered,
   spawnDungeonWithFood,
 } from '../components/simulator/spawnCloud';
@@ -40,6 +39,8 @@ const meta: Meta<typeof SimulatorRenderer> = {
     },
   },
   argTypes: {
+    spawnFn: { table: { disable: true } },
+    spawnPreset: { table: { disable: true } },
     seed: { control: { type: 'number', min: 0, step: 1 }, description: 'RNG seed' },
     ticsPerSecond: {
       control: { type: 'number', min: 1, max: 30, step: 1 },
@@ -48,6 +49,18 @@ const meta: Meta<typeof SimulatorRenderer> = {
     entityCount: {
       control: { type: 'number', min: 1, max: 2000, step: 10 },
       description: 'Number of random-walk entities',
+    },
+    zoom: {
+      control: { type: 'range', min: 0.25, max: 4, step: 0.25 },
+      description: 'Zoom level (1 = default)',
+    },
+    roomWidth: {
+      control: { type: 'number', min: 4, max: 120, step: 2 },
+      description: 'Room width in tiles (floor rect stories)',
+    },
+    roomHeight: {
+      control: { type: 'number', min: 4, max: 80, step: 2 },
+      description: 'Room height in tiles (floor rect stories)',
     },
   },
 };
@@ -108,7 +121,9 @@ export const FloorGridRect: StoryObj<typeof SimulatorRenderer> = {
     seed: 42,
     ticsPerSecond: 10,
     entityCount: 15,
-    spawnFn: spawnFloorRectThenScattered,
+    spawnPreset: 'floorRect',
+    roomWidth: 60,
+    roomHeight: 40,
   },
 };
 
@@ -138,7 +153,9 @@ export const PointerBasicCursor: StoryObj<typeof SimulatorRenderer> = {
     seed: 42,
     ticsPerSecond: 10,
     entityCount: 6,
-    spawnFn: spawnFloorRectThenScattered,
+    spawnPreset: 'floorRect',
+    roomWidth: 60,
+    roomHeight: 40,
     captionLegend: 'Hover: pointer tile. Click empty→floor, floor→wall, wall→remove, bot→follow.',
   },
 };
@@ -149,7 +166,9 @@ export const PointerClickBot: StoryObj<typeof SimulatorRenderer> = {
     seed: 42,
     ticsPerSecond: 10,
     entityCount: 8,
-    spawnFn: spawnFloorRectThenScattered,
+    spawnPreset: 'floorRect',
+    roomWidth: 60,
+    roomHeight: 40,
     captionLegend: 'Click a bot to follow it. Camera centers on the followed bot.',
   },
 };

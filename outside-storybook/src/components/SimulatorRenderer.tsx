@@ -24,9 +24,12 @@ import {
   spawnFloorTile,
 } from '@outside/simulator';
 import type { ResolveEntityKind } from '@outside/simulator';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useSimulatorWorld, type SpawnFn } from './simulator/useSimulatorWorld';
-import { spawnScatteredWithLeaders } from './simulator/spawnCloud';
+import {
+  spawnScatteredWithLeaders,
+  createFloorRectSpawn,
+} from './simulator/spawnCloud';
 import { SimulatorViewport } from './simulator/SimulatorViewport';
 import { SimulatorEntity } from './simulator/SimulatorEntity';
 import { SimulatorCaption } from './simulator/SimulatorCaption';
@@ -60,8 +63,16 @@ interface SimulatorRendererProps {
   entityCount?: number;
   /** Optional custom spawn function (e.g. spawnFollowChain for follow-chain demo). */
   spawnFn?: SpawnFn;
+  /** When 'floorRect', use createFloorRectSpawn(roomWidth, roomHeight) and ignore spawnFn. */
+  spawnPreset?: 'floorRect';
+  /** Room width in tiles (used when spawnPreset is 'floorRect'). Default 60. */
+  roomWidth?: number;
+  /** Room height in tiles (used when spawnPreset is 'floorRect'). Default 40. */
+  roomHeight?: number;
   /** Optional legend for caption. */
   captionLegend?: string;
+  /** Zoom level (1 = default, >1 = zoom in, <1 = zoom out). */
+  zoom?: number;
 }
 
 /**
@@ -86,15 +97,21 @@ export function SimulatorRenderer({
   ticsPerSecond = 10,
   entityCount = 5,
   spawnFn,
+  spawnPreset,
+  roomWidth = 60,
+  roomHeight = 40,
   captionLegend,
+  zoom = 1,
 }: SimulatorRendererProps) {
+  const resolvedSpawnFn = useMemo<SpawnFn>(
+    () =>
+      spawnPreset === 'floorRect'
+        ? createFloorRectSpawn(roomWidth, roomHeight)
+        : (spawnFn ?? spawnScatteredWithLeaders),
+    [spawnPreset, roomWidth, roomHeight, spawnFn]
+  );
   const { world, entityIds, collisionEids, seed: stateSeed, invalidate } =
-    useSimulatorWorld(
-      seed,
-      entityCount,
-      ticsPerSecond,
-      spawnFn ?? spawnScatteredWithLeaders
-    );
+    useSimulatorWorld(seed, entityCount, ticsPerSecond, resolvedSpawnFn);
 
   const followEid = world ? getViewportFollowTarget(world) : 0;
   const viewCenter = world && followEid
@@ -188,6 +205,7 @@ export function SimulatorRenderer({
       <SimulatorViewport
         viewBoxWidth={VIEWBOX_WIDTH}
         viewBoxHeight={VIEWBOX_HEIGHT}
+        zoom={zoom}
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         onPointerDown={handlePointerDown}

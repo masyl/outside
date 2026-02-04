@@ -89,10 +89,24 @@ export function spawnFloorRectThenScattered(
   seed: number,
   entityCount: number
 ): void {
-  const xMin = -30;
-  const yMin = -20;
-  const xMax = 30;
-  const yMax = 20;
+  spawnFloorRectThenScatteredWithSize(world, seed, entityCount, 60, 40);
+}
+
+/**
+ * Spawns a walkable floor rectangle with wall perimeter, then entities scattered with leaders.
+ * Room is centered at (0,0) with given width and height (in tiles).
+ */
+export function spawnFloorRectThenScatteredWithSize(
+  world: SimulatorWorld,
+  seed: number,
+  entityCount: number,
+  width: number,
+  height: number
+): void {
+  const xMin = -width / 2;
+  const yMin = -height / 2;
+  const xMax = width / 2;
+  const yMax = height / 2;
   spawnFloorRect(world, xMin, yMin, xMax, yMax, true);
   for (let x = xMin - 1; x <= xMax + 1; x++) {
     spawnWall(world, x, yMin - 1);
@@ -103,6 +117,18 @@ export function spawnFloorRectThenScattered(
     spawnWall(world, xMax + 1, y);
   }
   spawnScatteredWithLeaders(world, seed, entityCount);
+}
+
+/**
+ * Returns a spawn function for a rectangular room with the given dimensions.
+ * Use when room width/height are controlled dynamically (e.g. Storybook controls).
+ */
+export function createFloorRectSpawn(
+  width: number,
+  height: number
+): (world: SimulatorWorld, seed: number, entityCount: number) => void {
+  return (world, seed, entityCount) =>
+    spawnFloorRectThenScatteredWithSize(world, seed, entityCount, width, height);
 }
 
 function key(x: number, y: number): string {

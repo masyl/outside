@@ -3,6 +3,8 @@ import { useRef, useCallback, type ReactNode } from 'react';
 export interface SimulatorViewportProps {
   viewBoxWidth: number;
   viewBoxHeight: number;
+  /** Zoom level (1 = default, >1 = zoom in, <1 = zoom out). */
+  zoom?: number;
   children: ReactNode;
   onPointerMove?: (viewBoxX: number, viewBoxY: number) => void;
   onPointerLeave?: () => void;
@@ -16,6 +18,7 @@ export interface SimulatorViewportProps {
 export function SimulatorViewport({
   viewBoxWidth,
   viewBoxHeight,
+  zoom = 1,
   children,
   onPointerMove,
   onPointerLeave,
@@ -67,7 +70,14 @@ export function SimulatorViewport({
     >
       <svg
         ref={svgRef}
-        viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+        viewBox={(() => {
+          const z = Math.max(0.1, zoom);
+          const w = viewBoxWidth / z;
+          const h = viewBoxHeight / z;
+          const minX = viewBoxWidth / 2 - w / 2;
+          const minY = viewBoxHeight / 2 - h / 2;
+          return `${minX} ${minY} ${w} ${h}`;
+        })()}
         preserveAspectRatio="xMidYMid meet"
         style={{
           flex: 1,
