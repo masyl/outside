@@ -8,6 +8,9 @@ import {
   spawnDungeonThenScattered,
   spawnDungeonWithFood,
   spawnDungeonWithFoodAndHero,
+  spawnDungeonWFCThenScattered,
+  spawnDungeonWFCWithFood,
+  spawnDungeonWFCWithFoodAndHero,
 } from '../components/simulator/spawnCloud';
 
 /** Wrapper so the simulator fills the canvas and resizes with the viewport. */
@@ -138,6 +141,16 @@ export const FloorGridDungeon: StoryObj<typeof SimulatorRenderer> = {
   },
 };
 
+/** WFC-generated dungeon: organic floor layout (wave function collapse). Compare with FloorGridDungeon. */
+export const FloorGridDungeonWFC: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 123,
+    ticsPerSecond: 10,
+    entityCount: 20,
+    spawnFn: spawnDungeonWFCThenScattered,
+  },
+};
+
 /** Dungeon + food: green circles are food; bots consume on overlap and food disappears. */
 export const FloorGridDungeonWithFood: StoryObj<typeof SimulatorRenderer> = {
   args: {
@@ -145,6 +158,16 @@ export const FloorGridDungeonWithFood: StoryObj<typeof SimulatorRenderer> = {
     ticsPerSecond: 10,
     entityCount: 20,
     spawnFn: spawnDungeonWithFood,
+  },
+};
+
+/** WFC dungeon + food. Same as FloorGridDungeonWithFood but with WFC layout. */
+export const FloorGridDungeonWithFoodWFC: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 123,
+    ticsPerSecond: 10,
+    entityCount: 20,
+    spawnFn: spawnDungeonWFCWithFood,
   },
 };
 
@@ -195,5 +218,16 @@ export const DungeonWithHero: StoryObj<typeof SimulatorRenderer> = {
     entityCount: 9,
     spawnFn: spawnDungeonWithFoodAndHero,
     captionLegend: 'Dungeon: 12 food, 9 bots, 1 hero. Click floor to order hero there.',
+  },
+};
+
+/** WFC dungeon with 12 food, 9 bots, 1 hero. Same as DungeonWithHero but WFC-generated layout. */
+export const DungeonWithHeroWFC: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 123,
+    ticsPerSecond: 10,
+    entityCount: 9,
+    spawnFn: spawnDungeonWFCWithFoodAndHero,
+    captionLegend: 'WFC dungeon: 12 food, 9 bots, 1 hero. Click floor to order hero there.',
   },
 };

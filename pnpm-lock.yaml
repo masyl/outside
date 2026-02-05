@@ -191,6 +191,9 @@ importers:
       react-dom:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
+      wavefunctioncollapse:
+        specifier: ^2.1.0
+        version: 2.1.0
     devDependencies:
       '@storybook/addon-essentials':
         specifier: 9.0.0-alpha.12
@@ -3670,6 +3673,9 @@ packages:
   w3c-xmlserializer@5.0.0:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
+
+  wavefunctioncollapse@2.1.0:
+    resolution: {integrity: sha512-GclizlVcMKyS2POsjrKb8sHy//NXJj3EI7957Wa+f97DtiNOsj773CzftCo59Hylvb/RBefrqtv4k0pOFfS71g==}
 
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
@@ -7384,6 +7390,8 @@ snapshots:
   w3c-xmlserializer@5.0.0:
     dependencies:
       xml-name-validator: 5.0.0
+
+  wavefunctioncollapse@2.1.0: {}
 
   webidl-conversions@7.0.0: {}
 

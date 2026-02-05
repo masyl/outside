@@ -9,6 +9,7 @@ import {
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import { generateDungeon } from '../../utils/dungeonLayout';
+import { generateDungeonWFC } from '../../utils/dungeonLayoutWFC';
 
 /**
  * Spawns count bots in a follow chain: first is leader (Wander), rest Follow previous.
@@ -281,6 +282,122 @@ export function spawnDungeonWithFood(
     const y = p.y + offsetY + 0.5;
     spawnFood(world, { x, y });
   }
+}
+
+/**
+ * WFC-generated dungeon (rooms + organic layout). Same layout and spawn logic as spawnDungeonThenScattered but uses generateDungeonWFC.
+ */
+export function spawnDungeonWFCThenScattered(
+  world: SimulatorWorld,
+  seed: number,
+  entityCount: number
+): void {
+  const width = 80;
+  const height = 50;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+  const { grid, roomCells } = generateDungeonWFC(width, height, seed);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) {
+        spawnFloorTile(world, x + offsetX, y + offsetY, true);
+      }
+    }
+  }
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+  if (roomCells.length === 0) return;
+  for (let i = 0; i < entityCount; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+    const p = roomCells[idx];
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, i * 2) * Math.PI * 2;
+    spawnBot(world, {
+      x: cx,
+      y: cy,
+      directionRad: angle,
+      urge: 'wander',
+    });
+  }
+}
+
+/**
+ * WFC dungeon plus food. Same as spawnDungeonWithFood but uses WFC generator.
+ */
+export function spawnDungeonWFCWithFood(
+  world: SimulatorWorld,
+  seed: number,
+  entityCount: number
+): void {
+  spawnDungeonWFCThenScattered(world, seed, entityCount);
+  const { roomCells } = generateDungeonWFC(80, 50, seed);
+  if (roomCells.length === 0) return;
+  const offsetX = -40;
+  const offsetY = -25;
+  for (let i = 0; i < DUNGEON_FOOD_COUNT; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
+      roomCells.length;
+    const p = roomCells[idx];
+    const x = p.x + offsetX + 0.5;
+    const y = p.y + offsetY + 0.5;
+    spawnFood(world, { x, y });
+  }
+}
+
+/**
+ * WFC dungeon with food, bots, and hero. Same as spawnDungeonWithFoodAndHero but uses WFC generator.
+ */
+export function spawnDungeonWFCWithFoodAndHero(
+  world: SimulatorWorld,
+  seed: number,
+  _entityCount: number
+): void {
+  const width = 80;
+  const height = 50;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+  const { grid, roomCells } = generateDungeonWFC(width, height, seed);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) {
+        spawnFloorTile(world, x + offsetX, y + offsetY, true);
+      }
+    }
+  }
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+  if (roomCells.length === 0) return;
+  for (let i = 0; i < DUNGEON_HERO_BOT_COUNT; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+    const p = roomCells[idx];
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, i * 2) * Math.PI * 2;
+    spawnBot(world, {
+      x: cx,
+      y: cy,
+      directionRad: angle,
+      urge: 'wander',
+    });
+  }
+  for (let i = 0; i < DUNGEON_HERO_FOOD_COUNT; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
+      roomCells.length;
+    const p = roomCells[idx];
+    const x = p.x + offsetX + 0.5;
+    const y = p.y + offsetY + 0.5;
+    spawnFood(world, { x, y });
+  }
+  const heroIdx =
+    Math.floor(seededUnit(seed, 2000) * roomCells.length) % roomCells.length;
+  const heroCell = roomCells[heroIdx];
+  const heroX = heroCell.x + offsetX + 0.5;
+  const heroY = heroCell.y + offsetY + 0.5;
+  const heroEid = spawnHero(world, { x: heroX, y: heroY });
+  setViewportFollowTarget(world, heroEid);
 }
 
 /** Food count for dungeon-with-hero preset. */
