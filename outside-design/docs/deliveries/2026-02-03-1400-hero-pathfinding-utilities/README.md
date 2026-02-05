@@ -4,7 +4,7 @@ DeliveryDate: 2026-02-03
 Summary: Player-controlled Hero prefab, pathfinding over walkable floor, path-follow system with line-of-sight simplification, and click-to-move in Storybook.
 Status: DONE
 Branch: feature/hero-pathfinding-utilities
-Commit: ""
+Commit: 6ea172e
 ---
 
 # Hero and Pathfinding Utilities
