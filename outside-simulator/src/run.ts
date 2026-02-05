@@ -3,6 +3,7 @@
  * @packageDocumentation
  */
 
+import { heroPathSystem } from './heroPath';
 import { urgeSystem } from './systems/urge';
 import { movementSystem } from './systems/movement';
 import { consumptionSystem } from './systems/consumption';
@@ -12,6 +13,7 @@ import type { SimulatorWorld } from './world';
 
 const pipeline = (world: SimulatorWorld) => {
   world.ticCount = (world.ticCount ?? 0) + 1;
+  heroPathSystem(world);
   urgeSystem(world);
   movementSystem(world);
   consumptionSystem(world);

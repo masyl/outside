@@ -4,6 +4,8 @@ import {
   spawnFloorTile,
   spawnWall,
   spawnFood,
+  spawnHero,
+  setViewportFollowTarget,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import { generateDungeon } from '../../utils/dungeonLayout';
@@ -131,6 +133,46 @@ export function createFloorRectSpawn(
     spawnFloorRectThenScatteredWithSize(world, seed, entityCount, width, height);
 }
 
+/**
+ * Floor rect with wall perimeter, one hero at center (0,0), then entityCount bots scattered with leaders.
+ * Sets viewport follow target to the hero so the camera follows the player character by default.
+ */
+export function spawnFloorRectWithHero(
+  world: SimulatorWorld,
+  seed: number,
+  entityCount: number,
+  width: number = 60,
+  height: number = 40
+): void {
+  const xMin = -width / 2;
+  const yMin = -height / 2;
+  const xMax = width / 2;
+  const yMax = height / 2;
+  spawnFloorRect(world, xMin, yMin, xMax, yMax, true);
+  for (let x = xMin - 1; x <= xMax + 1; x++) {
+    spawnWall(world, x, yMin - 1);
+    spawnWall(world, x, yMax + 1);
+  }
+  for (let y = yMin; y <= yMax; y++) {
+    spawnWall(world, xMin - 1, y);
+    spawnWall(world, xMax + 1, y);
+  }
+  const heroEid = spawnHero(world, { x: 0, y: 0 });
+  setViewportFollowTarget(world, heroEid);
+  spawnScatteredWithLeaders(world, seed, entityCount);
+}
+
+/**
+ * Returns a spawn function for floor rect + hero + bots (for Storybook preset).
+ */
+export function createFloorRectWithHeroSpawn(
+  width: number,
+  height: number
+): (world: SimulatorWorld, seed: number, entityCount: number) => void {
+  return (world, seed, entityCount) =>
+    spawnFloorRectWithHero(world, seed, entityCount, width, height);
+}
+
 function key(x: number, y: number): string {
   return `${x},${y}`;
 }
@@ -239,6 +281,67 @@ export function spawnDungeonWithFood(
     const y = p.y + offsetY + 0.5;
     spawnFood(world, { x, y });
   }
+}
+
+/** Food count for dungeon-with-hero preset. */
+const DUNGEON_HERO_FOOD_COUNT = 12;
+
+/** Bot count for dungeon-with-hero preset. */
+const DUNGEON_HERO_BOT_COUNT = 9;
+
+/**
+ * Dungeon layout with 12 food items, 9 bots, and 1 hero. Camera follows the hero.
+ * Click floor tiles to order the hero there; path uses line-of-sight simplification.
+ */
+export function spawnDungeonWithFoodAndHero(
+  world: SimulatorWorld,
+  seed: number,
+  _entityCount: number
+): void {
+  const width = 80;
+  const height = 50;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+  const { grid, roomCells } = generateDungeon(width, height, seed);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) {
+        spawnFloorTile(world, x + offsetX, y + offsetY, true);
+      }
+    }
+  }
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+  if (roomCells.length === 0) return;
+  for (let i = 0; i < DUNGEON_HERO_BOT_COUNT; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+    const p = roomCells[idx];
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, i * 2) * Math.PI * 2;
+    spawnBot(world, {
+      x: cx,
+      y: cy,
+      directionRad: angle,
+      urge: 'wander',
+    });
+  }
+  for (let i = 0; i < DUNGEON_HERO_FOOD_COUNT; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
+      roomCells.length;
+    const p = roomCells[idx];
+    const x = p.x + offsetX + 0.5;
+    const y = p.y + offsetY + 0.5;
+    spawnFood(world, { x, y });
+  }
+  const heroIdx =
+    Math.floor(seededUnit(seed, 2000) * roomCells.length) % roomCells.length;
+  const heroCell = roomCells[heroIdx];
+  const heroX = heroCell.x + offsetX + 0.5;
+  const heroY = heroCell.y + offsetY + 0.5;
+  const heroEid = spawnHero(world, { x: heroX, y: heroY });
+  setViewportFollowTarget(world, heroEid);
 }
 
 /**

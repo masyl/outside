@@ -15,6 +15,7 @@ import {
   Food,
   Obstacle,
   Walkable,
+  Hero,
   setPointerTile,
   getPointerTile,
   clearPointerTile,
@@ -22,6 +23,8 @@ import {
   getViewportFollowTarget,
   setViewportFollowTarget,
   spawnFloorTile,
+  orderHeroTo,
+  getHeroPath,
 } from '@outside/simulator';
 import type { ResolveEntityKind } from '@outside/simulator';
 import { useCallback, useMemo } from 'react';
@@ -29,6 +32,7 @@ import { useSimulatorWorld, type SpawnFn } from './simulator/useSimulatorWorld';
 import {
   spawnScatteredWithLeaders,
   createFloorRectSpawn,
+  createFloorRectWithHeroSpawn,
 } from './simulator/spawnCloud';
 import { SimulatorViewport } from './simulator/SimulatorViewport';
 import { SimulatorEntity } from './simulator/SimulatorEntity';
@@ -63,8 +67,8 @@ interface SimulatorRendererProps {
   entityCount?: number;
   /** Optional custom spawn function (e.g. spawnFollowChain for follow-chain demo). */
   spawnFn?: SpawnFn;
-  /** When 'floorRect', use createFloorRectSpawn(roomWidth, roomHeight) and ignore spawnFn. */
-  spawnPreset?: 'floorRect';
+  /** When 'floorRect', use createFloorRectSpawn(roomWidth, roomHeight). When 'floorRectWithHero', use floor rect + hero + setViewportFollowTarget(hero). */
+  spawnPreset?: 'floorRect' | 'floorRectWithHero';
   /** Room width in tiles (used when spawnPreset is 'floorRect'). Default 60. */
   roomWidth?: number;
   /** Room height in tiles (used when spawnPreset is 'floorRect'). Default 40. */
@@ -105,9 +109,11 @@ export function SimulatorRenderer({
 }: SimulatorRendererProps) {
   const resolvedSpawnFn = useMemo<SpawnFn>(
     () =>
-      spawnPreset === 'floorRect'
-        ? createFloorRectSpawn(roomWidth, roomHeight)
-        : (spawnFn ?? spawnScatteredWithLeaders),
+      spawnPreset === 'floorRectWithHero'
+        ? createFloorRectWithHeroSpawn(roomWidth, roomHeight)
+        : spawnPreset === 'floorRect'
+          ? createFloorRectSpawn(roomWidth, roomHeight)
+          : (spawnFn ?? spawnScatteredWithLeaders),
     [spawnPreset, roomWidth, roomHeight, spawnFn]
   );
   const { world, entityIds, collisionEids, seed: stateSeed, invalidate } =
@@ -161,6 +167,16 @@ export function SimulatorRenderer({
         viewCenterY
       );
       const resolved = resolveEntityAt(world, tx, ty);
+      const heroEids = new Set(query(world, [Hero]));
+      if (
+        followEid &&
+        heroEids.has(followEid) &&
+        resolved.kind === 'floor'
+      ) {
+        orderHeroTo(world, followEid, tx, ty);
+        invalidate();
+        return;
+      }
       if (resolved.kind === 'empty') {
         spawnFloorTile(world, tx, ty, true);
       } else if (resolved.kind === 'floor' && resolved.eid != null) {
@@ -173,7 +189,7 @@ export function SimulatorRenderer({
       }
       invalidate();
     },
-    [world, viewCenterX, viewCenterY, invalidate]
+    [world, followEid, viewCenterX, viewCenterY, invalidate]
   );
 
   const pointerTile = world ? getPointerTile(world) : { x: NaN, y: NaN };
@@ -297,40 +313,88 @@ export function SimulatorRenderer({
             </g>
           );
         })}
-        {entityIds.map((eid) => {
-          const pos = getComponent(world, eid, Position);
-          const visualSize = getComponent(world, eid, VisualSize);
-          const inCollision = collisionEids.has(eid);
-          const collidedComp = getComponent(world, eid, Collided);
-          const collidedTicks = collidedComp?.ticksRemaining ?? 0;
-          const inCollidedCooldown = collidedTicks > 0;
-          const collidedOpacity =
-            inCollidedCooldown ? collidedTicks / COLLIDED_COOLDOWN_MAX : 0;
-          const fill =
-            inCollidedCooldown
-              ? '#44f'
-              : inCollision
-                ? '#f44'
-                : '#4a4';
-          const stroke =
-            inCollidedCooldown
-              ? '#88f'
-              : inCollision
-                ? '#f88'
-                : '#6c6';
-          return (
-            <SimulatorEntity
-              key={eid}
-              cx={toX(pos.x)}
-              cy={toY(pos.y)}
-              r={(visualSize.diameter / 2) * PIXELS_PER_TILE}
-              fill={fill}
-              fillOpacity={inCollidedCooldown ? collidedOpacity : 1}
-              stroke={stroke}
-              strokeOpacity={inCollidedCooldown ? collidedOpacity : 1}
-            />
-          );
-        })}
+        {(() => {
+          const heroEidsSet = new Set(query(world, [Hero]));
+          return entityIds.map((eid) => {
+            const pos = getComponent(world, eid, Position);
+            const visualSize = getComponent(world, eid, VisualSize);
+            const isHero = heroEidsSet.has(eid);
+            const inCollision = collisionEids.has(eid);
+            const collidedComp = getComponent(world, eid, Collided);
+            const collidedTicks = collidedComp?.ticksRemaining ?? 0;
+            const inCollidedCooldown = collidedTicks > 0;
+            const collidedOpacity =
+              inCollidedCooldown ? collidedTicks / COLLIDED_COOLDOWN_MAX : 0;
+            const fill = isHero
+              ? '#fff'
+              : inCollidedCooldown
+                ? '#44f'
+                : inCollision
+                  ? '#f44'
+                  : '#4a4';
+            const stroke = isHero
+              ? '#fff'
+              : inCollidedCooldown
+                ? '#88f'
+                : inCollision
+                  ? '#f88'
+                  : '#6c6';
+            return (
+              <SimulatorEntity
+                key={eid}
+                cx={toX(pos.x)}
+                cy={toY(pos.y)}
+                r={(visualSize.diameter / 2) * PIXELS_PER_TILE}
+                fill={fill}
+                fillOpacity={inCollidedCooldown ? collidedOpacity : 1}
+                stroke={stroke}
+                strokeOpacity={inCollidedCooldown ? collidedOpacity : 1}
+              />
+            );
+          });
+        })()}
+        {/* Hero path: dotted yellow line and yellow outlined checkpoints (50% tile) for followed hero */}
+        {followEid &&
+          (() => {
+            const path = getHeroPath(world, followEid);
+            if (path.length === 0) return null;
+            const followPos = getComponent(world, followEid, Position);
+            const points: { x: number; y: number }[] = [
+              { x: followPos.x, y: followPos.y },
+              ...path.map((w) => ({ x: w.x + 0.5, y: w.y + 0.5 })),
+            ];
+            const halfTile = PIXELS_PER_TILE * 0.5;
+            const quarterTile = PIXELS_PER_TILE * 0.25;
+            return (
+              <g pointerEvents="none">
+                {points.length >= 2 && (
+                  <polyline
+                    points={points
+                      .map((p) => `${toX(p.x)},${toY(p.y)}`)
+                      .join(' ')}
+                    fill="none"
+                    stroke="#fc0"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 2"
+                    strokeOpacity={0.9}
+                  />
+                )}
+                {path.map((w, i) => (
+                  <rect
+                    key={i}
+                    x={toX(w.x + 0.5) - quarterTile}
+                    y={toY(w.y + 0.5) - quarterTile}
+                    width={halfTile}
+                    height={halfTile}
+                    fill="none"
+                    stroke="#fc0"
+                    strokeWidth={1}
+                    strokeOpacity={0.8}
+                  />
+                ))}
+              </g>
+            );
+          })()}
         {/* Pointer tile highlight when hovering: default 50% dotted; floor/wall 100% dotted; bot solid green */}
         {pointerVisible &&
           (() => {

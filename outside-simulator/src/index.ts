@@ -29,9 +29,12 @@ export { getComponent, setComponent, set, addComponent, removeComponent, removeE
 
 export { spawnBot, getOrCreateBotPrefab } from './prefabs/bot';
 export type { SpawnBotOptions } from './prefabs/bot';
+export { spawnHero, getOrCreateHeroPrefab } from './prefabs/hero';
+export type { SpawnHeroOptions } from './prefabs/hero';
 export { spawnFloorTile, spawnFloorRect, spawnWall } from './prefabs/floor';
 export { spawnFood } from './prefabs/food';
 export type { SpawnFoodOptions } from './prefabs/food';
+export { orderHeroTo, getHeroPath } from './heroPath';
 
 export {
   setPointerTile,

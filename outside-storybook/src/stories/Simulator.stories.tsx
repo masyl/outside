@@ -7,6 +7,7 @@ import {
   spawnScatteredWithLeaders,
   spawnDungeonThenScattered,
   spawnDungeonWithFood,
+  spawnDungeonWithFoodAndHero,
 } from '../components/simulator/spawnCloud';
 
 /** Wrapper so the simulator fills the canvas and resizes with the viewport. */
@@ -170,5 +171,29 @@ export const PointerClickBot: StoryObj<typeof SimulatorRenderer> = {
     roomWidth: 60,
     roomHeight: 40,
     captionLegend: 'Click a bot to follow it. Camera centers on the followed bot.',
+  },
+};
+
+/** Hero (player-controlled) at center; click floor to order hero to that tile. Path and checkpoints drawn in yellow. */
+export const HeroAndPathfinding: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 42,
+    ticsPerSecond: 10,
+    entityCount: 4,
+    spawnPreset: 'floorRectWithHero',
+    roomWidth: 60,
+    roomHeight: 40,
+    captionLegend: 'Click a floor tile to order the hero there. Path: dotted yellow; checkpoints: yellow boxes.',
+  },
+};
+
+/** Dungeon layout with 12 food items, 9 bots, and 1 hero. Camera follows hero. Click floor to order hero there. */
+export const DungeonWithHero: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 123,
+    ticsPerSecond: 10,
+    entityCount: 9,
+    spawnFn: spawnDungeonWithFoodAndHero,
+    captionLegend: 'Dungeon: 12 food, 9 bots, 1 hero. Click floor to order hero there.',
   },
 };

@@ -9,6 +9,7 @@ import FollowTightness from './FollowTightness';
 import Food from './Food';
 import Grid from './Grid';
 import GridResolution from './GridResolution';
+import Hero from './Hero';
 import IsViewportFocus from './IsViewportFocus';
 import MaxSpeed from './MaxSpeed';
 import Observed from './Observed';
@@ -39,6 +40,7 @@ export interface SimulatorComponents {
   Food: typeof Food;
   Grid: typeof Grid;
   GridResolution: typeof GridResolution;
+  Hero: typeof Hero;
   IsViewportFocus: typeof IsViewportFocus;
   MaxSpeed: typeof MaxSpeed;
   Observed: typeof Observed;
@@ -60,4 +62,4 @@ export interface SimulatorComponents {
   WanderPersistence: typeof WanderPersistence;
 }
 
-export { Collided, Direction, FloorTile, Follow, FollowTarget, FollowTightness, Food, Grid, GridResolution, IsViewportFocus, MaxSpeed, Observed, Obstacle, ObstacleSize, Pointer, PointerTarget, PointerTile, Position, PreviousPosition, RandomWalk, Size, Speed, View, VisualSize, Wait, Walkable, Wander, WanderPersistence };
+export { Collided, Direction, FloorTile, Follow, FollowTarget, FollowTightness, Food, Grid, GridResolution, Hero, IsViewportFocus, MaxSpeed, Observed, Obstacle, ObstacleSize, Pointer, PointerTarget, PointerTile, Position, PreviousPosition, RandomWalk, Size, Speed, View, VisualSize, Wait, Walkable, Wander, WanderPersistence };
