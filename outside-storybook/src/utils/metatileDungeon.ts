@@ -35,12 +35,17 @@ function int(rng: () => number, min: number, max: number): number {
   return min + Math.floor(rng() * (max - min + 1));
 }
 
-/** Exit: Wall, then 2–12 Floor, then Empty. Length 4..14. */
-function generateExitWithLength(rng: () => number, floorCount: number): TileKind[] {
+/** Exit with given floor count: Wall + floorCount Floor + Wall. Length = floorCount + 2 (4..14). */
+function exitWithFloorCount(floorCount: number): TileKind[] {
   const out: TileKind[] = ['wall'];
   for (let i = 0; i < floorCount; i++) out.push('floor');
-  out.push('empty');
+  out.push('wall');
   return out;
+}
+
+/** Exit: Wall, then 2–12 Floor, then Wall. Length 4..14. */
+function generateExitWithLength(rng: () => number, floorCount: number): TileKind[] {
+  return exitWithFloorCount(floorCount);
 }
 
 /** Gap: exactly n Empty (n in [2,8]). */
@@ -48,17 +53,145 @@ function generateGapOfLength(n: number): TileKind[] {
   return Array(n).fill('empty');
 }
 
-/** Side: length exactly 16. One Gap + one Exit: G + E = 16, G in [2,8], E in [4,14] so E in [8,14]. */
-function generateSide(rng: () => number): TileKind[] {
-  const exitLen = int(rng, 8, 14);
-  const gapLen = SIDE_LENGTH - exitLen;
-  const floorCount = exitLen - 2;
-  const gap = generateGapOfLength(gapLen);
-  const exit = generateExitWithLength(rng, floorCount);
-  return [...gap, ...exit];
+/**
+ * The complete set of possible Gaps: exactly 7, one per length 2..8.
+ * A gap is only defined by its length (that many Empty tiles); no other variation.
+ */
+export function getAllPossibleGaps(): TileKind[][] {
+  const out: TileKind[][] = [];
+  for (let n = GAP_MIN; n <= GAP_MAX; n++) {
+    out.push(generateGapOfLength(n));
+  }
+  return out;
 }
 
-function countExits(side: TileKind[]): number {
+/**
+ * Generate a random sample of gaps (for comparison). Use getAllPossibleGaps() for the complete set.
+ */
+export function generateGaps(seed: number, count: number): TileKind[][] {
+  const rng = createRng(seed);
+  const out: TileKind[][] = [];
+  for (let i = 0; i < count; i++) {
+    const n = int(rng, GAP_MIN, GAP_MAX);
+    out.push(generateGapOfLength(n));
+  }
+  return out;
+}
+
+/**
+ * The complete set of possible Exits: exactly 11, one per floor count 2..12.
+ * Each exit is Wall + floorCount Floor + Wall (length 4..14).
+ */
+export function getAllPossibleExits(): TileKind[][] {
+  const out: TileKind[][] = [];
+  for (let f = EXIT_FLOOR_MIN; f <= EXIT_FLOOR_MAX; f++) {
+    out.push(exitWithFloorCount(f));
+  }
+  return out;
+}
+
+/**
+ * Generate a set of Exits for inspection. Each exit is Wall + (2–12 Floor) + Wall.
+ * Deterministic for a given seed.
+ */
+export function generateExits(seed: number, count: number): TileKind[][] {
+  const rng = createRng(seed);
+  const out: TileKind[][] = [];
+  for (let i = 0; i < count; i++) {
+    const floorCount = int(rng, EXIT_FLOOR_MIN, EXIT_FLOOR_MAX);
+    out.push(generateExitWithLength(rng, floorCount));
+  }
+  return out;
+}
+
+export const GAP_MIN_EXPORT = GAP_MIN;
+export const GAP_MAX_EXPORT = GAP_MAX;
+export const EXIT_FLOOR_MIN_EXPORT = EXIT_FLOOR_MIN;
+export const EXIT_FLOOR_MAX_EXPORT = EXIT_FLOOR_MAX;
+
+/**
+ * Build one side from segment lengths: [gapLen, exitLen, gapLen, ...] ending with a gap.
+ * Exit length 4..14; floorCount = exitLen - 2.
+ */
+function buildSideFromSegments(segments: number[]): TileKind[] {
+  const out: TileKind[] = [];
+  for (let i = 0; i < segments.length; i++) {
+    if (i % 2 === 0) {
+      out.push(...generateGapOfLength(segments[i]));
+    } else {
+      const exitLen = segments[i];
+      const floorCount = exitLen - 2;
+      out.push(...exitWithFloorCount(floorCount));
+    }
+  }
+  return out;
+}
+
+/** Enumerate all valid side segment sequences: start with Gap, alternate Exit/Gap, end with Gap; total 16. */
+function enumerateSideSegments(): number[][] {
+  const results: number[][] = [];
+  function addGap(segments: number[], sum: number): void {
+    for (let g = GAP_MIN; g <= GAP_MAX; g++) {
+      const newSum = sum + g;
+      if (newSum === SIDE_LENGTH) {
+        results.push([...segments, g]);
+      } else if (newSum < SIDE_LENGTH) {
+        addExit([...segments, g], newSum);
+      }
+    }
+  }
+  function addExit(segments: number[], sum: number): void {
+    for (let e = 4; e <= 14; e++) {
+      const newSum = sum + e;
+      if (newSum < SIDE_LENGTH && newSum + GAP_MIN <= SIDE_LENGTH) {
+        addGap([...segments, e], newSum);
+      }
+    }
+  }
+  addGap([], 0);
+  return results;
+}
+
+/**
+ * The complete set of possible Sides: all valid sequences of Gaps and Exits that sum to 16.
+ * First segment is always a Gap; Exits are always followed by a Gap; last segment is always a Gap.
+ */
+export function getAllPossibleSides(): TileKind[][] {
+  const segmentLists = enumerateSideSegments();
+  return segmentLists.map((segments) => buildSideFromSegments(segments));
+}
+
+/** All valid segment sequences (cached). */
+let _cachedSegmentLists: number[][] | null = null;
+function getValidSegmentLists(): number[][] {
+  if (_cachedSegmentLists === null) _cachedSegmentLists = enumerateSideSegments();
+  return _cachedSegmentLists;
+}
+
+/** Side: length exactly 16. Valid sequence: starts with Gap, alternates Gap/Exit, ends with Gap. */
+function generateSide(rng: () => number): TileKind[] {
+  const segmentLists = getValidSegmentLists();
+  const idx = Math.floor(rng() * segmentLists.length) % segmentLists.length;
+  const segments = segmentLists[idx];
+  return buildSideFromSegments(segments);
+}
+
+/**
+ * Random sample of sides (for comparison). Use getAllPossibleSides() for the complete set.
+ */
+export function generateSides(seed: number, count: number): TileKind[][] {
+  const rng = createRng(seed);
+  const out: TileKind[][] = [];
+  for (let i = 0; i < count; i++) {
+    out.push(generateSide(rng));
+  }
+  return out;
+}
+
+export const SIDE_LENGTH_EXPORT = SIDE_LENGTH;
+
+/** Count exit segments in a side (each Wall→…→Empty transition = 1 exit; with Wall end, each Wall→…→next Gap = 1). */
+export function countExitsInSide(side: TileKind[]): number {
   let n = 0;
   let inExit = false;
   for (const t of side) {
@@ -71,13 +204,19 @@ function countExits(side: TileKind[]): number {
   return n;
 }
 
-/** Frame: 4 Sides; total exits ≤ 8. */
-function generateFrame(rng: () => number): {
+function countExits(side: TileKind[]): number {
+  return countExitsInSide(side);
+}
+
+export interface MetaTileFrame {
   top: TileKind[];
   bottom: TileKind[];
   left: TileKind[];
   right: TileKind[];
-} {
+}
+
+/** Frame: 4 Sides; total exits ≤ 8. */
+function generateFrame(rng: () => number): MetaTileFrame {
   for (let attempt = 0; attempt < 50; attempt++) {
     const top = generateSide(rng);
     const bottom = generateSide(rng);
@@ -175,6 +314,30 @@ function generateOneMetaTile(rng: () => number): TileKind[][] {
   const frame = generateFrame(rng);
   const interior = generateInterior(rng, frame);
   return assembleMetaTile(frame, interior);
+}
+
+/** Generate a single frame (4 sides, total exits ≤ 8). Deterministic for a given seed. */
+export function generateSingleFrame(seed: number): MetaTileFrame {
+  let i = 0;
+  const rng = () => seeded(seed, i++);
+  return generateFrame(rng);
+}
+
+/** Generate a single 14×14 interior for a frame. Uses same seed to build frame then interior. Deterministic. */
+export function generateSingleInterior(seed: number): TileKind[][] {
+  let i = 0;
+  const rng = () => seeded(seed, i++);
+  const frame = generateFrame(rng);
+  return generateInterior(rng, frame);
+}
+
+export const INTERIOR_SIZE_EXPORT = INTERIOR_SIZE;
+
+/** Generate a single 16×16 MetaTile. Deterministic for a given seed. */
+export function generateSingleMetaTile(seed: number): TileKind[][] {
+  let i = 0;
+  const rng = () => seeded(seed, i++);
+  return generateOneMetaTile(rng);
 }
 
 export interface MetaTileDungeonResult extends DungeonResult {
