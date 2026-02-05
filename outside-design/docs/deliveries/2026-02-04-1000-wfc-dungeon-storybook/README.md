@@ -4,7 +4,7 @@ DeliveryDate: 2026-02-04
 Summary: Alternative dungeon generator using wave function collapse for more varied Storybook layouts.
 Status: DONE
 Branch: feature/wfc-dungeon-storybook
-Commit: da7055b
+Commit: d9b667c
 ---
 
 # WFC Dungeon Generator in Storybook
