@@ -33,6 +33,7 @@ import {
   spawnScatteredWithLeaders,
   createFloorRectSpawn,
   createFloorRectWithHeroSpawn,
+  createMetaTileDungeonSpawn,
 } from './simulator/spawnCloud';
 import { SimulatorViewport } from './simulator/SimulatorViewport';
 import { SimulatorEntity } from './simulator/SimulatorEntity';
@@ -67,12 +68,16 @@ interface SimulatorRendererProps {
   entityCount?: number;
   /** Optional custom spawn function (e.g. spawnFollowChain for follow-chain demo). */
   spawnFn?: SpawnFn;
-  /** When 'floorRect', use createFloorRectSpawn(roomWidth, roomHeight). When 'floorRectWithHero', use floor rect + hero + setViewportFollowTarget(hero). */
-  spawnPreset?: 'floorRect' | 'floorRectWithHero';
+  /** When 'floorRect', use createFloorRectSpawn(roomWidth, roomHeight). When 'floorRectWithHero', use floor rect + hero. When 'metaTileDungeon', use MetaTile dungeon. */
+  spawnPreset?: 'floorRect' | 'floorRectWithHero' | 'metaTileDungeon';
   /** Room width in tiles (used when spawnPreset is 'floorRect'). Default 60. */
   roomWidth?: number;
   /** Room height in tiles (used when spawnPreset is 'floorRect'). Default 40. */
   roomHeight?: number;
+  /** MetaTile grid width (used when spawnPreset is 'metaTileDungeon'). Default 5. */
+  metaWidth?: number;
+  /** MetaTile grid height (used when spawnPreset is 'metaTileDungeon'). Default 5. */
+  metaHeight?: number;
   /** Optional legend for caption. */
   captionLegend?: string;
   /** Zoom level (1 = default, >1 = zoom in, <1 = zoom out). */
@@ -104,6 +109,8 @@ export function SimulatorRenderer({
   spawnPreset,
   roomWidth = 60,
   roomHeight = 40,
+  metaWidth = 5,
+  metaHeight = 5,
   captionLegend,
   zoom = 1,
 }: SimulatorRendererProps) {
@@ -113,8 +120,10 @@ export function SimulatorRenderer({
         ? createFloorRectWithHeroSpawn(roomWidth, roomHeight)
         : spawnPreset === 'floorRect'
           ? createFloorRectSpawn(roomWidth, roomHeight)
-          : (spawnFn ?? spawnScatteredWithLeaders),
-    [spawnPreset, roomWidth, roomHeight, spawnFn]
+          : spawnPreset === 'metaTileDungeon'
+            ? createMetaTileDungeonSpawn(metaWidth, metaHeight)
+            : (spawnFn ?? spawnScatteredWithLeaders),
+    [spawnPreset, roomWidth, roomHeight, metaWidth, metaHeight, spawnFn]
   );
   const { world, entityIds, collisionEids, seed: stateSeed, invalidate } =
     useSimulatorWorld(seed, entityCount, ticsPerSecond, resolvedSpawnFn);

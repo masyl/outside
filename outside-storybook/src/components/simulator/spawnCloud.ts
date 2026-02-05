@@ -10,6 +10,7 @@ import {
 import type { SimulatorWorld } from '@outside/simulator';
 import { generateDungeon } from '../../utils/dungeonLayout';
 import { generateDungeonWFC } from '../../utils/dungeonLayoutWFC';
+import { generateDungeonMetaTiles } from '../../utils/metatileDungeon';
 
 /**
  * Spawns count bots in a follow chain: first is leader (Wander), rest Follow previous.
@@ -459,6 +460,52 @@ export function spawnDungeonWithFoodAndHero(
   const heroY = heroCell.y + offsetY + 0.5;
   const heroEid = spawnHero(world, { x: heroX, y: heroY });
   setViewportFollowTarget(world, heroEid);
+}
+
+/**
+ * Creates a spawn function that generates a MetaTile dungeon (16×16 tiles per metatile).
+ * Uses grid + wallGrid: Floor and Wall are placed explicitly; Empty cells get no entity.
+ * Default 5×5 metatiles = 80×80 tiles; use metaWidth/metaHeight for controls.
+ */
+export function createMetaTileDungeonSpawn(
+  metaWidth: number,
+  metaHeight: number
+): (world: SimulatorWorld, seed: number, entityCount: number) => void {
+  return (world, seed, entityCount) => {
+    const { grid, roomCells, wallGrid } = generateDungeonMetaTiles(
+      metaWidth,
+      metaHeight,
+      seed
+    );
+    const width = grid.length;
+    const height = grid[0].length;
+    const offsetX = -width / 2;
+    const offsetY = -height / 2;
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        if (grid[x][y]) {
+          spawnFloorTile(world, x + offsetX, y + offsetY, true);
+        } else if (wallGrid[x][y]) {
+          spawnWall(world, x + offsetX, y + offsetY);
+        }
+      }
+    }
+    if (roomCells.length === 0) return;
+    for (let i = 0; i < entityCount; i++) {
+      const idx =
+        Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+      const p = roomCells[idx];
+      const cx = p.x + offsetX + 0.5;
+      const cy = p.y + offsetY + 0.5;
+      const angle = seededUnit(seed, i * 2) * Math.PI * 2;
+      spawnBot(world, {
+        x: cx,
+        y: cy,
+        directionRad: angle,
+        urge: 'wander',
+      });
+    }
+  };
 }
 
 /**

@@ -66,6 +66,14 @@ const meta: Meta<typeof SimulatorRenderer> = {
       control: { type: 'number', min: 4, max: 80, step: 2 },
       description: 'Room height in tiles (floor rect stories)',
     },
+    metaWidth: {
+      control: { type: 'number', min: 1, max: 10, step: 1 },
+      description: 'MetaTile grid width (metaTileDungeon preset)',
+    },
+    metaHeight: {
+      control: { type: 'number', min: 1, max: 10, step: 1 },
+      description: 'MetaTile grid height (metaTileDungeon preset)',
+    },
   },
 };
 
@@ -148,6 +156,19 @@ export const FloorGridDungeonWFC: StoryObj<typeof SimulatorRenderer> = {
     ticsPerSecond: 10,
     entityCount: 20,
     spawnFn: spawnDungeonWFCThenScattered,
+  },
+};
+
+/** MetaTile dungeon: 16×16 metatiles with Exits, Gaps, Sides, Frames, Interiors. Empty vs Wall distinct. Default 5×5 metatiles (80×80 tiles). */
+export const FloorGridDungeonMetaTiles: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 123,
+    ticsPerSecond: 10,
+    entityCount: 20,
+    spawnPreset: 'metaTileDungeon',
+    metaWidth: 5,
+    metaHeight: 5,
+    captionLegend: 'MetaTile dungeon. Use metaWidth / metaHeight controls to change grid size.',
   },
 };
 
