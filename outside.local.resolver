@@ -1,6 +1,0 @@
-# This file needs to be placed at /etc/resolver/outside.local
-# Run: sudo cp outside.local.resolver /etc/resolver/outside.local
-
-nameserver 127.0.0.1
-port 5333
-timeout 5

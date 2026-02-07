@@ -12,7 +12,7 @@ Move every workspace package under `packages/` while keeping package names and b
 
 - Move all `outside-*` workspace directories under `packages/`.
 - Update pnpm workspace configuration to include `packages/*`.
-- Update path-based references in docs, Docker, and scripts to the new locations.
+- Update path-based references in docs and scripts to the new locations.
 - Keep existing package names (`@outside/*`) and behavior intact.
 
 ## Exclusions

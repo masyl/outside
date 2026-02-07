@@ -12,7 +12,7 @@ This roadmap tracks the **todos** and **success criteria** for moving all worksp
 
 - **W1: Workspace layout** (move packages, verify structure)
 - **W2: Configuration** (pnpm, turbo, scripts)
-- **W3: Infra + tooling** (Docker, compose, CI paths)
+- **W3: Infra + tooling** (scripts, CI paths)
 - **W4: Documentation** (README, MONOREPO, design docs)
 - **W5: Validation** (install/build/dev sanity)
 

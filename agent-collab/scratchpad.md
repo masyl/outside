@@ -17,7 +17,6 @@ Random notes taken during development.
 
 ## Review
 
-- Replace the docker setup with a caddy setup to map hostname to three different environments to be targetted a agentic sessions/workspaces.
 - Refactor agent skills:
   - Extract usefull generic methods into global utilities if they don't specifically relate to the world object.
   - Put reccurent "Math" operations into utilities (global or local) instead of re-writing each time. Will help for documenting and testing them.

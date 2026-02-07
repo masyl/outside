@@ -17,7 +17,7 @@ Moved all workspace packages under `packages/` while keeping names and behavior 
 ## Delivered
 
 - Workspace directories relocated under `packages/`.
-- Workspace config, Docker, and compose paths updated.
+- Workspace config and internal path references updated.
 - Docs and internal references updated for the new layout.
 - Root `storybook` script added.
 

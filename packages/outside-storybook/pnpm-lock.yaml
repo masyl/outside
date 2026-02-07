@@ -2732,7 +2732,6 @@ packages:
   is-deflate@1.0.0:
     resolution: {integrity: sha512-YDoFpuZWu1VRXlsnlYMzKyVRITXj7Ej/V9gXQ2/pAe7X1J7M/RNOqaIYi6qUn+B7nGyB9pDXrv02dsB58d2ZAQ==}
 
-  is-docker@2.2.1:
     resolution: {integrity: sha512-F+i2BKsFrH66iaUFc0woD8sLy8getkwTwtOBjvs56Cx4CgJDeKQeqfz8wAYiSb8JOprWhHH5p77PbmYCvvUuXQ==}
     engines: {node: '>=8'}
     hasBin: true
@@ -7188,7 +7187,6 @@ snapshots:
 
   is-deflate@1.0.0: {}
 
-  is-docker@2.2.1: {}
 
   is-extglob@2.1.1: {}
 
@@ -7244,7 +7242,6 @@ snapshots:
 
   is-wsl@2.2.0:
     dependencies:
-      is-docker: 2.2.1
 
   isarray@1.0.0: {}
 
@@ -7601,7 +7598,6 @@ snapshots:
   open@8.4.2:
     dependencies:
       define-lazy-prop: 2.0.0
-      is-docker: 2.2.1
       is-wsl: 2.2.0
 
   ora@5.4.1:

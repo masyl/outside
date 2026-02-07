@@ -2,13 +2,13 @@
 
 ## Summary
 
-All workspace packages were moved under `packages/`, and path references across tooling and docs were updated to match. Workspace configuration now targets `packages/*`, and Docker/compose paths align with the new layout.
+All workspace packages were moved under `packages/`, and path references across tooling and docs were updated to match. Workspace configuration now targets `packages/*`.
 
 ## What was delivered
 
 - Moved all `outside-*` workspace directories into `packages/`.
 - Updated workspace configuration (`pnpm-workspace.yaml`, root `package.json`, `pnpm-lock.yaml`).
-- Updated Dockerfiles and docker-compose references for new paths.
+- Updated tool and script references for new paths.
 - Updated documentation and internal references to the new layout.
 - Added root `pnpm storybook` script for convenience.
 

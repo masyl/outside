@@ -2500,7 +2500,6 @@ packages:
     resolution: {integrity: sha512-UfoeMA6fIJ8wTYFEUjelnaGI67v6+N7qXJEvQuIGa99l4xsCruSYOVSQ0uPANn4dAzm8lkYPaKLrrijLq7x23w==}
     engines: {node: '>= 0.4'}
 
-  is-docker@3.0.0:
     resolution: {integrity: sha512-eljcgEDlEns/7AXFosB5K/2nCM4P7FQPkGc/DWLy5rmFEWvZayGrik1d9/QIY5nJ4f9YsVvBkA6kJpHn9rISdQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     hasBin: true
@@ -6158,7 +6157,6 @@ snapshots:
     dependencies:
       hasown: 2.0.2
 
-  is-docker@3.0.0: {}
 
   is-extendable@0.1.1: {}
 
@@ -6166,7 +6164,6 @@ snapshots:
 
   is-inside-container@1.0.0:
     dependencies:
-      is-docker: 3.0.0
 
   is-potential-custom-element-name@1.0.1: {}
 

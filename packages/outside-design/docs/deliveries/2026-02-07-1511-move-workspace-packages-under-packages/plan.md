@@ -35,8 +35,6 @@ Move all workspace packages under `packages/` while keeping package names and be
 
 ### Checklist
 
-- [x] Update Dockerfiles to copy from `packages/<name>/`.
-- [x] Update docker-compose files to point at new Dockerfile paths.
 - [x] Update any scripts or configs that reference old root paths.
 
 ## 4. Documentation + References
