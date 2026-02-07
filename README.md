@@ -298,3 +298,7 @@ Before committing changes:
 ## AI/Cursor Context
 
 This monorepo is optimized for AI-assisted development with clear project structure, comprehensive testing infrastructure, and workflow guidelines.
+
+## AI Skills
+
+Skills live in `skills/` and are symlinked into vendor-specific folders. See [Skills Symlink Setup](./docs/skills-symlinks.md).
