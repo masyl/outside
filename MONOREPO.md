@@ -21,37 +21,37 @@ outside/
 ├── .gitignore                # Git ignore rules
 ├── .cursorignore            # AI context reduction
 │
-├── outside-utils/            # 🔧 SHARED UTILS - RNG, movement/time helpers
+├── packages/outside-utils/            # 🔧 SHARED UTILS - RNG, movement/time helpers
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── src/
 │       └── index.ts
 │
-├── outside-core/            # 🎯 SHARED CODE - Core game logic (depends on @outside/utils)
+├── packages/outside-core/            # 🎯 SHARED CODE - Core game logic (depends on @outside/utils)
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── src/
 │       └── index.ts
 │
-├── outside-simulator/       # 🎮 SIMULATOR - Headless ECS (depends on @outside/utils, bitecs)
+├── packages/outside-simulator/       # 🎮 SIMULATOR - Headless ECS (depends on @outside/utils, bitecs)
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── src/
 │       └── index.ts
 │
-├── outside-client/          # 🖥️ CLIENT - Frontend application
+├── packages/outside-client/          # 🖥️ CLIENT - Frontend application
 │   └── package.json
 │
-├── outside-server/          # 🖥️ SERVER - Backend application
+├── packages/outside-server/          # 🖥️ SERVER - Backend application
 │   └── package.json
 │
-├── outside-design/          # 🎨 DESIGN - UI components & design system
+├── packages/outside-design/          # 🎨 DESIGN - UI components & design system
 │   └── package.json
 │
-├── outside-storybook/       # 📖 STORYBOOK - Component docs (depends on @outside/simulator, etc.)
+├── packages/outside-storybook/       # 📖 STORYBOOK - Component docs (depends on @outside/simulator, etc.)
 │   └── package.json
 │
-└── outside-doc/             # 📚 DOCS - Documentation
+└── packages/outside-doc/             # 📚 DOCS - Documentation
     └── package.json
 ```
 
@@ -147,7 +147,7 @@ When working on a project:
 
 ## Adding a New Package
 
-1. Create folder: `outside-<name>/`
+1. Create folder: `packages/outside-<name>/`
 2. Add `package.json` with name `@outside/<name>`
 3. Add to workspace (already matches `outside-*` pattern)
 4. Run `pnpm install` to link workspace packages

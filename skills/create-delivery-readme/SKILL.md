@@ -15,7 +15,7 @@ Creates or updates `README.md` in a delivery folder. Single, focused task: front
 
 ## Inputs
 
-- **Delivery folder path**: Full path to the delivery folder (e.g. `outside-design/docs/deliveries/2026-02-02-1000-food-static-pickups`)
+- **Delivery folder path**: Full path to the delivery folder (e.g. `packages/outside-design/docs/deliveries/2026-02-02-1000-food-static-pickups`)
 - **Delivery title**: Human-readable title (e.g. "Food in the Dungeon — Static Pickups")
 - **Branch name**: e.g. `feature/<delivery-slug>`
 - **Optional**: One-sentence summary (for frontmatter `Summary`)
@@ -43,5 +43,5 @@ Creates or updates `README.md` in a delivery folder. Single, focused task: front
 
 ## Reference
 
-- [Wrapup: Create or update README](outside-design/docs/wrapup.md) — step 8
-- [tappable-entities/README.md](outside-design/docs/deliveries/tappable-entities/README.md)
+- [Wrapup: Create or update README](packages/outside-design/docs/wrapup.md) — step 8
+- [tappable-entities/README.md](packages/outside-design/docs/deliveries/tappable-entities/README.md)

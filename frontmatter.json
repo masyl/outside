@@ -119,15 +119,15 @@
   "frontMatter.content.pageFolders": [
     {
       "title": "design-process",
-      "path": "[[workspace]]/outside-design/docs/design-process"
+      "path": "[[workspace]]/packages/outside-design/docs/design-process"
     },
     {
       "title": "pitches",
-      "path": "[[workspace]]/outside-design/docs/pitches"
+      "path": "[[workspace]]/packages/outside-design/docs/pitches"
     },
     {
       "title": "deliveries",
-      "path": "[[workspace]]/outside-design/docs/deliveries",
+      "path": "[[workspace]]/packages/outside-design/docs/deliveries",
       "contentTypes": ["delivery"],
       "defaultContentType": "delivery"
     }

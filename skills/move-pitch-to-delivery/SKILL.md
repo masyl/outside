@@ -15,14 +15,14 @@ Copies the entire content of a pitch file into a delivery folder as `pitch.md`. 
 
 ## Inputs
 
-- **Source pitch path**: Full path to the pitch file (e.g. `outside-design/docs/pitches/food-static-pickups.md`)
-- **Destination delivery folder path**: Full path to the delivery folder (e.g. `outside-design/docs/deliveries/2026-02-02-1000-food-static-pickups`)
+- **Source pitch path**: Full path to the pitch file (e.g. `packages/outside-design/docs/pitches/food-static-pickups.md`)
+- **Destination delivery folder path**: Full path to the delivery folder (e.g. `packages/outside-design/docs/deliveries/2026-02-02-1000-food-static-pickups`)
 
 ## Actions
 
 1. Read the **entire content** of the source pitch file.
 2. Write that content to `{delivery-folder}/pitch.md` (same filename `pitch.md` in the delivery folder).
-3. Do **not** delete or modify the original file in `outside-design/docs/pitches/`.
+3. Do **not** delete or modify the original file in `packages/outside-design/docs/pitches/`.
 4. Do **not** create the delivery folder or any other files.
 
 ## Do not

@@ -1,6 +1,6 @@
 ---
 name: create-delivery-folder
-description: Creates the delivery folder and initial file structure (empty placeholders) under outside-design/docs/deliveries. Use when starting a new delivery and the folder does not exist yet, or when an agent needs the folder structure before copying pitch, plan, or roadmap.
+description: Creates the delivery folder and initial file structure (empty placeholders) under packages/outside-design/docs/deliveries. Use when starting a new delivery and the folder does not exist yet, or when an agent needs the folder structure before copying pitch, plan, or roadmap.
 ---
 
 # Create delivery folder
@@ -20,7 +20,7 @@ Creates the delivery folder and initial file structure only. Does not fill pitch
 
 ## Actions
 
-1. **Folder path**: `outside-design/docs/deliveries/{YYYY-MM-DD-HHMM}-{kebab-name}/`
+1. **Folder path**: `packages/outside-design/docs/deliveries/{YYYY-MM-DD-HHMM}-{kebab-name}/`
    - Use current date-time if not provided (e.g. today at 10:00 → `2026-02-02-1000`).
    - Name: lowercase, hyphens only (kebab-case).
 
@@ -39,4 +39,4 @@ Creates the delivery folder and initial file structure only. Does not fill pitch
 
 ## Reference
 
-- [Wrapup: Delivery Folder Structure](outside-design/docs/wrapup.md) — folder format and expected files.
+- [Wrapup: Delivery Folder Structure](packages/outside-design/docs/wrapup.md) — folder format and expected files.

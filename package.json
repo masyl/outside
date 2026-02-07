@@ -4,13 +4,14 @@
   "private": true,
   "description": "Outside game - monorepo",
   "workspaces": [
-    "outside-*"
+    "packages/*"
   ],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
+    "storybook": "pnpm --filter outside-storybook storybook",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""

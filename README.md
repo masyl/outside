@@ -6,11 +6,11 @@ A monorepo for the Outside game project, containing all tiers of the architectur
 
 ```
 outside/
-├── outside-client/    # Client application
-├── outside-core/      # Core game logic and shared code
-├── outside-design/    # Design system and UI components
-├── outside-doc/       # Documentation
-└── outside-server/    # Server/backend
+├── packages/outside-client/    # Client application
+├── packages/outside-core/      # Core game logic and shared code
+├── packages/outside-design/    # Design system and UI components
+├── packages/outside-doc/       # Documentation
+└── packages/outside-server/    # Server/backend
 ```
 
 ## Prerequisites
@@ -35,7 +35,7 @@ pnpm dev
 ### Run a specific project
 
 ```bash
-cd outside-client && pnpm dev
+cd packages/outside-client && pnpm dev
 # or
 pnpm --filter outside-client dev
 ```
@@ -67,7 +67,7 @@ pnpm test:coverage
 ### Run tests for a specific project
 
 ```bash
-cd outside-core && pnpm test
+cd packages/outside-core && pnpm test
 # or
 pnpm --filter outside-core test
 ```
@@ -119,8 +119,8 @@ This project uses **Vitest** as the primary testing framework with the following
 
 Each package includes its own test configuration and test files:
 
-- **outside-core/**: Core game logic and utilities tests (node environment)
-- **outside-client/**: Client application tests with browser API mocking
+- **packages/outside-core/**: Core game logic and utilities tests (node environment)
+- **packages/outside-client/**: Client application tests with browser API mocking
 - **outside-\***: Other packages follow the same pattern
 
 ### Coverage Reports
@@ -143,7 +143,7 @@ This project includes **Storybook** for component testing and documentation. Sto
 - **Command-Driven Testing**: Components are tested using the game's command system for deterministic states
 - **Real Game Logic**: No artificial mocking - all test states are created through actual game commands
 
-[**Storybook Documentation**](./outside-design/docs/storybook.md) - Complete setup and development guide
+[**Storybook Documentation**](./packages/outside-design/docs/storybook.md) - Complete setup and development guide
 
 ### Development Workflow
 
@@ -239,11 +239,11 @@ This reduces AI context and improves response quality.
 
 ### Project Boundaries
 
-- **outside-client/**: Client application code
-- **outside-core/**: Core game logic and shared code
-- **outside-design/**: Design system and UI components
-- **outside-doc/**: Documentation
-- **outside-server/**: Server/backend code
+- **packages/outside-client/**: Client application code
+- **packages/outside-core/**: Core game logic and shared code
+- **packages/outside-design/**: Design system and UI components
+- **packages/outside-doc/**: Documentation
+- **packages/outside-server/**: Server/backend code
 
 AI agents should respect these boundaries and only modify files within the appropriate project scope unless cross-project changes are explicitly required.
 
@@ -261,10 +261,10 @@ This monorepo follows trunk-based development workflow:
 
 When proposing new features or system changes, AI agents should follow the documented design process:
 
-- **Design Process Documentation**: See `outside-design/docs/design-process/` for complete methodology
-- **Pitch Phase**: See `outside-design/docs/design-process/pitch-phase.md` for pitch format requirements
-- **AI Agent Instructions**: See `outside-design/docs/ai-agent-instructions.md` for detailed workflow guidance
-- **Existing Pitches**: Reference `outside-design/docs/pitches/` for format examples
+- **Design Process Documentation**: See `packages/outside-design/docs/design-process/` for complete methodology
+- **Pitch Phase**: See `packages/outside-design/docs/design-process/pitch-phase.md` for pitch format requirements
+- **AI Agent Instructions**: See `packages/outside-design/docs/ai-agent-instructions.md` for detailed workflow guidance
+- **Existing Pitches**: Reference `packages/outside-design/docs/pitches/` for format examples
 
 AI agents must use the standard pitch template before implementing new features or system modifications.
 

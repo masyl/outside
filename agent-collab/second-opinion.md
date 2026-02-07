@@ -21,7 +21,7 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 
 #### 1. Create TimelineBar Component
 
-**File**: `outside-client/src/ui/timelineBar.ts` (new)
+**File**: `packages/outside-client/src/ui/timelineBar.ts` (new)
 
 **Implementation Details**:
 
@@ -46,7 +46,7 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 
 #### 2. Integrate TimelineBar into main.ts
 
-**File**: `outside-client/src/main.ts`
+**File**: `packages/outside-client/src/main.ts`
 
 **Changes**:
 
@@ -65,7 +65,7 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 
 #### 3. Update TimelineManager Position Notifications
 
-**File**: `outside-client/src/timeline/manager.ts`
+**File**: `packages/outside-client/src/timeline/manager.ts`
 
 **Enhancement**:
 
@@ -92,7 +92,7 @@ Create a PIXI-based **TimelineBar** component that displays a visual indicator f
 
 #### 4. DebugOverlay Enhancements (Verify Implementation)
 
-**File**: `outside-client/src/debug/overlay.ts`
+**File**: `packages/outside-client/src/debug/overlay.ts`
 
 **Status**: ✅ Already Implemented
 
@@ -158,13 +158,13 @@ markerX = (currentStep / totalSteps) * barWidth
 
 **New Files**:
 
-1. `outside-client/src/ui/timelineBar.ts` - TimelineBar component
+1. `packages/outside-client/src/ui/timelineBar.ts` - TimelineBar component
 
-**Modified Files**: 2. `outside-client/src/main.ts` - Integrate TimelineBar 3. `outside-client/src/timeline/manager.ts` - Enhance position change notifications (optional but recommended)
+**Modified Files**: 2. `packages/outside-client/src/main.ts` - Integrate TimelineBar 3. `packages/outside-client/src/timeline/manager.ts` - Enhance position change notifications (optional but recommended)
 
 **No Changes Needed**:
 
-- `outside-client/src/debug/overlay.ts` - Already complete
+- `packages/outside-client/src/debug/overlay.ts` - Already complete
 
 ---
 

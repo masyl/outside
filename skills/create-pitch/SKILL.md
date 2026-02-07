@@ -88,13 +88,13 @@ Before finalizing, verify:
 
 ## File location and naming
 
-- **Directory**: `outside-design/docs/pitches/`
+- **Directory**: `packages/outside-design/docs/pitches/`
 - **Filename**: `kebab-case-name.md` (e.g., `timeline-engine-core.md`)
 - **Title in file**: Use Title Case (e.g., "Timeline Engine Core")
 
 ### Alternate locations
 
-- Pitches that have moved on to a delivery are moved to their delivery folders in: `outside-design/docs/deliveries/*/pitch.md`
+- Pitches that have moved on to a delivery are moved to their delivery folders in: `packages/outside-design/docs/deliveries/*/pitch.md`
 - If working on a temporary pitch during a session, a draft pitch document can be found in `agent-collab/new-pitch.md`
 
 
@@ -117,7 +117,7 @@ For related features, indicate series context:
 
 ## Examples
 
-See existing pitches in `outside-design/docs/pitches/`:
+See existing pitches in `packages/outside-design/docs/pitches/`:
 
 - `keystroke-help-menu.md` - Simple, focused pitch
 - `timeline-engine-core.md` - Complex feature with series context

@@ -15,7 +15,7 @@ Creates `roadmap.md` in a delivery folder. Structure only: frontmatter, Workstre
 
 ## Inputs
 
-- **Delivery folder path**: Full path to the delivery folder (e.g. `outside-design/docs/deliveries/2026-02-02-1000-food-static-pickups`)
+- **Delivery folder path**: Full path to the delivery folder (e.g. `packages/outside-design/docs/deliveries/2026-02-02-1000-food-static-pickups`)
 - **Optional**: Path to plan.md (to derive phase/todo structure from plan headings). Default: `{delivery-folder}/plan.md`
 - **Optional**: Delivery title (for roadmap title and intro)
 - **Optional**: Delivery date (YYYY-MM-DD) for frontmatter; default: use folder date or today
@@ -39,5 +39,5 @@ Creates `roadmap.md` in a delivery folder. Structure only: frontmatter, Workstre
 
 ## Reference
 
-- [tappable-entities/roadmap.md](outside-design/docs/deliveries/tappable-entities/roadmap.md)
-- [urge-system/roadmap.md](outside-design/docs/deliveries/urge-system/roadmap.md)
+- [tappable-entities/roadmap.md](packages/outside-design/docs/deliveries/tappable-entities/roadmap.md)
+- [urge-system/roadmap.md](packages/outside-design/docs/deliveries/urge-system/roadmap.md)

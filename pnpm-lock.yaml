@@ -44,7 +44,7 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
 
-  outside-client:
+  packages/outside-client:
     dependencies:
       '@outside/core':
         specifier: workspace:*
@@ -93,7 +93,7 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
 
-  outside-core:
+  packages/outside-core:
     devDependencies:
       typescript:
         specifier: ^5.3.3
@@ -102,7 +102,7 @@ importers:
         specifier: ^4.0.17
         version: 4.0.17(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
 
-  outside-design:
+  packages/outside-design:
     dependencies:
       '@outside/core':
         specifier: workspace:*
@@ -121,13 +121,13 @@ importers:
         specifier: ^3.4.21
         version: 3.5.26(typescript@5.9.3)
 
-  outside-doc:
+  packages/outside-doc:
     devDependencies:
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
 
-  outside-server:
+  packages/outside-server:
     dependencies:
       '@outside/core':
         specifier: workspace:*
@@ -152,7 +152,7 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
-  outside-simulator:
+  packages/outside-simulator:
     dependencies:
       '@outside/utils':
         specifier: workspace:*
@@ -174,7 +174,7 @@ importers:
         specifier: ^4.0.17
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
 
-  outside-storybook:
+  packages/outside-storybook:
     dependencies:
       '@outside/client':
         specifier: workspace:*
@@ -235,7 +235,7 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
 
-  outside-utils:
+  packages/outside-utils:
     devDependencies:
       typescript:
         specifier: ^5.3.3

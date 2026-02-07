@@ -2,7 +2,7 @@ services:
   game-server:
     build:
       context: .
-      dockerfile: outside-server/Dockerfile
+      dockerfile: packages/outside-server/Dockerfile
     container_name: game-server-dev
     restart: unless-stopped
     networks:
@@ -27,7 +27,7 @@ services:
   game-client:
     build:
       context: .
-      dockerfile: outside-client/Dockerfile
+      dockerfile: packages/outside-client/Dockerfile
     container_name: game-client-dev
     restart: unless-stopped
     networks:
@@ -47,7 +47,7 @@ services:
   storybook:
     build:
       context: .
-      dockerfile: outside-storybook/Dockerfile
+      dockerfile: packages/outside-storybook/Dockerfile
     container_name: storybook-dev
     restart: unless-stopped
     networks:

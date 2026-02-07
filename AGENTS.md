@@ -11,14 +11,14 @@ This document contains the core instructions for the AI agent working on this pr
 
 Before implementing new features or system changes, consult the design process documentation at:
 
-- [AI Agent Instructions](outside-design/docs/ai-agent-instructions.md)
+- [AI Agent Instructions](packages/outside-design/docs/ai-agent-instructions.md)
 
 ## Pitches
 
 Non trivial work typically starts by writing a pitch, before writing an implementation plan.
 
-- [Design Process - Pitch Phase](outside-design/docs/design-process/pitch-phase.md)
-- Find examples in the [Pitches Directory](outside-design/docs/pitches/)
+- [Design Process - Pitch Phase](packages/outside-design/docs/design-process/pitch-phase.md)
+- Find examples in the [Pitches Directory](packages/outside-design/docs/pitches/)
 
 
 ## Build Commands
@@ -57,7 +57,7 @@ pnpm --filter outside-core build
 pnpm --filter @outside/client test
 
 # Change to package directory
-cd outside-client && pnpm dev
+cd packages/outside-client && pnpm dev
 ```
 
 ### Test Commands - Single Tests

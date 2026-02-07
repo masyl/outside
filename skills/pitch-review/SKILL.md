@@ -19,7 +19,7 @@ Evaluate the pitch against these aspects:
 
 - **Writing:** Spelling, syntax, punctuation, phrase structure.
 - **Meaning:** The document can be understood by anyone with basic understanding of software and games, without extensive technical expertise.
-- **Process:** All required parts of the pitch are present or explicitly marked as not relevant (see [create-pitch](.cursor/skills/create-pitch/SKILL.md) template for standard sections)
+- **Process:** All required parts of the pitch are present or explicitly marked as not relevant (see [create-pitch](../create-pitch/SKILL.md) template for standard sections)
 - **Relationships:** Links and references help the reader understand the topic: less common concepts, source material, technical definitions, referenced documents, past deliveries.
 
 ## Questions to raise and answer

@@ -30,6 +30,10 @@ Creates a feature branch from `main` for delivery work, using the project's bran
 4. **Optional: push to remote**  
    If the user will use a remote: `git push -u origin feature/<name>`
 
+## Merge strategy
+
+When closing a feature branch or ending a delivery, use **Merge and Squash**.
+
 ## Branch naming
 
 - Prefix: `feature/`
