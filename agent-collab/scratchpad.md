@@ -2,17 +2,39 @@
 
 Random notes taken during development.
 
+## Next Big Prompt
+
+...
 
 ## Definitions
 
 - **Tic:** A complete synchronous pass through the simulator loop which outputs a new state state.
 - **Step:** A player movement during a tick
 - **Bots:** A basic prefab entity that can move and has all the basic properties of an NPC.
-- **Grid:** A system thatr uses the integer part of the coordinate system to create a native grid to lay out entities such as floor tiles, etc.
+- **Grid:** A system that uses the integer part of the coordinate system to create a native grid to lay out entities such as floor tiles, etc.
 - **Sub-Grid:** A system that uses the fraction part of the coordinate system for fine grained operations while still "snapping" to a fine grid that is aligned with the resolution of the pixel art assets and rendering mechanisms. Useful for placing entities more precisely, path finding, collision detection, hit boxes, etc.
+- Everything to do with the pointer and view
 
 ## Review
 
+- Replace the docker setup with a caddy setup to map hostname to three different environments to be targetted a agentic sessions/workspaces.
+- Refactor agent skills:
+  - Extract usefull generic methods into global utilities if they don't specifically relate to the world object.
+  - Put reccurent "Math" operations into utilities (global or local) instead of re-writing each time. Will help for documenting and testing them.
+    - Example: const dist = Math.hypot(pos.x - centerX, pos.y - centerY); -> Should be distanceBetween(pos.x, pos.y,centerX, centerY)
+  - Identiy potential problematic hardcoding of type or entities by name (ex.: export type ResolveEntityKind = 'empty' | 'floor' | 'wall' | 'bot';)
+  - Identify coupling of concerns. Example: resolveEntityAt 
+- The code lacks a lot of documentation:
+  - tsdoc on modules and methods
+  - inline comment on intent
+  - Link backs to the source documentation
+- The roadmap format has issues:
+  - Tasks are not granular enough
+  - The structure varies often without a clear template
+  - The agent doesnt always update it while he works, only at the end.
+  - The format should allow the tracking of progress in real-time in the vitepress doc.
+  - When the agent starts implementation, he should give a URL to the roadmap to follow.
+  - Maybe consider a sort of "dashboard-ish" approach ?
 - Improve: The agent decided to adopt a new approach when migrating the "urge" system. Instead of doing a mode switching, he uses empty components as tags, which would allow for overlapping/competing urges. It's interesting, but he current approach is lacking a clear direction. The concept of "urges/goals/objectives" needs to be improved.
 - During the last delivery, the process skipped the creation of the feature branch. This should be added to the skill set.
 - There is a lot of untracked+changed files in the project... doh!

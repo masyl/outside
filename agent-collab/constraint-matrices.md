@@ -311,27 +311,85 @@ const chalkSpriteVariants = spritePathRuleset
 
 ## Review, Questions and Improvements
 
-**Possible sense/meaning issues**
-- “Array of real numbers” but the rules only mention `-1`, `0`, `1`; if values are discrete, call them integers or explain non‑integer meaning.
-- “Same height and width and height” was redundant; ensure you intend a square matrix only, or state rectangle support.
-- The “center value” is sometimes `0` (no constraint) and sometimes `1` (obligation). Clarify whether the center is always ignored, always checked, or must be `0/1`.
-- `.any([[...],[...],...])` vs `.any([ ... ], [ ... ])` inconsistently shows API shape.
-- `.with("path");` ends the chain, then `.constrain(...)` continues; if chaining is required, remove the semicolon or clarify that `with()` returns `ruleset`.
-- `ruleset.layer("water", surroundingWaterTilesLayer).validate()` uses a different variable name than declared (`surroundingWaterTilesLayer` vs `surroundindWaterTiles` in the original).
-- Asymmetric rules show `.constrain(...).asymmetric()` in one case and `.asymmetric().constrain(...)` in another; define whether `asymmetric()` is a ruleset toggle or a constraint‑builder toggle.
-- “Reflections on both axes” but also mentions rotations implicitly; clarify if rotations are included or only reflections.
+**Questions to confirm**
+- *Q:* Are matrix values strictly integers (`-1`, `0`, `1`), or can they be any real numbers with weighted meaning?
+- *A1:* Integers only (`-1`, `0`, `1`), no other values allowed.
+- *A2:* Any real number allowed as a weight (non-zero values treated as stronger constraints).
+- *A3:* Real numbers allowed but must be in a defined range (for example `[-1, 1]`).
+
+- *Q:* Are constraint matrices always square?
+- *A1:* Yes, width must equal height.
+- *A2:* No, rectangular matrices are allowed.
+
+- *Q:* What are the semantics of the center value?
+- *A1:* Always ignored; must be `0`.
+- *A2:* Must be `0` or `1`, and is checked like any other cell.
+- *A3:* Can be `-1/0/1` and applies to the tile being tested.
+
+- *Q:* What is the expected signature for `any()`?
+- *A1:* `any([matrixA, matrixB, ...])` only.
+- *A2:* `any(matrixA, matrixB, ...)` only.
+- *A3:* Both forms are supported.
+
+- *Q:* What does `with()` return?
+- *A1:* The constraint-builder so chaining continues on the same rule.
+- *A2:* The ruleset instance so chaining continues at the ruleset level.
+- *A3:* Nothing; `with()` ends the chain.
+
+- *Q:* Should the example use `surroundingWaterTilesLayer` consistently?
+- *A1:* Yes, rename all occurrences to `surroundingWaterTilesLayer`.
+- *A2:* No, use a shorter name consistently (specify it).
+
+- *Q:* What does `asymmetric()` toggle?
+- *A1:* A ruleset-wide toggle affecting all following constraints.
+- *A2:* A constraint-builder toggle affecting only the current constraint chain.
+- *A3:* A per-constraint flag that must be passed explicitly.
+
+- *Q:* Which transformations are applied by default?
+- *A1:* Horizontal and vertical reflections only.
+- *A2:* Reflections plus 90/180/270 degree rotations.
+- *A3:* Configurable per ruleset.
 
 **Can I code this library? What’s missing**
 I can implement it, but I need a few concrete specs to avoid wrong assumptions:
 
-- **Data model**: Map representation, layer model, and whether tiles can be stacked. Define the shape for layers (`string[][]`, `number[]`, bitmasks?).
-- **Matrix alignment**: Exact mapping from matrix indices to grid coordinates, especially for even sizes.
-- **Center semantics**: Is the center always ignored? Is it allowed to be `1/-1`? If so, what does that mean?
-- **Constraint evaluation**: How to treat “no constraint” (`0`): ignore entirely or must match absence?
-- **Rule composition**: Exact signatures and return types for `constrain()`, `with()`, `match()`, `any()`, `all()`, `anyOf()`, `allOf()`, `oneOf()`, `layer()`, `layers()`, `allowed()`, `restrictions()`, `validate()`.
-- **Symmetry rules**: Which transformations are applied by default (horizontal/vertical reflections only, or rotations too). How `asymmetric()` scopes.
-- **Edge handling**: What happens when a matrix goes outside the map bounds (treat as empty, invalid, clamp, or ignore out‑of‑bounds cells).
-- **Performance targets**: Expected map sizes and rule counts, and whether caching is required.
-- **Error behavior**: Validate or throw on malformed matrices, inconsistent sizes, or unknown layers.
+- *Q:* What is the map and layer data model (and can tiles stack)?
+- *A1:* `string[][]` per layer, no stacking.
+- *A2:* `string[][]` per layer, stacking allowed via array per cell.
+- *A3:* Numeric IDs per layer (`number[]`), stacking via bitmasks.
+
+- *Q:* How do matrix indices map to grid coordinates (especially for even sizes)?
+- *A1:* Matrix center aligns to target cell; even sizes are disallowed.
+- *A2:* Matrix center aligns to target cell; even sizes align using top-left bias.
+- *A3:* Matrix center aligns to target cell; even sizes align using bottom-right bias.
+
+- *Q:* How should `0` be evaluated?
+- *A1:* Ignore the cell entirely.
+- *A2:* Require absence of the `with()` tile.
+- *A3:* Require that the layer is empty regardless of tile type.
+
+- *Q:* What are the exact method signatures and return types?
+- *A1:* Provide a full TypeScript interface for `Ruleset` and builder types.
+- *A2:* Provide a minimal API subset and allow me to propose the rest.
+
+- *Q:* How should symmetry be configured?
+- *A1:* Reflections only (default), rotations optional per ruleset.
+- *A2:* Reflections and rotations always on by default.
+- *A3:* No symmetry by default; explicit `reflect()` or `rotate()` calls.
+
+- *Q:* How should out-of-bounds cells be treated during evaluation?
+- *A1:* Treat as empty.
+- *A2:* Treat as invalid (fail the constraint).
+- *A3:* Ignore out-of-bounds cells.
+
+- *Q:* What are the performance targets?
+- *A1:* Small maps (<= 64x64) and small rulesets (< 100 rules).
+- *A2:* Medium maps (<= 256x256) and medium rulesets (< 1,000 rules).
+- *A3:* Large maps (>= 512x512) and large rulesets (>= 5,000 rules) with caching.
+
+- *Q:* How should malformed input be handled?
+- *A1:* Throw descriptive errors.
+- *A2:* Return `false`/empty results and collect warnings.
+- *A3:* Strict in dev, tolerant in prod.
 
 If you want, I can turn these into a concrete spec checklist or update the document directly with these clarifications.
