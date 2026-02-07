@@ -1,9 +1,13 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { generateSingleInterior, type TileKind } from '../utils/metatileDungeon';
+import {
+  generateSingleFrame,
+  generateInteriorForFrame,
+  assembleMetaTile,
+  type TileKind,
+} from '../utils/metatileDungeon';
 
 const CELL_SIZE = 8;
-const INTERIOR_SIZE = 14;
 
 const TILE_COLORS: Record<TileKind, string> = {
   empty: '#2a2a2a',
@@ -11,17 +15,18 @@ const TILE_COLORS: Record<TileKind, string> = {
   floor: '#4a7a4a',
 };
 
-function InteriorGrid({ grid, index }: { grid: TileKind[][]; index: number }) {
+function FullTile({ grid, index }: { grid: TileKind[][]; index: number }) {
+  const size = grid.length;
   return (
     <div style={{ display: 'inline-block', margin: 8, verticalAlign: 'top' }}>
       <div style={{ fontSize: 11, color: '#888', marginBottom: 4 }}>
-        Interior #{index}
+        Tile #{index} (16×16)
       </div>
       <div
         style={{
           display: 'inline-grid',
-          gridTemplateColumns: `repeat(${INTERIOR_SIZE}, ${CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${INTERIOR_SIZE}, ${CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${size}, ${CELL_SIZE}px)`,
+          gridTemplateRows: `repeat(${size}, ${CELL_SIZE}px)`,
           gap: 0,
           backgroundColor: '#111',
           border: '1px solid #333',
@@ -46,16 +51,15 @@ function InteriorGrid({ grid, index }: { grid: TileKind[][]; index: number }) {
   );
 }
 
-function InteriorsGrid({ interiors }: { interiors: TileKind[][][] }) {
+function InteriorsGrid({ tiles }: { tiles: TileKind[][][] }) {
   return (
     <div style={{ padding: 16, fontFamily: 'sans-serif' }}>
       <p style={{ marginBottom: 12, color: '#ccc', fontSize: 12 }}>
-        A dozen 14×14 interiors. Each is generated from a frame (same seed builds frame then interior).
-        Rules: Floor only next to Floor or Wall; every Floor ≥ 2 Floor neighbors; every Wall ≥ 2 Wall neighbors.
+        One frame (seed), then 12 interiors for that frame. Shown: 12 full 16×16 tiles (frame + interior each).
       </p>
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {interiors.map((grid, i) => (
-          <InteriorGrid key={i} grid={grid} index={i} />
+        {tiles.map((grid, i) => (
+          <FullTile key={i} grid={grid} index={i} />
         ))}
       </div>
     </div>
@@ -70,7 +74,7 @@ const meta: Meta<typeof InteriorsGrid> = {
     docs: {
       description: {
         component:
-          '14×14 interior generation. Each interior is constrained by its frame (Empty/Wall/Floor). Generate a dozen to spot patterns.',
+          'One frame, 12 interiors: each assembled as a full 16×16 tile (frame + interior). Same frame for all 12.',
       },
     },
   },
@@ -85,14 +89,16 @@ type Story = StoryObj<{ seed: number }>;
 
 export const DozenInteriors: Story = {
   render: (args) => {
-    const interiors = React.useMemo(() => {
+    const tiles = React.useMemo(() => {
+      const frame = generateSingleFrame(args.seed);
       const out: TileKind[][][] = [];
       for (let i = 0; i < 12; i++) {
-        out.push(generateSingleInterior(args.seed + i));
+        const interior = generateInteriorForFrame(frame, args.seed + 1000 + i);
+        out.push(assembleMetaTile(frame, interior));
       }
       return out;
     }, [args.seed]);
-    return <InteriorsGrid interiors={interiors} />;
+    return <InteriorsGrid tiles={tiles} />;
   },
   args: {
     seed: 0,

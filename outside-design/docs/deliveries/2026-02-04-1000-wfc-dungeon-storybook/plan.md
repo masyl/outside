@@ -31,7 +31,7 @@ Add a wave function collapse (WFC) dungeon generator to outside-storybook that r
 ### Checklist
 
 - [x] Create [outside-storybook/src/utils/dungeonLayoutWFC.ts](outside-storybook/src/utils/dungeonLayoutWFC.ts).
-- [x] Define minimal tileset data for SimpleTiledModel: two tiles (e.g. "floor", "wall") with symmetry "X" or "I"; use 1×1 or minimum tile size; neighbor rules so floor and wall can sit next to each other (floor-floor, floor-wall, wall-floor, wall-wall).
+- [x] Define minimal tileset data for SimpleTiledModel: two tiles (e.g. "floor", "wall") with symmetry "X" or "I"; use 1×1 or minimum tile size; adjacency rules so floor and wall can sit next to each other (floor-floor, floor-wall, wall-floor, wall-wall).
 - [x] Implement seeded RNG function (e.g. same pattern as `seeded` in dungeonLayout.ts) and pass it to `model.generate(rng)`.
 - [x] After successful generate, read `model.observed` (index = x + y * width) and map tile indices to boolean grid (floor → true, wall → false). Build `roomCells` as all floor cells (or largest connected components if preferred).
 - [x] Export `generateDungeonWFC(width, height, seed): DungeonResult`; import `DungeonResult` from dungeonLayout.ts.
@@ -61,7 +61,7 @@ Add a wave function collapse (WFC) dungeon generator to outside-storybook that r
 
 ## Notes
 
-- **wavefunctioncollapse** API: SimpleTiledModel expects `data` with `tiles` (name, symmetry, bitmap or weight), `neighbors` (left/right tile name pairs). After `generate()`, `model.observed` is a flat array of tile indices (0..T-1). See library README and simple-tiled-model.js.
+- **wavefunctioncollapse** API: SimpleTiledModel expects `data` with `tiles` (name, symmetry, bitmap or weight), `neighbors` (left/right tile name pairs; constrains which tiles can be adjacent on any of 4 sides). After `generate()`, `model.observed` is a flat array of tile indices (0..T-1). See library README and simple-tiled-model.js.
 - **Tile size**: Library default tilesize is 16; we can use 1×1 pixel bitmaps (floor=green, wall=gray) or the minimum the library allows so we don't need real assets.
 - **roomCells**: Using all floor cells is simplest; avoids connected-components logic and still spreads spawns across the map.
 - **Wrapup**: Completed 2026-02-04. No deviations from the plan; all checklist items delivered.

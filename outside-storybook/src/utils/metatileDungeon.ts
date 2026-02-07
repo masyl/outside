@@ -2,12 +2,10 @@
  * MetaTile-based dungeon generator (Storybook utility).
  * 16×16 MetaTiles built from Exits, Gaps, Sides, Frames, Interiors.
  * Empty, Wall, Floor are distinct; output uses optional wallGrid so Empty stays void.
- * Interior 14×14 is generated via wavefunctioncollapse (SimpleTiledModel).
+ * Interior 14×14 is currently empty (placeholder for future generation).
  */
 
 import type { DungeonResult } from './dungeonLayout';
-import { generateDungeon } from './dungeonLayout';
-import { SimpleTiledModel } from 'wavefunctioncollapse';
 
 export type TileKind = 'empty' | 'wall' | 'floor';
 
@@ -19,35 +17,6 @@ const EXIT_FLOOR_MAX = 12;
 const GAP_MIN = 2;
 const GAP_MAX = 8;
 const FRAME_MAX_EXITS = 8;
-
-/** WFC tileset for 14×14 interior: empty, wall, floor. Floor only next to floor or wall. */
-const INTERIOR_WFC_TILESIZE = 1;
-const EMPTY_RGBA = new Uint8Array([0x2a, 0x2a, 0x2a, 255]);
-const WALL_RGBA = new Uint8Array([0x5a, 0x4a, 0x3a, 255]);
-const FLOOR_RGBA = new Uint8Array([0x4a, 0x7a, 0x4a, 255]);
-
-const INTERIOR_WFC_DATA = {
-  tilesize: INTERIOR_WFC_TILESIZE,
-  tiles: [
-    { name: 'empty', symmetry: 'X', bitmap: EMPTY_RGBA, weight: 1 },
-    { name: 'wall', symmetry: 'X', bitmap: WALL_RGBA, weight: 1 },
-    { name: 'floor', symmetry: 'X', bitmap: FLOOR_RGBA, weight: 2 },
-  ],
-  neighbors: [
-    { left: 'floor', right: 'floor' },
-    { left: 'floor', right: 'wall' },
-    { left: 'wall', right: 'floor' },
-    { left: 'wall', right: 'wall' },
-    { left: 'wall', right: 'empty' },
-    { left: 'empty', right: 'wall' },
-    { left: 'empty', right: 'empty' },
-  ],
-};
-
-/** Tile indices in INTERIOR_WFC_DATA order: 0=empty, 1=wall, 2=floor. */
-const INTERIOR_TILE_KINDS: TileKind[] = ['empty', 'wall', 'floor'];
-
-const INTERIOR_WFC_MAX_RETRIES = 3;
 
 /** Seeded 0..1 from seed + index (deterministic). */
 function seeded(seed: number, index: number): number {
@@ -280,32 +249,11 @@ function applyFrameToGrid(
   }
 }
 
-/** Interior 14×14: generated via WFC (SimpleTiledModel). Frame is not used by WFC; assembly applies it later. */
-function generateInterior(rng: () => number, _frame: MetaTileFrame): TileKind[][] {
-  for (let attempt = 0; attempt < INTERIOR_WFC_MAX_RETRIES; attempt++) {
-    const attemptRng = () => rng();
-    const model = new SimpleTiledModel(
-      INTERIOR_WFC_DATA,
-      null,
-      INTERIOR_SIZE,
-      INTERIOR_SIZE,
-      false
-    );
-    const ok = model.generate(attemptRng);
-    if (ok && model.isGenerationComplete() && model.observed) {
-      const out: TileKind[][] = [];
-      for (let x = 0; x < INTERIOR_SIZE; x++) {
-        out[x] = [];
-        for (let y = 0; y < INTERIOR_SIZE; y++) {
-          const i = x + y * INTERIOR_SIZE;
-          const tileIndex = model.observed[i];
-          out[x][y] = INTERIOR_TILE_KINDS[tileIndex] ?? 'empty';
-        }
-      }
-      return out;
-    }
-  }
-  return Array.from({ length: INTERIOR_SIZE }, () => Array(INTERIOR_SIZE).fill('empty' as TileKind));
+/** Interior 14×14: empty placeholder (no generation yet). */
+function generateInterior(_rng: () => number, _frame: MetaTileFrame): TileKind[][] {
+  return Array.from({ length: INTERIOR_SIZE }, () =>
+    Array(INTERIOR_SIZE).fill('empty' as TileKind)
+  );
 }
 
 /** Assemble 16×16 MetaTile from frame + interior. Top/bottom = rows 0 and 15; left/right = cols 0 and 15; corners from top/bottom. */

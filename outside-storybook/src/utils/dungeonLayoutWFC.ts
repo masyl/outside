@@ -31,6 +31,7 @@ const DUNGEON_WFC_DATA = {
     { name: 'floor', symmetry: 'X', bitmap: FLOOR_RGBA, weight: 2 },
     { name: 'wall', symmetry: 'X', bitmap: WALL_RGBA, weight: 1 },
   ],
+  /** Adjacency rules (library key "neighbors"): which tiles can sit next to each other on any of 4 sides. */
   neighbors: [
     { left: 'floor', right: 'floor' },
     { left: 'floor', right: 'wall' },

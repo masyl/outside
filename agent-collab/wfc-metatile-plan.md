@@ -19,11 +19,11 @@
 
 ## Layers (from pitch)
 
-1. **Exits**: Wall → 2–12 Floor → Empty. (Sequence of tile types.)
+1. **Exits**: Wall → 2–12 Floor → Wall. (Sequence of tile types.)
 2. **Gaps**: 2–8 Empty tiles.
 3. **Sides**: length 16; sequence of Gaps and Exits; starts with Gap; alternates Gap/Exit; total length 16.
 4. **Frames**: 4 Sides (Top, Bottom, Left, Right); total Exits across all four ≤ 8.
-5. **Interiors**: 14×14; Empty/Wall/Floor; Floor only next to Floor or Wall; every Floor ≥ 2 Floor neighbors; every Wall ≥ 2 Wall neighbors.
+5. **Interiors**: 14×14; Empty/Wall/Floor; Floor only next to Floor or Wall; every Floor ≥ 2 adjacent Floor tiles; every Wall ≥ 2 adjacent Wall tiles.
 6. **MetaTile**: 16×16 = frame (sides) + interior (14×14 center).
 
 ## Placement

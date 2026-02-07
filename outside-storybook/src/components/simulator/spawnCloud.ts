@@ -198,7 +198,7 @@ function spawnWallsAroundFloor(
       if (grid[x][y]) filled.add(key(x, y));
     }
   }
-  const neighbors = [
+  const adjacentOffsets = [
     [-1, 0],
     [1, 0],
     [0, -1],
@@ -207,7 +207,7 @@ function spawnWallsAroundFloor(
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       if (!grid[x][y]) continue;
-      for (const [dx, dy] of neighbors) {
+      for (const [dx, dy] of adjacentOffsets) {
         const nx = x + dx;
         const ny = y + dy;
         if (filled.has(key(nx, ny))) continue;
