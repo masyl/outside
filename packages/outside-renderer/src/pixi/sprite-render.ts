@@ -91,6 +91,7 @@ export function updateSpriteForEntity(
   assets: RendererAssets
 ): void {
   const world = renderWorld.world;
+  const spriteKey = resolveSpriteKey(world, eid);
   const diameter = getEntityDiameter(world, eid, kind);
   const posX = Position.x[eid];
   const posY = Position.y[eid];
@@ -118,7 +119,6 @@ export function updateSpriteForEntity(
   }
 
   if (kind === 'food') {
-    const spriteKey = resolveSpriteKey(world, eid);
     const texture =
       resolveFoodTexture(assets.foodTextureBySpriteKey, spriteKey) ??
       getPlaceholderTexture(renderer, assets, 'error');
@@ -141,12 +141,38 @@ export function updateSpriteForEntity(
   sprite.x = topLeft.x;
   sprite.y = topLeft.y;
 
-  if ((kind === 'bot' || kind === 'hero') && assets.botIdle && assets.botWalk) {
+  if (kind === 'bot' || kind === 'hero') {
+    const actorVariantSheet = spriteKey
+      ? assets.actorVariantSheetBySpriteKey.get(spriteKey)
+      : undefined;
     const facing = getFacingDirection(renderWorld, eid);
     const frame = getWalkFrame(renderWorld, eid);
     const isMoving = getIsMoving(renderWorld, eid);
-    updateBotSpriteFrame(sprite, assets, facing, isMoving, frame, diameter, tileSize);
-    return;
+    if (actorVariantSheet) {
+      updateActorVariantSpriteFrame(
+        sprite,
+        actorVariantSheet.texture,
+        actorVariantSheet.animation,
+        facing,
+        isMoving,
+        frame,
+        diameter,
+        tileSize
+      );
+      return;
+    }
+    if (assets.botIdle && assets.botWalk) {
+      updateBotSpriteFrame(
+        sprite,
+        assets,
+        facing,
+        isMoving,
+        frame,
+        diameter,
+        tileSize
+      );
+      return;
+    }
   }
 
   const size = kind === 'error' ? tileSize : tileSize * diameter;
@@ -228,4 +254,58 @@ function updateBotSpriteFrame(
   }
   sprite.scale.y = baseScale;
   sprite.pivot.y = 0;
+}
+
+function updateActorVariantSpriteFrame(
+  sprite: Sprite,
+  sheet: Texture,
+  animation: {
+    frameWidth: number;
+    frameHeight: number;
+    frameCount: number;
+    idleRow: number;
+    walkRow: number;
+    framePitchX: number;
+    framePitchY: number;
+    frameInsetX: number;
+    frameInsetY: number;
+    cardinalDirectionToGroup: {
+      down: number;
+      right: number;
+      up: number;
+      left: number;
+    };
+  },
+  direction: 'up' | 'down' | 'left' | 'right',
+  isMoving: boolean,
+  frameIndex: number,
+  diameter: number,
+  tileSize: number
+): void {
+  const row = isMoving ? animation.walkRow : animation.idleRow;
+  const group = animation.cardinalDirectionToGroup[direction];
+  const frameStep = ((frameIndex % animation.frameCount) + animation.frameCount) % animation.frameCount;
+  const frameX =
+    group * animation.frameCount * animation.framePitchX +
+    frameStep * animation.framePitchX +
+    animation.frameInsetX;
+  const frameY = row * animation.framePitchY + animation.frameInsetY;
+
+  sprite.texture = new Texture({
+    source: sheet.source,
+    frame: new Rectangle(
+      frameX,
+      frameY,
+      animation.frameWidth,
+      animation.frameHeight
+    ),
+  });
+  setNearestScale(sprite.texture);
+
+  const baseScale = (tileSize / animation.frameWidth) * diameter;
+  sprite.anchor.set(0, 0);
+  sprite.pivot.x = 0;
+  sprite.pivot.y = 0;
+  sprite.scale.x = baseScale;
+  sprite.scale.y = baseScale;
 }

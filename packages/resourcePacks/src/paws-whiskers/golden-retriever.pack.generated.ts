@@ -1,0 +1,61 @@
+export const goldenRetrieverPack = {
+  "id": "paws-whiskers-golden-retriever",
+  "name": "Paws & Whiskers Isometric Dogs Pack (Free) - Golden Retriever",
+  "version": "1.0.0",
+  "type": "actor-variant",
+  "sheet": "golden-retriever.spritesheet.png",
+  "credits": {
+    "creator": "Netherzapdos",
+    "homepage": "https://netherzapdos.itch.io/paws-whiskers-isometric-dogs-pack",
+    "licenseName": "Paws & Whiskers Free Pack License",
+    "creditRequired": false,
+    "sourceDescription": "Paws & Whiskers - Isometric Dogs Pack Free Version",
+    "retrievedAt": "2026-02-08T00:00:00.000Z",
+    "restrictions": [
+      "Use allowed for non-commercial projects.",
+      "Do not resell or redistribute assets, modified or unmodified.",
+      "Do not use assets as basis for AI-generated content."
+    ]
+  },
+  "actorVariant": {
+    "variantId": "golden-retriever",
+    "displayName": "Golden Retriever",
+    "botSpriteKey": "actor.bot.golden-retriever",
+    "heroSpriteKey": "actor.hero.golden-retriever",
+    "animation": {
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frameCount": 4,
+      "directionCount": 8,
+      "idleRow": 0,
+      "walkRow": 1,
+      "framePitchX": 32,
+      "framePitchY": 31,
+      "frameInsetX": 8,
+      "frameInsetY": 8,
+      "directionOrder": [
+        "bottom",
+        "bottom-left",
+        "right",
+        "top-right",
+        "top",
+        "top-left",
+        "left",
+        "bottom-right"
+      ],
+      "cardinalDirectionToGroup": {
+        "down": 0,
+        "right": 2,
+        "up": 4,
+        "left": 6
+      }
+    }
+  },
+  "notes": [
+    "Source sheet copied from agent-collab/Paws & Whiskers - Isometric Dogs Pack (Free).",
+    "Frame layout extracted from source image dimensions and provided pack notes.",
+    "This pack provides actor variant keys for bots and heroes."
+  ]
+} as const;
+
+export default goldenRetrieverPack;

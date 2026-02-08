@@ -48,6 +48,24 @@ describe('classifyRenderKind', () => {
     expect(classifyRenderKind(world, eid)).toBe('food');
   });
 
+  it('treats actor variant sprite key prefixes as bot/hero kinds', () => {
+    const world = makeWorld();
+
+    const bot = addEntity(world);
+    addComponent(world, bot, DefaultSpriteKey);
+    DefaultSpriteKey.value[bot] = 'actor.bot';
+    addComponent(world, bot, VariantSpriteKey);
+    VariantSpriteKey.value[bot] = 'actor.bot.golden-retriever';
+    expect(classifyRenderKind(world, bot)).toBe('bot');
+
+    const hero = addEntity(world);
+    addComponent(world, hero, DefaultSpriteKey);
+    DefaultSpriteKey.value[hero] = 'actor.hero';
+    addComponent(world, hero, VariantSpriteKey);
+    VariantSpriteKey.value[hero] = 'actor.hero.golden-retriever';
+    expect(classifyRenderKind(world, hero)).toBe('hero');
+  });
+
   it('falls back to error when no known key exists', () => {
     const world = makeWorld();
     const missing = addEntity(world);

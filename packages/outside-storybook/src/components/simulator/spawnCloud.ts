@@ -9,6 +9,10 @@ import {
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import { foodVariantIds, type FoodVariantId } from '@outside/resource-packs/pixel-platter/meta';
+import {
+  GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
+  GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
+} from '@outside/resource-packs/paws-whiskers/meta';
 import { generateDungeon } from '../../utils/dungeonLayout';
 import { generateDungeonWFC } from '../../utils/dungeonLayoutWFC';
 import { generateDungeonMetaTiles } from '../../utils/metatileDungeon';
@@ -331,6 +335,7 @@ export function spawnDungeonWFCThenScattered(
       y: cy,
       directionRad: angle,
       urge: 'wander',
+      variantSpriteKey: GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
     });
   }
 }
@@ -414,7 +419,11 @@ export function spawnDungeonWFCWithFoodAndHero(
   const heroCell = roomCells[heroIdx];
   const heroX = heroCell.x + offsetX + 0.5;
   const heroY = heroCell.y + offsetY + 0.5;
-  const heroEid = spawnHero(world, { x: heroX, y: heroY });
+  const heroEid = spawnHero(world, {
+    x: heroX,
+    y: heroY,
+    variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
+  });
   setViewportFollowTarget(world, heroEid);
 }
 
@@ -460,6 +469,7 @@ export function spawnDungeonWithFoodAndHero(
       y: cy,
       directionRad: angle,
       urge: 'wander',
+      variantSpriteKey: GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
     });
   }
   for (let i = 0; i < resolvedFoodCount; i++) {
@@ -476,7 +486,11 @@ export function spawnDungeonWithFoodAndHero(
   const heroCell = roomCells[heroIdx];
   const heroX = heroCell.x + offsetX + 0.5;
   const heroY = heroCell.y + offsetY + 0.5;
-  const heroEid = spawnHero(world, { x: heroX, y: heroY });
+  const heroEid = spawnHero(world, {
+    x: heroX,
+    y: heroY,
+    variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
+  });
   setViewportFollowTarget(world, heroEid);
 }
 

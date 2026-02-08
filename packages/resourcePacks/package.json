@@ -20,10 +20,20 @@
       "types": "./dist/pixel-platter/atlas.d.ts",
       "import": "./src/pixel-platter/atlas.ts",
       "default": "./src/pixel-platter/atlas.ts"
+    },
+    "./paws-whiskers/meta": {
+      "types": "./dist/paws-whiskers/meta.d.ts",
+      "import": "./src/paws-whiskers/meta.ts",
+      "default": "./src/paws-whiskers/meta.ts"
+    },
+    "./paws-whiskers/atlas": {
+      "types": "./dist/paws-whiskers/atlas.d.ts",
+      "import": "./src/paws-whiskers/atlas.ts",
+      "default": "./src/paws-whiskers/atlas.ts"
     }
   },
   "scripts": {
-    "build:pack": "node ./scripts/build-pixel-platter-pack.mjs",
+    "build:pack": "node ./scripts/build-pixel-platter-pack.mjs && node ./scripts/build-paws-whiskers-pack.mjs",
     "dev": "tsc --watch",
     "build": "pnpm run build:pack && tsc --noEmit",
     "test": "vitest",

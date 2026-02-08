@@ -56,6 +56,12 @@ export function classifyRenderKind(world: RenderWorldState['world'], eid: number
     if (spriteKey.startsWith(`${DEFAULT_FOOD_SPRITE_KEY}.`)) {
       return 'food';
     }
+    if (spriteKey.startsWith('actor.bot.')) {
+      return 'bot';
+    }
+    if (spriteKey.startsWith('actor.hero.')) {
+      return 'hero';
+    }
     const mapped = (SPRITE_KEY_TO_RENDER_KIND as Record<string, RenderKind>)[spriteKey];
     return mapped ?? 'error';
   }

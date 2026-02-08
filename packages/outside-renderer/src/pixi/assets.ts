@@ -3,6 +3,12 @@ import {
   DEFAULT_FOOD_SPRITE_KEY,
   pixelPlatterPack,
 } from '@outside/resource-packs/pixel-platter/meta';
+import { goldenRetrieverSheetUrl } from '@outside/resource-packs/paws-whiskers/atlas';
+import {
+  GOLDEN_RETRIEVER_ANIMATION_LAYOUT,
+  GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
+  GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
+} from '@outside/resource-packs/paws-whiskers/meta';
 import { Assets, Graphics, Rectangle, Texture, type Renderer } from 'pixi.js';
 import type { RendererAssets, PlaceholderKind } from './types';
 
@@ -14,6 +20,7 @@ import type { RendererAssets, PlaceholderKind } from './types';
 export function createRendererAssets(): RendererAssets {
   return {
     foodTextureBySpriteKey: new Map<string, Texture>(),
+    actorVariantSheetBySpriteKey: new Map(),
     icons: {},
     placeholders: {},
   };
@@ -83,6 +90,17 @@ export async function loadRendererAssets(
       assets.icons.food = defaultTexture;
     }
   }
+
+  const goldenRetrieverSheet = await Assets.load(goldenRetrieverSheetUrl);
+  setNearestScale(goldenRetrieverSheet);
+  assets.actorVariantSheetBySpriteKey.set(GOLDEN_RETRIEVER_BOT_SPRITE_KEY, {
+    texture: goldenRetrieverSheet,
+    animation: GOLDEN_RETRIEVER_ANIMATION_LAYOUT,
+  });
+  assets.actorVariantSheetBySpriteKey.set(GOLDEN_RETRIEVER_HERO_SPRITE_KEY, {
+    texture: goldenRetrieverSheet,
+    animation: GOLDEN_RETRIEVER_ANIMATION_LAYOUT,
+  });
 
   setNearestScale(assets.botIdle);
   setNearestScale(assets.botWalk);

@@ -1,4 +1,5 @@
 import type { Texture } from 'pixi.js';
+import type { ActorVariantAnimationLayout } from '@outside/resource-packs/paws-whiskers/meta';
 import type { DEFAULT_ICON_URLS } from '../icons';
 
 /**
@@ -24,6 +25,11 @@ export interface PixiRendererOptions {
  */
 export type PlaceholderKind = 'bot' | 'hero' | 'food' | 'error';
 
+export interface ActorVariantSheet {
+  texture: Texture;
+  animation: ActorVariantAnimationLayout;
+}
+
 /**
  * Runtime texture bundle used by sprite construction and updates.
  */
@@ -31,6 +37,7 @@ export interface RendererAssets {
   botIdle?: Texture;
   botWalk?: Texture;
   foodTextureBySpriteKey: Map<string, Texture>;
+  actorVariantSheetBySpriteKey: Map<string, ActorVariantSheet>;
   icons: {
     bot?: Texture;
     hero?: Texture;
