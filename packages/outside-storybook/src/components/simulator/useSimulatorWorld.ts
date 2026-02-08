@@ -19,6 +19,8 @@ export type SpawnFn = (
   spawnOptions?: {
     botCount?: number;
     foodCount?: number;
+    dogCount?: number;
+    catCount?: number;
   }
 ) => void;
 

@@ -3,8 +3,14 @@ import {
   DEFAULT_FOOD_SPRITE_KEY,
   pixelPlatterPack,
 } from '@outside/resource-packs/pixel-platter/meta';
-import { goldenRetrieverSheetUrl } from '@outside/resource-packs/paws-whiskers/atlas';
 import {
+  beigeCatSheetUrl,
+  goldenRetrieverSheetUrl,
+} from '@outside/resource-packs/paws-whiskers/atlas';
+import {
+  BEIGE_CAT_ANIMATION_LAYOUT,
+  BEIGE_CAT_BOT_SPRITE_KEY,
+  BEIGE_CAT_HERO_SPRITE_KEY,
   GOLDEN_RETRIEVER_ANIMATION_LAYOUT,
   GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
   GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
@@ -100,6 +106,17 @@ export async function loadRendererAssets(
   assets.actorVariantSheetBySpriteKey.set(GOLDEN_RETRIEVER_HERO_SPRITE_KEY, {
     texture: goldenRetrieverSheet,
     animation: GOLDEN_RETRIEVER_ANIMATION_LAYOUT,
+  });
+
+  const beigeCatSheet = await Assets.load(beigeCatSheetUrl);
+  setNearestScale(beigeCatSheet);
+  assets.actorVariantSheetBySpriteKey.set(BEIGE_CAT_BOT_SPRITE_KEY, {
+    texture: beigeCatSheet,
+    animation: BEIGE_CAT_ANIMATION_LAYOUT,
+  });
+  assets.actorVariantSheetBySpriteKey.set(BEIGE_CAT_HERO_SPRITE_KEY, {
+    texture: beigeCatSheet,
+    animation: BEIGE_CAT_ANIMATION_LAYOUT,
   });
 
   setNearestScale(assets.botIdle);

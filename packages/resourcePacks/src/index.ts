@@ -1,5 +1,5 @@
 export { pixelPlatterAtlasUrl } from './pixel-platter/atlas';
-export { goldenRetrieverSheetUrl } from './paws-whiskers/atlas';
+export { goldenRetrieverSheetUrl, beigeCatSheetUrl } from './paws-whiskers/atlas';
 
 export {
   pixelPlatterPack,
@@ -12,10 +12,16 @@ export {
 } from './pixel-platter/meta';
 export {
   goldenRetrieverPack,
+  beigeCatPack,
   GOLDEN_RETRIEVER_VARIANT_ID,
   GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
   GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
   GOLDEN_RETRIEVER_ANIMATION_LAYOUT,
+  BEIGE_CAT_VARIANT_ID,
+  BEIGE_CAT_BOT_SPRITE_KEY,
+  BEIGE_CAT_HERO_SPRITE_KEY,
+  BEIGE_CAT_ANIMATION_LAYOUT,
+  PAWS_WHISKERS_ACTOR_VARIANT_KEYS,
   PAWS_WHISKERS_PACK_ID,
   PAWS_WHISKERS_PACK_VERSION,
 } from './paws-whiskers/meta';

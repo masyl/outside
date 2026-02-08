@@ -32,7 +32,7 @@
       "framePitchX": 32,
       "framePitchY": 31,
       "frameInsetX": 8,
-      "frameInsetY": 8,
+      "frameInsetY": 9,
       "directionOrder": [
         "bottom",
         "bottom-left",
@@ -44,9 +44,9 @@
         "bottom-right"
       ],
       "cardinalDirectionToGroup": {
-        "down": 0,
+        "down": 4,
         "right": 2,
-        "up": 4,
+        "up": 0,
         "left": 6
       }
     }

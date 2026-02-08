@@ -10,6 +10,7 @@ import {
 import type { SimulatorWorld } from '@outside/simulator';
 import { foodVariantIds, type FoodVariantId } from '@outside/resource-packs/pixel-platter/meta';
 import {
+  BEIGE_CAT_BOT_SPRITE_KEY,
   GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
   GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
 } from '@outside/resource-packs/paws-whiskers/meta';
@@ -54,6 +55,8 @@ function pickFoodVariant(seed: number, index: number): FoodVariantId {
 interface DynamicSpawnOptions {
   botCount?: number;
   foodCount?: number;
+  dogCount?: number;
+  catCount?: number;
 }
 
 /**
@@ -364,6 +367,81 @@ export function spawnDungeonWFCWithFood(
   }
 }
 
+/** Dog count for dungeon-with-hero preset. */
+const DUNGEON_HERO_DOG_COUNT = 0;
+/** Cat count for dungeon-with-hero preset. */
+const DUNGEON_HERO_CAT_COUNT = 0;
+
+function spawnDungeonActorVariants(
+  world: SimulatorWorld,
+  seed: number,
+  roomCells: Array<{ x: number; y: number }>,
+  offsetX: number,
+  offsetY: number,
+  spawnOptions: DynamicSpawnOptions | undefined,
+  fallbackBotCount: number
+): void {
+  const resolvedBotCount = Math.max(
+    0,
+    Math.floor(spawnOptions?.botCount ?? fallbackBotCount)
+  );
+  const resolvedDogCount = Math.max(
+    0,
+    Math.floor(spawnOptions?.dogCount ?? DUNGEON_HERO_DOG_COUNT)
+  );
+  const resolvedCatCount = Math.max(
+    0,
+    Math.floor(spawnOptions?.catCount ?? DUNGEON_HERO_CAT_COUNT)
+  );
+
+  for (let i = 0; i < resolvedBotCount; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, 3000 + i) * roomCells.length) % roomCells.length;
+    const p = roomCells[idx];
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, 4000 + i * 2) * Math.PI * 2;
+    spawnBot(world, {
+      x: cx,
+      y: cy,
+      directionRad: angle,
+      urge: 'wander',
+    });
+  }
+
+  for (let i = 0; i < resolvedDogCount; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, 5000 + i) * roomCells.length) % roomCells.length;
+    const p = roomCells[idx];
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, 6000 + i * 2) * Math.PI * 2;
+    spawnBot(world, {
+      x: cx,
+      y: cy,
+      directionRad: angle,
+      urge: 'wander',
+      variantSpriteKey: GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
+    });
+  }
+
+  for (let i = 0; i < resolvedCatCount; i++) {
+    const idx =
+      Math.floor(seededUnit(seed, 7000 + i) * roomCells.length) % roomCells.length;
+    const p = roomCells[idx];
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, 8000 + i * 2) * Math.PI * 2;
+    spawnBot(world, {
+      x: cx,
+      y: cy,
+      directionRad: angle,
+      urge: 'wander',
+      variantSpriteKey: BEIGE_CAT_BOT_SPRITE_KEY,
+    });
+  }
+}
+
 /**
  * WFC dungeon with configurable food/bot counts and hero.
  * Same as spawnDungeonWithFoodAndHero but uses WFC generator.
@@ -388,23 +466,8 @@ export function spawnDungeonWFCWithFoodAndHero(
   }
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
-  const resolvedBotCount = Math.max(0, Math.floor(spawnOptions?.botCount ?? botCount));
   const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
-
-  for (let i = 0; i < resolvedBotCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
-    const p = roomCells[idx];
-    const cx = p.x + offsetX + 0.5;
-    const cy = p.y + offsetY + 0.5;
-    const angle = seededUnit(seed, i * 2) * Math.PI * 2;
-    spawnBot(world, {
-      x: cx,
-      y: cy,
-      directionRad: angle,
-      urge: 'wander',
-    });
-  }
+  spawnDungeonActorVariants(world, seed, roomCells, offsetX, offsetY, spawnOptions, botCount);
   for (let i = 0; i < resolvedFoodCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
@@ -454,24 +517,8 @@ export function spawnDungeonWithFoodAndHero(
   }
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
-  const resolvedBotCount = Math.max(0, Math.floor(spawnOptions?.botCount ?? botCount));
   const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
-
-  for (let i = 0; i < resolvedBotCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
-    const p = roomCells[idx];
-    const cx = p.x + offsetX + 0.5;
-    const cy = p.y + offsetY + 0.5;
-    const angle = seededUnit(seed, i * 2) * Math.PI * 2;
-    spawnBot(world, {
-      x: cx,
-      y: cy,
-      directionRad: angle,
-      urge: 'wander',
-      variantSpriteKey: GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
-    });
-  }
+  spawnDungeonActorVariants(world, seed, roomCells, offsetX, offsetY, spawnOptions, botCount);
   for (let i = 0; i < resolvedFoodCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %

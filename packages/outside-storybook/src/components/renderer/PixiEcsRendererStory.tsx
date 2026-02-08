@@ -23,6 +23,8 @@ interface PixiEcsRendererStoryProps {
   ticsPerSecond: number;
   botCount: number;
   foodCount?: number;
+  dogCount?: number;
+  catCount?: number;
   spawnFn: SpawnFn;
   tileSize?: number;
   waitForAssets?: boolean;
@@ -47,6 +49,8 @@ export function PixiEcsRendererStory({
   ticsPerSecond,
   botCount,
   foodCount,
+  dogCount,
+  catCount,
   spawnFn,
   tileSize = 16,
   waitForAssets = false,
@@ -73,6 +77,8 @@ export function PixiEcsRendererStory({
     spawnOptions: {
       botCount,
       foodCount,
+      dogCount,
+      catCount,
     },
     ticsPerSecond,
     spawnFn,

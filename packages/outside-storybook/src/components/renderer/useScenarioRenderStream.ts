@@ -34,6 +34,8 @@ interface DynamicScenarioStreamOptions extends BaseScenarioStreamOptions {
   spawnOptions?: {
     botCount?: number;
     foodCount?: number;
+    dogCount?: number;
+    catCount?: number;
   };
   ticsPerSecond: number;
   spawnFn: SpawnFn;
@@ -101,7 +103,16 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
 
   const streamKey = useMemo(() => {
     if (options.mode === 'dynamic') {
-      return `dynamic:${options.seed}:${options.botCount}:${options.ticsPerSecond}:${options.spawnFn.name}:${options.spawnOptions?.foodCount ?? ''}`;
+      return [
+        'dynamic',
+        options.seed,
+        options.botCount,
+        options.ticsPerSecond,
+        options.spawnFn.name,
+        options.spawnOptions?.foodCount ?? '',
+        options.spawnOptions?.dogCount ?? '',
+        options.spawnOptions?.catCount ?? '',
+      ].join(':');
     }
     return `static:${options.seed}:${options.buildWorld.name}`;
   }, [options]);

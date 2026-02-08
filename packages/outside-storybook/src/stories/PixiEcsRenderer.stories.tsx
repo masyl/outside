@@ -66,12 +66,20 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       description: 'Simulation tics per second',
     },
     botCount: {
-      control: { type: 'number', min: 1, max: 200, step: 5 },
-      description: 'Number of bots to spawn',
+      control: { type: 'number', min: 0, max: 200, step: 1 },
+      description: 'Number of default bots to spawn',
     },
     foodCount: {
-      control: { type: 'number', min: 1, max: 200, step: 1 },
+      control: { type: 'number', min: 0, max: 200, step: 1 },
       description: 'Number of food entities (used by Hero and Food story)',
+    },
+    dogCount: {
+      control: { type: 'number', min: 0, max: 200, step: 1 },
+      description: 'Number of dog-variant bots (used by Hero and Food story)',
+    },
+    catCount: {
+      control: { type: 'number', min: 0, max: 200, step: 1 },
+      description: 'Number of cat-variant bots (used by Hero and Food story)',
     },
     tileSize: {
       control: { type: 'select' },
@@ -173,7 +181,9 @@ export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
     seed: 321,
     ticsPerSecond: 10,
-    botCount: 9,
+    botCount: 3,
+    dogCount: 3,
+    catCount: 3,
     foodCount: 12,
     spawnFn: spawnDungeonWithFoodAndHero,
     tileSize: 16,

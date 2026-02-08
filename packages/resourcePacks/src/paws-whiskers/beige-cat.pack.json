@@ -1,15 +1,15 @@
-export const goldenRetrieverPack = {
-  "id": "paws-whiskers-golden-retriever",
-  "name": "Paws & Whiskers Isometric Dogs Pack (Free) - Golden Retriever",
+{
+  "id": "paws-whiskers-beige-cat",
+  "name": "Paws & Whiskers Isometric Cats Pack (Free) - Beige Cat",
   "version": "1.0.0",
   "type": "actor-variant",
-  "sheet": "golden-retriever.spritesheet.png",
+  "sheet": "beige-cat.spritesheet.png",
   "credits": {
     "creator": "Netherzapdos",
-    "homepage": "https://netherzapdos.itch.io/paws-whiskers-isometric-dogs-pack",
+    "homepage": "https://netherzapdos.itch.io/paws-whiskers-isometric-cats-pack",
     "licenseName": "Paws & Whiskers Free Pack License",
     "creditRequired": false,
-    "sourceDescription": "Paws & Whiskers - Isometric Dogs Pack Free Version",
+    "sourceDescription": "Paws & Whiskers - Isometric Cats Pack Free Version",
     "retrievedAt": "2026-02-08T00:00:00.000Z",
     "restrictions": [
       "Use allowed for non-commercial projects.",
@@ -18,10 +18,10 @@ export const goldenRetrieverPack = {
     ]
   },
   "actorVariant": {
-    "variantId": "golden-retriever",
-    "displayName": "Golden Retriever",
-    "botSpriteKey": "actor.bot.golden-retriever",
-    "heroSpriteKey": "actor.hero.golden-retriever",
+    "variantId": "beige-cat",
+    "displayName": "Beige Cat",
+    "botSpriteKey": "actor.bot.beige-cat",
+    "heroSpriteKey": "actor.hero.beige-cat",
     "animation": {
       "frameWidth": 16,
       "frameHeight": 16,
@@ -52,10 +52,8 @@ export const goldenRetrieverPack = {
     }
   },
   "notes": [
-    "Source sheet copied from agent-collab/Paws & Whiskers - Isometric Dogs Pack (Free).",
+    "Source sheet copied from agent-collab/Paws & Whiskers - Isometric Cats Pack (Free).",
     "Frame layout extracted from source image dimensions and provided pack notes.",
     "This pack provides actor variant keys for bots and heroes."
   ]
-} as const;
-
-export default goldenRetrieverPack;
+}

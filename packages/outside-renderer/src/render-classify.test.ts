@@ -58,12 +58,26 @@ describe('classifyRenderKind', () => {
     VariantSpriteKey.value[bot] = 'actor.bot.golden-retriever';
     expect(classifyRenderKind(world, bot)).toBe('bot');
 
+    const catBot = addEntity(world);
+    addComponent(world, catBot, DefaultSpriteKey);
+    DefaultSpriteKey.value[catBot] = 'actor.bot';
+    addComponent(world, catBot, VariantSpriteKey);
+    VariantSpriteKey.value[catBot] = 'actor.bot.beige-cat';
+    expect(classifyRenderKind(world, catBot)).toBe('bot');
+
     const hero = addEntity(world);
     addComponent(world, hero, DefaultSpriteKey);
     DefaultSpriteKey.value[hero] = 'actor.hero';
     addComponent(world, hero, VariantSpriteKey);
     VariantSpriteKey.value[hero] = 'actor.hero.golden-retriever';
     expect(classifyRenderKind(world, hero)).toBe('hero');
+
+    const catHero = addEntity(world);
+    addComponent(world, catHero, DefaultSpriteKey);
+    DefaultSpriteKey.value[catHero] = 'actor.hero';
+    addComponent(world, catHero, VariantSpriteKey);
+    VariantSpriteKey.value[catHero] = 'actor.hero.beige-cat';
+    expect(classifyRenderKind(world, catHero)).toBe('hero');
   });
 
   it('falls back to error when no known key exists', () => {
