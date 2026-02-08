@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import React, { isValidElement, type ReactElement, type ReactNode } from 'react';
-import { InspectorRenderer } from './InspectorRenderer';
+import { InspectorPrimitivesLayer } from './components/InspectorPrimitivesLayer';
 import type { InspectorFrame } from './frame';
 
 function flattenElements(node: ReactNode, out: ReactElement[] = []): ReactElement[] {
@@ -61,15 +61,13 @@ const BASE_FRAME: InspectorFrame = {
   unknownCount: 0,
 };
 
-describe('InspectorRenderer', () => {
+describe('InspectorPrimitivesLayer', () => {
   it('renders follow links, velocity vectors, and collision tint by default', () => {
-    const tree = InspectorRenderer({
+    const tree = InspectorPrimitivesLayer({
       frame: BASE_FRAME,
-      width: 800,
-      height: 600,
       tileSize: 16,
-      centerX: 0,
-      centerY: 0,
+      toScreenX: (x) => x * 16,
+      toScreenY: (y) => y * 16,
     });
     const elements = flattenElements(tree);
 
@@ -101,13 +99,11 @@ describe('InspectorRenderer', () => {
   });
 
   it('hides optional diagnostics when toggles are disabled', () => {
-    const tree = InspectorRenderer({
+    const tree = InspectorPrimitivesLayer({
       frame: BASE_FRAME,
-      width: 800,
-      height: 600,
       tileSize: 16,
-      centerX: 0,
-      centerY: 0,
+      toScreenX: (x) => x * 16,
+      toScreenY: (y) => y * 16,
       showFollowLinks: false,
       showVelocityVectors: false,
       showCollisionTint: false,
@@ -137,4 +133,3 @@ describe('InspectorRenderer', () => {
     expect(botEntity?.props.fill).toBe('#4a4');
   });
 });
-

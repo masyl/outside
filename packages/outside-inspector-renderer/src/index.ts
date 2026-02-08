@@ -13,6 +13,7 @@ export {
   type InspectorFrame,
   type InspectorTile,
   type InspectorEntity,
+  type InspectorFollowLink,
   type InspectorTileKind,
   type InspectorEntityKind,
 } from './frame';
@@ -45,3 +46,6 @@ export type {
   ViewBounds,
   ViewTransform as GridViewTransform,
 } from './components/GridOverlay';
+
+export { InspectorPrimitivesLayer } from './components/InspectorPrimitivesLayer';
+export type { InspectorPrimitivesLayerProps } from './components/InspectorPrimitivesLayer';

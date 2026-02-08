@@ -70,6 +70,18 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       control: { type: 'boolean' },
       description: 'Overlay inspector renderer on top of Pixi',
     },
+    showInspectorFollowLinks: {
+      control: { type: 'boolean' },
+      description: 'Inspector: show follow-target links',
+    },
+    showInspectorVelocityVectors: {
+      control: { type: 'boolean' },
+      description: 'Inspector: show velocity vectors',
+    },
+    showInspectorCollisionTint: {
+      control: { type: 'boolean' },
+      description: 'Inspector: tint colliding bots/walls',
+    },
     rendererVer: {
       control: { type: 'select' },
       options: [RENDERER_VER],
@@ -85,6 +97,9 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
   },
   args: {
     showInspectorOverlay: false,
+    showInspectorFollowLinks: true,
+    showInspectorVelocityVectors: true,
+    showInspectorCollisionTint: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
   },
@@ -124,7 +139,7 @@ export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
     seed: 321,
     ticsPerSecond: 10,
-    entityCount: 18,
+    entityCount: 81,
     spawnFn: spawnDungeonWithFoodAndHero,
     tileSize: 16,
     waitForAssets: false,

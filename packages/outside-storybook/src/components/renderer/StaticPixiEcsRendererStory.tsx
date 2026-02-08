@@ -21,12 +21,19 @@ export interface StaticPixiEcsRendererStoryProps {
   tileSize?: number;
   waitForAssets?: boolean;
   showInspectorOverlay?: boolean;
+  showInspectorFollowLinks?: boolean;
+  showInspectorVelocityVectors?: boolean;
+  showInspectorCollisionTint?: boolean;
   buildWorld: (world: SimulatorWorld, seed: number) => void;
 }
 
 const EMPTY_FRAME: InspectorFrame = {
   tiles: [],
   entities: [],
+  followLinks: [],
+  collisionEntityCount: 0,
+  collisionTileCount: 0,
+  followLinkCount: 0,
   unknownCount: 0,
 };
 
@@ -35,6 +42,9 @@ export function StaticPixiEcsRendererStory({
   tileSize = 16,
   waitForAssets = false,
   showInspectorOverlay = false,
+  showInspectorFollowLinks = true,
+  showInspectorVelocityVectors = true,
+  showInspectorCollisionTint = true,
   buildWorld,
 }: StaticPixiEcsRendererStoryProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -213,6 +223,9 @@ export function StaticPixiEcsRendererStory({
           tileSize={tileSize}
           centerX={stream.center.x}
           centerY={stream.center.y}
+          showFollowLinks={showInspectorFollowLinks}
+          showVelocityVectors={showInspectorVelocityVectors}
+          showCollisionTint={showInspectorCollisionTint}
         />
       </InspectorOverlay>
     </div>
