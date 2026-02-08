@@ -21,7 +21,8 @@ interface PixiEcsRendererStoryProps {
   resourcePackVersion?: string;
   seed: number;
   ticsPerSecond: number;
-  entityCount: number;
+  botCount: number;
+  foodCount?: number;
   spawnFn: SpawnFn;
   tileSize?: number;
   waitForAssets?: boolean;
@@ -44,7 +45,8 @@ const EMPTY_FRAME: InspectorFrame = {
 export function PixiEcsRendererStory({
   seed,
   ticsPerSecond,
-  entityCount,
+  botCount,
+  foodCount,
   spawnFn,
   tileSize = 16,
   waitForAssets = false,
@@ -67,7 +69,11 @@ export function PixiEcsRendererStory({
   const stream = useScenarioRenderStream({
     mode: 'dynamic',
     seed,
-    entityCount,
+    botCount,
+    spawnOptions: {
+      botCount,
+      foodCount,
+    },
     ticsPerSecond,
     spawnFn,
   });

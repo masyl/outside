@@ -47,6 +47,11 @@ function pickFoodVariant(seed: number, index: number): FoodVariantId {
   return variants[Math.max(0, variantIndex)] as FoodVariantId;
 }
 
+interface DynamicSpawnOptions {
+  botCount?: number;
+  foodCount?: number;
+}
+
 /**
  * Same scatter as spawnBotsInWorld: positions from seeded cloud.
  * Used by spawnBotsInWorld and spawnScatteredWithLeaders.
@@ -355,12 +360,14 @@ export function spawnDungeonWFCWithFood(
 }
 
 /**
- * WFC dungeon with food, bots, and hero. Same as spawnDungeonWithFoodAndHero but uses WFC generator.
+ * WFC dungeon with configurable food/bot counts and hero.
+ * Same as spawnDungeonWithFoodAndHero but uses WFC generator.
  */
 export function spawnDungeonWFCWithFoodAndHero(
   world: SimulatorWorld,
   seed: number,
-  _entityCount: number
+  botCount: number,
+  spawnOptions?: DynamicSpawnOptions
 ): void {
   const width = 80;
   const height = 50;
@@ -376,7 +383,10 @@ export function spawnDungeonWFCWithFoodAndHero(
   }
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
-  for (let i = 0; i < DUNGEON_HERO_BOT_COUNT; i++) {
+  const resolvedBotCount = Math.max(0, Math.floor(spawnOptions?.botCount ?? botCount));
+  const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
+
+  for (let i = 0; i < resolvedBotCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
     const p = roomCells[idx];
@@ -390,7 +400,7 @@ export function spawnDungeonWFCWithFoodAndHero(
       urge: 'wander',
     });
   }
-  for (let i = 0; i < DUNGEON_HERO_FOOD_COUNT; i++) {
+  for (let i = 0; i < resolvedFoodCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
       roomCells.length;
@@ -411,17 +421,15 @@ export function spawnDungeonWFCWithFoodAndHero(
 /** Food count for dungeon-with-hero preset. */
 const DUNGEON_HERO_FOOD_COUNT = 12;
 
-/** Bot count for dungeon-with-hero preset. */
-const DUNGEON_HERO_BOT_COUNT = 9;
-
 /**
- * Dungeon layout with 12 food items, 9 bots, and 1 hero. Camera follows the hero.
+ * Dungeon layout with configurable food/bot counts and 1 hero. Camera follows the hero.
  * Click floor tiles to order the hero there; path uses line-of-sight simplification.
  */
 export function spawnDungeonWithFoodAndHero(
   world: SimulatorWorld,
   seed: number,
-  _entityCount: number
+  botCount: number,
+  spawnOptions?: DynamicSpawnOptions
 ): void {
   const width = 80;
   const height = 50;
@@ -437,7 +445,10 @@ export function spawnDungeonWithFoodAndHero(
   }
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
-  for (let i = 0; i < DUNGEON_HERO_BOT_COUNT; i++) {
+  const resolvedBotCount = Math.max(0, Math.floor(spawnOptions?.botCount ?? botCount));
+  const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
+
+  for (let i = 0; i < resolvedBotCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
     const p = roomCells[idx];
@@ -451,7 +462,7 @@ export function spawnDungeonWithFoodAndHero(
       urge: 'wander',
     });
   }
-  for (let i = 0; i < DUNGEON_HERO_FOOD_COUNT; i++) {
+  for (let i = 0; i < resolvedFoodCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
       roomCells.length;

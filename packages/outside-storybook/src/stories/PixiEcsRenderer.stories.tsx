@@ -65,9 +65,13 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       control: { type: 'number', min: 1, max: 20, step: 1 },
       description: 'Simulation tics per second',
     },
-    entityCount: {
+    botCount: {
       control: { type: 'number', min: 1, max: 200, step: 5 },
-      description: 'Number of random-walk entities',
+      description: 'Number of bots to spawn',
+    },
+    foodCount: {
+      control: { type: 'number', min: 1, max: 200, step: 1 },
+      description: 'Number of food entities (used by Hero and Food story)',
     },
     tileSize: {
       control: { type: 'select' },
@@ -137,7 +141,7 @@ export const Default: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
     seed: 42,
     ticsPerSecond: 10,
-    entityCount: 25,
+    botCount: 25,
     spawnFn: spawnFloorRectThenScattered,
     tileSize: 16,
     waitForAssets: false,
@@ -153,7 +157,7 @@ export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
     seed: 123,
     ticsPerSecond: 8,
-    entityCount: 30,
+    botCount: 30,
     spawnFn: spawnDungeonThenScattered,
     tileSize: 8,
     waitForAssets: false,
@@ -169,7 +173,8 @@ export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
     seed: 321,
     ticsPerSecond: 10,
-    entityCount: 81,
+    botCount: 9,
+    foodCount: 12,
     spawnFn: spawnDungeonWithFoodAndHero,
     tileSize: 16,
     waitForAssets: false,

@@ -30,7 +30,11 @@ interface BaseScenarioStreamOptions {
 
 interface DynamicScenarioStreamOptions extends BaseScenarioStreamOptions {
   mode: 'dynamic';
-  entityCount: number;
+  botCount: number;
+  spawnOptions?: {
+    botCount?: number;
+    foodCount?: number;
+  };
   ticsPerSecond: number;
   spawnFn: SpawnFn;
 }
@@ -97,7 +101,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
 
   const streamKey = useMemo(() => {
     if (options.mode === 'dynamic') {
-      return `dynamic:${options.seed}:${options.entityCount}:${options.ticsPerSecond}:${options.spawnFn.name}`;
+      return `dynamic:${options.seed}:${options.botCount}:${options.ticsPerSecond}:${options.spawnFn.name}:${options.spawnOptions?.foodCount ?? ''}`;
     }
     return `static:${options.seed}:${options.buildWorld.name}`;
   }, [options]);
@@ -105,7 +109,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
   useEffect(() => {
     const world = createWorld({ seed: options.seed, ticDurationMs: 50 });
     if (options.mode === 'dynamic') {
-      options.spawnFn(world, options.seed, options.entityCount);
+      options.spawnFn(world, options.seed, options.botCount, options.spawnOptions);
       observerRef.current = createRenderObserverSerializer(world);
     } else {
       options.buildWorld(world, options.seed);

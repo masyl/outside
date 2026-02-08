@@ -15,7 +15,11 @@ import { spawnScatteredWithLeaders } from './spawnCloud';
 export type SpawnFn = (
   world: ReturnType<typeof createWorld>,
   seed: number,
-  entityCount: number
+  entityCount: number,
+  spawnOptions?: {
+    botCount?: number;
+    foodCount?: number;
+  }
 ) => void;
 
 export interface UseSimulatorWorldResult {
