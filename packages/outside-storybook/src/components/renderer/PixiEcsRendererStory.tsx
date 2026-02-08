@@ -49,6 +49,7 @@ export function PixiEcsRendererStory({
   const inspectorWorldRef = useRef(createInspectorRenderWorld());
   const streamControllerRef = useRef(createStreamController());
   const pixiApplyQueueRef = useRef(Promise.resolve());
+  const applyGenerationRef = useRef(0);
   const [inspectorFrame, setInspectorFrame] = useState<InspectorFrame>(EMPTY_FRAME);
   const [viewportSize, setViewportSize] = useState({ width: 1, height: 1 });
   const [rendererReady, setRendererReady] = useState(0);
@@ -78,11 +79,17 @@ export function PixiEcsRendererStory({
   }, []);
 
   useEffect(() => {
+    applyGenerationRef.current += 1;
     streamControllerRef.current.reset(stream.streamKey);
     pixiApplyQueueRef.current = Promise.resolve();
     inspectorWorldRef.current = createInspectorRenderWorld();
     setInspectorFrame(EMPTY_FRAME);
   }, [stream.streamKey]);
+
+  useEffect(() => {
+    applyGenerationRef.current += 1;
+    pixiApplyQueueRef.current = Promise.resolve();
+  }, [tileSize, showDebug, waitForAssets]);
 
   useEffect(() => {
     const renderer = rendererRef.current;
@@ -117,10 +124,23 @@ export function PixiEcsRendererStory({
     const unsubscribe = streamControllerRef.current.subscribe('pixi', (packet) => {
       const renderer = rendererRef.current;
       if (!renderer) return;
+      const generation = applyGenerationRef.current;
 
       pixiApplyQueueRef.current = pixiApplyQueueRef.current.then(async () => {
+        if (applyGenerationRef.current !== generation) {
+          return;
+        }
+        if (rendererRef.current !== renderer) {
+          return;
+        }
         if (waitForAssets && renderer.getAssetsReady()) {
           await renderer.getAssetsReady();
+        }
+        if (applyGenerationRef.current !== generation) {
+          return;
+        }
+        if (rendererRef.current !== renderer) {
+          return;
         }
         renderer.applyStream({
           kind: packet.kind,
@@ -184,7 +204,7 @@ export function PixiEcsRendererStory({
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
       <PixiContainerWrapper
-        instanceKey={`pixi-ecs-${stream.streamKey}-${tileSize}`}
+        instanceKey="pixi-ecs"
         width="100%"
         height="100%"
         backgroundColor={0x0b0d12}

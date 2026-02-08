@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Application } from 'pixi.js';
 import { initDevtools } from '@pixi/devtools';
 import type { CSSProperties } from 'react';
@@ -27,6 +27,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
   const appRef = useRef<Application | null>(null);
   const readyRef = useRef(false);
   const childrenRef = useRef(children);
+  const [readyVersion, setReadyVersion] = useState(0);
 
   useEffect(() => {
     childrenRef.current = children;
@@ -90,6 +91,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
         app.stage.name = `storybook:pixi-app#${appId}:stage`;
         (app.stage as any).label = `storybook:pixi-app#${appId}:stage`;
         readyRef.current = true;
+        setReadyVersion((v) => v + 1);
         childrenRef.current(app);
 
         void initDevtools({ app }).catch((error) => {
@@ -143,7 +145,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
     });
     observer.observe(container);
     return () => observer.disconnect();
-  }, [width, height, backgroundColor, onResize]);
+  }, [width, height, backgroundColor, onResize, instanceKey, readyVersion]);
 
   return (
     <div
