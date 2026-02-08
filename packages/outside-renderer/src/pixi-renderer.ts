@@ -7,6 +7,7 @@ import {
   Text,
   TextStyle,
   Sprite,
+  TilingSprite,
   Texture,
 } from 'pixi.js';
 import { Position, VisualSize, Size } from '@outside/simulator';
@@ -50,6 +51,10 @@ export class PixiEcsRenderer {
   private root: Container;
   private tileLayer: Container;
   private entityLayer: Container;
+  private backgroundLayer: Container;
+  private background?: TilingSprite;
+  private gridTexture?: Texture;
+  private gridTileSize = 0;
   private renderWorld: RenderWorldState;
   private displayIndex = new Map<number, Sprite>();
   private assets: RendererAssets = { icons: {}, placeholders: {} };
@@ -82,9 +87,15 @@ export class PixiEcsRenderer {
     this.entityLayer.zIndex = 1;
     this.root.addChild(this.tileLayer);
     this.root.addChild(this.entityLayer);
+    this.backgroundLayer = new Container();
+    this.backgroundLayer.zIndex = 0;
+    this.root.zIndex = 1;
+    this.app.stage.sortableChildren = true;
+    this.app.stage.addChild(this.backgroundLayer);
     this.app.stage.addChild(this.root);
     this.app.stage.roundPixels = true;
     this.setDebugEnabled(this.debugEnabled);
+    this.updateBackground();
 
     this.renderWorld = createRenderWorld();
   }
@@ -123,6 +134,8 @@ export class PixiEcsRenderer {
 
   setTileSize(tileSize: number): void {
     this.tileSize = tileSize;
+    this.updateBackground();
+    this.recenter();
     this.render();
   }
 
@@ -184,7 +197,13 @@ export class PixiEcsRenderer {
     this.setViewCenter(this.lastCenter.x, this.lastCenter.y);
   }
 
+  setViewportSize(width: number, height: number): void {
+    this.updateBackground(width, height);
+    this.recenter();
+  }
+
   render(): void {
+    this.updateBackground();
     const world = this.renderWorld.world;
     const entities = query(world, [Position]);
     const nextIds = new Set<number>();
@@ -445,9 +464,19 @@ export class PixiEcsRenderer {
     const cached = this.assets.placeholders[kind];
     if (cached) return cached;
     const color =
-      kind === 'bot' ? 0x4aa8ff : kind === 'hero' ? 0xffd166 : 0x37d67a;
+      kind === 'bot' ? 0x4aa8ff : kind === 'hero' ? 0xffd166 : 0xff3b30;
     const g = new Graphics();
-    g.circle(0, 0, 8).fill(color).stroke({ color: 0x0b0d12, width: 2 });
+    const size = 16;
+    const inset = 2;
+    if (kind === 'food') {
+      g.rect(inset, inset, size - inset * 2, size - inset * 2)
+        .fill(color)
+        .stroke({ color: 0x5b0b0b, width: 2 });
+    } else {
+      g.circle(size / 2, size / 2, size / 2 - 1)
+        .fill(color)
+        .stroke({ color: 0x0b0d12, width: 2 });
+    }
     const texture = this.app.renderer.generateTexture(g, {
       resolution: 1,
       region: undefined,
@@ -455,6 +484,53 @@ export class PixiEcsRenderer {
     });
     this.setNearestScale(texture);
     this.assets.placeholders[kind] = texture;
+    return texture;
+  }
+
+  private updateBackground(width?: number, height?: number): void {
+    const nextWidth = width ?? this.app.renderer.width;
+    const nextHeight = height ?? this.app.renderer.height;
+
+    if (!this.gridTexture || this.gridTileSize !== this.tileSize) {
+      if (this.gridTexture) {
+        this.gridTexture.destroy(true);
+      }
+      this.gridTexture = this.createGridTexture(this.tileSize);
+      this.gridTileSize = this.tileSize;
+      if (this.background) {
+        this.background.texture = this.gridTexture;
+      }
+    }
+
+    if (!this.background && this.gridTexture) {
+      this.background = new TilingSprite({
+        texture: this.gridTexture,
+        width: nextWidth,
+        height: nextHeight,
+      });
+      this.background.zIndex = 0;
+      this.backgroundLayer.addChild(this.background);
+    }
+
+    if (this.background) {
+      this.background.width = nextWidth;
+      this.background.height = nextHeight;
+    }
+  }
+
+  private createGridTexture(tileSize: number): Texture {
+    const base = 0x0b0d12;
+    const line = 0x151a21;
+    const g = new Graphics();
+    g.rect(0, 0, tileSize, tileSize).fill(base);
+    g.moveTo(0, 0).lineTo(tileSize, 0).stroke({ color: line, width: 1 });
+    g.moveTo(0, 0).lineTo(0, tileSize).stroke({ color: line, width: 1 });
+    const texture = this.app.renderer.generateTexture(g, {
+      resolution: 1,
+      region: undefined,
+      antialias: false,
+    });
+    this.setNearestScale(texture);
     return texture;
   }
 }
