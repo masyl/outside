@@ -145,7 +145,7 @@ export function StaticPixiEcsRendererStory({
     const renderer = rendererRef.current;
     if (!renderer) return;
     renderer.setViewCenter(stream.center.x, stream.center.y);
-  }, [stream.center.x, stream.center.y, stream.streamKey]);
+  }, [rendererReady, stream.center.x, stream.center.y, stream.streamKey]);
 
   useEffect(() => {
     return () => {
