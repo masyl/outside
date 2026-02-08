@@ -1,0 +1,144 @@
+{
+  "id": "pixel-lands-dungeons-demo",
+  "name": "Pixel Lands - Dungeons Demo",
+  "version": "1.0.0",
+  "type": "dungeon-tiles",
+  "tileSize": 16,
+  "padding": 0,
+  "atlas": "pixel-lands-dungeons.atlas.png",
+  "credits": {
+    "creator": "Trislin Games",
+    "homepage": "https://trislin.itch.io/pixel-lands-dungeons",
+    "license": "Pixel Lands Dungeons Demo license (INFO.txt in source pack)",
+    "creditRequired": false,
+    "sourceDescription": "Demo subset of the Pixel Lands - Dungeons tileset with dungeon floor and wall tiles.",
+    "retrievedAt": "2026-02-08T00:00:00.000Z"
+  },
+  "tileVariants": [
+    {
+      "variantId": "wall",
+      "displayName": "Wall",
+      "spriteKey": "tile.wall",
+      "renderKind": "wall",
+      "isBase": true,
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 16,
+        "h": 16
+      },
+      "sourceCell": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "variantId": "wall-cracked",
+      "displayName": "Wall Cracked",
+      "spriteKey": "tile.wall.cracked",
+      "renderKind": "wall",
+      "isBase": false,
+      "frame": {
+        "x": 64,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "sourceCell": {
+        "x": 4,
+        "y": 2
+      }
+    },
+    {
+      "variantId": "wall-mouse-hole",
+      "displayName": "Wall Mouse Hole",
+      "spriteKey": "tile.wall.mouse-hole",
+      "renderKind": "wall",
+      "isBase": false,
+      "frame": {
+        "x": 64,
+        "y": 32,
+        "w": 16,
+        "h": 16
+      },
+      "sourceCell": {
+        "x": 4,
+        "y": 2
+      }
+    },
+    {
+      "variantId": "floor",
+      "displayName": "Floor",
+      "spriteKey": "tile.floor",
+      "renderKind": "floor",
+      "isBase": true,
+      "frame": {
+        "x": 0,
+        "y": 48,
+        "w": 16,
+        "h": 16
+      },
+      "sourceCell": {
+        "x": 0,
+        "y": 3
+      }
+    },
+    {
+      "variantId": "floor-dirty",
+      "displayName": "Floor Dirty",
+      "spriteKey": "tile.floor.dirty",
+      "renderKind": "floor",
+      "isBase": false,
+      "frame": {
+        "x": 0,
+        "y": 64,
+        "w": 16,
+        "h": 16
+      },
+      "sourceCell": {
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "variantId": "floor-crack",
+      "displayName": "Floor Crack",
+      "spriteKey": "tile.floor.crack",
+      "renderKind": "floor",
+      "isBase": false,
+      "frame": {
+        "x": 16,
+        "y": 48,
+        "w": 16,
+        "h": 16
+      },
+      "sourceCell": {
+        "x": 1,
+        "y": 3
+      }
+    },
+    {
+      "variantId": "floor-crack-2",
+      "displayName": "Floor Crack 2",
+      "spriteKey": "tile.floor.crack-2",
+      "renderKind": "floor",
+      "isBase": false,
+      "frame": {
+        "x": 16,
+        "y": 64,
+        "w": 16,
+        "h": 16
+      },
+      "sourceCell": {
+        "x": 1,
+        "y": 4
+      }
+    }
+  ],
+  "notes": [
+    "Atlas is copied from agent-collab/Pixel Lands Dungeons Demo/dungeons_demo.png.",
+    "Tile size is 16x16 with no padding.",
+    "Renderer-side weighted selection uses 75% base tile and 25% variant tiles.",
+    "Only the explicitly requested floor and wall tiles are included in this first pass."
+  ]
+}

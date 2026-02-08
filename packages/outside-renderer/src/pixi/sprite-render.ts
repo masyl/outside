@@ -12,6 +12,7 @@ import type { RenderWorldState } from '../render-world';
 import type { RendererAssets } from './types';
 import { getPlaceholderTexture, setNearestScale } from './assets';
 import { resolveFoodTexture } from './food-textures';
+import { pickTileVariant } from './tile-variants';
 
 /**
  * Builds a new sprite instance for a render kind.
@@ -110,11 +111,26 @@ export function updateSpriteForEntity(
       : { x: (posX - diameter / 2) * tileSize, y: -(posY + diameter / 2) * tileSize };
 
   if (kind === 'floor' || kind === 'wall') {
+    const tileBucket =
+      kind === 'wall'
+        ? assets.tileTextureByKind.wall
+        : assets.tileTextureByKind.floor;
+    const texture = pickTileVariant(
+      {
+        base: tileBucket.base ?? null,
+        variants: tileBucket.variants,
+      },
+      { kind, worldX: posX, worldY: posY, eid }
+    );
+    if (texture && sprite.texture !== texture) {
+      sprite.texture = texture;
+      setNearestScale(sprite.texture);
+    }
     sprite.x = topLeft.x;
     sprite.y = topLeft.y;
     sprite.width = tileSize;
     sprite.height = tileSize;
-    sprite.tint = kind === 'wall' ? 0x2f2f2f : 0x4b4b4b;
+    sprite.tint = texture ? 0xffffff : kind === 'wall' ? 0x2f2f2f : 0x4b4b4b;
     return;
   }
 

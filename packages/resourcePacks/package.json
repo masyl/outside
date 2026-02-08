@@ -30,10 +30,20 @@
       "types": "./dist/paws-whiskers/atlas.d.ts",
       "import": "./src/paws-whiskers/atlas.ts",
       "default": "./src/paws-whiskers/atlas.ts"
+    },
+    "./pixel-lands-dungeons/meta": {
+      "types": "./dist/pixel-lands-dungeons/meta.d.ts",
+      "import": "./src/pixel-lands-dungeons/meta.ts",
+      "default": "./src/pixel-lands-dungeons/meta.ts"
+    },
+    "./pixel-lands-dungeons/atlas": {
+      "types": "./dist/pixel-lands-dungeons/atlas.d.ts",
+      "import": "./src/pixel-lands-dungeons/atlas.ts",
+      "default": "./src/pixel-lands-dungeons/atlas.ts"
     }
   },
   "scripts": {
-    "build:pack": "node ./scripts/build-pixel-platter-pack.mjs && node ./scripts/build-paws-whiskers-pack.mjs",
+    "build:pack": "node ./scripts/build-pixel-platter-pack.mjs && node ./scripts/build-paws-whiskers-pack.mjs && node ./scripts/build-pixel-lands-dungeons-pack.mjs",
     "dev": "tsc --watch",
     "build": "pnpm run build:pack && tsc --noEmit",
     "test": "vitest",

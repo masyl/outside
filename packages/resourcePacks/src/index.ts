@@ -1,5 +1,6 @@
 export { pixelPlatterAtlasUrl } from './pixel-platter/atlas';
 export { goldenRetrieverSheetUrl, beigeCatSheetUrl } from './paws-whiskers/atlas';
+export { pixelLandsDungeonsAtlasUrl } from './pixel-lands-dungeons/atlas';
 
 export {
   pixelPlatterPack,
@@ -25,6 +26,15 @@ export {
   PAWS_WHISKERS_PACK_ID,
   PAWS_WHISKERS_PACK_VERSION,
 } from './paws-whiskers/meta';
+export {
+  pixelLandsDungeonsPack,
+  DEFAULT_FLOOR_TILE_SPRITE_KEY,
+  DEFAULT_WALL_TILE_SPRITE_KEY,
+  floorTileVariants,
+  wallTileVariants,
+  PIXEL_LANDS_DUNGEONS_PACK_ID,
+  PIXEL_LANDS_DUNGEONS_PACK_VERSION,
+} from './pixel-lands-dungeons/meta';
 
 export type {
   ResourcePackManifest,
@@ -39,3 +49,10 @@ export type {
   ActorVariantAnimationLayout,
   ActorVariantCardinalGroups,
 } from './paws-whiskers/manifest.types';
+export type {
+  DungeonTilePackManifest,
+  DungeonTilePackCredits,
+  DungeonTileFrame,
+  DungeonTileRenderKind,
+  DungeonTileVariant,
+} from './pixel-lands-dungeons/manifest.types';

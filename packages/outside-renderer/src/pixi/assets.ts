@@ -3,6 +3,8 @@ import {
   DEFAULT_FOOD_SPRITE_KEY,
   pixelPlatterPack,
 } from '@outside/resource-packs/pixel-platter/meta';
+import { pixelLandsDungeonsAtlasUrl } from '@outside/resource-packs/pixel-lands-dungeons/atlas';
+import { pixelLandsDungeonsPack } from '@outside/resource-packs/pixel-lands-dungeons/meta';
 import {
   beigeCatSheetUrl,
   goldenRetrieverSheetUrl,
@@ -27,6 +29,10 @@ export function createRendererAssets(): RendererAssets {
   return {
     foodTextureBySpriteKey: new Map<string, Texture>(),
     actorVariantSheetBySpriteKey: new Map(),
+    tileTextureByKind: {
+      floor: { variants: [] },
+      wall: { variants: [] },
+    },
     icons: {},
     placeholders: {},
   };
@@ -71,6 +77,10 @@ export async function loadRendererAssets(
   const foodAtlas = await Assets.load(pixelPlatterAtlasUrl);
   setNearestScale(foodAtlas);
   assets.foodTextureBySpriteKey.clear();
+  assets.tileTextureByKind.floor.base = undefined;
+  assets.tileTextureByKind.floor.variants = [];
+  assets.tileTextureByKind.wall.base = undefined;
+  assets.tileTextureByKind.wall.variants = [];
 
   for (const variant of pixelPlatterPack.foodVariants) {
     const texture = new Texture({
@@ -94,6 +104,30 @@ export async function loadRendererAssets(
     if (defaultTexture) {
       assets.foodTextureBySpriteKey.set(DEFAULT_FOOD_SPRITE_KEY, defaultTexture);
       assets.icons.food = defaultTexture;
+    }
+  }
+
+  const dungeonAtlas = await Assets.load(pixelLandsDungeonsAtlasUrl);
+  setNearestScale(dungeonAtlas);
+  for (const variant of pixelLandsDungeonsPack.tileVariants) {
+    const texture = new Texture({
+      source: dungeonAtlas.source,
+      frame: new Rectangle(
+        variant.frame.x,
+        variant.frame.y,
+        variant.frame.w,
+        variant.frame.h
+      ),
+    });
+    setNearestScale(texture);
+    const bucket =
+      variant.renderKind === 'wall'
+        ? assets.tileTextureByKind.wall
+        : assets.tileTextureByKind.floor;
+    if (variant.isBase) {
+      bucket.base = texture;
+    } else {
+      bucket.variants.push(texture);
     }
   }
 

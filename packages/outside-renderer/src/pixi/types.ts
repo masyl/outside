@@ -30,6 +30,11 @@ export interface ActorVariantSheet {
   animation: ActorVariantAnimationLayout;
 }
 
+export interface TileTextureVariants {
+  base?: Texture;
+  variants: Texture[];
+}
+
 /**
  * Runtime texture bundle used by sprite construction and updates.
  */
@@ -38,6 +43,10 @@ export interface RendererAssets {
   botWalk?: Texture;
   foodTextureBySpriteKey: Map<string, Texture>;
   actorVariantSheetBySpriteKey: Map<string, ActorVariantSheet>;
+  tileTextureByKind: {
+    floor: TileTextureVariants;
+    wall: TileTextureVariants;
+  };
   icons: {
     bot?: Texture;
     hero?: Texture;
