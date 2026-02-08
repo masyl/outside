@@ -1,5 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { RENDERER_VERSION } from '@outside/renderer';
+import { INSPECTOR_RENDERER_VERSION } from '@outside/inspector-renderer';
 import {
   spawnBot,
   spawnFloorRect,
@@ -11,6 +13,15 @@ import {
 import type { SimulatorWorld } from '@outside/simulator';
 import { StaticPixiEcsRendererStory } from '../components/renderer/StaticPixiEcsRendererStory';
 import { generateDungeon } from '../utils/dungeonLayout';
+
+const RENDERER_VER =
+  typeof RENDERER_VERSION === 'string' && RENDERER_VERSION.length > 0
+    ? RENDERER_VERSION
+    : 'unknown';
+const INSPECTOR_VER =
+  typeof INSPECTOR_RENDERER_VERSION === 'string' && INSPECTOR_RENDERER_VERSION.length > 0
+    ? INSPECTOR_RENDERER_VERSION
+    : 'unknown';
 
 function FullHeightDecorator(Story: React.ComponentType) {
   return (
@@ -207,14 +218,24 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
     },
     showDebug: { control: { type: 'boolean' } },
     waitForAssets: { control: { type: 'boolean' } },
+    rendererVer: {
+      control: { type: 'select' },
+      options: [RENDERER_VER],
+      description: 'Full semver for @outside/renderer',
+      table: { readonly: true },
+    },
+    inspectorVer: {
+      control: { type: 'select' },
+      options: [INSPECTOR_VER],
+      description: 'Full semver for @outside/inspector-renderer',
+      table: { readonly: true },
+    },
     showInspectorOverlay: { control: { type: 'boolean' } },
-    inspectorOpacity: { control: { type: 'range', min: 0.1, max: 1, step: 0.05 } },
-    width: { control: { type: 'number', min: 300, step: 50 } },
-    height: { control: { type: 'number', min: 300, step: 50 } },
   },
   args: {
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -227,10 +248,9 @@ export const BoxDungeonHero: StoryObj<typeof StaticPixiEcsRendererStory> = {
     tileSize: 16,
     showDebug: false,
     waitForAssets: false,
-    showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    showInspectorOverlay: true,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -242,9 +262,8 @@ export const ZoosShowcase: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -256,9 +275,8 @@ export const SmallDungeonEmpty: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -270,9 +288,8 @@ export const LargeDungeonWithEntities: StoryObj<typeof StaticPixiEcsRendererStor
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -284,9 +301,8 @@ export const SingleTileHero: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -298,9 +314,8 @@ export const TileStrip: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -312,9 +327,8 @@ export const FoodOnly: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -326,8 +340,7 @@ export const WallsOnly: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };

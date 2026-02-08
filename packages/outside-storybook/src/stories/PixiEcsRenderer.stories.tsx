@@ -1,11 +1,22 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { RENDERER_VERSION } from '@outside/renderer';
+import { INSPECTOR_RENDERER_VERSION } from '@outside/inspector-renderer';
 import { PixiEcsRendererStory } from '../components/renderer/PixiEcsRendererStory';
 import {
   spawnFloorRectThenScattered,
   spawnDungeonThenScattered,
   spawnDungeonWithFoodAndHero,
 } from '../components/simulator/spawnCloud';
+
+const RENDERER_VER =
+  typeof RENDERER_VERSION === 'string' && RENDERER_VERSION.length > 0
+    ? RENDERER_VERSION
+    : 'unknown';
+const INSPECTOR_VER =
+  typeof INSPECTOR_RENDERER_VERSION === 'string' && INSPECTOR_RENDERER_VERSION.length > 0
+    ? INSPECTOR_RENDERER_VERSION
+    : 'unknown';
 
 function FullHeightDecorator(Story: React.ComponentType) {
   return (
@@ -63,16 +74,23 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       control: { type: 'boolean' },
       description: 'Overlay inspector renderer on top of Pixi',
     },
-    inspectorOpacity: {
-      control: { type: 'range', min: 0.1, max: 1, step: 0.05 },
-      description: 'Overlay opacity',
+    rendererVer: {
+      control: { type: 'select' },
+      options: [RENDERER_VER],
+      description: 'Full semver for @outside/renderer',
+      table: { readonly: true },
     },
-    width: { control: { type: 'number', min: 300, step: 50 } },
-    height: { control: { type: 'number', min: 300, step: 50 } },
+    inspectorVer: {
+      control: { type: 'select' },
+      options: [INSPECTOR_VER],
+      description: 'Full semver for @outside/inspector-renderer',
+      table: { readonly: true },
+    },
   },
   args: {
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -88,9 +106,8 @@ export const Default: StoryObj<typeof PixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -104,9 +121,8 @@ export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };
 
@@ -120,8 +136,7 @@ export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
     showDebug: false,
     waitForAssets: false,
     showInspectorOverlay: false,
-    inspectorOpacity: 0.45,
-    width: 900,
-    height: 700,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
   },
 };

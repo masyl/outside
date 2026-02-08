@@ -18,8 +18,6 @@ export interface StaticPixiEcsRendererStoryProps {
   rendererVer?: string;
   inspectorVer?: string;
   seed: number;
-  width?: number;
-  height?: number;
   tileSize?: number;
   showDebug?: boolean;
   waitForAssets?: boolean;
@@ -35,8 +33,6 @@ const EMPTY_FRAME: InspectorFrame = {
 
 export function StaticPixiEcsRendererStory({
   seed,
-  width = 900,
-  height = 700,
   tileSize = 16,
   showDebug = false,
   waitForAssets = false,
@@ -49,7 +45,7 @@ export function StaticPixiEcsRendererStory({
   const streamControllerRef = useRef(createStreamController());
   const pixiApplyQueueRef = useRef(Promise.resolve());
   const [inspectorFrame, setInspectorFrame] = useState<InspectorFrame>(EMPTY_FRAME);
-  const [viewportSize, setViewportSize] = useState({ width, height });
+  const [viewportSize, setViewportSize] = useState({ width: 1, height: 1 });
   const [rendererReady, setRendererReady] = useState(0);
 
   const stream = useScenarioRenderStream({
@@ -156,11 +152,11 @@ export function StaticPixiEcsRendererStory({
   }, []);
 
   return (
-    <div style={{ position: 'relative', width, height }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <PixiContainerWrapper
-        instanceKey={`pixi-ecs-static-${stream.streamKey}-${tileSize}-${width}-${height}`}
-        width={width}
-        height={height}
+        instanceKey={`pixi-ecs-static-${stream.streamKey}-${tileSize}`}
+        width="100%"
+        height="100%"
         backgroundColor={0x0b0d12}
         onResize={(_app, nextWidth, nextHeight) => {
           rendererRef.current?.setViewportSize(nextWidth, nextHeight);

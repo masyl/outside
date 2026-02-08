@@ -1,19 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 import { Application } from 'pixi.js';
+import { initDevtools } from '@pixi/devtools';
+import type { CSSProperties } from 'react';
 
 interface PixiContainerWrapperProps {
   children: (app: Application) => void;
-  width?: number;
-  height?: number;
+  width?: CSSProperties['width'];
+  height?: CSSProperties['height'];
   backgroundColor?: number;
+  instanceKey?: string;
   onResize?: (app: Application, width: number, height: number) => void;
 }
 
+let NEXT_STORYBOOK_PIXI_APP_ID = 1;
+
 export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
   children,
-  width = 800,
-  height = 600,
+  width = '100%',
+  height = '100%',
   backgroundColor = 0x000000,
+  instanceKey = 'default',
   onResize,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,36 +37,74 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
 
   useEffect(() => {
     let cancelled = false;
+    let initialized = false;
+    let destroyed = false;
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
     if (appRef.current) return undefined;
 
     const app = new Application();
+    const appId = NEXT_STORYBOOK_PIXI_APP_ID++;
     appRef.current = app;
     (window as any).__pixiApp = app;
 
+    const destroyApp = () => {
+      if (destroyed) return;
+      destroyed = true;
+      try {
+        app.destroy(
+          { removeView: false },
+          {
+            children: true,
+            texture: true,
+            textureSource: true,
+          }
+        );
+      } catch (error) {
+        console.warn('[PixiContainerWrapper] destroy failed', error);
+      }
+    };
+
     (async () => {
-      await app.init({
-        canvas,
-        width,
-        height,
-        backgroundColor,
-        antialias: false,
-        resolution: 1,
-        roundPixels: true,
-      });
-      app.renderer.clearBeforeRender = true;
-      if (cancelled) return;
-      readyRef.current = true;
-      childrenRef.current(app);
+      try {
+        const rect = canvas.getBoundingClientRect();
+        const initialWidth = Math.max(1, Math.floor(rect.width));
+        const initialHeight = Math.max(1, Math.floor(rect.height));
+        await app.init({
+          canvas,
+          width: initialWidth,
+          height: initialHeight,
+          backgroundColor,
+          antialias: false,
+          resolution: 1,
+          roundPixels: true,
+        });
+        initialized = true;
+
+        if (cancelled) {
+          destroyApp();
+          return;
+        }
+
+        app.renderer.clearBeforeRender = true;
+        app.stage.name = `storybook:pixi-app#${appId}:stage`;
+        (app.stage as any).label = `storybook:pixi-app#${appId}:stage`;
+        readyRef.current = true;
+        childrenRef.current(app);
+
+        void initDevtools({ app }).catch((error) => {
+          console.warn('[PixiContainerWrapper] pixi devtools init failed', error);
+        });
+      } catch (error) {
+        console.warn('[PixiContainerWrapper] init failed', error);
+        destroyApp();
+      }
     })();
 
     return () => {
       cancelled = true;
-      try {
-        app.destroy?.(true);
-      } catch (error) {
-        console.warn('[PixiContainerWrapper] destroy failed', error);
+      if (initialized) {
+        destroyApp();
       }
       readyRef.current = false;
       if (appRef.current === app) {
@@ -70,7 +114,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
         (window as any).__pixiApp = null;
       }
     };
-  }, []);
+  }, [instanceKey, backgroundColor]);
 
   useEffect(() => {
     const app = appRef.current;
@@ -99,7 +143,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
     });
     observer.observe(container);
     return () => observer.disconnect();
-  }, [width, height, backgroundColor]);
+  }, [width, height, backgroundColor, onResize]);
 
   return (
     <div
