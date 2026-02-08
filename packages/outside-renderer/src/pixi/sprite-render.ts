@@ -14,6 +14,11 @@ import { getPlaceholderTexture, setNearestScale } from './assets';
 
 /**
  * Builds a new sprite instance for a render kind.
+ *
+ * @param renderer `Renderer` used for placeholder texture generation.
+ * @param assets `RendererAssets` loaded textures and placeholder cache.
+ * @param kind `RenderKind` render classification for sprite/layer setup.
+ * @returns `Sprite` newly created display object for this entity kind.
  */
 export function createSpriteForKind(
   renderer: Renderer,
@@ -64,6 +69,14 @@ export function createSpriteForKind(
 
 /**
  * Updates an existing sprite's texture, transform, and sizing for the current world entity state.
+ *
+ * @param renderer `Renderer` used for placeholder texture generation.
+ * @param sprite `Sprite` display object to mutate in-place.
+ * @param kind `RenderKind` render classification for the entity.
+ * @param eid `number` entity id in the render ECS world.
+ * @param tileSize `number` world tile side length in pixels.
+ * @param renderWorld `RenderWorldState` current deserialized render snapshot.
+ * @param assets `RendererAssets` loaded textures and placeholder cache.
  */
 export function updateSpriteForEntity(
   renderer: Renderer,
@@ -78,6 +91,8 @@ export function updateSpriteForEntity(
   const diameter = getEntityDiameter(world, eid, kind);
   const posX = Position.x[eid];
   const posY = Position.y[eid];
+  // World positions are center-based for entities and corner-based for tiles.
+  // Convert center positions to top-left so sprite bounds align with tile grid.
   const topLeft =
     kind === 'floor' || kind === 'wall'
       ? { x: posX * tileSize, y: posY * tileSize }
@@ -128,6 +143,11 @@ export function updateSpriteForEntity(
 
 /**
  * Reads rendering diameter from visual data, with a sane default.
+ *
+ * @param world `World` render ECS world.
+ * @param eid `number` entity id.
+ * @param kind `RenderKind` classification used to shortcut tile sizing.
+ * @returns `number` display diameter in tile units.
  */
 export function getEntityDiameter(world: World, eid: number, kind: RenderKind): number {
   if (kind === 'floor' || kind === 'wall') return 1;
@@ -172,6 +192,7 @@ function updateBotSpriteFrame(
   }
 
   const padding = 2;
+  // Frames are laid out on a fixed grid: frame width plus symmetric transparent padding.
   const stride = SPRITE_SIZE + padding * 2;
   const frameX = frameIndex * stride + padding;
   const frameY = row * stride + padding + 2;
@@ -182,6 +203,7 @@ function updateBotSpriteFrame(
   });
   setNearestScale(sprite.texture);
 
+  // Scale from native 16x16 frame pixels to world tile pixels, including large-entity diameter.
   const baseScale = (tileSize / SPRITE_SIZE) * diameter;
   sprite.anchor.set(0, 0);
   if (flipX) {

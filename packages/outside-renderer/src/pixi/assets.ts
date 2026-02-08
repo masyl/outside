@@ -3,6 +3,8 @@ import type { RendererAssets, PlaceholderKind } from './types';
 
 /**
  * Creates an empty asset bundle.
+ *
+ * @returns `RendererAssets` initialized with empty icon/placeholder slots.
  */
 export function createRendererAssets(): RendererAssets {
   return {
@@ -13,6 +15,8 @@ export function createRendererAssets(): RendererAssets {
 
 /**
  * Forces nearest-neighbor scaling for pixel-art crispness.
+ *
+ * @param texture optional `Texture` to configure.
  */
 export function setNearestScale(texture?: Texture): void {
   if (!texture) return;
@@ -23,6 +27,10 @@ export function setNearestScale(texture?: Texture): void {
 
 /**
  * Loads spritesheets/icons into the provided asset bundle.
+ *
+ * @param assets `RendererAssets` mutable asset store to populate.
+ * @param options object containing sprite base path, icon URLs, and optional callback.
+ * @returns `Promise<void>` resolved after all textures load.
  */
 export async function loadRendererAssets(
   assets: RendererAssets,
@@ -52,6 +60,11 @@ export async function loadRendererAssets(
 
 /**
  * Returns a cached placeholder texture; creates it on first request.
+ *
+ * @param renderer `Renderer` used for texture generation.
+ * @param assets `RendererAssets` placeholder cache owner.
+ * @param kind `PlaceholderKind` visual category to synthesize.
+ * @returns `Texture` cached or newly generated placeholder texture.
  */
 export function getPlaceholderTexture(
   renderer: Renderer,

@@ -45,6 +45,8 @@ function facingFromAngle(angle: number, fallback: number): number {
 
 /**
  * Computes one renderer animation tick from current world state.
+ *
+ * @param renderWorld `RenderWorldState` world + renderer-only animation caches.
  */
 export function runAnimationTic(renderWorld: RenderWorldState): void {
   const world = renderWorld.world;
@@ -86,6 +88,7 @@ export function runAnimationTic(renderWorld: RenderWorldState): void {
       : RenderLastPosition.y[eid];
     const dx = Position.x[eid] - prevX;
     const dy = Position.y[eid] - prevY;
+    // Euclidean distance gives displacement in tile units independent of axis direction.
     const distance = Math.hypot(dx, dy);
     const isMoving = distance > 0.0001;
 
@@ -111,6 +114,9 @@ export function runAnimationTic(renderWorld: RenderWorldState): void {
     if (!isMoving) {
       RenderWalkFrame.index[eid] = 0;
     } else {
+      // Convert accumulated travel distance into looped frame index.
+      // distance * WALK_CYCLES_PER_TILE => completed animation cycles
+      // ... * WALK_FRAMES => frame progression over those cycles
       const frame =
         Math.floor(RenderWalkDistance.value[eid] * WALK_FRAMES * WALK_CYCLES_PER_TILE) %
         WALK_FRAMES;
@@ -124,6 +130,10 @@ export function runAnimationTic(renderWorld: RenderWorldState): void {
 
 /**
  * Returns human-readable facing from cached renderer state.
+ *
+ * @param renderWorld `RenderWorldState` renderer ECS state.
+ * @param eid `number` entity id.
+ * @returns `FacingDirection` cardinal facing for spritesheet row selection.
  */
 export function getFacingDirection(renderWorld: RenderWorldState, eid: number): FacingDirection {
   const dir = RenderFacing.dir[eid] ?? FACING.DOWN;
@@ -142,6 +152,10 @@ export function getFacingDirection(renderWorld: RenderWorldState, eid: number): 
 
 /**
  * Returns current walk frame index.
+ *
+ * @param renderWorld `RenderWorldState` renderer ECS state.
+ * @param eid `number` entity id.
+ * @returns `number` 0-based walk frame index.
  */
 export function getWalkFrame(renderWorld: RenderWorldState, eid: number): number {
   return RenderWalkFrame.index[eid] ?? 0;
@@ -149,6 +163,10 @@ export function getWalkFrame(renderWorld: RenderWorldState, eid: number): number
 
 /**
  * Returns whether the entity moved during the last animation update.
+ *
+ * @param renderWorld `RenderWorldState` renderer ECS state.
+ * @param eid `number` entity id.
+ * @returns `boolean` movement flag from the last animation tick.
  */
 export function getIsMoving(renderWorld: RenderWorldState, eid: number): boolean {
   return (RenderIsMoving.value[eid] ?? 0) > 0;
