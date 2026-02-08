@@ -160,7 +160,11 @@ export function StaticPixiEcsRendererStory({
         backgroundColor={0x0b0d12}
         onResize={(_app, nextWidth, nextHeight) => {
           rendererRef.current?.setViewportSize(nextWidth, nextHeight);
-          setViewportSize({ width: nextWidth, height: nextHeight });
+          setViewportSize((prev) =>
+            prev.width === nextWidth && prev.height === nextHeight
+              ? prev
+              : { width: nextWidth, height: nextHeight }
+          );
         }}
       >
         {initRenderer}

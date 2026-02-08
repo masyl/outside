@@ -27,6 +27,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
   const appRef = useRef<Application | null>(null);
   const readyRef = useRef(false);
   const childrenRef = useRef(children);
+  const onResizeRef = useRef(onResize);
 
   useEffect(() => {
     childrenRef.current = children;
@@ -34,6 +35,10 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
       children(appRef.current);
     }
   }, [children]);
+
+  useEffect(() => {
+    onResizeRef.current = onResize;
+  }, [onResize]);
 
   useEffect(() => {
     let cancelled = false;
@@ -130,7 +135,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
         if ((app.renderer as any).background) {
           (app.renderer as any).background.color = backgroundColor;
         }
-        onResize?.(app, nextWidth, nextHeight);
+        onResizeRef.current?.(app, nextWidth, nextHeight);
       } catch (error) {
         console.warn('[PixiContainerWrapper] resize failed', error);
       }
@@ -143,7 +148,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
     });
     observer.observe(container);
     return () => observer.disconnect();
-  }, [width, height, backgroundColor, onResize]);
+  }, [width, height, backgroundColor]);
 
   return (
     <div
