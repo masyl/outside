@@ -1,0 +1,40 @@
+{
+  "name": "@outside/resource-packs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./pixel-platter/meta": {
+      "types": "./dist/pixel-platter/meta.d.ts",
+      "import": "./src/pixel-platter/meta.ts",
+      "default": "./src/pixel-platter/meta.ts"
+    },
+    "./pixel-platter/atlas": {
+      "types": "./dist/pixel-platter/atlas.d.ts",
+      "import": "./src/pixel-platter/atlas.ts",
+      "default": "./src/pixel-platter/atlas.ts"
+    }
+  },
+  "scripts": {
+    "build:pack": "node ./scripts/build-pixel-platter-pack.mjs",
+    "dev": "tsc --watch",
+    "build": "pnpm run build:pack && tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "echo \"No linter configured yet\"",
+    "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  }
+}

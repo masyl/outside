@@ -154,6 +154,9 @@ importers:
       '@hackernoon/pixel-icon-library':
         specifier: ^1.0.6
         version: 1.0.6
+      '@outside/resource-packs':
+        specifier: workspace:*
+        version: link:../resourcePacks
       '@outside/simulator':
         specifier: workspace:*
         version: link:../outside-simulator
@@ -204,6 +207,9 @@ importers:
 
   packages/outside-simulator:
     dependencies:
+      '@outside/resource-packs':
+        specifier: workspace:*
+        version: link:../resourcePacks
       '@outside/utils':
         specifier: workspace:*
         version: link:../outside-utils
@@ -238,6 +244,9 @@ importers:
       '@outside/renderer':
         specifier: workspace:*
         version: link:../outside-renderer
+      '@outside/resource-packs':
+        specifier: workspace:*
+        version: link:../resourcePacks
       '@outside/simulator':
         specifier: workspace:*
         version: link:../outside-simulator
@@ -304,6 +313,18 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.17
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
+
+  packages/resourcePacks:
+    devDependencies:
+      pngjs:
+        specifier: ^7.0.0
+        version: 7.0.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
 
 packages:
@@ -2994,6 +3015,10 @@ packages:
     resolution: {integrity: sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==}
     engines: {node: '>=18'}
     hasBin: true
+
+  pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
 
   points-on-curve@0.2.0:
     resolution: {integrity: sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==}
@@ -6668,6 +6693,8 @@ snapshots:
       playwright-core: 1.58.2
     optionalDependencies:
       fsevents: 2.3.2
+
+  pngjs@7.0.0: {}
 
   points-on-curve@0.2.0: {}
 
