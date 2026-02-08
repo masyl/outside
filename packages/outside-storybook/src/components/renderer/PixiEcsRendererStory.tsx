@@ -92,24 +92,25 @@ export function PixiEcsRendererStory({
 
   useEffect(() => {
     const renderer = rendererRef.current;
-    if (!renderer || !stream.packet) return;
+    const packet = stream.packet;
+    if (!renderer || !packet) return;
 
     const applyPacket = async () => {
       if (waitForAssets && renderer.getAssetsReady()) {
         await renderer.getAssetsReady();
       }
       renderer.applyStream({
-        kind: stream.packet!.kind,
-        tic: stream.packet!.tic,
-        buffer: new Uint8Array(stream.packet!.buffer),
+        kind: packet.kind,
+        tic: packet.tic,
+        buffer: new Uint8Array(packet.buffer),
       });
 
-      applyInspectorStream(inspectorWorldRef.current, stream.packet!);
+      applyInspectorStream(inspectorWorldRef.current, packet);
       setInspectorFrame(buildInspectorFrame(inspectorWorldRef.current.world));
     };
 
     void applyPacket();
-  }, [stream.packetVersion, waitForAssets]);
+  }, [rendererReady, stream.packetVersion, waitForAssets]);
 
   useEffect(() => {
     const renderer = rendererRef.current;
