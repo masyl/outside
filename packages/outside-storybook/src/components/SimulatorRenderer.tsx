@@ -35,11 +35,13 @@ import {
   createFloorRectWithHeroSpawn,
   createMetaTileDungeonSpawn,
 } from './simulator/spawnCloud';
-import { SimulatorViewport } from './simulator/SimulatorViewport';
-import { SimulatorEntity } from './simulator/SimulatorEntity';
-import { SimulatorCaption } from './simulator/SimulatorCaption';
-import { FloorTilesLayer } from './simulator/FloorTilesLayer';
-import { GridOverlay } from './simulator/GridOverlay';
+import {
+  SimulatorViewport,
+  SimulatorEntity,
+  SimulatorCaption,
+  FloorTilesLayer,
+  GridOverlay,
+} from '@outside/inspector-renderer';
 
 /** Logical size of the SVG viewBox (4x zoom-out vs original 400×300) */
 const VIEWBOX_WIDTH = 1600;

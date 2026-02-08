@@ -16,6 +16,7 @@
   "dependencies": {
     "@outside/client": "workspace:*",
     "@outside/core": "workspace:*",
+    "@outside/inspector-renderer": "workspace:*",
     "@outside/renderer": "workspace:*",
     "@outside/simulator": "workspace:*",
     "react": "^18.2.0",
@@ -23,6 +24,7 @@
     "wavefunctioncollapse": "^2.1.0"
   },
   "devDependencies": {
+    "@pixi/devtools": "^2.0.1",
     "@playwright/test": "^1.50.0",
     "@storybook/addon-a11y": "10.2.7",
     "@storybook/addon-docs": "10.2.7",

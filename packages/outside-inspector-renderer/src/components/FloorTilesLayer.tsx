@@ -42,7 +42,7 @@ export function FloorTilesLayer({
   const obstacleSet = new Set(query(world, [Obstacle]));
   return (
     <g aria-hidden="true">
-      {tiles.map((eid) => {
+      {Array.from(tiles).map((eid) => {
         const pos = getComponent(world, eid, Position);
         const size = getComponent(world, eid, Size);
         const w = size.diameter;
