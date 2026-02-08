@@ -218,7 +218,10 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
   argTypes: {
     buildWorld: { table: { disable: true } },
     seed: { control: { type: 'number', min: 0, step: 1 }, description: 'Seed for layout' },
-    tileSize: { control: { type: 'number', min: 16, max: 64, step: 4 } },
+    tileSize: {
+      control: { type: 'select' },
+      options: [8, 12, 16, 24, 32, 48, 64],
+    },
     showDebug: { control: { type: 'boolean' } },
     waitForAssets: { control: { type: 'boolean' } },
     width: { control: { type: 'number', min: 300, step: 50 } },

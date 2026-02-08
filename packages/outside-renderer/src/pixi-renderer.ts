@@ -57,6 +57,7 @@ export class PixiEcsRenderer {
   private gridTileSize = 0;
   private renderWorld: RenderWorldState;
   private displayIndex = new Map<number, Sprite>();
+  private displayKinds = new Map<number, RenderKind>();
   private assets: RendererAssets = { icons: {}, placeholders: {} };
   private tileSize: number;
   private assetBaseUrl: string;
@@ -170,6 +171,18 @@ export class PixiEcsRenderer {
     this.render();
   }
 
+  resetWorld(): void {
+    for (const sprite of this.displayIndex.values()) {
+      sprite.destroy();
+    }
+    this.displayIndex.clear();
+    this.displayKinds.clear();
+    this.tileLayer.removeChildren();
+    this.entityLayer.removeChildren();
+    this.renderWorld = createRenderWorld();
+    this.render();
+  }
+
   getAssetsReady(): Promise<void> | null {
     return this.assetsReady;
   }
@@ -243,9 +256,18 @@ export class PixiEcsRenderer {
       }
 
       let sprite = this.displayIndex.get(eid);
+      const previousKind = this.displayKinds.get(eid);
+      if (sprite && previousKind && previousKind !== kind) {
+        sprite.destroy();
+        this.displayIndex.delete(eid);
+        this.displayKinds.delete(eid);
+        sprite = undefined;
+      }
+
       if (!sprite) {
         sprite = this.createSpriteForKind(kind);
         this.displayIndex.set(eid, sprite);
+        this.displayKinds.set(eid, kind);
         if (kind === 'floor' || kind === 'wall') {
           this.tileLayer.addChild(sprite);
         } else {
@@ -260,6 +282,7 @@ export class PixiEcsRenderer {
       if (nextIds.has(eid)) continue;
       sprite.destroy();
       this.displayIndex.delete(eid);
+      this.displayKinds.delete(eid);
     }
 
     if (this.debugLabel) {
@@ -293,6 +316,7 @@ export class PixiEcsRenderer {
       sprite.destroy();
     }
     this.displayIndex.clear();
+    this.displayKinds.clear();
     this.root.destroy({ children: true });
   }
 

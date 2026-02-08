@@ -2,7 +2,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { PixiEcsRendererStory } from '../components/renderer/PixiEcsRendererStory';
 import {
-  spawnScatteredWithLeaders,
+  spawnFloorRectThenScattered,
   spawnDungeonThenScattered,
   spawnDungeonWithFoodAndHero,
 } from '../components/simulator/spawnCloud';
@@ -47,7 +47,8 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       description: 'Number of random-walk entities',
     },
     tileSize: {
-      control: { type: 'number', min: 16, max: 64, step: 4 },
+      control: { type: 'select' },
+      options: [8, 12, 16, 24, 32, 48, 64],
       description: 'Tile size (pixels)',
     },
     showDebug: {
@@ -70,7 +71,7 @@ export const Default: StoryObj<typeof PixiEcsRendererStory> = {
     seed: 42,
     ticsPerSecond: 10,
     entityCount: 25,
-    spawnFn: spawnScatteredWithLeaders,
+    spawnFn: spawnFloorRectThenScattered,
     tileSize: 16,
     showDebug: false,
     waitForAssets: false,

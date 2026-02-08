@@ -2,8 +2,10 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import type { Application } from 'pixi.js';
 import {
   createWorld,
-  createRenderObserverSerializer,
+  createSnapshotSerializer,
+  RENDER_COMPONENTS,
   Position,
+  query,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import { PixiEcsRenderer } from '@outside/renderer';
@@ -24,8 +26,9 @@ function computeBounds(world: SimulatorWorld): { minX: number; maxX: number; min
   let maxX = -Infinity;
   let minY = Infinity;
   let maxY = -Infinity;
-  const count = Position.x.length;
-  for (let eid = 0; eid < count; eid++) {
+  const entities = query(world, [Position]);
+  for (let i = 0; i < entities.length; i++) {
+    const eid = entities[i];
     const x = Position.x[eid];
     const y = Position.y[eid];
     if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
@@ -60,28 +63,23 @@ export function StaticPixiEcsRendererStory({
 
     renderer.setTileSize(tileSize);
     renderer.setDebugEnabled(showDebug);
+    renderer.resetWorld();
 
     const world = createWorld({ seed, ticDurationMs: 50 });
-    const observer = createRenderObserverSerializer(world);
+    const snapshot = createSnapshotSerializer(world, RENDER_COMPONENTS);
     buildWorld(world, seed);
 
     if (waitForAssets && renderer.getAssetsReady()) {
       await renderer.getAssetsReady();
     }
-    renderer.applyStream({
-      kind: 'delta',
-      buffer: observer(),
-      tic: 0,
-    });
+    renderer.applyStream({ kind: 'snapshot', buffer: snapshot(), tic: 0 });
 
     const bounds = computeBounds(world);
     const centerX = (bounds.minX + bounds.maxX) / 2 + 0.5;
     const centerY = (bounds.minY + bounds.maxY) / 2 + 0.5;
     renderer.setViewCenter(centerX, centerY);
 
-    const entityCount = Position.x.reduce((count, value, index) => {
-      return Number.isFinite(value) && Number.isFinite(Position.y[index]) ? count + 1 : count;
-    }, 0);
+    const entityCount = query(world, [Position]).length;
     if (showDebug) {
       console.log('[StaticPixiEcsRenderer] snapshot applied', {
         entityCount,
@@ -109,7 +107,9 @@ export function StaticPixiEcsRendererStory({
       width={width}
       height={height}
       backgroundColor={0x0b0d12}
-      onResize={() => rendererRef.current?.recenter()}
+      onResize={(_app, nextWidth, nextHeight) => {
+        rendererRef.current?.setViewportSize(nextWidth, nextHeight);
+      }}
     >
       {initRenderer}
     </PixiContainerWrapper>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { addEntity, addComponent, setComponent } from 'bitecs';
+import { addEntity, addComponent } from 'bitecs';
 import { FloorTile, Obstacle, Food, Hero, Size } from '@outside/simulator';
 import { createRenderWorld } from './render-world';
 import { classifyRenderKind } from './render-classify';
@@ -35,14 +35,12 @@ describe('classifyRenderKind', () => {
   it('infers tiles from size when tags are missing', () => {
     const world = makeWorld();
     const tile = addEntity(world);
-    addComponent(world, tile, Size);
-    setComponent(world, tile, Size, { diameter: 1 });
+    Size.diameter[tile] = 1;
     expect(classifyRenderKind(world, tile)).toBe('floor');
 
     const wall = addEntity(world);
-    addComponent(world, wall, Size);
+    Size.diameter[wall] = 1;
     addComponent(world, wall, Obstacle);
-    setComponent(world, wall, Size, { diameter: 1 });
     expect(classifyRenderKind(world, wall)).toBe('wall');
   });
 });

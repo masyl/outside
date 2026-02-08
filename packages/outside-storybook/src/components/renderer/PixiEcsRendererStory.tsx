@@ -4,7 +4,10 @@ import {
   createWorld,
   runTics,
   createRenderObserverSerializer,
+  createSnapshotSerializer,
+  RENDER_COMPONENTS,
   Position,
+  query,
 } from '@outside/simulator';
 import { PixiEcsRenderer } from '@outside/renderer';
 import type { SpawnFn } from '../simulator/useSimulatorWorld';
@@ -20,27 +23,6 @@ interface PixiEcsRendererStoryProps {
   tileSize?: number;
   showDebug?: boolean;
   waitForAssets?: boolean;
-}
-
-function computeBounds(): { minX: number; maxX: number; minY: number; maxY: number } {
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  const count = Position.x.length;
-  for (let eid = 0; eid < count; eid++) {
-    const x = Position.x[eid];
-    const y = Position.y[eid];
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-    if (x < minX) minX = x;
-    if (x > maxX) maxX = x;
-    if (y < minY) minY = y;
-    if (y > maxY) maxY = y;
-  }
-  if (!Number.isFinite(minX)) {
-    return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
-  }
-  return { minX, maxX, minY, maxY };
 }
 
 export function PixiEcsRendererStory({
@@ -59,6 +41,31 @@ export function PixiEcsRendererStory({
   const observerRef = useRef<ReturnType<typeof createRenderObserverSerializer> | null>(null);
   const ticRef = useRef(0);
   const [rendererReady, setRendererReady] = useState(0);
+  const worldRefForBounds = useRef<ReturnType<typeof createWorld> | null>(null);
+
+  const computeBounds = useCallback((): { minX: number; maxX: number; minY: number; maxY: number } => {
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    const world = worldRefForBounds.current;
+    if (!world) return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+    const entities = query(world, [Position]);
+    for (let i = 0; i < entities.length; i++) {
+      const eid = entities[i];
+      const x = Position.x[eid];
+      const y = Position.y[eid];
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+    if (!Number.isFinite(minX)) {
+      return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+    }
+    return { minX, maxX, minY, maxY };
+  }, []);
 
   const setupSimulation = useCallback(async () => {
     const renderer = rendererRef.current;
@@ -69,22 +76,22 @@ export function PixiEcsRendererStory({
 
     renderer.setTileSize(tileSize);
     renderer.setDebugEnabled(showDebug);
+    renderer.resetWorld();
 
     const world = createWorld({ seed, ticDurationMs: 50 });
     const observer = createRenderObserverSerializer(world);
+    const snapshot = createSnapshotSerializer(world, RENDER_COMPONENTS);
     spawnFn(world, seed, entityCount);
     worldRef.current = world;
+    worldRefForBounds.current = world;
     observerRef.current = observer;
     ticRef.current = 0;
 
     if (waitForAssets && renderer.getAssetsReady()) {
       await renderer.getAssetsReady();
     }
-    renderer.applyStream({
-      kind: 'delta',
-      buffer: observer(),
-      tic: ticRef.current,
-    });
+    renderer.applyStream({ kind: 'snapshot', buffer: snapshot(), tic: ticRef.current });
+    renderer.applyStream({ kind: 'delta', buffer: observer(), tic: ticRef.current });
 
     const bounds = computeBounds();
     const centerX = (bounds.minX + bounds.maxX) / 2 + 0.5;
@@ -112,7 +119,7 @@ export function PixiEcsRendererStory({
     const world = worldRef.current;
     const observer = observerRef.current;
     const renderer = rendererRef.current;
-    const ticDurationMs = world.ticDurationMs;
+    const ticMs = 1000 / Math.max(1, ticsPerSecond);
     let lastTime = performance.now();
     let accumulator = 0;
     let frameId = 0;
@@ -125,8 +132,8 @@ export function PixiEcsRendererStory({
       accumulator += deltaMs;
 
       let ticsToRun = 0;
-      while (accumulator >= ticDurationMs) {
-        accumulator -= ticDurationMs;
+      while (accumulator >= ticMs) {
+        accumulator -= ticMs;
         ticsToRun += 1;
         if (ticsToRun > 10) break;
       }
@@ -158,7 +165,9 @@ export function PixiEcsRendererStory({
       width={width}
       height={height}
       backgroundColor={0x0b0d12}
-      onResize={() => rendererRef.current?.recenter()}
+      onResize={(_app, nextWidth, nextHeight) => {
+        rendererRef.current?.setViewportSize(nextWidth, nextHeight);
+      }}
     >
       {initRenderer}
     </PixiContainerWrapper>

@@ -16,11 +16,9 @@ export function classifyRenderKind(world: RenderWorldState['world'], eid: number
   }
   if (hasComponent(world, eid, Food)) return 'food';
   if (hasComponent(world, eid, Hero)) return 'hero';
-  if (hasComponent(world, eid, Size)) {
-    const diameter = Size.diameter[eid];
-    if (Number.isFinite(diameter) && Math.abs(diameter - 1) < 0.01) {
-      return hasComponent(world, eid, Obstacle) ? 'wall' : 'floor';
-    }
+  const diameter = Size.diameter[eid];
+  if (Number.isFinite(diameter) && diameter > 0.01 && diameter <= 1.01) {
+    return hasComponent(world, eid, Obstacle) ? 'wall' : 'floor';
   }
   return 'bot';
 }
