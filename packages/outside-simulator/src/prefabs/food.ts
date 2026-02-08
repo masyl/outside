@@ -15,7 +15,7 @@ import {
 import type { SimulatorWorld } from '../world';
 
 /** Default food diameter in tiles (used for overlap and rendering). */
-const FOOD_DIAMETER = 0.5;
+const FOOD_DIAMETER = 1;
 
 export interface SpawnFoodOptions {
   x: number;
