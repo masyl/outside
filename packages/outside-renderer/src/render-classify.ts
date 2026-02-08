@@ -1,4 +1,5 @@
 import { hasComponent } from 'bitecs';
+import { DEFAULT_FOOD_SPRITE_KEY } from '@outside/resource-packs/pixel-platter/meta';
 import {
   DefaultSpriteKey,
   FloorTile,
@@ -52,7 +53,11 @@ export function resolveSpriteKey(
 export function classifyRenderKind(world: RenderWorldState['world'], eid: number): RenderKind {
   const spriteKey = resolveSpriteKey(world, eid);
   if (spriteKey) {
-    return SPRITE_KEY_TO_RENDER_KIND[spriteKey] ?? 'error';
+    if (spriteKey.startsWith(`${DEFAULT_FOOD_SPRITE_KEY}.`)) {
+      return 'food';
+    }
+    const mapped = (SPRITE_KEY_TO_RENDER_KIND as Record<string, RenderKind>)[spriteKey];
+    return mapped ?? 'error';
   }
 
   // Fallback for partially-populated stream entities: use explicit semantic tags.

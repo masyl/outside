@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@hackernoon/pixel-icon-library": "^1.0.6",
+    "@outside/resource-packs": "workspace:*",
     "@outside/simulator": "workspace:*",
     "bitecs": "^0.4.0",
     "pixi.js": "^8.7.3"

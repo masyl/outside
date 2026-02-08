@@ -30,6 +30,7 @@ export type PlaceholderKind = 'bot' | 'hero' | 'food' | 'error';
 export interface RendererAssets {
   botIdle?: Texture;
   botWalk?: Texture;
+  foodTextureBySpriteKey: Map<string, Texture>;
   icons: {
     bot?: Texture;
     hero?: Texture;

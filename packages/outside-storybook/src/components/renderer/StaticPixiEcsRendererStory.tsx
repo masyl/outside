@@ -17,6 +17,8 @@ import { createStreamController } from './stream-controller';
 export interface StaticPixiEcsRendererStoryProps {
   rendererVer?: string;
   inspectorVer?: string;
+  resourcePackId?: string;
+  resourcePackVersion?: string;
   seed: number;
   tileSize?: number;
   waitForAssets?: boolean;

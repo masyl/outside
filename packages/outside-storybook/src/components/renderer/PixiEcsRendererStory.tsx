@@ -17,6 +17,8 @@ import { createStreamController } from './stream-controller';
 interface PixiEcsRendererStoryProps {
   rendererVer?: string;
   inspectorVer?: string;
+  resourcePackId?: string;
+  resourcePackVersion?: string;
   seed: number;
   ticsPerSecond: number;
   entityCount: number;

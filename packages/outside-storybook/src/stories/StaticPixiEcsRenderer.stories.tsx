@@ -3,6 +3,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { RENDERER_VERSION } from '@outside/renderer';
 import { INSPECTOR_RENDERER_VERSION } from '@outside/inspector-renderer';
 import {
+  PIXEL_PLATTER_PACK_ID,
+  PIXEL_PLATTER_PACK_VERSION,
+  foodVariantIds,
+} from '@outside/resource-packs/pixel-platter/meta';
+import {
   spawnBot,
   spawnFloorRect,
   spawnFloorTile,
@@ -21,6 +26,14 @@ const RENDERER_VER =
 const INSPECTOR_VER =
   typeof INSPECTOR_RENDERER_VERSION === 'string' && INSPECTOR_RENDERER_VERSION.length > 0
     ? INSPECTOR_RENDERER_VERSION
+    : 'unknown';
+const RESOURCE_PACK_ID =
+  typeof PIXEL_PLATTER_PACK_ID === 'string' && PIXEL_PLATTER_PACK_ID.length > 0
+    ? PIXEL_PLATTER_PACK_ID
+    : 'unknown';
+const RESOURCE_PACK_VERSION =
+  typeof PIXEL_PLATTER_PACK_VERSION === 'string' && PIXEL_PLATTER_PACK_VERSION.length > 0
+    ? PIXEL_PLATTER_PACK_VERSION
     : 'unknown';
 
 function FullHeightDecorator(Story: React.ComponentType) {
@@ -86,9 +99,9 @@ function spawnZoosWorld(world: SimulatorWorld, seed: number): void {
   spawnHero(world, { x: pens[0].cx, y: pens[0].cy });
   spawnBot(world, { x: pens[1].cx - 2, y: pens[1].cy, urge: 'none', tilesPerSec: 0 });
   spawnBot(world, { x: pens[1].cx + 2, y: pens[1].cy, urge: 'none', tilesPerSec: 0 });
-  spawnFood(world, { x: pens[2].cx, y: pens[2].cy });
+  spawnFood(world, { x: pens[2].cx, y: pens[2].cy, variant: 'apple' });
   spawnBot(world, { x: pens[3].cx - 1, y: pens[3].cy + 1, urge: 'none', tilesPerSec: 0 });
-  spawnFood(world, { x: pens[3].cx + 1, y: pens[3].cy - 1 });
+  spawnFood(world, { x: pens[3].cx + 1, y: pens[3].cy - 1, variant: 'banana' });
 
   // Central walkway
   spawnFloorRect(world, -5, -2, 5, 2, true);
@@ -163,7 +176,8 @@ function spawnLargeDungeonWithEntities(world: SimulatorWorld, seed: number): voi
   const foodCount = Math.min(12, roomCells.length);
   for (let i = 0; i < foodCount; i++) {
     const cell = roomCells[(i * 11) % roomCells.length];
-    spawnFood(world, { x: cell.x - 40 + 0.5, y: cell.y - 25 + 0.5 });
+    const variant = foodVariantIds[i % foodVariantIds.length];
+    spawnFood(world, { x: cell.x - 40 + 0.5, y: cell.y - 25 + 0.5, variant });
   }
 }
 
@@ -180,9 +194,9 @@ function spawnTileStrip(world: SimulatorWorld, _seed: number): void {
 }
 
 function spawnFoodOnly(world: SimulatorWorld, _seed: number): void {
-  spawnFood(world, { x: -2, y: -1 });
-  spawnFood(world, { x: 2, y: -1 });
-  spawnFood(world, { x: 0, y: 2 });
+  spawnFood(world, { x: -2, y: -1, variant: 'apple' });
+  spawnFood(world, { x: 2, y: -1, variant: 'orange' });
+  spawnFood(world, { x: 0, y: 2, variant: 'strawberry' });
 }
 
 function spawnWallsOnly(world: SimulatorWorld, _seed: number): void {
@@ -193,6 +207,20 @@ function spawnWallsOnly(world: SimulatorWorld, _seed: number): void {
   for (let y = -2; y <= 2; y++) {
     spawnWall(world, -4, y);
     spawnWall(world, 4, y);
+  }
+}
+
+function spawnFoodVariantGallery(world: SimulatorWorld, _seed: number): void {
+  const columns = 6;
+  const spacing = 2;
+  for (let i = 0; i < foodVariantIds.length; i++) {
+    const variant = foodVariantIds[i];
+    const col = i % columns;
+    const row = Math.floor(i / columns);
+    const x = col * spacing - ((columns - 1) * spacing) / 2;
+    const y = -row * spacing + 2;
+    spawnFloorTile(world, Math.floor(x), Math.floor(y), true);
+    spawnFood(world, { x: x + 0.5, y: y + 0.5, variant });
   }
 }
 
@@ -229,6 +257,18 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
       description: 'Full semver for @outside/inspector-renderer',
       table: { readonly: true },
     },
+    resourcePackId: {
+      control: { type: 'select' },
+      options: [RESOURCE_PACK_ID],
+      description: 'Selected food resource pack id',
+      table: { readonly: true },
+    },
+    resourcePackVersion: {
+      control: { type: 'select' },
+      options: [RESOURCE_PACK_VERSION],
+      description: 'Selected food resource pack version',
+      table: { readonly: true },
+    },
     showInspectorOverlay: { control: { type: 'boolean' } },
     showInspectorFollowLinks: { control: { type: 'boolean' } },
     showInspectorVelocityVectors: { control: { type: 'boolean' } },
@@ -241,6 +281,8 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
     showInspectorCollisionTint: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -255,6 +297,8 @@ export const BoxDungeonHero: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -267,6 +311,8 @@ export const ZoosShowcase: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -279,6 +325,8 @@ export const SmallDungeonEmpty: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -291,6 +339,8 @@ export const LargeDungeonWithEntities: StoryObj<typeof StaticPixiEcsRendererStor
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -303,6 +353,8 @@ export const SingleTileHero: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -315,6 +367,8 @@ export const TileStrip: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -327,6 +381,22 @@ export const FoodOnly: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
+  },
+};
+
+export const FoodVariantGallery: StoryObj<typeof StaticPixiEcsRendererStory> = {
+  args: {
+    seed: 1,
+    buildWorld: spawnFoodVariantGallery,
+    tileSize: 16,
+    waitForAssets: false,
+    showInspectorOverlay: false,
+    rendererVer: RENDERER_VER,
+    inspectorVer: INSPECTOR_VER,
+    resourcePackId: RESOURCE_PACK_ID,
+    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 

@@ -38,6 +38,16 @@ describe('classifyRenderKind', () => {
     expect(classifyRenderKind(world, eid)).toBe('food');
   });
 
+  it('treats food variant sprite keys as food even if not listed explicitly', () => {
+    const world = makeWorld();
+    const eid = addEntity(world);
+    addComponent(world, eid, DefaultSpriteKey);
+    DefaultSpriteKey.value[eid] = 'pickup.food';
+    addComponent(world, eid, VariantSpriteKey);
+    VariantSpriteKey.value[eid] = 'pickup.food.custom-variant';
+    expect(classifyRenderKind(world, eid)).toBe('food');
+  });
+
   it('falls back to error when no known key exists', () => {
     const world = makeWorld();
     const missing = addEntity(world);

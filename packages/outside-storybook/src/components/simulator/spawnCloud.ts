@@ -8,6 +8,7 @@ import {
   setViewportFollowTarget,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
+import { foodVariantIds, type FoodVariantId } from '@outside/resource-packs/pixel-platter/meta';
 import { generateDungeon } from '../../utils/dungeonLayout';
 import { generateDungeonWFC } from '../../utils/dungeonLayoutWFC';
 import { generateDungeonMetaTiles } from '../../utils/metatileDungeon';
@@ -38,6 +39,12 @@ export function seededUnit(seed: number, index: number): number {
   const n = (seed + index * 7919) | 0;
   const t = Math.sin(n * 12.9898 + index * 78.233) * 43758.5453;
   return t - Math.floor(t);
+}
+
+function pickFoodVariant(seed: number, index: number): FoodVariantId {
+  const variants = foodVariantIds;
+  const variantIndex = Math.floor(seededUnit(seed, 7000 + index) * variants.length) % variants.length;
+  return variants[Math.max(0, variantIndex)] as FoodVariantId;
 }
 
 /**
@@ -281,7 +288,7 @@ export function spawnDungeonWithFood(
     const p = roomCells[idx];
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
-    spawnFood(world, { x, y });
+    spawnFood(world, { x, y, variant: pickFoodVariant(seed, i) });
   }
 }
 
@@ -343,7 +350,7 @@ export function spawnDungeonWFCWithFood(
     const p = roomCells[idx];
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
-    spawnFood(world, { x, y });
+    spawnFood(world, { x, y, variant: pickFoodVariant(seed, 100 + i) });
   }
 }
 
@@ -390,7 +397,7 @@ export function spawnDungeonWFCWithFoodAndHero(
     const p = roomCells[idx];
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
-    spawnFood(world, { x, y });
+    spawnFood(world, { x, y, variant: pickFoodVariant(seed, 200 + i) });
   }
   const heroIdx =
     Math.floor(seededUnit(seed, 2000) * roomCells.length) % roomCells.length;
@@ -451,7 +458,7 @@ export function spawnDungeonWithFoodAndHero(
     const p = roomCells[idx];
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
-    spawnFood(world, { x, y });
+    spawnFood(world, { x, y, variant: pickFoodVariant(seed, 300 + i) });
   }
   const heroIdx =
     Math.floor(seededUnit(seed, 2000) * roomCells.length) % roomCells.length;

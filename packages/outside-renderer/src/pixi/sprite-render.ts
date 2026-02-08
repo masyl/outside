@@ -1,7 +1,7 @@
 import { Rectangle, Sprite, Texture, type Renderer } from 'pixi.js';
 import { Size, Position, VisualSize } from '@outside/simulator';
 import { hasComponent, type World } from 'bitecs';
-import type { RenderKind } from '../render-classify';
+import { resolveSpriteKey, type RenderKind } from '../render-classify';
 import { SPRITE_SIZE } from '../constants';
 import {
   getFacingDirection,
@@ -11,6 +11,7 @@ import {
 import type { RenderWorldState } from '../render-world';
 import type { RendererAssets } from './types';
 import { getPlaceholderTexture, setNearestScale } from './assets';
+import { resolveFoodTexture } from './food-textures';
 
 /**
  * Builds a new sprite instance for a render kind.
@@ -34,7 +35,9 @@ export function createSpriteForKind(
       return sprite;
     }
     case 'food': {
-      const texture = assets.icons.food ?? getPlaceholderTexture(renderer, assets, 'food');
+      const texture =
+        resolveFoodTexture(assets.foodTextureBySpriteKey, null) ??
+        getPlaceholderTexture(renderer, assets, 'error');
       const sprite = new Sprite(texture);
       sprite.roundPixels = true;
       sprite.zIndex = 3;
@@ -115,7 +118,10 @@ export function updateSpriteForEntity(
   }
 
   if (kind === 'food') {
-    const texture = assets.icons.food ?? getPlaceholderTexture(renderer, assets, 'food');
+    const spriteKey = resolveSpriteKey(world, eid);
+    const texture =
+      resolveFoodTexture(assets.foodTextureBySpriteKey, spriteKey) ??
+      getPlaceholderTexture(renderer, assets, 'error');
     if (sprite.texture !== texture) {
       sprite.texture = texture;
       setNearestScale(sprite.texture);

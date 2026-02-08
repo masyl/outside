@@ -1,4 +1,9 @@
-import { Assets, Graphics, type Renderer, type Texture } from 'pixi.js';
+import { pixelPlatterAtlasUrl } from '@outside/resource-packs/pixel-platter/atlas';
+import {
+  DEFAULT_FOOD_SPRITE_KEY,
+  pixelPlatterPack,
+} from '@outside/resource-packs/pixel-platter/meta';
+import { Assets, Graphics, Rectangle, Texture, type Renderer } from 'pixi.js';
 import type { RendererAssets, PlaceholderKind } from './types';
 
 /**
@@ -8,6 +13,7 @@ import type { RendererAssets, PlaceholderKind } from './types';
  */
 export function createRendererAssets(): RendererAssets {
   return {
+    foodTextureBySpriteKey: new Map<string, Texture>(),
     icons: {},
     placeholders: {},
   };
@@ -48,6 +54,35 @@ export async function loadRendererAssets(
   assets.icons.bot = await Assets.load(options.iconUrls.bot);
   assets.icons.hero = await Assets.load(options.iconUrls.hero);
   assets.icons.food = await Assets.load(options.iconUrls.food);
+
+  const foodAtlas = await Assets.load(pixelPlatterAtlasUrl);
+  setNearestScale(foodAtlas);
+  assets.foodTextureBySpriteKey.clear();
+
+  for (const variant of pixelPlatterPack.foodVariants) {
+    const texture = new Texture({
+      source: foodAtlas.source,
+      frame: new Rectangle(
+        variant.frame.x,
+        variant.frame.y,
+        variant.frame.w,
+        variant.frame.h
+      ),
+    });
+    setNearestScale(texture);
+    assets.foodTextureBySpriteKey.set(variant.spriteKey, texture);
+  }
+
+  const defaultVariant =
+    pixelPlatterPack.foodVariants.find((variant) => variant.variantId === 'apple') ??
+    pixelPlatterPack.foodVariants[0];
+  if (defaultVariant) {
+    const defaultTexture = assets.foodTextureBySpriteKey.get(defaultVariant.spriteKey);
+    if (defaultTexture) {
+      assets.foodTextureBySpriteKey.set(DEFAULT_FOOD_SPRITE_KEY, defaultTexture);
+      assets.icons.food = defaultTexture;
+    }
+  }
 
   setNearestScale(assets.botIdle);
   setNearestScale(assets.botWalk);

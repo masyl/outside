@@ -17,6 +17,7 @@
     "@outside/client": "workspace:*",
     "@outside/core": "workspace:*",
     "@outside/inspector-renderer": "workspace:*",
+    "@outside/resource-packs": "workspace:*",
     "@outside/renderer": "workspace:*",
     "@outside/simulator": "workspace:*",
     "react": "^18.2.0",
