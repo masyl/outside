@@ -5,6 +5,11 @@
 
 import { addEntity, addComponent, setComponent } from 'bitecs';
 import {
+  DEFAULT_FOOD_SPRITE_KEY,
+  foodVariantToSpriteKey,
+  type FoodVariantId,
+} from '@outside/resource-packs/pixel-platter/meta';
+import {
   Position,
   Size,
   Food,
@@ -20,6 +25,7 @@ const FOOD_DIAMETER = 1;
 export interface SpawnFoodOptions {
   x: number;
   y: number;
+  variant?: FoodVariantId;
 }
 
 /**
@@ -34,7 +40,7 @@ export function spawnFood(
   world: SimulatorWorld,
   options: SpawnFoodOptions
 ): number {
-  const { x, y } = options;
+  const { x, y, variant } = options;
   const eid = addEntity(world);
   addComponent(world, eid, Observed);
   addComponent(world, eid, Position);
@@ -43,8 +49,10 @@ export function spawnFood(
   setComponent(world, eid, Size, { diameter: FOOD_DIAMETER });
   addComponent(world, eid, Food);
   addComponent(world, eid, DefaultSpriteKey);
-  setComponent(world, eid, DefaultSpriteKey, { value: 'pickup.food' });
+  setComponent(world, eid, DefaultSpriteKey, { value: DEFAULT_FOOD_SPRITE_KEY });
   addComponent(world, eid, VariantSpriteKey);
-  setComponent(world, eid, VariantSpriteKey, { value: '' });
+  setComponent(world, eid, VariantSpriteKey, {
+    value: variant ? foodVariantToSpriteKey(variant) : '',
+  });
   return eid;
 }

@@ -34,6 +34,12 @@ export type { SpawnHeroOptions } from './prefabs/hero';
 export { spawnFloorTile, spawnFloorRect, spawnWall } from './prefabs/floor';
 export { spawnFood } from './prefabs/food';
 export type { SpawnFoodOptions } from './prefabs/food';
+export {
+  FOOD_VARIANTS,
+  spawnFoodVariant,
+  spawnFoodByVariant,
+} from './prefabs/food-variants';
+export type { SpawnFoodVariantOptions } from './prefabs/food-variants';
 export { orderHeroTo, getHeroPath } from './heroPath';
 
 export {
