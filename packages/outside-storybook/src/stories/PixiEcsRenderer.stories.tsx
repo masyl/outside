@@ -31,7 +31,7 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
     docs: {
       description: {
         component:
-          'Pixi renderer synced to the ECS simulator via BitECS observer stream. Tiles + entities only.',
+          'Pixi renderer synced to the ECS simulator via BitECS observer stream. Toggle inspector overlay to compare the same stream input.',
       },
     },
   },
@@ -59,8 +59,20 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       control: { type: 'boolean' },
       description: 'Delay render until assets load',
     },
+    showInspectorOverlay: {
+      control: { type: 'boolean' },
+      description: 'Overlay inspector renderer on top of Pixi',
+    },
+    inspectorOpacity: {
+      control: { type: 'range', min: 0.1, max: 1, step: 0.05 },
+      description: 'Overlay opacity',
+    },
     width: { control: { type: 'number', min: 300, step: 50 } },
     height: { control: { type: 'number', min: 300, step: 50 } },
+  },
+  args: {
+    showInspectorOverlay: false,
+    inspectorOpacity: 0.45,
   },
 };
 
@@ -75,6 +87,8 @@ export const Default: StoryObj<typeof PixiEcsRendererStory> = {
     tileSize: 16,
     showDebug: false,
     waitForAssets: false,
+    showInspectorOverlay: false,
+    inspectorOpacity: 0.45,
     width: 900,
     height: 700,
   },
@@ -86,9 +100,11 @@ export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
     ticsPerSecond: 8,
     entityCount: 30,
     spawnFn: spawnDungeonThenScattered,
-    tileSize: 16,
+    tileSize: 8,
     showDebug: false,
     waitForAssets: false,
+    showInspectorOverlay: false,
+    inspectorOpacity: 0.45,
     width: 900,
     height: 700,
   },
@@ -103,6 +119,8 @@ export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
     tileSize: 16,
     showDebug: false,
     waitForAssets: false,
+    showInspectorOverlay: false,
+    inspectorOpacity: 0.45,
     width: 900,
     height: 700,
   },

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const stories = [
+  'renderer-pixi-ecs--default&args=showInspectorOverlay:true;inspectorOpacity:0.45',
   'renderer-pixi-ecs-static--box-dungeon-hero&args=showDebug:true',
   'renderer-pixi-ecs-static--zoos-showcase&args=showDebug:true',
   'renderer-pixi-ecs-static--small-dungeon-empty&args=showDebug:true',
@@ -33,5 +34,9 @@ for (const storyId of stories) {
       return pixel[3];
     });
     expect(alpha).toBeGreaterThanOrEqual(0);
+
+    if (storyId.includes('showInspectorOverlay:true')) {
+      await expect(page.locator('svg[aria-label=\"Inspector renderer overlay\"]')).toBeVisible();
+    }
   });
 }

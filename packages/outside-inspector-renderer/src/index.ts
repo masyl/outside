@@ -1,6 +1,28 @@
 /**
  * React inspector renderer primitives shared by Storybook render diagnostics.
  */
+export {
+  createInspectorRenderWorld,
+  applyInspectorStream,
+  type RenderStreamPacket,
+  type InspectorRenderWorld,
+} from './render-stream';
+
+export {
+  buildInspectorFrame,
+  type InspectorFrame,
+  type InspectorTile,
+  type InspectorEntity,
+  type InspectorTileKind,
+  type InspectorEntityKind,
+} from './frame';
+
+export { InspectorRenderer } from './InspectorRenderer';
+export type { InspectorRendererProps } from './InspectorRenderer';
+
+export { InspectorOverlay } from './InspectorOverlay';
+export type { InspectorOverlayProps } from './InspectorOverlay';
+
 export { SimulatorViewport } from './components/SimulatorViewport';
 export type { SimulatorViewportProps } from './components/SimulatorViewport';
 

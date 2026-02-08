@@ -132,6 +132,9 @@ importers:
       '@outside/simulator':
         specifier: workspace:*
         version: link:../outside-simulator
+      bitecs:
+        specifier: ^0.4.0
+        version: 0.4.0
       react:
         specifier: 18.3.1
         version: 18.3.1
