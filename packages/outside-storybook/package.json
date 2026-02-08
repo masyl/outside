@@ -23,17 +23,17 @@
     "wavefunctioncollapse": "^2.1.0"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "9.0.0-alpha.12",
-    "@storybook/react": "10.2.0-beta.0",
-    "@storybook/react-vite": "10.2.0-beta.0",
-    "@storybook/test": "9.0.0-alpha.2",
+    "@playwright/test": "^1.50.0",
+    "@storybook/addon-a11y": "10.2.7",
+    "@storybook/addon-docs": "10.2.7",
+    "@storybook/react": "10.2.7",
+    "@storybook/react-vite": "10.2.7",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.3.0",
-    "@playwright/test": "^1.50.0",
     "esbuild": "0.25.12",
     "pixi.js": "^8.0.0",
-    "storybook": "10.2.0-beta.0",
+    "storybook": "10.2.7",
     "typescript": "^5.3.3",
     "vite": "^6.0.1",
     "vitest": "^4.0.18"
