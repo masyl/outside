@@ -226,6 +226,7 @@ export function PixiEcsRendererStory({
           tileSize={tileSize}
           centerX={stream.center.x}
           centerY={stream.center.y}
+          overlayMode={showInspectorOverlay}
           showFollowLinks={showInspectorFollowLinks}
           showVelocityVectors={showInspectorVelocityVectors}
           showCollisionTint={showInspectorCollisionTint}

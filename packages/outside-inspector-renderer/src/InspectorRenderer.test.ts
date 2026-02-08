@@ -132,4 +132,32 @@ describe('InspectorPrimitivesLayer', () => {
     );
     expect(botEntity?.props.fill).toBe('#4a4');
   });
+
+  it('uses outline-only shapes in overlay mode', () => {
+    const tree = InspectorPrimitivesLayer({
+      frame: BASE_FRAME,
+      tileSize: 16,
+      toScreenX: (x) => x * 16,
+      toScreenY: (y) => y * 16,
+      overlayMode: true,
+    });
+    const elements = flattenElements(tree);
+
+    const wallTile = elements.find(
+      (element) =>
+        element.type === 'rect' && element.props['data-inspector-kind'] === 'wall'
+    );
+    expect(wallTile?.props.fill).toBe('none');
+
+    const botEntity = elements.find(
+      (element) =>
+        element.type === 'circle' && element.props['data-inspector-kind'] === 'bot'
+    );
+    expect(botEntity?.props.fill).toBe('none');
+
+    const vectorArrowHead = elements.find(
+      (element) => element.type === 'polygon' && element.props.stroke === '#fc6'
+    );
+    expect(vectorArrowHead?.props.fill).toBe('none');
+  });
 });

@@ -9,6 +9,7 @@ export interface InspectorRendererProps {
   tileSize: number;
   centerX: number;
   centerY: number;
+  overlayMode?: boolean;
   showFollowLinks?: boolean;
   showVelocityVectors?: boolean;
   showCollisionTint?: boolean;
@@ -32,6 +33,7 @@ export function InspectorRenderer({
   tileSize,
   centerX,
   centerY,
+  overlayMode = false,
   showFollowLinks = true,
   showVelocityVectors = true,
   showCollisionTint = true,
@@ -49,6 +51,7 @@ export function InspectorRenderer({
         tileSize={tileSize}
         toScreenX={(x) => toScreenX(x, centerX, tileSize, width)}
         toScreenY={(y) => toScreenY(y, centerY, tileSize, height)}
+        overlayMode={overlayMode}
         showFollowLinks={showFollowLinks}
         showVelocityVectors={showVelocityVectors}
         showCollisionTint={showCollisionTint}

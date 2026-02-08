@@ -11,6 +11,7 @@ export interface InspectorPrimitivesLayerProps {
   tileSize: number;
   toScreenX: (worldX: number) => number;
   toScreenY: (worldY: number) => number;
+  overlayMode?: boolean;
   showTiles?: boolean;
   showFollowLinks?: boolean;
   showVelocityVectors?: boolean;
@@ -25,6 +26,7 @@ export function InspectorPrimitivesLayer({
   tileSize,
   toScreenX,
   toScreenY,
+  overlayMode = false,
   showTiles = true,
   showFollowLinks = true,
   showVelocityVectors = true,
@@ -54,10 +56,10 @@ export function InspectorPrimitivesLayer({
                 width={sizePx}
                 height={sizePx}
                 data-inspector-kind={tile.kind}
-                fill={wallCollided ? '#6af' : tile.kind === 'wall' ? '#888' : '#2f2f2f'}
-                fillOpacity={fillOpacity}
+                fill={overlayMode ? 'none' : wallCollided ? '#6af' : tile.kind === 'wall' ? '#888' : '#2f2f2f'}
+                fillOpacity={overlayMode ? 1 : fillOpacity}
                 stroke={tile.kind === 'wall' ? '#b5b5b5' : '#555'}
-                strokeWidth={1}
+                strokeWidth={overlayMode ? 1.25 : 1}
               />
             );
           })}
@@ -116,7 +118,14 @@ export function InspectorPrimitivesLayer({
                   strokeWidth={1.5}
                   strokeOpacity={0.9}
                 />
-                <polygon points={arrowPoints} fill="#fc6" fillOpacity={0.9} stroke="none" />
+                <polygon
+                  points={arrowPoints}
+                  fill={overlayMode ? 'none' : '#fc6'}
+                  fillOpacity={overlayMode ? 1 : 0.9}
+                  stroke="#fc6"
+                  strokeWidth={overlayMode ? 1.25 : 0}
+                  strokeOpacity={0.9}
+                />
               </g>
             );
           })}
@@ -154,11 +163,11 @@ export function InspectorPrimitivesLayer({
               cy={toScreenY(entity.y)}
               r={radius}
               data-inspector-kind={entity.kind}
-              fill={fill}
-              fillOpacity={isCollisionTinted ? collidedOpacity : 1}
+              fill={overlayMode ? 'none' : fill}
+              fillOpacity={overlayMode ? 1 : isCollisionTinted ? collidedOpacity : 1}
               stroke={stroke}
               strokeOpacity={isCollisionTinted ? collidedOpacity : 1}
-              strokeWidth={1.5}
+              strokeWidth={overlayMode ? 2 : 1.5}
             />
           );
         })}
