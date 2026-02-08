@@ -127,6 +127,34 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  packages/outside-renderer:
+    dependencies:
+      '@hackernoon/pixel-icon-library':
+        specifier: ^1.0.6
+        version: 1.0.6
+      '@outside/simulator':
+        specifier: workspace:*
+        version: link:../outside-simulator
+      bitecs:
+        specifier: ^0.4.0
+        version: 0.4.0
+      pixi.js:
+        specifier: ^8.7.3
+        version: 8.15.0
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.1
+        version: 6.4.1(@types/node@25.0.9)(tsx@4.21.0)
+      vite-plugin-dts:
+        specifier: ^4.3.0
+        version: 4.5.4(@types/node@25.0.9)(rollup@4.56.0)(typescript@5.9.3)(vite@6.4.1(@types/node@25.0.9)(tsx@4.21.0))
+      vitest:
+        specifier: ^4.0.17
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)
+
   packages/outside-server:
     dependencies:
       '@outside/core':
@@ -182,6 +210,9 @@ importers:
       '@outside/core':
         specifier: workspace:*
         version: link:../outside-core
+      '@outside/renderer':
+        specifier: workspace:*
+        version: link:../outside-renderer
       '@outside/simulator':
         specifier: workspace:*
         version: link:../outside-simulator
@@ -195,6 +226,9 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.50.0
+        version: 1.58.2
       '@storybook/addon-essentials':
         specifier: 9.0.0-alpha.12
         version: 9.0.0-alpha.12(storybook@10.2.0-beta.0(@testing-library/dom@10.4.0)(prettier@3.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
@@ -681,6 +715,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@hackernoon/pixel-icon-library@1.0.6':
+    resolution: {integrity: sha512-WCkDFAJq6Xyp2rdVV7qcmx/vlixoScikEv2DpWUNtzWchDOyeTFrU3GTvd0jD/DGYJomLy2tKwkl13wycaO3Ng==}
+
   '@iconify-json/simple-icons@1.2.66':
     resolution: {integrity: sha512-D1OnnXwiQXFkVMw5M+Bt8mPsXeMkQyGmMdrmN7lsQlKMUkfLOp6JWhnUJ92po51WXT046aF/zzqSmkKqg08p4Q==}
 
@@ -768,6 +805,11 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
+
+  '@playwright/test@1.58.2':
+    resolution: {integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
@@ -2356,6 +2398,11 @@ packages:
     resolution: {integrity: sha512-VWSRii4t0AFm6ixFFmLLx1t7wS1gh+ckoa84aOeapGum0h+EZd1EhEumSB+ZdDLnEPuucsVB9oB7cxJHap6Afg==}
     engines: {node: '>=14.14'}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -2500,6 +2547,7 @@ packages:
     resolution: {integrity: sha512-UfoeMA6fIJ8wTYFEUjelnaGI67v6+N7qXJEvQuIGa99l4xsCruSYOVSQ0uPANn4dAzm8lkYPaKLrrijLq7x23w==}
     engines: {node: '>= 0.4'}
 
+  is-docker@3.0.0:
     resolution: {integrity: sha512-eljcgEDlEns/7AXFosB5K/2nCM4P7FQPkGc/DWLy5rmFEWvZayGrik1d9/QIY5nJ4f9YsVvBkA6kJpHn9rISdQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     hasBin: true
@@ -2919,6 +2967,16 @@ packages:
 
   pkg-types@2.3.0:
     resolution: {integrity: sha512-SIqCzDRg0s9npO5XQ3tNZioRY1uK06lA41ynBC1YmFTmnY6FjUjVt6s4LoADmwoig1qqD0oK8h1p/8mlMx8Oig==}
+
+  playwright-core@1.58.2:
+    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.58.2:
+    resolution: {integrity: sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   points-on-curve@0.2.0:
     resolution: {integrity: sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==}
@@ -4189,6 +4247,8 @@ snapshots:
   '@esbuild/win32-x64@0.25.12':
     optional: true
 
+  '@hackernoon/pixel-icon-library@1.0.6': {}
+
   '@iconify-json/simple-icons@1.2.66':
     dependencies:
       '@iconify/types': 2.0.0
@@ -4306,6 +4366,10 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
+
+  '@playwright/test@1.58.2':
+    dependencies:
+      playwright: 1.58.2
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -5999,6 +6063,9 @@ snapshots:
       jsonfile: 6.2.0
       universalify: 2.0.1
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -6157,6 +6224,7 @@ snapshots:
     dependencies:
       hasown: 2.0.2
 
+  is-docker@3.0.0: {}
 
   is-extendable@0.1.1: {}
 
@@ -6164,6 +6232,7 @@ snapshots:
 
   is-inside-container@1.0.0:
     dependencies:
+      is-docker: 3.0.0
 
   is-potential-custom-element-name@1.0.1: {}
 
@@ -6571,6 +6640,14 @@ snapshots:
       confbox: 0.2.2
       exsolve: 1.0.8
       pathe: 2.0.3
+
+  playwright-core@1.58.2: {}
+
+  playwright@1.58.2:
+    dependencies:
+      playwright-core: 1.58.2
+    optionalDependencies:
+      fsevents: 2.3.2
 
   points-on-curve@0.2.0: {}
 

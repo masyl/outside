@@ -10,11 +10,13 @@
     "preview": "vite preview",
     "storybook": "storybook dev --port 6007",
     "build-storybook": "storybook build",
+    "test:playwright": "playwright test",
     "storybook:clear-cache": "rm -rf node_modules/.cache/storybook node_modules/.cache/vite 2>/dev/null; echo Cache cleared"
   },
   "dependencies": {
     "@outside/client": "workspace:*",
     "@outside/core": "workspace:*",
+    "@outside/renderer": "workspace:*",
     "@outside/simulator": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -28,6 +30,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "@playwright/test": "^1.50.0",
     "esbuild": "0.25.12",
     "pixi.js": "^8.0.0",
     "storybook": "10.2.0-beta.0",

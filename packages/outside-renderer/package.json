@@ -1,0 +1,35 @@
+{
+  "name": "@outside/renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "vite build",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "echo \"No linter configured yet\"",
+    "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {
+    "@hackernoon/pixel-icon-library": "^1.0.6",
+    "@outside/simulator": "workspace:*",
+    "bitecs": "^0.4.0",
+    "pixi.js": "^8.7.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^6.0.1",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^4.0.17"
+  }
+}

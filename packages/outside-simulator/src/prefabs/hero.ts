@@ -18,6 +18,7 @@ import {
   MaxSpeed,
   PointerTarget,
   Hero,
+  Observed,
 } from '../components';
 import type { SimulatorWorld } from '../world';
 
@@ -41,6 +42,7 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
   if (prefabEid !== undefined) return prefabEid;
 
   prefabEid = addPrefab(world);
+  addComponent(world, prefabEid, Observed);
   addComponent(world, prefabEid, set(Position, { x: DEFAULTS.x, y: DEFAULTS.y }));
   addComponent(world, prefabEid, set(VisualSize, { diameter: DEFAULTS.visualDiameter }));
   addComponent(world, prefabEid, set(ObstacleSize, { diameter: DEFAULTS.obstacleDiameter }));
@@ -75,6 +77,7 @@ export function spawnHero(
   const prefabEid = getOrCreateHeroPrefab(world);
   const eid = addEntity(world);
   addComponent(world, eid, IsA(prefabEid));
+  addComponent(world, eid, Observed);
 
   if (options?.x !== undefined || options?.y !== undefined) {
     setComponent(world, eid, Position, {
