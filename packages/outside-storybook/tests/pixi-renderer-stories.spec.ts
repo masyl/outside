@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 
 const stories = [
   'renderer-pixi-ecs--default&args=showInspectorOverlay:true',
-  'renderer-pixi-ecs-static--box-dungeon-hero&args=showDebug:true',
-  'renderer-pixi-ecs-static--zoos-showcase&args=showDebug:true',
-  'renderer-pixi-ecs-static--small-dungeon-empty&args=showDebug:true',
-  'renderer-pixi-ecs-static--large-dungeon-with-entities&args=showDebug:true',
+  'renderer-pixi-ecs-static--box-dungeon-hero',
+  'renderer-pixi-ecs-static--zoos-showcase',
+  'renderer-pixi-ecs-static--small-dungeon-empty',
+  'renderer-pixi-ecs-static--large-dungeon-with-entities',
   'renderer-pixi-canvas-checks--solid-rect',
   'renderer-pixi-canvas-checks--grid-lines',
   'renderer-pixi-canvas-checks--circles-palette',

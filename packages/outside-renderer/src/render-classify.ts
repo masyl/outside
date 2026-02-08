@@ -1,6 +1,10 @@
 import { hasComponent } from 'bitecs';
 import {
   DefaultSpriteKey,
+  FloorTile,
+  Food,
+  Hero,
+  Obstacle,
   VariantSpriteKey,
 } from '@outside/simulator';
 import type { RenderWorldState } from './render-world';
@@ -47,6 +51,16 @@ export function resolveSpriteKey(
  */
 export function classifyRenderKind(world: RenderWorldState['world'], eid: number): RenderKind {
   const spriteKey = resolveSpriteKey(world, eid);
-  if (!spriteKey) return 'error';
-  return SPRITE_KEY_TO_RENDER_KIND[spriteKey] ?? 'error';
+  if (spriteKey) {
+    return SPRITE_KEY_TO_RENDER_KIND[spriteKey] ?? 'error';
+  }
+
+  // Fallback for partially-populated stream entities: use explicit semantic tags.
+  if (hasComponent(world, eid, FloorTile)) {
+    return hasComponent(world, eid, Obstacle) ? 'wall' : 'floor';
+  }
+  if (hasComponent(world, eid, Food)) return 'food';
+  if (hasComponent(world, eid, Hero)) return 'hero';
+
+  return 'error';
 }

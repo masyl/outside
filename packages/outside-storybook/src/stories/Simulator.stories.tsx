@@ -101,8 +101,8 @@ export const FewEntities: StoryObj<typeof SimulatorRenderer> = {
 export const ManyEntities: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 999,
-    ticsPerSecond: 30,
-    entityCount: 999,
+    ticsPerSecond: 20,
+    entityCount: 99,
     spawnFn: spawnScatteredWithLeaders,
   },
 };
@@ -227,7 +227,8 @@ export const HeroAndPathfinding: StoryObj<typeof SimulatorRenderer> = {
     spawnPreset: 'floorRectWithHero',
     roomWidth: 60,
     roomHeight: 40,
-    captionLegend: 'Click a floor tile to order the hero there. Path: dotted yellow; checkpoints: yellow boxes.',
+    captionLegend:
+      'Click a floor tile to order the hero there. Path: dotted yellow; checkpoints: yellow boxes.',
   },
 };
 

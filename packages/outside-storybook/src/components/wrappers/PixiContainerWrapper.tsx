@@ -88,8 +88,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
         }
 
         app.renderer.clearBeforeRender = true;
-        app.stage.name = `storybook:pixi-app#${appId}:stage`;
-        (app.stage as any).label = `storybook:pixi-app#${appId}:stage`;
+        app.stage.label = `storybook:pixi-app#${appId}:stage`;
         readyRef.current = true;
         setReadyVersion((v) => v + 1);
         childrenRef.current(app);

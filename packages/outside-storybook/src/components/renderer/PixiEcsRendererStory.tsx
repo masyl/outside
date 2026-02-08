@@ -22,7 +22,6 @@ interface PixiEcsRendererStoryProps {
   entityCount: number;
   spawnFn: SpawnFn;
   tileSize?: number;
-  showDebug?: boolean;
   waitForAssets?: boolean;
   showInspectorOverlay?: boolean;
 }
@@ -39,7 +38,6 @@ export function PixiEcsRendererStory({
   entityCount,
   spawnFn,
   tileSize = 16,
-  showDebug = false,
   waitForAssets = false,
   showInspectorOverlay = false,
 }: PixiEcsRendererStoryProps) {
@@ -70,7 +68,6 @@ export function PixiEcsRendererStory({
     }
     const renderer = new PixiEcsRenderer(app, {
       tileSize,
-      debugEnabled: showDebug,
     });
     rendererRef.current = renderer;
     rendererAppRef.current = app;
@@ -89,15 +86,14 @@ export function PixiEcsRendererStory({
   useEffect(() => {
     applyGenerationRef.current += 1;
     pixiApplyQueueRef.current = Promise.resolve();
-  }, [tileSize, showDebug, waitForAssets]);
+  }, [tileSize, waitForAssets]);
 
   useEffect(() => {
     const renderer = rendererRef.current;
     if (!renderer || rendererReady === 0) return;
     renderer.resetWorld();
     renderer.setTileSize(tileSize);
-    renderer.setDebugEnabled(showDebug);
-  }, [rendererReady, tileSize, showDebug, stream.streamKey]);
+  }, [rendererReady, tileSize, stream.streamKey]);
 
   useEffect(() => {
     if (!stream.packet) return;

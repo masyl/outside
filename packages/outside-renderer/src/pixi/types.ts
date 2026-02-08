@@ -17,10 +17,6 @@ export interface PixiRendererOptions {
    * Optional icon URL overrides.
    */
   iconUrls?: Partial<typeof DEFAULT_ICON_URLS>;
-  /**
-   * Enables verbose debug logs and on-canvas diagnostics.
-   */
-  debugEnabled?: boolean;
 }
 
 /**

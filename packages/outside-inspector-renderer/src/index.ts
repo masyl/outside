@@ -21,6 +21,7 @@ export { InspectorRenderer } from './InspectorRenderer';
 export type { InspectorRendererProps } from './InspectorRenderer';
 
 export { InspectorOverlay } from './InspectorOverlay';
+export { INSPECTOR_RENDERER_VERSION } from './version';
 export type { InspectorOverlayProps } from './InspectorOverlay';
 
 export { SimulatorViewport } from './components/SimulatorViewport';

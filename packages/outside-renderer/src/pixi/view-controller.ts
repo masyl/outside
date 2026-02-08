@@ -60,7 +60,8 @@ export class PixiViewController {
 
     // Convert desired world-center into root translation so world point lands at screen midpoint.
     const rootX = screenWidth / 2 - worldX * this.tileSize;
-    const rootY = screenHeight / 2 - worldY * this.tileSize;
+    // World space is Y-up; screen space is Y-down. Invert Y during camera translation.
+    const rootY = screenHeight / 2 + worldY * this.tileSize;
     this.root.x = rootX;
     this.root.y = rootY;
 

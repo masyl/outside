@@ -2,7 +2,6 @@ import React, { type ReactNode } from 'react';
 
 export interface InspectorOverlayProps {
   visible: boolean;
-  opacity?: number;
   pointerEvents?: 'none' | 'auto';
   children: ReactNode;
 }
@@ -12,19 +11,20 @@ export interface InspectorOverlayProps {
  */
 export function InspectorOverlay({
   visible,
-  opacity = 0.45,
   pointerEvents = 'none',
   children,
 }: InspectorOverlayProps) {
-  if (!visible) return null;
-
   return (
     <div
+      className="outside-inspector-overlay"
+      data-inspector-overlay="true"
+      data-visible={visible ? 'true' : 'false'}
+      aria-label="Inspector overlay"
       style={{
         position: 'absolute',
         inset: 0,
         pointerEvents,
-        opacity,
+        display: visible ? 'block' : 'none',
         zIndex: 10,
       }}
     >

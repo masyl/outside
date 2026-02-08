@@ -10,3 +10,4 @@ export {
 export { runAnimationTic, getFacingDirection, getIsMoving, getWalkFrame } from './animation';
 export { PixiEcsRenderer, type PixiRendererOptions } from './pixi-renderer';
 export { classifyRenderKind, type RenderKind } from './render-classify';
+export { RENDERER_VERSION } from './version';

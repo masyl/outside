@@ -4,23 +4,29 @@ import { DEFAULT_ICON_URLS } from './icons';
 import { PixiGridBackground } from './pixi/background';
 import { createRendererAssets, loadRendererAssets } from './pixi/assets';
 import { PixiViewController } from './pixi/view-controller';
-import { PixiDebugOverlay } from './pixi/debug-overlay';
 import { runRenderPass, type RenderDisplayState } from './pixi/render-pass';
 import { RenderStreamController } from './pixi/stream-controller';
 import type { PixiRendererOptions } from './pixi/types';
 import type { RenderStreamPacket } from './render-world';
+
+let NEXT_RENDERER_ID = 1;
+
+function setNodeLabel(node: { label?: string }, label: string): void {
+  node.label = label;
+}
 
 /**
  * Pixi renderer that consumes serialized simulator deltas/snapshots and renders a read-only view.
  */
 export class PixiEcsRenderer {
   private readonly app: Application;
+  private readonly backgroundLayer: Container;
   private readonly root: Container;
   private readonly tileLayer: Container;
   private readonly entityLayer: Container;
   private readonly stream: RenderStreamController;
   private readonly view: PixiViewController;
-  private readonly debugOverlay: PixiDebugOverlay;
+  private readonly rendererId: number;
 
   private readonly displayState: RenderDisplayState;
   private readonly assets = createRendererAssets();
@@ -37,6 +43,7 @@ export class PixiEcsRenderer {
    */
   constructor(app: Application, options: PixiRendererOptions = {}) {
     this.app = app;
+    this.rendererId = NEXT_RENDERER_ID++;
     this.assetBaseUrl = options.assetBaseUrl ?? '/sprites';
     this.iconUrls = {
       ...DEFAULT_ICON_URLS,
@@ -45,32 +52,38 @@ export class PixiEcsRenderer {
 
     this.root = new Container();
     this.root.sortableChildren = true;
+    setNodeLabel(this.root, `renderer#${this.rendererId}:root`);
 
     this.tileLayer = new Container();
     this.entityLayer = new Container();
     this.tileLayer.zIndex = 0;
     this.entityLayer.zIndex = 1;
+    setNodeLabel(this.tileLayer, `renderer#${this.rendererId}:tile-layer`);
+    setNodeLabel(this.entityLayer, `renderer#${this.rendererId}:entity-layer`);
     this.root.addChild(this.tileLayer);
     this.root.addChild(this.entityLayer);
 
-    const backgroundLayer = new Container();
-    backgroundLayer.zIndex = 0;
+    this.backgroundLayer = new Container();
+    this.backgroundLayer.zIndex = 0;
+    setNodeLabel(this.backgroundLayer, `renderer#${this.rendererId}:background-layer`);
     this.root.zIndex = 1;
 
     this.app.stage.sortableChildren = true;
-    this.app.stage.addChild(backgroundLayer);
+    setNodeLabel(this.app.stage, `renderer#${this.rendererId}:stage`);
+    this.app.stage.addChild(this.backgroundLayer);
     this.app.stage.addChild(this.root);
 
-    const background = new PixiGridBackground(this.app.renderer, backgroundLayer);
+    const background = new PixiGridBackground(
+      this.app.renderer,
+      this.backgroundLayer,
+      `renderer#${this.rendererId}:background`
+    );
     this.view = new PixiViewController(
       this.app.renderer,
       this.root,
       background,
       options.tileSize ?? DEFAULT_TILE_SIZE
     );
-
-    this.debugOverlay = new PixiDebugOverlay(this.app.stage);
-    this.debugOverlay.setEnabled(options.debugEnabled ?? false);
 
     this.stream = new RenderStreamController();
 
@@ -81,20 +94,12 @@ export class PixiEcsRenderer {
   }
 
   /**
-   * Enables or disables on-canvas debug diagnostics.
-   *
-   * @param enabled `boolean` that toggles debug overlays and verbose logging.
-   */
-  setDebugEnabled(enabled: boolean): void {
-    this.debugOverlay.setEnabled(enabled);
-  }
-
-  /**
    * Updates tile size and redraws immediately.
    *
    * @param tileSize `number` next tile side length in pixels.
    */
   setTileSize(tileSize: number): void {
+    this.clearDisplayState();
     this.view.setTileSize(tileSize);
     this.render();
   }
@@ -133,13 +138,7 @@ export class PixiEcsRenderer {
    * Clears display objects and resets the local render world.
    */
   resetWorld(): void {
-    for (const sprite of this.displayState.displayIndex.values()) {
-      sprite.destroy();
-    }
-    this.displayState.displayIndex.clear();
-    this.displayState.displayKinds.clear();
-    this.tileLayer.removeChildren();
-    this.entityLayer.removeChildren();
+    this.clearDisplayState();
 
     this.stream.reset();
     this.render();
@@ -161,26 +160,7 @@ export class PixiEcsRenderer {
    * @param worldY `number` center Y in world tile units.
    */
   setViewCenter(worldX: number, worldY: number): void {
-    const metrics = this.view.setViewCenter(worldX, worldY);
-
-    this.debugOverlay.setCenterLabel(
-      worldX,
-      worldY,
-      metrics.screenWidth,
-      metrics.screenHeight,
-      metrics.rootX,
-      metrics.rootY
-    );
-
-    if (this.debugOverlay.isEnabled()) {
-      console.log('[PixiEcsRenderer] view center', {
-        worldX,
-        worldY,
-        screenWidth: metrics.screenWidth,
-        screenHeight: metrics.screenHeight,
-      });
-      console.log('[PixiEcsRenderer] root position', { x: metrics.rootX, y: metrics.rootY });
-    }
+    this.view.setViewCenter(worldX, worldY);
 
     // Static stories call camera updates independently from stream packets.
     this.render();
@@ -190,12 +170,7 @@ export class PixiEcsRenderer {
    * Reapplies the last requested center.
    */
   recenter(): void {
-    const metrics = this.view.recenter();
-    if (!metrics) return;
-
-    if (this.debugOverlay.isEnabled()) {
-      console.log('[PixiEcsRenderer] recenter', metrics);
-    }
+    this.view.recenter();
   }
 
   /**
@@ -207,6 +182,7 @@ export class PixiEcsRenderer {
   setViewportSize(width: number, height: number): void {
     this.view.setViewportSize(width, height);
     this.recenter();
+    this.render();
   }
 
   /**
@@ -214,35 +190,16 @@ export class PixiEcsRenderer {
    */
   render(): void {
     this.view.updateBackground();
-
-    const stats = runRenderPass(
+    runRenderPass(
       this.app.renderer,
       this.stream.getWorldState(),
       this.assets,
       this.view.getTileSize(),
       this.tileLayer,
       this.entityLayer,
-      this.displayState
+      this.displayState,
+      `renderer#${this.rendererId}`
     );
-
-    this.debugOverlay.setStatsLabel(
-      `entities=${stats.entityCount} displays=${stats.displayCount} ` +
-        `tiles=${stats.tileDisplayCount} ents=${stats.entityDisplayCount} ` +
-        `floor=${stats.floorCount} wall=${stats.wallCount} hero=${stats.heroCount} food=${stats.foodCount} bot=${stats.botCount} error=${stats.errorCount} ` +
-        `root=(${this.root.x.toFixed(1)}, ${this.root.y.toFixed(1)})`
-    );
-
-    if (this.debugOverlay.isEnabled()) {
-      console.log('[PixiEcsRenderer] render entities=', stats.entityCount);
-      console.log(
-        '[PixiEcsRenderer] displayIndex=',
-        stats.displayCount,
-        'tileLayer=',
-        stats.tileDisplayCount,
-        'entityLayer=',
-        stats.entityDisplayCount
-      );
-    }
 
     try {
       this.app.renderer.clear();
@@ -256,14 +213,26 @@ export class PixiEcsRenderer {
    * Destroys all renderer-owned display objects and helpers.
    */
   destroy(): void {
+    this.clearDisplayState();
+    this.view.destroy();
+    this.root.removeFromParent();
+    this.backgroundLayer.removeFromParent();
+    this.root.destroy({ children: true });
+    this.backgroundLayer.destroy({ children: true });
+  }
+
+  /**
+   * Destroys all tracked display objects and clears render-layer children.
+   */
+  private clearDisplayState(): void {
     for (const sprite of this.displayState.displayIndex.values()) {
+      sprite.removeFromParent();
       sprite.destroy();
     }
     this.displayState.displayIndex.clear();
     this.displayState.displayKinds.clear();
-    this.debugOverlay.destroy();
-    this.view.destroy();
-    this.root.destroy({ children: true });
+    this.tileLayer.removeChildren();
+    this.entityLayer.removeChildren();
   }
 }
 

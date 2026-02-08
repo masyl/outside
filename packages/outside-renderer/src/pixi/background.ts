@@ -1,6 +1,10 @@
 import { Graphics, TilingSprite, type Container, type Renderer, type Texture } from 'pixi.js';
 import { setNearestScale } from './assets';
 
+function setNodeLabel(node: { label?: string }, label: string): void {
+  node.label = label;
+}
+
 /**
  * Owns the tiled background grid so renderer logic stays focused on entities.
  */
@@ -11,7 +15,8 @@ export class PixiGridBackground {
 
   constructor(
     private readonly renderer: Renderer,
-    private readonly layer: Container
+    private readonly layer: Container,
+    private readonly labelPrefix = 'renderer:background'
   ) {}
 
   /**
@@ -36,6 +41,7 @@ export class PixiGridBackground {
         height,
       });
       this.background.zIndex = 0;
+      setNodeLabel(this.background, `${this.labelPrefix}:tiling-sprite`);
       this.layer.addChild(this.background);
     }
 

@@ -1,10 +1,27 @@
 import type { Container, Renderer, Sprite } from 'pixi.js';
-import { Position } from '@outside/simulator';
-import { query } from 'bitecs';
-import { classifyRenderKind, type RenderKind } from '../render-classify';
+import {
+  DefaultSpriteKey,
+  Food,
+  FloorTile,
+  Hero,
+  Obstacle,
+  Position,
+  VariantSpriteKey,
+  Walkable,
+} from '@outside/simulator';
+import { hasComponent, query } from 'bitecs';
+import {
+  classifyRenderKind,
+  resolveSpriteKey,
+  type RenderKind,
+} from '../render-classify';
 import type { RenderWorldState } from '../render-world';
 import type { RendererAssets } from './types';
 import { createSpriteForKind, updateSpriteForEntity } from './sprite-render';
+
+function setNodeLabel(node: { label?: string }, label: string): void {
+  node.label = label;
+}
 
 /**
  * Per-frame renderer counters used for diagnostics.
@@ -40,6 +57,7 @@ export interface RenderDisplayState {
  * @param tileLayer `Container` destination layer for floor/wall sprites.
  * @param entityLayer `Container` destination layer for actors/items sprites.
  * @param state `RenderDisplayState` persistent display object maps.
+ * @param rendererLabel `string` identifier used to tag nodes for DevTools inspection.
  * @returns `RenderPassStats` aggregate counters for logs/debug labels.
  */
 export function runRenderPass(
@@ -49,11 +67,27 @@ export function runRenderPass(
   tileSize: number,
   tileLayer: Container,
   entityLayer: Container,
-  state: RenderDisplayState
+  state: RenderDisplayState,
+  rendererLabel: string
 ): RenderPassStats {
   const world = renderWorld.world;
-  const entities = query(world, [Position]);
+  // Only render entities that explicitly opt into the sprite-key rendering contract.
+  const entities = query(world, [Position, DefaultSpriteKey]);
   const nextIds = new Set<number>();
+  const unresolvedEntities: Array<{
+    eid: number;
+    position: { x: number; y: number };
+    resolvedSpriteKey: string | null;
+    defaultSpriteKey: string | null;
+    variantSpriteKey: string | null;
+    components: {
+      floorTile: boolean;
+      obstacle: boolean;
+      walkable: boolean;
+      food: boolean;
+      hero: boolean;
+    };
+  }> = [];
 
   const stats: RenderPassStats = {
     floorCount: 0,
@@ -62,7 +96,7 @@ export function runRenderPass(
     foodCount: 0,
     botCount: 0,
     errorCount: 0,
-    entityCount: entities.length,
+    entityCount: 0,
     displayCount: 0,
     tileDisplayCount: 0,
     entityDisplayCount: 0,
@@ -72,6 +106,35 @@ export function runRenderPass(
     const eid = entities[i];
     const kind = classifyRenderKind(world, eid);
     if (!kind) continue;
+    if (kind === 'error') {
+      // Unknown sprite keys are considered data issues and are intentionally not rendered.
+      // Rendering them as fallback sprites can explode display-object counts when stream data is noisy.
+      stats.errorCount += 1;
+      const defaultSprite = DefaultSpriteKey.value[eid];
+      const variantSprite = VariantSpriteKey.value[eid];
+      unresolvedEntities.push({
+        eid,
+        position: {
+          x: Position.x[eid],
+          y: Position.y[eid],
+        },
+        resolvedSpriteKey: resolveSpriteKey(world, eid),
+        defaultSpriteKey:
+          typeof defaultSprite === 'string' ? defaultSprite : null,
+        variantSpriteKey:
+          typeof variantSprite === 'string' ? variantSprite : null,
+        components: {
+          floorTile: hasComponent(world, eid, FloorTile),
+          obstacle: hasComponent(world, eid, Obstacle),
+          walkable: hasComponent(world, eid, Walkable),
+          food: hasComponent(world, eid, Food),
+          hero: hasComponent(world, eid, Hero),
+        },
+      });
+      continue;
+    }
+
+    stats.entityCount += 1;
     nextIds.add(eid);
     countKind(stats, kind);
 
@@ -80,6 +143,7 @@ export function runRenderPass(
 
     // Recreate sprite only if classification changed because it may require a layer swap.
     if (sprite && previousKind && previousKind !== kind) {
+      sprite.removeFromParent();
       sprite.destroy();
       state.displayIndex.delete(eid);
       state.displayKinds.delete(eid);
@@ -88,6 +152,7 @@ export function runRenderPass(
 
     if (!sprite) {
       sprite = createSpriteForKind(renderer, assets, kind);
+      setNodeLabel(sprite, `${rendererLabel}:${kind}:eid:${eid}`);
       state.displayIndex.set(eid, sprite);
       state.displayKinds.set(eid, kind);
       if (kind === 'floor' || kind === 'wall') {
@@ -102,6 +167,7 @@ export function runRenderPass(
 
   for (const [eid, sprite] of state.displayIndex.entries()) {
     if (nextIds.has(eid)) continue;
+    sprite.removeFromParent();
     sprite.destroy();
     state.displayIndex.delete(eid);
     state.displayKinds.delete(eid);
@@ -110,6 +176,12 @@ export function runRenderPass(
   stats.displayCount = state.displayIndex.size;
   stats.tileDisplayCount = tileLayer.children.length;
   stats.entityDisplayCount = entityLayer.children.length;
+  if (unresolvedEntities.length > 0) {
+    console.log('[PixiEcsRenderer] unresolved render entities', {
+      total: unresolvedEntities.length,
+      entities: unresolvedEntities.slice(0, 50),
+    });
+  }
   return stats;
 }
 

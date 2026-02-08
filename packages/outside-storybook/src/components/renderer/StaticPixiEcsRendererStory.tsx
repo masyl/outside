@@ -19,7 +19,6 @@ export interface StaticPixiEcsRendererStoryProps {
   inspectorVer?: string;
   seed: number;
   tileSize?: number;
-  showDebug?: boolean;
   waitForAssets?: boolean;
   showInspectorOverlay?: boolean;
   buildWorld: (world: SimulatorWorld, seed: number) => void;
@@ -34,7 +33,6 @@ const EMPTY_FRAME: InspectorFrame = {
 export function StaticPixiEcsRendererStory({
   seed,
   tileSize = 16,
-  showDebug = false,
   waitForAssets = false,
   showInspectorOverlay = false,
   buildWorld,
@@ -64,7 +62,6 @@ export function StaticPixiEcsRendererStory({
     }
     const renderer = new PixiEcsRenderer(app, {
       tileSize,
-      debugEnabled: showDebug,
     });
     rendererRef.current = renderer;
     rendererAppRef.current = app;
@@ -83,15 +80,14 @@ export function StaticPixiEcsRendererStory({
   useEffect(() => {
     applyGenerationRef.current += 1;
     pixiApplyQueueRef.current = Promise.resolve();
-  }, [tileSize, showDebug, waitForAssets]);
+  }, [tileSize, waitForAssets]);
 
   useEffect(() => {
     const renderer = rendererRef.current;
     if (!renderer || rendererReady === 0) return;
     renderer.setTileSize(tileSize);
-    renderer.setDebugEnabled(showDebug);
     renderer.resetWorld();
-  }, [rendererReady, tileSize, showDebug, stream.streamKey]);
+  }, [rendererReady, tileSize, stream.streamKey]);
 
   useEffect(() => {
     if (!stream.packet) {

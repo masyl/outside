@@ -21,7 +21,7 @@ export interface RenderWorldState {
  */
 export type RenderStreamPacket = {
   kind: 'snapshot' | 'delta';
-  buffer: Uint8Array;
+  buffer: ArrayBuffer;
   tic: number;
 };
 

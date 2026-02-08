@@ -91,12 +91,19 @@ export function updateSpriteForEntity(
   const diameter = getEntityDiameter(world, eid, kind);
   const posX = Position.x[eid];
   const posY = Position.y[eid];
+  if (!Number.isFinite(posX) || !Number.isFinite(posY)) {
+    sprite.visible = false;
+    return;
+  }
+  sprite.visible = true;
   // World positions are center-based for entities and corner-based for tiles.
   // Convert center positions to top-left so sprite bounds align with tile grid.
+  // Convert world coordinates (Y-up) to local render coordinates.
+  // Tiles are anchored at their bottom-left corner in world space.
   const topLeft =
     kind === 'floor' || kind === 'wall'
-      ? { x: posX * tileSize, y: posY * tileSize }
-      : { x: (posX - diameter / 2) * tileSize, y: (posY - diameter / 2) * tileSize };
+      ? { x: posX * tileSize, y: -(posY + 1) * tileSize }
+      : { x: (posX - diameter / 2) * tileSize, y: -(posY + diameter / 2) * tileSize };
 
   if (kind === 'floor' || kind === 'wall') {
     sprite.x = topLeft.x;
