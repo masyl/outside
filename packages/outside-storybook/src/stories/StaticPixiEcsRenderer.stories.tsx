@@ -185,23 +185,6 @@ function spawnWallsOnly(world: SimulatorWorld, _seed: number): void {
   }
 }
 
-function spawnMixedSizes(world: SimulatorWorld, _seed: number): void {
-  spawnFloorRect(world, -6, -4, 6, 4, true);
-  spawnBot(world, { x: -2, y: 0, visualDiameter: 0.8, obstacleDiameter: 0.6, urge: 'none' });
-  spawnBot(world, { x: 0, y: 0, visualDiameter: 1.2, obstacleDiameter: 0.8, urge: 'none' });
-  spawnBot(world, { x: 2, y: 0, visualDiameter: 1.6, obstacleDiameter: 1.0, urge: 'none' });
-  spawnHero(world, { x: 0, y: -2 });
-  spawnFood(world, { x: 0, y: 2 });
-}
-
-function spawnRenderKindPalette(world: SimulatorWorld, _seed: number): void {
-  spawnFloorTile(world, -2, 0, true);
-  spawnWall(world, -1, 0);
-  spawnBot(world, { x: 0.5, y: 0.5, urge: 'none', tilesPerSec: 0 });
-  spawnHero(world, { x: 1.5, y: 0.5 });
-  spawnFood(world, { x: 2.5, y: 0.5 });
-}
-
 const meta: Meta<typeof StaticPixiEcsRendererStory> = {
   title: 'Renderer/Pixi ECS (Static)',
   component: StaticPixiEcsRendererStory,
@@ -319,30 +302,6 @@ export const WallsOnly: StoryObj<typeof StaticPixiEcsRendererStory> = {
   args: {
     seed: 1,
     buildWorld: spawnWallsOnly,
-    tileSize: 16,
-    showDebug: false,
-    waitForAssets: false,
-    width: 900,
-    height: 700,
-  },
-};
-
-export const MixedSizes: StoryObj<typeof StaticPixiEcsRendererStory> = {
-  args: {
-    seed: 1,
-    buildWorld: spawnMixedSizes,
-    tileSize: 16,
-    showDebug: false,
-    waitForAssets: false,
-    width: 900,
-    height: 700,
-  },
-};
-
-export const RenderKindPalette: StoryObj<typeof StaticPixiEcsRendererStory> = {
-  args: {
-    seed: 1,
-    buildWorld: spawnRenderKindPalette,
     tileSize: 16,
     showDebug: false,
     waitForAssets: false,

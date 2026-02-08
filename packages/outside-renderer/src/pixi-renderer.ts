@@ -43,6 +43,7 @@ interface RendererAssets {
     bot?: Texture;
     hero?: Texture;
     food?: Texture;
+    error?: Texture;
   };
 }
 
@@ -203,6 +204,8 @@ export class PixiEcsRenderer {
       console.log('[PixiEcsRenderer] view center', { worldX, worldY, screenWidth, screenHeight });
       console.log('[PixiEcsRenderer] root position', { x: this.root.x, y: this.root.y });
     }
+    // Static stories rely on explicit renders; re-render immediately after camera move.
+    this.render();
   }
 
   recenter(): void {
@@ -230,6 +233,7 @@ export class PixiEcsRenderer {
     let heroCount = 0;
     let foodCount = 0;
     let botCount = 0;
+    let errorCount = 0;
 
     for (let i = 0; i < entities.length; i++) {
       const eid = entities[i];
@@ -250,6 +254,11 @@ export class PixiEcsRenderer {
           foodCount += 1;
           break;
         case 'bot':
+          botCount += 1;
+          break;
+        case 'error':
+          errorCount += 1;
+          break;
         default:
           botCount += 1;
           break;
@@ -289,7 +298,7 @@ export class PixiEcsRenderer {
       this.debugLabel.text =
         `entities=${entities.length} displays=${this.displayIndex.size} ` +
         `tiles=${this.tileLayer.children.length} ents=${this.entityLayer.children.length} ` +
-        `floor=${floorCount} wall=${wallCount} hero=${heroCount} food=${foodCount} bot=${botCount} ` +
+        `floor=${floorCount} wall=${wallCount} hero=${heroCount} food=${foodCount} bot=${botCount} error=${errorCount} ` +
         `root=(${this.root.x.toFixed(1)}, ${this.root.y.toFixed(1)})`;
     }
     if (this.debugEnabled) {
@@ -351,15 +360,18 @@ export class PixiEcsRenderer {
         return sprite;
       }
       case 'bot':
+      case 'error':
       default: {
         const texture =
-          this.assets.botIdle ??
-          this.assets.icons.bot ??
-          this.assets.placeholders.bot ??
-          this.createPlaceholderTexture('bot');
+          kind === 'error'
+            ? this.assets.placeholders.error ?? this.createPlaceholderTexture('error')
+            : this.assets.botIdle ??
+              this.assets.icons.bot ??
+              this.assets.placeholders.bot ??
+              this.createPlaceholderTexture('bot');
         const sprite = new Sprite(texture);
         sprite.roundPixels = true;
-        sprite.zIndex = 3;
+        sprite.zIndex = kind === 'error' ? 5 : 3;
         return sprite;
       }
     }
@@ -405,8 +417,9 @@ export class PixiEcsRenderer {
       return;
     }
 
-    sprite.width = tileSize * diameter;
-    sprite.height = tileSize * diameter;
+    const size = kind === 'error' ? tileSize : tileSize * diameter;
+    sprite.width = size;
+    sprite.height = size;
   }
 
   private updateBotSpriteFrame(
@@ -481,11 +494,17 @@ export class PixiEcsRenderer {
     }
   }
 
-  private createPlaceholderTexture(kind: 'bot' | 'hero' | 'food'): Texture {
+  private createPlaceholderTexture(kind: 'bot' | 'hero' | 'food' | 'error'): Texture {
     const cached = this.assets.placeholders[kind];
     if (cached) return cached;
     const color =
-      kind === 'bot' ? 0x4aa8ff : kind === 'hero' ? 0xffd166 : 0xff3b30;
+      kind === 'bot'
+        ? 0x4aa8ff
+        : kind === 'hero'
+          ? 0xffd166
+          : kind === 'food'
+            ? 0xff3b30
+            : 0xd40000;
     const g = new Graphics();
     const size = 16;
     const inset = 2;
@@ -493,6 +512,10 @@ export class PixiEcsRenderer {
       g.rect(inset, inset, size - inset * 2, size - inset * 2)
         .fill(color)
         .stroke({ color: 0x5b0b0b, width: 2 });
+    } else if (kind === 'error') {
+      g.rect(0, 0, size, size).fill(0x160000);
+      g.moveTo(2, 2).lineTo(size - 2, size - 2).stroke({ color, width: 3 });
+      g.moveTo(size - 2, 2).lineTo(2, size - 2).stroke({ color, width: 3 });
     } else {
       g.circle(size / 2, size / 2, size / 2 - 1)
         .fill(color)
@@ -554,4 +577,5 @@ export class PixiEcsRenderer {
     this.setNearestScale(texture);
     return texture;
   }
+
 }
