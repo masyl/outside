@@ -1,9 +1,14 @@
 import {
+  Collided,
+  Direction,
   FloorTile,
+  Follow,
+  FollowTarget,
   Food,
   Hero,
   Obstacle,
   Position,
+  Speed,
   Size,
   VisualSize,
 } from '@outside/simulator';
@@ -18,6 +23,8 @@ export interface InspectorTile {
   y: number;
   size: number;
   kind: InspectorTileKind;
+  inCollidedCooldown: boolean;
+  collidedTicksRemaining: number;
 }
 
 export interface InspectorEntity {
@@ -26,11 +33,28 @@ export interface InspectorEntity {
   y: number;
   diameter: number;
   kind: InspectorEntityKind;
+  directionRad: number | null;
+  speedTilesPerSec: number | null;
+  inCollidedCooldown: boolean;
+  collidedTicksRemaining: number;
+}
+
+export interface InspectorFollowLink {
+  followerEid: number;
+  targetEid: number;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
 }
 
 export interface InspectorFrame {
   tiles: InspectorTile[];
   entities: InspectorEntity[];
+  followLinks: InspectorFollowLink[];
+  collisionEntityCount: number;
+  collisionTileCount: number;
+  followLinkCount: number;
   unknownCount: number;
 }
 
@@ -44,7 +68,10 @@ export function buildInspectorFrame(world: World): InspectorFrame {
   const eids = query(world, [Position]);
   const tiles: InspectorTile[] = [];
   const entities: InspectorEntity[] = [];
+  const followLinks: InspectorFollowLink[] = [];
   let unknownCount = 0;
+  let collisionEntityCount = 0;
+  let collisionTileCount = 0;
 
   for (let i = 0; i < eids.length; i++) {
     const eid = eids[i];
@@ -55,7 +82,22 @@ export function buildInspectorFrame(world: World): InspectorFrame {
     if (hasComponent(world, eid, FloorTile)) {
       const size = hasComponent(world, eid, Size) ? (Size.diameter[eid] ?? 1) : 1;
       const kind: InspectorTileKind = hasComponent(world, eid, Obstacle) ? 'wall' : 'floor';
-      tiles.push({ eid, x, y, size, kind });
+      const collidedTicksRemaining = hasComponent(world, eid, Collided)
+        ? (Collided.ticksRemaining[eid] ?? 0)
+        : 0;
+      const inCollidedCooldown = collidedTicksRemaining > 0;
+      if (inCollidedCooldown) {
+        collisionTileCount += 1;
+      }
+      tiles.push({
+        eid,
+        x,
+        y,
+        size,
+        kind,
+        inCollidedCooldown,
+        collidedTicksRemaining,
+      });
       continue;
     }
 
@@ -74,9 +116,53 @@ export function buildInspectorFrame(world: World): InspectorFrame {
       kind = 'bot';
     }
     if (kind === 'unknown') unknownCount += 1;
+    const directionRad = hasComponent(world, eid, Direction) ? (Direction.angle[eid] ?? 0) : null;
+    const speedTilesPerSec = hasComponent(world, eid, Speed) ? (Speed.tilesPerSec[eid] ?? 0) : null;
+    const collidedTicksRemaining = hasComponent(world, eid, Collided)
+      ? (Collided.ticksRemaining[eid] ?? 0)
+      : 0;
+    const inCollidedCooldown = collidedTicksRemaining > 0;
+    if (inCollidedCooldown) {
+      collisionEntityCount += 1;
+    }
 
-    entities.push({ eid, x, y, diameter, kind });
+    entities.push({
+      eid,
+      x,
+      y,
+      diameter,
+      kind,
+      directionRad,
+      speedTilesPerSec,
+      inCollidedCooldown,
+      collidedTicksRemaining,
+    });
   }
 
-  return { tiles, entities, unknownCount };
+  const followers = query(world, [Position, Follow, FollowTarget]);
+  for (let i = 0; i < followers.length; i++) {
+    const followerEid = followers[i];
+    const targetEid = FollowTarget.eid[followerEid];
+    if (!Number.isFinite(targetEid) || targetEid < 0) continue;
+    if (!hasComponent(world, targetEid, Position)) continue;
+
+    followLinks.push({
+      followerEid,
+      targetEid,
+      fromX: Position.x[followerEid],
+      fromY: Position.y[followerEid],
+      toX: Position.x[targetEid],
+      toY: Position.y[targetEid],
+    });
+  }
+
+  return {
+    tiles,
+    entities,
+    followLinks,
+    collisionEntityCount,
+    collisionTileCount,
+    followLinkCount: followLinks.length,
+    unknownCount,
+  };
 }
