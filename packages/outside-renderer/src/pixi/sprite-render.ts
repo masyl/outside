@@ -184,7 +184,7 @@ function updateBotSpriteFrame(
 
   switch (direction) {
     case 'down':
-      row = 0;
+      row = 4;
       break;
     case 'left':
       row = 2;
@@ -194,7 +194,7 @@ function updateBotSpriteFrame(
       row = 2;
       break;
     case 'up':
-      row = 4;
+      row = 0;
       break;
   }
 
