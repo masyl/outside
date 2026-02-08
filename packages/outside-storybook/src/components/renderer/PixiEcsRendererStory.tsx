@@ -43,6 +43,7 @@ export function PixiEcsRendererStory({
   waitForAssets = false,
   showInspectorOverlay = false,
 }: PixiEcsRendererStoryProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<PixiEcsRenderer | null>(null);
   const rendererAppRef = useRef<Application | null>(null);
   const inspectorWorldRef = useRef(createInspectorRenderWorld());
@@ -154,17 +155,40 @@ export function PixiEcsRendererStory({
     };
   }, []);
 
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateFromContainer = () => {
+      const rect = container.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.floor(rect.width));
+      const nextHeight = Math.max(1, Math.floor(rect.height));
+      setViewportSize((prev) =>
+        prev.width === nextWidth && prev.height === nextHeight
+          ? prev
+          : { width: nextWidth, height: nextHeight }
+      );
+    };
+
+    updateFromContainer();
+    const observer = new ResizeObserver(updateFromContainer);
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleResize = useCallback((_app: Application, nextWidth: number, nextHeight: number) => {
+    rendererRef.current?.setViewportSize(nextWidth, nextHeight);
+  }, []);
+
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
       <PixiContainerWrapper
         instanceKey={`pixi-ecs-${stream.streamKey}-${tileSize}`}
         width="100%"
         height="100%"
         backgroundColor={0x0b0d12}
-        onResize={(_app, nextWidth, nextHeight) => {
-          rendererRef.current?.setViewportSize(nextWidth, nextHeight);
-          setViewportSize({ width: nextWidth, height: nextHeight });
-        }}
+        onResize={handleResize}
       >
         {initRenderer}
       </PixiContainerWrapper>
