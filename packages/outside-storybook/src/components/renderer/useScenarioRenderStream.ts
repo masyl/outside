@@ -123,12 +123,6 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       packetVersion: prev.packetVersion + 1,
     }));
 
-    if (options.mode === 'dynamic' && observerRef.current) {
-      setPacketState((prev) => ({
-        packet: { kind: 'delta', buffer: observerRef.current!(), tic: 0 },
-        packetVersion: prev.packetVersion + 1,
-      }));
-    }
   }, [streamKey]);
 
   useEffect(() => {

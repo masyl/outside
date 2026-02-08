@@ -12,8 +12,11 @@ import {
 } from '@outside/inspector-renderer';
 import { PixiContainerWrapper } from '../wrappers/PixiContainerWrapper';
 import { useScenarioRenderStream } from './useScenarioRenderStream';
+import { createStreamController } from './stream-controller';
 
 export interface StaticPixiEcsRendererStoryProps {
+  rendererVer?: string;
+  inspectorVer?: string;
   seed: number;
   width?: number;
   height?: number;
@@ -21,7 +24,6 @@ export interface StaticPixiEcsRendererStoryProps {
   showDebug?: boolean;
   waitForAssets?: boolean;
   showInspectorOverlay?: boolean;
-  inspectorOpacity?: number;
   buildWorld: (world: SimulatorWorld, seed: number) => void;
 }
 
@@ -39,12 +41,13 @@ export function StaticPixiEcsRendererStory({
   showDebug = false,
   waitForAssets = false,
   showInspectorOverlay = false,
-  inspectorOpacity = 0.45,
   buildWorld,
 }: StaticPixiEcsRendererStoryProps) {
   const rendererRef = useRef<PixiEcsRenderer | null>(null);
   const rendererAppRef = useRef<Application | null>(null);
   const inspectorWorldRef = useRef(createInspectorRenderWorld());
+  const streamControllerRef = useRef(createStreamController());
+  const pixiApplyQueueRef = useRef(Promise.resolve());
   const [inspectorFrame, setInspectorFrame] = useState<InspectorFrame>(EMPTY_FRAME);
   const [viewportSize, setViewportSize] = useState({ width, height });
   const [rendererReady, setRendererReady] = useState(0);
@@ -72,6 +75,8 @@ export function StaticPixiEcsRendererStory({
   }, []);
 
   useEffect(() => {
+    streamControllerRef.current.reset(stream.streamKey);
+    pixiApplyQueueRef.current = Promise.resolve();
     inspectorWorldRef.current = createInspectorRenderWorld();
     setInspectorFrame(EMPTY_FRAME);
   }, [stream.streamKey]);
@@ -85,26 +90,56 @@ export function StaticPixiEcsRendererStory({
   }, [rendererReady, tileSize, showDebug, stream.streamKey]);
 
   useEffect(() => {
-    const renderer = rendererRef.current;
-    const packet = stream.packet;
-    if (!renderer || !packet) return;
+    if (!stream.packet) {
+      return;
+    }
+    streamControllerRef.current.push(stream.packet);
+  }, [stream.packetVersion]);
 
-    const applyPacket = async () => {
-      if (waitForAssets && renderer.getAssetsReady()) {
-        await renderer.getAssetsReady();
-      }
-      renderer.applyStream({
-        kind: packet.kind,
-        tic: packet.tic,
-        buffer: new Uint8Array(packet.buffer),
-      });
-
+  useEffect(() => {
+    const unsubscribe = streamControllerRef.current.subscribe('inspector', (packet) => {
       applyInspectorStream(inspectorWorldRef.current, packet);
-      setInspectorFrame(buildInspectorFrame(inspectorWorldRef.current.world));
-    };
+      const frame = buildInspectorFrame(inspectorWorldRef.current.world);
+      setInspectorFrame(frame);
+    });
 
-    void applyPacket();
-  }, [rendererReady, stream.packetVersion, waitForAssets]);
+    return () => unsubscribe();
+  }, [stream.streamKey]);
+
+  useEffect(() => {
+    streamControllerRef.current.setReady('inspector', true);
+    return () => {
+      streamControllerRef.current.setReady('inspector', false);
+    };
+  }, [stream.streamKey]);
+
+  useEffect(() => {
+    const unsubscribe = streamControllerRef.current.subscribe('pixi', (packet) => {
+      const renderer = rendererRef.current;
+      if (!renderer) return;
+
+      pixiApplyQueueRef.current = pixiApplyQueueRef.current.then(async () => {
+        if (waitForAssets && renderer.getAssetsReady()) {
+          await renderer.getAssetsReady();
+        }
+        renderer.applyStream({
+          kind: packet.kind,
+          tic: packet.tic,
+          buffer: packet.buffer,
+        });
+      });
+    });
+
+    return () => unsubscribe();
+  }, [stream.streamKey, waitForAssets]);
+
+  useEffect(() => {
+    const isPixiReady = rendererReady > 0 && rendererRef.current !== null;
+    streamControllerRef.current.setReady('pixi', isPixiReady);
+    return () => {
+      streamControllerRef.current.setReady('pixi', false);
+    };
+  }, [rendererReady, stream.streamKey]);
 
   useEffect(() => {
     const renderer = rendererRef.current;
@@ -134,7 +169,7 @@ export function StaticPixiEcsRendererStory({
       >
         {initRenderer}
       </PixiContainerWrapper>
-      <InspectorOverlay visible={showInspectorOverlay} opacity={inspectorOpacity} pointerEvents="none">
+      <InspectorOverlay visible={showInspectorOverlay} pointerEvents="none">
         <InspectorRenderer
           frame={inspectorFrame}
           width={viewportSize.width}

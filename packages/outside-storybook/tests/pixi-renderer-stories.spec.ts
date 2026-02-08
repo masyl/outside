@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const stories = [
-  'renderer-pixi-ecs--default&args=showInspectorOverlay:true;inspectorOpacity:0.45',
+  'renderer-pixi-ecs--default&args=showInspectorOverlay:true',
   'renderer-pixi-ecs-static--box-dungeon-hero&args=showDebug:true',
   'renderer-pixi-ecs-static--zoos-showcase&args=showDebug:true',
   'renderer-pixi-ecs-static--small-dungeon-empty&args=showDebug:true',
@@ -37,6 +37,10 @@ for (const storyId of stories) {
 
     if (storyId.includes('showInspectorOverlay:true')) {
       await expect(page.locator('svg[aria-label=\"Inspector renderer overlay\"]')).toBeVisible();
+      const primitiveCount = await page.locator(
+        '.outside-inspector-overlay svg rect, .outside-inspector-overlay svg circle, .outside-inspector-overlay svg line, .outside-inspector-overlay svg path, .outside-inspector-overlay svg polygon'
+      ).count();
+      expect(primitiveCount).toBeGreaterThan(0);
     }
   });
 }
