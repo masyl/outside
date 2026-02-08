@@ -31,6 +31,8 @@ import {
   MaxSpeed,
   PointerTarget,
   Observed,
+  DefaultSpriteKey,
+  VariantSpriteKey,
 } from '../components';
 import type { SimulatorWorld } from '../world';
 
@@ -68,6 +70,8 @@ export function getOrCreateBotPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, set(Speed, { tilesPerSec: DEFAULTS.tilesPerSec }));
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
   addComponent(world, prefabEid, PointerTarget);
+  addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.bot' }));
+  addComponent(world, prefabEid, set(VariantSpriteKey, { value: '' }));
   // Wander + WanderPersistence are added per-entity in spawnBot so each bot has its own slot (no prefab inheritance for urge state)
 
   prefabByWorld.set(world, prefabEid);
@@ -91,6 +95,10 @@ export interface SpawnBotOptions {
   followTargetEid?: number;
   /** Follow tightness (0 = instant, higher = slower adjustment). Optional. */
   followTightness?: number;
+  /** Optional default sprite key override. */
+  spriteKey?: string;
+  /** Optional sprite variant key. */
+  variantSpriteKey?: string;
 }
 
 /**
@@ -108,6 +116,9 @@ export function spawnBot(
   const eid = addEntity(world);
   addComponent(world, eid, IsA(prefabEid));
   addComponent(world, eid, Observed);
+  // Always materialize sprite keys on instance so renderer does not depend on IsA copy behavior.
+  setComponent(world, eid, DefaultSpriteKey, { value: options?.spriteKey ?? 'actor.bot' });
+  setComponent(world, eid, VariantSpriteKey, { value: options?.variantSpriteKey ?? '' });
 
   if (options?.x !== undefined || options?.y !== undefined) {
     setComponent(world, eid, Position, {

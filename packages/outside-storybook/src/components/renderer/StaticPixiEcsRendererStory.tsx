@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Application } from 'pixi.js';
 import {
   createWorld,
@@ -53,11 +53,11 @@ export function StaticPixiEcsRendererStory({
   buildWorld,
 }: StaticPixiEcsRendererStoryProps) {
   const rendererRef = useRef<PixiEcsRenderer | null>(null);
+  const [rendererReady, setRendererReady] = useState(0);
 
   const applyStaticWorld = useCallback(async () => {
     const renderer = rendererRef.current;
     if (!renderer) {
-      console.log('[StaticPixiEcsRenderer] renderer not ready');
       return;
     }
 
@@ -95,12 +95,13 @@ export function StaticPixiEcsRendererStory({
     });
     rendererRef.current = renderer;
     void renderer.loadAssets();
-    void applyStaticWorld();
-  }, [applyStaticWorld, tileSize, showDebug]);
+    setRendererReady((v) => v + 1);
+  }, [tileSize, showDebug]);
 
   useEffect(() => {
+    if (rendererReady === 0) return;
     void applyStaticWorld();
-  }, [applyStaticWorld]);
+  }, [applyStaticWorld, rendererReady]);
 
   return (
     <PixiContainerWrapper

@@ -70,7 +70,6 @@ export function PixiEcsRendererStory({
   const setupSimulation = useCallback(async () => {
     const renderer = rendererRef.current;
     if (!renderer) {
-      console.log('[PixiEcsRendererStory] renderer not ready');
       return;
     }
 
@@ -106,13 +105,13 @@ export function PixiEcsRendererStory({
     });
     rendererRef.current = renderer;
     void renderer.loadAssets();
-    setupSimulation();
     setRendererReady((v) => v + 1);
-  }, [setupSimulation, tileSize, showDebug]);
+  }, [tileSize, showDebug]);
 
   useEffect(() => {
+    if (rendererReady === 0) return;
     void setupSimulation();
-  }, [setupSimulation]);
+  }, [setupSimulation, rendererReady]);
 
   useEffect(() => {
     if (!worldRef.current || !observerRef.current || !rendererRef.current) return;

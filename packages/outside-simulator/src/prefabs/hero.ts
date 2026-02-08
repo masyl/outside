@@ -19,6 +19,8 @@ import {
   PointerTarget,
   Hero,
   Observed,
+  DefaultSpriteKey,
+  VariantSpriteKey,
 } from '../components';
 import type { SimulatorWorld } from '../world';
 
@@ -53,6 +55,8 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
   addComponent(world, prefabEid, PointerTarget);
   addComponent(world, prefabEid, Hero);
+  addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.hero' }));
+  addComponent(world, prefabEid, set(VariantSpriteKey, { value: '' }));
 
   prefabByWorld.set(world, prefabEid);
   return prefabEid;
@@ -61,6 +65,8 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
 export interface SpawnHeroOptions {
   x?: number;
   y?: number;
+  spriteKey?: string;
+  variantSpriteKey?: string;
 }
 
 /**
@@ -78,6 +84,9 @@ export function spawnHero(
   const eid = addEntity(world);
   addComponent(world, eid, IsA(prefabEid));
   addComponent(world, eid, Observed);
+  // Always materialize sprite keys on instance so renderer does not depend on IsA copy behavior.
+  setComponent(world, eid, DefaultSpriteKey, { value: options?.spriteKey ?? 'actor.hero' });
+  setComponent(world, eid, VariantSpriteKey, { value: options?.variantSpriteKey ?? '' });
 
   if (options?.x !== undefined || options?.y !== undefined) {
     setComponent(world, eid, Position, {

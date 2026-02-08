@@ -9,6 +9,7 @@ import {
   createSnapshotSerializer,
   RENDER_COMPONENTS,
   Position,
+  DefaultSpriteKey,
 } from '@outside/simulator';
 import { applyRenderStream, createRenderWorld } from './render-world';
 import { query } from 'bitecs';
@@ -30,6 +31,10 @@ describe('render stream sync', () => {
 
     const renderEntities = query(renderWorld.world, [Position]);
     expect(renderEntities.length).toBeGreaterThan(0);
+    const botLike = renderEntities.find(
+      (eid) => DefaultSpriteKey.value[eid] === 'actor.bot' || DefaultSpriteKey.value[eid] === 'actor.hero'
+    );
+    expect(botLike).toBeDefined();
 
     const delta = observer();
     applyRenderStream(renderWorld, { kind: 'delta', buffer: delta, tic: 1 });

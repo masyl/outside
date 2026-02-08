@@ -1,46 +1,51 @@
 import { describe, it, expect } from 'vitest';
 import { addEntity, addComponent } from 'bitecs';
-import { FloorTile, Obstacle, Food, Hero, Size } from '@outside/simulator';
+import { DefaultSpriteKey, VariantSpriteKey } from '@outside/simulator';
 import { createRenderWorld } from './render-world';
-import { classifyRenderKind } from './render-classify';
+import { classifyRenderKind, resolveSpriteKey } from './render-classify';
 
 function makeWorld() {
   return createRenderWorld().world;
 }
 
 describe('classifyRenderKind', () => {
-  it('classifies floor and wall tags', () => {
+  it('classifies known sprite keys', () => {
     const world = makeWorld();
-    const floor = addEntity(world);
-    addComponent(world, floor, FloorTile);
-    expect(classifyRenderKind(world, floor)).toBe('floor');
+    const entries = [
+      ['tile.floor', 'floor'],
+      ['tile.wall', 'wall'],
+      ['actor.bot', 'bot'],
+      ['actor.hero', 'hero'],
+      ['pickup.food', 'food'],
+    ] as const;
 
-    const wall = addEntity(world);
-    addComponent(world, wall, FloorTile);
-    addComponent(world, wall, Obstacle);
-    expect(classifyRenderKind(world, wall)).toBe('wall');
+    for (const [key, expected] of entries) {
+      const eid = addEntity(world);
+      addComponent(world, eid, DefaultSpriteKey);
+      DefaultSpriteKey.value[eid] = key;
+      expect(classifyRenderKind(world, eid)).toBe(expected);
+    }
   });
 
-  it('classifies hero and food tags', () => {
+  it('uses variant key before default key', () => {
     const world = makeWorld();
-    const hero = addEntity(world);
-    addComponent(world, hero, Hero);
-    expect(classifyRenderKind(world, hero)).toBe('hero');
-
-    const food = addEntity(world);
-    addComponent(world, food, Food);
-    expect(classifyRenderKind(world, food)).toBe('food');
+    const eid = addEntity(world);
+    addComponent(world, eid, DefaultSpriteKey);
+    DefaultSpriteKey.value[eid] = 'actor.bot';
+    addComponent(world, eid, VariantSpriteKey);
+    VariantSpriteKey.value[eid] = 'pickup.food';
+    expect(resolveSpriteKey(world, eid)).toBe('pickup.food');
+    expect(classifyRenderKind(world, eid)).toBe('food');
   });
 
-  it('infers tiles from size when tags are missing', () => {
+  it('falls back to error when no known key exists', () => {
     const world = makeWorld();
-    const tile = addEntity(world);
-    Size.diameter[tile] = 1;
-    expect(classifyRenderKind(world, tile)).toBe('floor');
+    const missing = addEntity(world);
+    expect(classifyRenderKind(world, missing)).toBe('error');
 
-    const wall = addEntity(world);
-    Size.diameter[wall] = 1;
-    addComponent(world, wall, Obstacle);
-    expect(classifyRenderKind(world, wall)).toBe('wall');
+    const unknown = addEntity(world);
+    addComponent(world, unknown, DefaultSpriteKey);
+    DefaultSpriteKey.value[unknown] = 'unknown.key';
+    expect(classifyRenderKind(world, unknown)).toBe('error');
   });
 });

@@ -4,7 +4,14 @@
  */
 
 import { addEntity, addComponent, setComponent } from 'bitecs';
-import { Position, Size, Food, Observed } from '../components';
+import {
+  Position,
+  Size,
+  Food,
+  Observed,
+  DefaultSpriteKey,
+  VariantSpriteKey,
+} from '../components';
 import type { SimulatorWorld } from '../world';
 
 /** Default food diameter in tiles (used for overlap and rendering). */
@@ -35,5 +42,9 @@ export function spawnFood(
   addComponent(world, eid, Size);
   setComponent(world, eid, Size, { diameter: FOOD_DIAMETER });
   addComponent(world, eid, Food);
+  addComponent(world, eid, DefaultSpriteKey);
+  setComponent(world, eid, DefaultSpriteKey, { value: 'pickup.food' });
+  addComponent(world, eid, VariantSpriteKey);
+  setComponent(world, eid, VariantSpriteKey, { value: '' });
   return eid;
 }
