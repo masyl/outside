@@ -13,6 +13,22 @@ const config: StorybookConfig = {
   },
   async viteFinal(baseConfig) {
     return mergeConfig(baseConfig, {
+      plugins: [
+        {
+          name: 'outside-storybook-vitest-mocker-shim',
+          configureServer(server) {
+            server.middlewares.use((req, res, next) => {
+              if (req.url?.startsWith('/vite-inject-mocker-entry.js')) {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/javascript');
+                res.end('export {};');
+                return;
+              }
+              next();
+            });
+          },
+        },
+      ],
       resolve: {
         alias: {
           '@outside/simulator': resolve(rootDir, '../outside-simulator/src/index.ts'),
