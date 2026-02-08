@@ -341,9 +341,10 @@ export class PixiEcsRenderer {
       }
       case 'hero': {
         const texture =
-          this.assets.icons.hero ??
-          this.assets.placeholders.hero ??
-          this.createPlaceholderTexture('hero');
+          this.assets.botIdle ??
+          this.assets.icons.bot ??
+          this.assets.placeholders.bot ??
+          this.createPlaceholderTexture('bot');
         const sprite = new Sprite(texture);
         sprite.roundPixels = true;
         sprite.zIndex = 4;
@@ -384,10 +385,6 @@ export class PixiEcsRenderer {
       return;
     }
 
-    if (kind === 'hero' && this.assets.icons.hero && sprite.texture !== this.assets.icons.hero) {
-      sprite.texture = this.assets.icons.hero;
-      this.setNearestScale(sprite.texture);
-    }
     if (kind === 'food' && this.assets.icons.food && sprite.texture !== this.assets.icons.food) {
       sprite.texture = this.assets.icons.food;
       this.setNearestScale(sprite.texture);
@@ -400,7 +397,7 @@ export class PixiEcsRenderer {
     sprite.x = topLeft.x;
     sprite.y = topLeft.y;
 
-    if (kind === 'bot' && this.assets.botIdle && this.assets.botWalk) {
+    if ((kind === 'bot' || kind === 'hero') && this.assets.botIdle && this.assets.botWalk) {
       const facing = getFacingDirection(this.renderWorld, eid);
       const frame = getWalkFrame(this.renderWorld, eid);
       const isMoving = getIsMoving(this.renderWorld, eid);
