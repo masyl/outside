@@ -39,14 +39,14 @@ export const pixelLandsDungeonsPack = {
       "renderKind": "wall",
       "isBase": false,
       "frame": {
-        "x": 64,
-        "y": 32,
+        "x": 32,
+        "y": 64,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 4,
-        "y": 2
+        "x": 2,
+        "y": 4
       }
     },
     {
@@ -56,14 +56,14 @@ export const pixelLandsDungeonsPack = {
       "renderKind": "wall",
       "isBase": false,
       "frame": {
-        "x": 64,
-        "y": 32,
+        "x": 32,
+        "y": 64,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 4,
-        "y": 2
+        "x": 2,
+        "y": 4
       }
     },
     {
@@ -73,14 +73,14 @@ export const pixelLandsDungeonsPack = {
       "renderKind": "floor",
       "isBase": true,
       "frame": {
-        "x": 0,
-        "y": 48,
+        "x": 48,
+        "y": 0,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 0,
-        "y": 3
+        "x": 3,
+        "y": 0
       }
     },
     {
@@ -90,14 +90,14 @@ export const pixelLandsDungeonsPack = {
       "renderKind": "floor",
       "isBase": false,
       "frame": {
-        "x": 0,
-        "y": 64,
+        "x": 64,
+        "y": 0,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 0,
-        "y": 4
+        "x": 4,
+        "y": 0
       }
     },
     {
@@ -107,14 +107,14 @@ export const pixelLandsDungeonsPack = {
       "renderKind": "floor",
       "isBase": false,
       "frame": {
-        "x": 16,
-        "y": 48,
+        "x": 48,
+        "y": 16,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 1,
-        "y": 3
+        "x": 3,
+        "y": 1
       }
     },
     {
@@ -124,20 +124,21 @@ export const pixelLandsDungeonsPack = {
       "renderKind": "floor",
       "isBase": false,
       "frame": {
-        "x": 16,
-        "y": 64,
+        "x": 64,
+        "y": 16,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 1,
-        "y": 4
+        "x": 4,
+        "y": 1
       }
     }
   ],
   "notes": [
     "Atlas is copied from agent-collab/Pixel Lands Dungeons Demo/dungeons_demo.png.",
     "Tile size is 16x16 with no padding.",
+    "Source coordinates are interpreted as [row, column].",
     "Renderer-side weighted selection uses 75% base tile and 25% variant tiles.",
     "Only the explicitly requested floor and wall tiles are included in this first pass."
   ]

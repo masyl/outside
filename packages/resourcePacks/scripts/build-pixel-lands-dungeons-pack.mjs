@@ -26,7 +26,7 @@ const tileVariants = [
     spriteKey: 'tile.wall',
     renderKind: 'wall',
     isBase: true,
-    sourceCell: { x: 0, y: 0 },
+    sourceCell: { x: 0, y: 0 }, // [row=0, col=0]
   },
   {
     variantId: 'wall-cracked',
@@ -34,7 +34,7 @@ const tileVariants = [
     spriteKey: 'tile.wall.cracked',
     renderKind: 'wall',
     isBase: false,
-    sourceCell: { x: 4, y: 2 },
+    sourceCell: { x: 2, y: 4 }, // [row=4, col=2]
   },
   {
     variantId: 'wall-mouse-hole',
@@ -42,7 +42,7 @@ const tileVariants = [
     spriteKey: 'tile.wall.mouse-hole',
     renderKind: 'wall',
     isBase: false,
-    sourceCell: { x: 4, y: 2 },
+    sourceCell: { x: 2, y: 4 }, // [row=4, col=2]
   },
   {
     variantId: 'floor',
@@ -50,7 +50,7 @@ const tileVariants = [
     spriteKey: 'tile.floor',
     renderKind: 'floor',
     isBase: true,
-    sourceCell: { x: 0, y: 3 },
+    sourceCell: { x: 3, y: 0 }, // [row=0, col=3]
   },
   {
     variantId: 'floor-dirty',
@@ -58,7 +58,7 @@ const tileVariants = [
     spriteKey: 'tile.floor.dirty',
     renderKind: 'floor',
     isBase: false,
-    sourceCell: { x: 0, y: 4 },
+    sourceCell: { x: 4, y: 0 }, // [row=0, col=4]
   },
   {
     variantId: 'floor-crack',
@@ -66,7 +66,7 @@ const tileVariants = [
     spriteKey: 'tile.floor.crack',
     renderKind: 'floor',
     isBase: false,
-    sourceCell: { x: 1, y: 3 },
+    sourceCell: { x: 3, y: 1 }, // [row=1, col=3]
   },
   {
     variantId: 'floor-crack-2',
@@ -74,7 +74,7 @@ const tileVariants = [
     spriteKey: 'tile.floor.crack-2',
     renderKind: 'floor',
     isBase: false,
-    sourceCell: { x: 1, y: 4 },
+    sourceCell: { x: 4, y: 1 }, // [row=1, col=4]
   },
 ];
 
@@ -132,6 +132,7 @@ function buildManifest() {
     notes: [
       'Atlas is copied from agent-collab/Pixel Lands Dungeons Demo/dungeons_demo.png.',
       'Tile size is 16x16 with no padding.',
+      'Source coordinates are interpreted as [row, column].',
       'Renderer-side weighted selection uses 75% base tile and 25% variant tiles.',
       'Only the explicitly requested floor and wall tiles are included in this first pass.',
     ],
