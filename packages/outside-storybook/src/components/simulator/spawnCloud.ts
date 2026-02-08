@@ -380,7 +380,7 @@ function spawnDungeonActorVariants(
   offsetY: number,
   spawnOptions: DynamicSpawnOptions | undefined,
   fallbackBotCount: number
-): void {
+): Array<{ x: number; y: number }> {
   const resolvedBotCount = Math.max(
     0,
     Math.floor(spawnOptions?.botCount ?? fallbackBotCount)
@@ -393,6 +393,7 @@ function spawnDungeonActorVariants(
     0,
     Math.floor(spawnOptions?.catCount ?? DUNGEON_HERO_CAT_COUNT)
   );
+  const spawnedPositions: Array<{ x: number; y: number }> = [];
 
   for (let i = 0; i < resolvedBotCount; i++) {
     const idx =
@@ -407,6 +408,7 @@ function spawnDungeonActorVariants(
       directionRad: angle,
       urge: 'wander',
     });
+    spawnedPositions.push({ x: cx, y: cy });
   }
 
   for (let i = 0; i < resolvedDogCount; i++) {
@@ -423,6 +425,7 @@ function spawnDungeonActorVariants(
       urge: 'wander',
       variantSpriteKey: GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
     });
+    spawnedPositions.push({ x: cx, y: cy });
   }
 
   for (let i = 0; i < resolvedCatCount; i++) {
@@ -439,7 +442,9 @@ function spawnDungeonActorVariants(
       urge: 'wander',
       variantSpriteKey: BEIGE_CAT_BOT_SPRITE_KEY,
     });
+    spawnedPositions.push({ x: cx, y: cy });
   }
+  return spawnedPositions;
 }
 
 /**
@@ -467,8 +472,25 @@ export function spawnDungeonWFCWithFoodAndHero(
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
   const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
-  spawnDungeonActorVariants(world, seed, roomCells, offsetX, offsetY, spawnOptions, botCount);
-  for (let i = 0; i < resolvedFoodCount; i++) {
+  const actorPositions = spawnDungeonActorVariants(
+    world,
+    seed,
+    roomCells,
+    offsetX,
+    offsetY,
+    spawnOptions,
+    botCount
+  );
+  const anchoredFoodCount = Math.min(actorPositions.length, resolvedFoodCount);
+  for (let i = 0; i < anchoredFoodCount; i++) {
+    const anchor = actorPositions[i];
+    spawnFood(world, {
+      x: anchor.x,
+      y: anchor.y,
+      variant: pickFoodVariant(seed, 200 + i),
+    });
+  }
+  for (let i = anchoredFoodCount; i < resolvedFoodCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
       roomCells.length;
@@ -518,8 +540,25 @@ export function spawnDungeonWithFoodAndHero(
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
   const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
-  spawnDungeonActorVariants(world, seed, roomCells, offsetX, offsetY, spawnOptions, botCount);
-  for (let i = 0; i < resolvedFoodCount; i++) {
+  const actorPositions = spawnDungeonActorVariants(
+    world,
+    seed,
+    roomCells,
+    offsetX,
+    offsetY,
+    spawnOptions,
+    botCount
+  );
+  const anchoredFoodCount = Math.min(actorPositions.length, resolvedFoodCount);
+  for (let i = 0; i < anchoredFoodCount; i++) {
+    const anchor = actorPositions[i];
+    spawnFood(world, {
+      x: anchor.x,
+      y: anchor.y,
+      variant: pickFoodVariant(seed, 300 + i),
+    });
+  }
+  for (let i = anchoredFoodCount; i < resolvedFoodCount; i++) {
     const idx =
       Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
       roomCells.length;
