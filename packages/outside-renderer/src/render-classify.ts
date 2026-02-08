@@ -5,6 +5,9 @@ import {
 } from '@outside/simulator';
 import type { RenderWorldState } from './render-world';
 
+/**
+ * Render-layer classification used by sprite/layer selection.
+ */
 export type RenderKind = 'floor' | 'wall' | 'bot' | 'hero' | 'food' | 'error';
 
 const SPRITE_KEY_TO_RENDER_KIND = {
@@ -21,6 +24,9 @@ function readSpriteKey(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+/**
+ * Resolves `variantSpriteKey` first, then falls back to `defaultSpriteKey`.
+ */
 export function resolveSpriteKey(
   world: RenderWorldState['world'],
   eid: number
@@ -36,6 +42,9 @@ export function resolveSpriteKey(
   return fallback;
 }
 
+/**
+ * Maps resolved sprite keys to a render kind. Unknown keys map to `error`.
+ */
 export function classifyRenderKind(world: RenderWorldState['world'], eid: number): RenderKind {
   const spriteKey = resolveSpriteKey(world, eid);
   if (!spriteKey) return 'error';

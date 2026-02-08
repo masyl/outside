@@ -16,6 +16,9 @@ import {
 } from './render-components';
 import { WALK_CYCLES_PER_TILE, WALK_FRAMES } from './constants';
 
+/**
+ * Cardinal facing used by spritesheet row selection.
+ */
 export type FacingDirection = 'down' | 'left' | 'right' | 'up';
 
 const FACING = {
@@ -40,6 +43,9 @@ function facingFromAngle(angle: number, fallback: number): number {
   return facingFromVector(dx, dy, fallback);
 }
 
+/**
+ * Computes one renderer animation tick from current world state.
+ */
 export function runAnimationTic(renderWorld: RenderWorldState): void {
   const world = renderWorld.world;
   const entities = query(world, [Position]);
@@ -86,6 +92,7 @@ export function runAnimationTic(renderWorld: RenderWorldState): void {
     RenderIsMoving.value[eid] = isMoving ? 1 : 0;
 
     if (isMoving) {
+      // Distance-based frame progression keeps animation speed stable across variable delta lengths.
       RenderWalkDistance.value[eid] += distance;
     }
 
@@ -115,6 +122,9 @@ export function runAnimationTic(renderWorld: RenderWorldState): void {
   }
 }
 
+/**
+ * Returns human-readable facing from cached renderer state.
+ */
 export function getFacingDirection(renderWorld: RenderWorldState, eid: number): FacingDirection {
   const dir = RenderFacing.dir[eid] ?? FACING.DOWN;
   switch (dir) {
@@ -130,10 +140,16 @@ export function getFacingDirection(renderWorld: RenderWorldState, eid: number): 
   }
 }
 
+/**
+ * Returns current walk frame index.
+ */
 export function getWalkFrame(renderWorld: RenderWorldState, eid: number): number {
   return RenderWalkFrame.index[eid] ?? 0;
 }
 
+/**
+ * Returns whether the entity moved during the last animation update.
+ */
 export function getIsMoving(renderWorld: RenderWorldState, eid: number): boolean {
   return (RenderIsMoving.value[eid] ?? 0) > 0;
 }
