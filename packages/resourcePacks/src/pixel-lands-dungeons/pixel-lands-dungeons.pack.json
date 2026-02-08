@@ -21,6 +21,13 @@
       "spriteKey": "tile.wall",
       "renderKind": "wall",
       "isBase": true,
+      "transform": {
+        "reflectX": false,
+        "reflectY": false,
+        "rotate90": false,
+        "rotate180": false,
+        "rotate270": false
+      },
       "frame": {
         "x": 0,
         "y": 0,
@@ -38,15 +45,22 @@
       "spriteKey": "tile.wall.cracked",
       "renderKind": "wall",
       "isBase": false,
+      "transform": {
+        "reflectX": false,
+        "reflectY": false,
+        "rotate90": false,
+        "rotate180": false,
+        "rotate270": false
+      },
       "frame": {
-        "x": 32,
-        "y": 64,
+        "x": 64,
+        "y": 32,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 2,
-        "y": 4
+        "x": 4,
+        "y": 2
       }
     },
     {
@@ -55,15 +69,22 @@
       "spriteKey": "tile.wall.mouse-hole",
       "renderKind": "wall",
       "isBase": false,
+      "transform": {
+        "reflectX": false,
+        "reflectY": false,
+        "rotate90": false,
+        "rotate180": false,
+        "rotate270": false
+      },
       "frame": {
-        "x": 32,
-        "y": 64,
+        "x": 48,
+        "y": 32,
         "w": 16,
         "h": 16
       },
       "sourceCell": {
-        "x": 2,
-        "y": 4
+        "x": 3,
+        "y": 2
       }
     },
     {
@@ -72,6 +93,13 @@
       "spriteKey": "tile.floor",
       "renderKind": "floor",
       "isBase": true,
+      "transform": {
+        "reflectX": false,
+        "reflectY": false,
+        "rotate90": false,
+        "rotate180": false,
+        "rotate270": false
+      },
       "frame": {
         "x": 48,
         "y": 0,
@@ -89,6 +117,13 @@
       "spriteKey": "tile.floor.dirty",
       "renderKind": "floor",
       "isBase": false,
+      "transform": {
+        "reflectX": false,
+        "reflectY": false,
+        "rotate90": false,
+        "rotate180": false,
+        "rotate270": false
+      },
       "frame": {
         "x": 64,
         "y": 0,
@@ -106,6 +141,13 @@
       "spriteKey": "tile.floor.crack",
       "renderKind": "floor",
       "isBase": false,
+      "transform": {
+        "reflectX": true,
+        "reflectY": true,
+        "rotate90": true,
+        "rotate180": true,
+        "rotate270": true
+      },
       "frame": {
         "x": 48,
         "y": 16,
@@ -123,6 +165,13 @@
       "spriteKey": "tile.floor.crack-2",
       "renderKind": "floor",
       "isBase": false,
+      "transform": {
+        "reflectX": true,
+        "reflectY": true,
+        "rotate90": true,
+        "rotate180": true,
+        "rotate270": true
+      },
       "frame": {
         "x": 64,
         "y": 16,

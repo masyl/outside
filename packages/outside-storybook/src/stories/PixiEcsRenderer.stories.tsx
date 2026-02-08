@@ -179,14 +179,14 @@ export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
 
 export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
-    seed: 321,
+    seed: 0,
     ticsPerSecond: 10,
     botCount: 3,
-    dogCount: 3,
-    catCount: 3,
+    dogCount: 2,
+    catCount: 2,
     foodCount: 12,
     spawnFn: spawnDungeonWithFoodAndHero,
-    tileSize: 16,
+    tileSize: 32,
     waitForAssets: false,
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,

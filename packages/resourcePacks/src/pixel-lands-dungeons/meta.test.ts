@@ -33,11 +33,23 @@ describe('pixelLandsDungeonsPack manifest', () => {
       pixelLandsDungeonsPack.tileVariants.map((variant) => [variant.variantId, variant])
     );
     expect(byId.get('wall')?.sourceCell).toEqual({ x: 0, y: 0 });
-    expect(byId.get('wall-cracked')?.sourceCell).toEqual({ x: 2, y: 4 });
-    expect(byId.get('wall-mouse-hole')?.sourceCell).toEqual({ x: 2, y: 4 });
+    expect(byId.get('wall-cracked')?.sourceCell).toEqual({ x: 4, y: 2 });
+    expect(byId.get('wall-mouse-hole')?.sourceCell).toEqual({ x: 3, y: 2 });
     expect(byId.get('floor')?.sourceCell).toEqual({ x: 3, y: 0 });
     expect(byId.get('floor-dirty')?.sourceCell).toEqual({ x: 4, y: 0 });
     expect(byId.get('floor-crack')?.sourceCell).toEqual({ x: 3, y: 1 });
     expect(byId.get('floor-crack-2')?.sourceCell).toEqual({ x: 4, y: 1 });
+  });
+
+  it('should only enable transform flags on cracked floor variants', () => {
+    const cracked = new Set(['floor-crack', 'floor-crack-2']);
+    for (const variant of pixelLandsDungeonsPack.tileVariants) {
+      const expectedEnabled = cracked.has(variant.variantId);
+      expect(variant.transform.reflectX).toBe(expectedEnabled);
+      expect(variant.transform.reflectY).toBe(expectedEnabled);
+      expect(variant.transform.rotate90).toBe(expectedEnabled);
+      expect(variant.transform.rotate180).toBe(expectedEnabled);
+      expect(variant.transform.rotate270).toBe(expectedEnabled);
+    }
   });
 });

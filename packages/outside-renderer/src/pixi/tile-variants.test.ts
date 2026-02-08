@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { pickTileVariant } from './tile-variants';
+import {
+  buildTileSubVariants,
+  pickTileSubVariantIndex,
+  pickTileVariant,
+} from './tile-variants';
 
 describe('pickTileVariant', () => {
   it('should return only base when no variants exist', () => {
@@ -38,5 +42,34 @@ describe('pickTileVariant', () => {
     const ratio = baseCount / samples;
     expect(ratio).toBeGreaterThan(0.70);
     expect(ratio).toBeLessThan(0.80);
+  });
+
+  it('should enumerate flips and rotations for cracked variants', () => {
+    const subVariants = buildTileSubVariants({
+      reflectX: true,
+      reflectY: true,
+      rotate90: true,
+      rotate180: true,
+      rotate270: true,
+    });
+    expect(subVariants.length).toBe(16);
+  });
+
+  it('should deterministically pick a sub-variant index', () => {
+    const indexA = pickTileSubVariantIndex(16, {
+      kind: 'floor',
+      worldX: 7,
+      worldY: 9,
+      eid: 42,
+    });
+    const indexB = pickTileSubVariantIndex(16, {
+      kind: 'floor',
+      worldX: 7,
+      worldY: 9,
+      eid: 42,
+    });
+    expect(indexA).toBe(indexB);
+    expect(indexA).toBeGreaterThanOrEqual(0);
+    expect(indexA).toBeLessThan(16);
   });
 });

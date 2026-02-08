@@ -1,5 +1,6 @@
 import type { Texture } from 'pixi.js';
 import type { ActorVariantAnimationLayout } from '@outside/resource-packs/paws-whiskers/meta';
+import type { DungeonTileTransformFlags } from '@outside/resource-packs';
 import type { DEFAULT_ICON_URLS } from '../icons';
 
 /**
@@ -30,9 +31,22 @@ export interface ActorVariantSheet {
   animation: ActorVariantAnimationLayout;
 }
 
-export interface TileTextureVariants {
-  base?: Texture;
-  variants: Texture[];
+export interface TileTransform {
+  reflectX: boolean;
+  reflectY: boolean;
+  rotationRad: number;
+}
+
+export interface TileTextureVariant {
+  texture: Texture;
+  spriteKey: string;
+  transformFlags: DungeonTileTransformFlags;
+  subVariants: TileTransform[];
+}
+
+export interface TileTextureVariantPool {
+  base?: TileTextureVariant;
+  variants: TileTextureVariant[];
 }
 
 /**
@@ -44,8 +58,8 @@ export interface RendererAssets {
   foodTextureBySpriteKey: Map<string, Texture>;
   actorVariantSheetBySpriteKey: Map<string, ActorVariantSheet>;
   tileTextureByKind: {
-    floor: TileTextureVariants;
-    wall: TileTextureVariants;
+    floor: TileTextureVariantPool;
+    wall: TileTextureVariantPool;
   };
   icons: {
     bot?: Texture;

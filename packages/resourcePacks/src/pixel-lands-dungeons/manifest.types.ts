@@ -10,12 +10,21 @@ export interface DungeonTileFrame {
 
 export type DungeonTileRenderKind = 'floor' | 'wall';
 
+export interface DungeonTileTransformFlags {
+  reflectX: boolean;
+  reflectY: boolean;
+  rotate90: boolean;
+  rotate180: boolean;
+  rotate270: boolean;
+}
+
 export interface DungeonTileVariant {
   variantId: string;
   displayName: string;
   spriteKey: string;
   renderKind: DungeonTileRenderKind;
   isBase: boolean;
+  transform: DungeonTileTransformFlags;
   frame: DungeonTileFrame;
   sourceCell: {
     x: number;

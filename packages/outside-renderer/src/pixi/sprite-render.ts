@@ -12,7 +12,7 @@ import type { RenderWorldState } from '../render-world';
 import type { RendererAssets } from './types';
 import { getPlaceholderTexture, setNearestScale } from './assets';
 import { resolveFoodTexture } from './food-textures';
-import { pickTileVariant } from './tile-variants';
+import { pickTileSubVariantIndex, pickTileVariant } from './tile-variants';
 
 /**
  * Builds a new sprite instance for a render kind.
@@ -115,22 +115,40 @@ export function updateSpriteForEntity(
       kind === 'wall'
         ? assets.tileTextureByKind.wall
         : assets.tileTextureByKind.floor;
-    const texture = pickTileVariant(
+    const tileVariant = pickTileVariant(
       {
         base: tileBucket.base ?? null,
         variants: tileBucket.variants,
       },
       { kind, worldX: posX, worldY: posY, eid }
     );
-    if (texture && sprite.texture !== texture) {
-      sprite.texture = texture;
+    if (tileVariant && sprite.texture !== tileVariant.texture) {
+      sprite.texture = tileVariant.texture;
       setNearestScale(sprite.texture);
     }
+    const subVariant =
+      tileVariant?.subVariants[
+        pickTileSubVariantIndex(tileVariant.subVariants.length, {
+          kind,
+          worldX: posX,
+          worldY: posY,
+          eid,
+        })
+      ];
+    const texture = tileVariant?.texture;
+    const textureWidth = texture?.frame.width ?? 1;
+    const textureHeight = texture?.frame.height ?? 1;
+    const scaleX = (tileSize / textureWidth) * (subVariant?.reflectX ? -1 : 1);
+    const scaleY = (tileSize / textureHeight) * (subVariant?.reflectY ? -1 : 1);
+
+    sprite.anchor.set(0.5, 0.5);
+    sprite.rotation = subVariant?.rotationRad ?? 0;
+    sprite.scale.set(scaleX, scaleY);
     sprite.x = topLeft.x;
     sprite.y = topLeft.y;
-    sprite.width = tileSize;
-    sprite.height = tileSize;
-    sprite.tint = texture ? 0xffffff : kind === 'wall' ? 0x2f2f2f : 0x4b4b4b;
+    sprite.x += tileSize / 2;
+    sprite.y += tileSize / 2;
+    sprite.tint = tileVariant ? 0xffffff : kind === 'wall' ? 0x2f2f2f : 0x4b4b4b;
     return;
   }
 

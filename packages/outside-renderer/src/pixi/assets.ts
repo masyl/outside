@@ -19,6 +19,7 @@ import {
 } from '@outside/resource-packs/paws-whiskers/meta';
 import { Assets, Graphics, Rectangle, Texture, type Renderer } from 'pixi.js';
 import type { RendererAssets, PlaceholderKind } from './types';
+import { buildTileSubVariants } from './tile-variants';
 
 /**
  * Creates an empty asset bundle.
@@ -124,10 +125,16 @@ export async function loadRendererAssets(
       variant.renderKind === 'wall'
         ? assets.tileTextureByKind.wall
         : assets.tileTextureByKind.floor;
+    const tileVariant = {
+      texture,
+      spriteKey: variant.spriteKey,
+      transformFlags: variant.transform,
+      subVariants: buildTileSubVariants(variant.transform),
+    };
     if (variant.isBase) {
-      bucket.base = texture;
+      bucket.base = tileVariant;
     } else {
-      bucket.variants.push(texture);
+      bucket.variants.push(tileVariant);
     }
   }
 

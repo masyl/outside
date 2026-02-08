@@ -27,6 +27,13 @@ const tileVariants = [
     renderKind: 'wall',
     isBase: true,
     sourceCell: { x: 0, y: 0 }, // [row=0, col=0]
+    transform: {
+      reflectX: false,
+      reflectY: false,
+      rotate90: false,
+      rotate180: false,
+      rotate270: false,
+    },
   },
   {
     variantId: 'wall-cracked',
@@ -34,7 +41,14 @@ const tileVariants = [
     spriteKey: 'tile.wall.cracked',
     renderKind: 'wall',
     isBase: false,
-    sourceCell: { x: 2, y: 4 }, // [row=4, col=2]
+    sourceCell: { x: 4, y: 2 }, // [row=3rd, col=5th]
+    transform: {
+      reflectX: false,
+      reflectY: false,
+      rotate90: false,
+      rotate180: false,
+      rotate270: false,
+    },
   },
   {
     variantId: 'wall-mouse-hole',
@@ -42,7 +56,14 @@ const tileVariants = [
     spriteKey: 'tile.wall.mouse-hole',
     renderKind: 'wall',
     isBase: false,
-    sourceCell: { x: 2, y: 4 }, // [row=4, col=2]
+    sourceCell: { x: 3, y: 2 }, // [row=3rd, col=4th]
+    transform: {
+      reflectX: false,
+      reflectY: false,
+      rotate90: false,
+      rotate180: false,
+      rotate270: false,
+    },
   },
   {
     variantId: 'floor',
@@ -51,6 +72,13 @@ const tileVariants = [
     renderKind: 'floor',
     isBase: true,
     sourceCell: { x: 3, y: 0 }, // [row=0, col=3]
+    transform: {
+      reflectX: false,
+      reflectY: false,
+      rotate90: false,
+      rotate180: false,
+      rotate270: false,
+    },
   },
   {
     variantId: 'floor-dirty',
@@ -59,6 +87,13 @@ const tileVariants = [
     renderKind: 'floor',
     isBase: false,
     sourceCell: { x: 4, y: 0 }, // [row=0, col=4]
+    transform: {
+      reflectX: false,
+      reflectY: false,
+      rotate90: false,
+      rotate180: false,
+      rotate270: false,
+    },
   },
   {
     variantId: 'floor-crack',
@@ -67,6 +102,13 @@ const tileVariants = [
     renderKind: 'floor',
     isBase: false,
     sourceCell: { x: 3, y: 1 }, // [row=1, col=3]
+    transform: {
+      reflectX: true,
+      reflectY: true,
+      rotate90: true,
+      rotate180: true,
+      rotate270: true,
+    },
   },
   {
     variantId: 'floor-crack-2',
@@ -75,6 +117,13 @@ const tileVariants = [
     renderKind: 'floor',
     isBase: false,
     sourceCell: { x: 4, y: 1 }, // [row=1, col=4]
+    transform: {
+      reflectX: true,
+      reflectY: true,
+      rotate90: true,
+      rotate180: true,
+      rotate270: true,
+    },
   },
 ];
 
@@ -121,6 +170,7 @@ function buildManifest() {
       spriteKey: tile.spriteKey,
       renderKind: tile.renderKind,
       isBase: tile.isBase,
+      transform: tile.transform,
       frame: {
         x: tile.sourceCell.x * TILE_SIZE,
         y: tile.sourceCell.y * TILE_SIZE,

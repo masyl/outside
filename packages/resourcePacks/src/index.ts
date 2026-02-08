@@ -54,5 +54,6 @@ export type {
   DungeonTilePackCredits,
   DungeonTileFrame,
   DungeonTileRenderKind,
+  DungeonTileTransformFlags,
   DungeonTileVariant,
 } from './pixel-lands-dungeons/manifest.types';
