@@ -4,6 +4,7 @@ import {
   Food,
   FloorTile,
   Hero,
+  Observed,
   Obstacle,
   Position,
   VariantSpriteKey,
@@ -76,7 +77,7 @@ export function runRenderPass(
 ): RenderPassStats {
   const world = renderWorld.world;
   // Only render entities that explicitly opt into the sprite-key rendering contract.
-  const entities = query(world, [Position, DefaultSpriteKey]);
+  const entities = query(world, [Observed, Position, DefaultSpriteKey]);
   const nextIds = new Set<number>();
   const floorCells = new Set<string>();
   const unresolvedEntities: Array<{
@@ -107,7 +108,7 @@ export function runRenderPass(
     entityDisplayCount: 0,
   };
 
-  const floorTiles = query(world, [FloorTile, Position]);
+  const floorTiles = query(world, [Observed, FloorTile, Position]);
   for (let i = 0; i < floorTiles.length; i++) {
     const eid = floorTiles[i];
     if (hasComponent(world, eid, Obstacle)) continue;

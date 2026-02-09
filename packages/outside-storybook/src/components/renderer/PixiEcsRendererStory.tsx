@@ -119,6 +119,7 @@ export function PixiEcsRendererStory({
     if (!renderer || rendererReady === 0) return;
     renderer.resetWorld();
     renderer.setTileSize(tileSize);
+    streamControllerRef.current.replay('pixi');
   }, [rendererReady, tileSize, stream.streamKey]);
 
   useEffect(() => {

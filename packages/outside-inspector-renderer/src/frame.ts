@@ -6,6 +6,7 @@ import {
   FollowTarget,
   Food,
   Hero,
+  Observed,
   Obstacle,
   Position,
   Speed,
@@ -65,7 +66,7 @@ export interface InspectorFrame {
  * @returns Frame primitives for SVG/React rendering.
  */
 export function buildInspectorFrame(world: World): InspectorFrame {
-  const eids = query(world, [Position]);
+  const eids = query(world, [Observed, Position]);
   const tiles: InspectorTile[] = [];
   const entities: InspectorEntity[] = [];
   const followLinks: InspectorFollowLink[] = [];
@@ -139,7 +140,7 @@ export function buildInspectorFrame(world: World): InspectorFrame {
     });
   }
 
-  const followers = query(world, [Position, Follow, FollowTarget]);
+  const followers = query(world, [Observed, Position, Follow, FollowTarget]);
   for (let i = 0; i < followers.length; i++) {
     const followerEid = followers[i];
     const targetEid = FollowTarget.eid[followerEid];

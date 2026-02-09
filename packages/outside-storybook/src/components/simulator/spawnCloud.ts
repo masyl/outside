@@ -198,6 +198,27 @@ function key(x: number, y: number): string {
   return `${x},${y}`;
 }
 
+function pickRoomCell(
+  roomCells: Array<{ x: number; y: number }>,
+  seed: number,
+  salt: number,
+  blockedCells?: ReadonlySet<string>
+): { x: number; y: number } {
+  const startIndex =
+    Math.floor(seededUnit(seed, salt) * roomCells.length) % roomCells.length;
+  if (blockedCells == null || blockedCells.size === 0) {
+    return roomCells[startIndex];
+  }
+  for (let i = 0; i < roomCells.length; i++) {
+    const idx = (startIndex + i) % roomCells.length;
+    const candidate = roomCells[idx];
+    if (!blockedCells.has(key(candidate.x, candidate.y))) {
+      return candidate;
+    }
+  }
+  return roomCells[startIndex];
+}
+
 /**
  * After floor tiles are spawned from grid, add walls around every room and corridor:
  * build an index of floor coordinates, then for each floor cell add a wall at any
@@ -384,7 +405,8 @@ function spawnDungeonActorVariants(
   offsetX: number,
   offsetY: number,
   spawnOptions: DynamicSpawnOptions | undefined,
-  fallbackBotCount: number
+  fallbackBotCount: number,
+  blockedCells?: ReadonlySet<string>
 ): Array<{ x: number; y: number }> {
   const resolvedBotCount = Math.max(
     0,
@@ -401,9 +423,7 @@ function spawnDungeonActorVariants(
   const spawnedPositions: Array<{ x: number; y: number }> = [];
 
   for (let i = 0; i < resolvedBotCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, 3000 + i) * roomCells.length) % roomCells.length;
-    const p = roomCells[idx];
+    const p = pickRoomCell(roomCells, seed, 3000 + i, blockedCells);
     const cx = p.x + offsetX + 0.5;
     const cy = p.y + offsetY + 0.5;
     const angle = seededUnit(seed, 4000 + i * 2) * Math.PI * 2;
@@ -417,9 +437,7 @@ function spawnDungeonActorVariants(
   }
 
   for (let i = 0; i < resolvedDogCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, 5000 + i) * roomCells.length) % roomCells.length;
-    const p = roomCells[idx];
+    const p = pickRoomCell(roomCells, seed, 5000 + i, blockedCells);
     const cx = p.x + offsetX + 0.5;
     const cy = p.y + offsetY + 0.5;
     const angle = seededUnit(seed, 6000 + i * 2) * Math.PI * 2;
@@ -434,9 +452,7 @@ function spawnDungeonActorVariants(
   }
 
   for (let i = 0; i < resolvedCatCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, 7000 + i) * roomCells.length) % roomCells.length;
-    const p = roomCells[idx];
+    const p = pickRoomCell(roomCells, seed, 7000 + i, blockedCells);
     const cx = p.x + offsetX + 0.5;
     const cy = p.y + offsetY + 0.5;
     const angle = seededUnit(seed, 8000 + i * 2) * Math.PI * 2;
@@ -486,6 +502,17 @@ export function spawnDungeonWFCWithFoodAndHero(
   }
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
+  const heroCell = pickRoomCell(roomCells, seed, 2000);
+  const heroCellKey = key(heroCell.x, heroCell.y);
+  const blockedHeroCellSet = new Set([heroCellKey]);
+  const heroX = heroCell.x + offsetX + 0.5;
+  const heroY = heroCell.y + offsetY + 0.5;
+  const heroEid = spawnHero(world, {
+    x: heroX,
+    y: heroY,
+    variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
+  });
+  setViewportFollowTarget(world, heroEid);
   const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
   const actorPositions = spawnDungeonActorVariants(
     world,
@@ -494,7 +521,8 @@ export function spawnDungeonWFCWithFoodAndHero(
     offsetX,
     offsetY,
     spawnOptions,
-    botCount
+    botCount,
+    blockedHeroCellSet
   );
   const anchoredFoodCount = Math.min(3, actorPositions.length, resolvedFoodCount);
   for (let i = 0; i < anchoredFoodCount; i++) {
@@ -507,25 +535,11 @@ export function spawnDungeonWFCWithFoodAndHero(
     });
   }
   for (let i = anchoredFoodCount; i < resolvedFoodCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
-      roomCells.length;
-    const p = roomCells[idx];
+    const p = pickRoomCell(roomCells, seed, 1000 + i, blockedHeroCellSet);
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
     spawnFood(world, { x, y, variant: pickFoodVariant(seed, 200 + i) });
   }
-  const heroIdx =
-    Math.floor(seededUnit(seed, 2000) * roomCells.length) % roomCells.length;
-  const heroCell = roomCells[heroIdx];
-  const heroX = heroCell.x + offsetX + 0.5;
-  const heroY = heroCell.y + offsetY + 0.5;
-  const heroEid = spawnHero(world, {
-    x: heroX,
-    y: heroY,
-    variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
-  });
-  setViewportFollowTarget(world, heroEid);
 }
 
 /** Food count for dungeon-with-hero preset. */
@@ -555,6 +569,17 @@ export function spawnDungeonWithFoodAndHero(
   }
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
+  const heroCell = pickRoomCell(roomCells, seed, 2000);
+  const heroCellKey = key(heroCell.x, heroCell.y);
+  const blockedHeroCellSet = new Set([heroCellKey]);
+  const heroX = heroCell.x + offsetX + 0.5;
+  const heroY = heroCell.y + offsetY + 0.5;
+  const heroEid = spawnHero(world, {
+    x: heroX,
+    y: heroY,
+    variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
+  });
+  setViewportFollowTarget(world, heroEid);
   const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
   const actorPositions = spawnDungeonActorVariants(
     world,
@@ -563,7 +588,8 @@ export function spawnDungeonWithFoodAndHero(
     offsetX,
     offsetY,
     spawnOptions,
-    botCount
+    botCount,
+    blockedHeroCellSet
   );
   const anchoredFoodCount = Math.min(3, actorPositions.length, resolvedFoodCount);
   for (let i = 0; i < anchoredFoodCount; i++) {
@@ -576,25 +602,11 @@ export function spawnDungeonWithFoodAndHero(
     });
   }
   for (let i = anchoredFoodCount; i < resolvedFoodCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
-      roomCells.length;
-    const p = roomCells[idx];
+    const p = pickRoomCell(roomCells, seed, 1000 + i, blockedHeroCellSet);
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
     spawnFood(world, { x, y, variant: pickFoodVariant(seed, 300 + i) });
   }
-  const heroIdx =
-    Math.floor(seededUnit(seed, 2000) * roomCells.length) % roomCells.length;
-  const heroCell = roomCells[heroIdx];
-  const heroX = heroCell.x + offsetX + 0.5;
-  const heroY = heroCell.y + offsetY + 0.5;
-  const heroEid = spawnHero(world, {
-    x: heroX,
-    y: heroY,
-    variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
-  });
-  setViewportFollowTarget(world, heroEid);
 }
 
 /**

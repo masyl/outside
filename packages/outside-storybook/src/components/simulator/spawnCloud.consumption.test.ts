@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Food, createWorld, drainEventQueue, query, runTics } from '@outside/simulator';
+import { Food, Hero, Position, createWorld, drainEventQueue, query, runTics } from '@outside/simulator';
 import { spawnDungeonWithFoodAndHero } from './spawnCloud';
 
 describe('spawnDungeonWithFoodAndHero consumption', () => {
@@ -46,5 +46,26 @@ describe('spawnDungeonWithFoodAndHero consumption', () => {
     }
 
     expect(consumedCount).toBeGreaterThan(0);
+  });
+
+  it('spawns exactly one hero and hero wanders with zero bot/dog/cat/food counts', () => {
+    const world = createWorld({ seed: 1, ticDurationMs: 50 });
+    spawnDungeonWithFoodAndHero(world, 1, 0, {
+      botCount: 0,
+      dogCount: 0,
+      catCount: 0,
+      foodCount: 0,
+    });
+
+    const heroes = query(world, [Hero, Position]);
+    expect(heroes).toHaveLength(1);
+    const heroEid = heroes[0];
+    const startX = Position.x[heroEid];
+    const startY = Position.y[heroEid];
+
+    runTics(world, 20);
+
+    const delta = Math.hypot(Position.x[heroEid] - startX, Position.y[heroEid] - startY);
+    expect(delta).toBeGreaterThan(0);
   });
 });

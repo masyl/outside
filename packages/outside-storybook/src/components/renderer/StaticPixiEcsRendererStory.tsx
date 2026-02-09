@@ -101,6 +101,7 @@ export function StaticPixiEcsRendererStory({
     if (!renderer || rendererReady === 0) return;
     renderer.setTileSize(tileSize);
     renderer.resetWorld();
+    streamControllerRef.current.replay('pixi');
   }, [rendererReady, tileSize, stream.streamKey]);
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import {
   createRenderObserverSerializer,
   createSnapshotSerializer,
   createWorld,
+  getViewportFollowTarget,
   query,
   runTics,
 } from '@outside/simulator';
@@ -87,6 +88,18 @@ function centerFromBounds(bounds: StreamBounds): { x: number; y: number } {
   };
 }
 
+function centerFromWorld(world: SimulatorWorld, bounds: StreamBounds): { x: number; y: number } {
+  const focusEid = getViewportFollowTarget(world);
+  if (focusEid != null) {
+    const x = Position.x[focusEid];
+    const y = Position.y[focusEid];
+    if (Number.isFinite(x) && Number.isFinite(y)) {
+      return { x, y };
+    }
+  }
+  return centerFromBounds(bounds);
+}
+
 /**
  * Produces simulator render-stream packets for one scenario.
  * Dynamic mode emits snapshot then per-tick deltas; static mode emits snapshot only.
@@ -97,6 +110,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     packetVersion: 0,
   });
   const [bounds, setBounds] = useState<StreamBounds>({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
+  const [center, setCenter] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const worldRef = useRef<SimulatorWorld | null>(null);
   const observerRef = useRef<ReturnType<typeof createRenderObserverSerializer> | null>(null);
   const snapshotRef = useRef<ReturnType<typeof createSnapshotSerializer> | null>(null);
@@ -143,6 +157,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     const snapshot = snapshotRef.current ?? createSnapshotSerializer(world, RENDER_SNAPSHOT_COMPONENTS);
     const nextBounds = computeBounds(world);
     setBounds(nextBounds);
+    setCenter(centerFromWorld(world, nextBounds));
 
     setPacketState((prev) => ({
       packet: { kind: 'snapshot', buffer: snapshot(), tic: 0 },
@@ -195,6 +210,21 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
           packetVersion: prev.packetVersion + 1,
         }));
       }
+      if (ticsToRun > 0) {
+        const nextBounds = computeBounds(world);
+        setBounds((prev) =>
+          prev.minX === nextBounds.minX &&
+          prev.maxX === nextBounds.maxX &&
+          prev.minY === nextBounds.minY &&
+          prev.maxY === nextBounds.maxY
+            ? prev
+            : nextBounds
+        );
+        setCenter((prev) => {
+          const next = centerFromWorld(world, nextBounds);
+          return prev.x === next.x && prev.y === next.y ? prev : next;
+        });
+      }
 
       frameId = window.requestAnimationFrame(step);
     };
@@ -210,7 +240,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     packet: packetState.packet,
     packetVersion: packetState.packetVersion,
     bounds,
-    center: centerFromBounds(bounds),
+    center,
     streamKey,
   };
 }

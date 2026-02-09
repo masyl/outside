@@ -1,6 +1,6 @@
 /**
- * Hero entity prefab: player-controlled character. Same movement components as bot
- * but no Wander, Follow, or Wait. Movement is driven only by the hero path system.
+ * Hero entity prefab: player-controlled character. Same movement components as bot.
+ * Hero idles with Wander until user input assigns a path, then returns to Wander after path completion.
  * Visual: 100% white (renderer interprets via Hero tag).
  *
  * @packageDocumentation
@@ -18,6 +18,8 @@ import {
   MaxSpeed,
   PointerTarget,
   Hero,
+  Wander,
+  WanderPersistence,
   Observed,
   DefaultSpriteKey,
   VariantSpriteKey,
@@ -44,7 +46,6 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
   if (prefabEid !== undefined) return prefabEid;
 
   prefabEid = addPrefab(world);
-  addComponent(world, prefabEid, Observed);
   addComponent(world, prefabEid, set(Position, { x: DEFAULTS.x, y: DEFAULTS.y }));
   addComponent(world, prefabEid, set(VisualSize, { diameter: DEFAULTS.visualDiameter }));
   addComponent(world, prefabEid, set(ObstacleSize, { diameter: DEFAULTS.obstacleDiameter }));
@@ -54,7 +55,6 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, set(Speed, { tilesPerSec: DEFAULTS.tilesPerSec }));
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
   addComponent(world, prefabEid, PointerTarget);
-  addComponent(world, prefabEid, Hero);
   addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.hero' }));
   addComponent(world, prefabEid, set(VariantSpriteKey, { value: '' }));
 
@@ -70,7 +70,7 @@ export interface SpawnHeroOptions {
 }
 
 /**
- * Spawns a hero entity. Hero has no autonomous urge; movement is only via path-follow.
+ * Spawns a hero entity. Hero starts with Wander urge and can be switched to path-follow by heroPath.
  *
  * @param world - Simulator world
  * @param options - Optional position (default 0,0)
@@ -84,6 +84,7 @@ export function spawnHero(
   const eid = addEntity(world);
   addComponent(world, eid, IsA(prefabEid));
   addComponent(world, eid, Observed);
+  addComponent(world, eid, Hero);
   // Always materialize sprite keys on instance so renderer does not depend on IsA copy behavior.
   setComponent(world, eid, DefaultSpriteKey, { value: options?.spriteKey ?? 'actor.hero' });
   setComponent(world, eid, VariantSpriteKey, { value: options?.variantSpriteKey ?? '' });
@@ -94,6 +95,13 @@ export function spawnHero(
       y: options.y ?? DEFAULTS.y,
     });
   }
+
+  // Keep hero moving organically until the player issues a path command.
+  addComponent(world, eid, Wander);
+  addComponent(world, eid, WanderPersistence);
+  WanderPersistence.ticsUntilNextChange[eid] = 0;
+  WanderPersistence.ticsUntilDirectionChange[eid] = 0;
+  WanderPersistence.ticsUntilSpeedChange[eid] = 0;
 
   return eid;
 }

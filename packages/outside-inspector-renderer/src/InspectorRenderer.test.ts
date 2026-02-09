@@ -93,7 +93,7 @@ describe('InspectorPrimitivesLayer', () => {
       (element) =>
         element.type === 'circle' &&
         element.props['data-inspector-kind'] === 'bot' &&
-        element.props.fill === '#f44'
+        element.props.fill === '#44f'
     );
     expect(botEntity).toBeDefined();
   });

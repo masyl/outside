@@ -3,8 +3,22 @@
  * @packageDocumentation
  */
 
-import { query, getComponent, setComponent } from 'bitecs';
-import { Position, Direction, Speed, Hero } from './components';
+import {
+  addComponent,
+  getComponent,
+  hasComponent,
+  query,
+  removeComponent,
+  setComponent,
+} from 'bitecs';
+import {
+  Direction,
+  Hero,
+  Position,
+  Speed,
+  Wander,
+  WanderPersistence,
+} from './components';
 import { findPath, getPassableTiles, simplifyPath } from './pathfinding';
 import type { SimulatorWorld } from './world';
 
@@ -32,6 +46,18 @@ function angleToward(fromX: number, fromY: number, toX: number, toY: number): nu
   return Math.atan2(toY - fromY, toX - fromX);
 }
 
+function enableHeroWander(world: SimulatorWorld, heroEid: number): void {
+  if (!hasComponent(world, heroEid, Wander)) {
+    addComponent(world, heroEid, Wander);
+  }
+  if (!hasComponent(world, heroEid, WanderPersistence)) {
+    addComponent(world, heroEid, WanderPersistence);
+  }
+  WanderPersistence.ticsUntilNextChange[heroEid] = 0;
+  WanderPersistence.ticsUntilDirectionChange[heroEid] = 0;
+  WanderPersistence.ticsUntilSpeedChange[heroEid] = 0;
+}
+
 /**
  * Orders the hero to move to the given tile. Pathfinds and sets the path; hero path system will consume it.
  */
@@ -48,8 +74,12 @@ export function orderHeroTo(
   const rawPath = findPath(world, from, to);
   const path = simplifyPath(getPassableTiles(world), rawPath);
   const pathMap = getPathMap(world);
+  // While following a commanded path, disable Wander so urge does not override path steering.
+  removeComponent(world, heroEid, Wander);
+  removeComponent(world, heroEid, WanderPersistence);
   if (path.length <= 1) {
     pathMap.delete(heroEid);
+    enableHeroWander(world, heroEid);
     return;
   }
   pathMap.set(heroEid, path.slice(1));
@@ -78,7 +108,7 @@ export function heroPathSystem(world: SimulatorWorld): SimulatorWorld {
   for (const eid of heroes) {
     const path = pathMap.get(eid);
     if (path == null || path.length === 0) {
-      setComponent(world, eid, Speed, { tilesPerSec: 0 });
+      enableHeroWander(world, eid);
       continue;
     }
     const pos = getComponent(world, eid, Position);
@@ -90,7 +120,7 @@ export function heroPathSystem(world: SimulatorWorld): SimulatorWorld {
       path.shift();
       if (path.length === 0) {
         pathMap.delete(eid);
-        setComponent(world, eid, Speed, { tilesPerSec: 0 });
+        enableHeroWander(world, eid);
         continue;
       }
     }

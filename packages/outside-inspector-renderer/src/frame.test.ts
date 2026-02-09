@@ -7,6 +7,7 @@ import {
   FollowTarget,
   FloorTile,
   Food,
+  Observed,
   Obstacle,
   Position,
   Speed,
@@ -19,6 +20,7 @@ describe('buildInspectorFrame', () => {
     const world = createWorld();
 
     const floor = addEntity(world);
+    addComponent(world, floor, Observed);
     addComponent(world, floor, Position);
     Position.x[floor] = 0;
     Position.y[floor] = 0;
@@ -27,6 +29,7 @@ describe('buildInspectorFrame', () => {
     addComponent(world, floor, FloorTile);
 
     const wall = addEntity(world);
+    addComponent(world, wall, Observed);
     addComponent(world, wall, Position);
     Position.x[wall] = 1;
     Position.y[wall] = 0;
@@ -38,6 +41,7 @@ describe('buildInspectorFrame', () => {
     Collided.ticksRemaining[wall] = 1;
 
     const food = addEntity(world);
+    addComponent(world, food, Observed);
     addComponent(world, food, Position);
     Position.x[food] = 2;
     Position.y[food] = 2;
@@ -56,11 +60,13 @@ describe('buildInspectorFrame', () => {
   it('classifies non-tile entities as bots and includes vectors/follow links/collision metadata', () => {
     const world = createWorld();
     const leader = addEntity(world);
+    addComponent(world, leader, Observed);
     addComponent(world, leader, Position);
     Position.x[leader] = 3;
     Position.y[leader] = 3;
 
     const follower = addEntity(world);
+    addComponent(world, follower, Observed);
     addComponent(world, follower, Position);
     Position.x[follower] = 1;
     Position.y[follower] = 2;

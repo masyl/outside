@@ -16,6 +16,7 @@ type ConsumerState = {
 export interface StreamController {
   push: (packet: SharedRenderStreamPacket) => void;
   setReady: (id: StreamConsumerId, ready: boolean) => void;
+  replay: (id: StreamConsumerId) => void;
   subscribe: (
     id: StreamConsumerId,
     handler: (packet: SharedRenderStreamPacket, seq: number) => void
@@ -84,6 +85,13 @@ export function createStreamController(): StreamController {
       if (ready) {
         flushConsumer(id);
       }
+    },
+
+    replay(id) {
+      const consumer = consumers.get(id);
+      if (!consumer) return;
+      consumer.lastDeliveredSeq = -1;
+      flushConsumer(id);
     },
 
     subscribe(id, handler) {

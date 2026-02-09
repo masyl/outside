@@ -60,7 +60,6 @@ export function getOrCreateBotPrefab(world: SimulatorWorld): number {
   if (prefabEid !== undefined) return prefabEid;
 
   prefabEid = addPrefab(world);
-  addComponent(world, prefabEid, Observed);
   addComponent(world, prefabEid, set(Position, { x: DEFAULTS.x, y: DEFAULTS.y }));
   addComponent(world, prefabEid, set(VisualSize, { diameter: DEFAULTS.visualDiameter }));
   addComponent(world, prefabEid, set(ObstacleSize, { diameter: DEFAULTS.obstacleDiameter }));
