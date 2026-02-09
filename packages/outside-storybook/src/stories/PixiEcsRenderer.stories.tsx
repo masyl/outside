@@ -2,10 +2,6 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { RENDERER_VERSION } from '@outside/renderer';
 import { INSPECTOR_RENDERER_VERSION } from '@outside/inspector-renderer';
-import {
-  PIXEL_PLATTER_PACK_ID,
-  PIXEL_PLATTER_PACK_VERSION,
-} from '@outside/resource-packs/pixel-platter/meta';
 import { PixiEcsRendererStory } from '../components/renderer/PixiEcsRendererStory';
 import {
   spawnFloorRectThenScattered,
@@ -20,14 +16,6 @@ const RENDERER_VER =
 const INSPECTOR_VER =
   typeof INSPECTOR_RENDERER_VERSION === 'string' && INSPECTOR_RENDERER_VERSION.length > 0
     ? INSPECTOR_RENDERER_VERSION
-    : 'unknown';
-const RESOURCE_PACK_ID =
-  typeof PIXEL_PLATTER_PACK_ID === 'string' && PIXEL_PLATTER_PACK_ID.length > 0
-    ? PIXEL_PLATTER_PACK_ID
-    : 'unknown';
-const RESOURCE_PACK_VERSION =
-  typeof PIXEL_PLATTER_PACK_VERSION === 'string' && PIXEL_PLATTER_PACK_VERSION.length > 0
-    ? PIXEL_PLATTER_PACK_VERSION
     : 'unknown';
 
 function FullHeightDecorator(Story: React.ComponentType) {
@@ -106,6 +94,10 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       control: { type: 'boolean' },
       description: 'Inspector: tint colliding bots/walls',
     },
+    showInspectorWallOutlines: {
+      control: { type: 'boolean' },
+      description: 'Inspector: draw wall outlines',
+    },
     rendererVer: {
       control: { type: 'select' },
       options: [RENDERER_VER],
@@ -118,28 +110,15 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       description: 'Full semver for @outside/inspector-renderer',
       table: { readonly: true },
     },
-    resourcePackId: {
-      control: { type: 'select' },
-      options: [RESOURCE_PACK_ID],
-      description: 'Selected food resource pack id',
-      table: { readonly: true },
-    },
-    resourcePackVersion: {
-      control: { type: 'select' },
-      options: [RESOURCE_PACK_VERSION],
-      description: 'Selected food resource pack version',
-      table: { readonly: true },
-    },
   },
   args: {
     showInspectorOverlay: false,
     showInspectorFollowLinks: true,
     showInspectorVelocityVectors: true,
     showInspectorCollisionTint: true,
+    showInspectorWallOutlines: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -156,8 +135,6 @@ export const Default: StoryObj<typeof PixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -172,8 +149,6 @@ export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -191,8 +166,9 @@ export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
     showInspectorOverlay: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
     showInspectorVelocityVectors: false,
+    showInspectorFollowLinks: false,
+    showInspectorCollisionTint: false,
+    showInspectorWallOutlines: false,
   },
 };

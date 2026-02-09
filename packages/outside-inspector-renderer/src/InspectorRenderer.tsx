@@ -13,6 +13,7 @@ export interface InspectorRendererProps {
   showFollowLinks?: boolean;
   showVelocityVectors?: boolean;
   showCollisionTint?: boolean;
+  showWallOutlines?: boolean;
 }
 
 function toScreenX(worldX: number, centerX: number, tileSize: number, width: number): number {
@@ -37,6 +38,7 @@ export function InspectorRenderer({
   showFollowLinks = true,
   showVelocityVectors = true,
   showCollisionTint = true,
+  showWallOutlines = true,
 }: InspectorRendererProps) {
   return (
     <svg
@@ -55,6 +57,7 @@ export function InspectorRenderer({
         showFollowLinks={showFollowLinks}
         showVelocityVectors={showVelocityVectors}
         showCollisionTint={showCollisionTint}
+        showWallOutlines={showWallOutlines}
       />
     </svg>
   );

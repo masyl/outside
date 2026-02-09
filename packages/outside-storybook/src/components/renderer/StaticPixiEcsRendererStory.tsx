@@ -17,8 +17,6 @@ import { createStreamController } from './stream-controller';
 export interface StaticPixiEcsRendererStoryProps {
   rendererVer?: string;
   inspectorVer?: string;
-  resourcePackId?: string;
-  resourcePackVersion?: string;
   seed: number;
   tileSize?: number;
   waitForAssets?: boolean;
@@ -26,6 +24,7 @@ export interface StaticPixiEcsRendererStoryProps {
   showInspectorFollowLinks?: boolean;
   showInspectorVelocityVectors?: boolean;
   showInspectorCollisionTint?: boolean;
+  showInspectorWallOutlines?: boolean;
   buildWorld: (world: SimulatorWorld, seed: number) => void;
 }
 
@@ -47,6 +46,7 @@ export function StaticPixiEcsRendererStory({
   showInspectorFollowLinks = true,
   showInspectorVelocityVectors = true,
   showInspectorCollisionTint = true,
+  showInspectorWallOutlines = true,
   buildWorld,
 }: StaticPixiEcsRendererStoryProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -229,6 +229,7 @@ export function StaticPixiEcsRendererStory({
           showFollowLinks={showInspectorFollowLinks}
           showVelocityVectors={showInspectorVelocityVectors}
           showCollisionTint={showInspectorCollisionTint}
+          showWallOutlines={showInspectorWallOutlines}
         />
       </InspectorOverlay>
     </div>

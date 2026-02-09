@@ -17,8 +17,6 @@ import { createStreamController } from './stream-controller';
 interface PixiEcsRendererStoryProps {
   rendererVer?: string;
   inspectorVer?: string;
-  resourcePackId?: string;
-  resourcePackVersion?: string;
   seed: number;
   ticsPerSecond: number;
   botCount: number;
@@ -32,6 +30,7 @@ interface PixiEcsRendererStoryProps {
   showInspectorFollowLinks?: boolean;
   showInspectorVelocityVectors?: boolean;
   showInspectorCollisionTint?: boolean;
+  showInspectorWallOutlines?: boolean;
 }
 
 const EMPTY_FRAME: InspectorFrame = {
@@ -58,6 +57,7 @@ export function PixiEcsRendererStory({
   showInspectorFollowLinks = true,
   showInspectorVelocityVectors = true,
   showInspectorCollisionTint = true,
+  showInspectorWallOutlines = true,
 }: PixiEcsRendererStoryProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<PixiEcsRenderer | null>(null);
@@ -244,6 +244,7 @@ export function PixiEcsRendererStory({
           showFollowLinks={showInspectorFollowLinks}
           showVelocityVectors={showInspectorVelocityVectors}
           showCollisionTint={showInspectorCollisionTint}
+          showWallOutlines={showInspectorWallOutlines}
         />
       </InspectorOverlay>
     </div>

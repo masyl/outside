@@ -16,6 +16,7 @@ export interface InspectorPrimitivesLayerProps {
   showFollowLinks?: boolean;
   showVelocityVectors?: boolean;
   showCollisionTint?: boolean;
+  showWallOutlines?: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export function InspectorPrimitivesLayer({
   showFollowLinks = true,
   showVelocityVectors = true,
   showCollisionTint = true,
+  showWallOutlines = true,
 }: InspectorPrimitivesLayerProps) {
   const tiles = frame.tiles ?? [];
   const entities = frame.entities ?? [];
@@ -58,8 +60,8 @@ export function InspectorPrimitivesLayer({
                 data-inspector-kind={tile.kind}
                 fill={overlayMode ? 'none' : wallCollided ? '#6af' : tile.kind === 'wall' ? '#888' : '#2f2f2f'}
                 fillOpacity={overlayMode ? 1 : fillOpacity}
-                stroke={wallCollided ? '#6af' : tile.kind === 'wall' ? '#b5b5b5' : '#555'}
-                strokeWidth={overlayMode ? 1.25 : 1}
+                stroke={showWallOutlines ? (wallCollided ? '#6af' : tile.kind === 'wall' ? '#b5b5b5' : '#555') : 'none'}
+                strokeWidth={showWallOutlines ? (overlayMode ? 1.25 : 1) : 0}
               />
             );
           })}

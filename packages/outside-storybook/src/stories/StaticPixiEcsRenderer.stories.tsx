@@ -2,11 +2,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { RENDERER_VERSION } from '@outside/renderer';
 import { INSPECTOR_RENDERER_VERSION } from '@outside/inspector-renderer';
-import {
-  PIXEL_PLATTER_PACK_ID,
-  PIXEL_PLATTER_PACK_VERSION,
-  foodVariantIds,
-} from '@outside/resource-packs/pixel-platter/meta';
+import { foodVariantIds } from '@outside/resource-packs/pixel-platter/meta';
 import {
   spawnBot,
   spawnFloorRect,
@@ -26,14 +22,6 @@ const RENDERER_VER =
 const INSPECTOR_VER =
   typeof INSPECTOR_RENDERER_VERSION === 'string' && INSPECTOR_RENDERER_VERSION.length > 0
     ? INSPECTOR_RENDERER_VERSION
-    : 'unknown';
-const RESOURCE_PACK_ID =
-  typeof PIXEL_PLATTER_PACK_ID === 'string' && PIXEL_PLATTER_PACK_ID.length > 0
-    ? PIXEL_PLATTER_PACK_ID
-    : 'unknown';
-const RESOURCE_PACK_VERSION =
-  typeof PIXEL_PLATTER_PACK_VERSION === 'string' && PIXEL_PLATTER_PACK_VERSION.length > 0
-    ? PIXEL_PLATTER_PACK_VERSION
     : 'unknown';
 
 function FullHeightDecorator(Story: React.ComponentType) {
@@ -257,32 +245,20 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
       description: 'Full semver for @outside/inspector-renderer',
       table: { readonly: true },
     },
-    resourcePackId: {
-      control: { type: 'select' },
-      options: [RESOURCE_PACK_ID],
-      description: 'Selected food resource pack id',
-      table: { readonly: true },
-    },
-    resourcePackVersion: {
-      control: { type: 'select' },
-      options: [RESOURCE_PACK_VERSION],
-      description: 'Selected food resource pack version',
-      table: { readonly: true },
-    },
     showInspectorOverlay: { control: { type: 'boolean' } },
     showInspectorFollowLinks: { control: { type: 'boolean' } },
     showInspectorVelocityVectors: { control: { type: 'boolean' } },
     showInspectorCollisionTint: { control: { type: 'boolean' } },
+    showInspectorWallOutlines: { control: { type: 'boolean' } },
   },
   args: {
     showInspectorOverlay: false,
     showInspectorFollowLinks: true,
     showInspectorVelocityVectors: true,
     showInspectorCollisionTint: true,
+    showInspectorWallOutlines: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -297,8 +273,6 @@ export const BoxDungeonHero: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -311,8 +285,6 @@ export const ZoosShowcase: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -325,8 +297,6 @@ export const SmallDungeonEmpty: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -339,8 +309,6 @@ export const LargeDungeonWithEntities: StoryObj<typeof StaticPixiEcsRendererStor
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -353,8 +321,6 @@ export const SingleTileHero: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -367,8 +333,6 @@ export const TileStrip: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -381,8 +345,6 @@ export const FoodOnly: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
@@ -395,8 +357,6 @@ export const FoodVariantGallery: StoryObj<typeof StaticPixiEcsRendererStory> = {
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
-    resourcePackId: RESOURCE_PACK_ID,
-    resourcePackVersion: RESOURCE_PACK_VERSION,
   },
 };
 
