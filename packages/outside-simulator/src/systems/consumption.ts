@@ -4,8 +4,19 @@
  * @packageDocumentation
  */
 
-import { query, getComponent, removeEntity } from 'bitecs';
-import { Position, ObstacleSize, Speed, Direction, Size, Food } from '../components';
+import { query, getComponent, removeComponent, removeEntity } from 'bitecs';
+import {
+  Position,
+  ObstacleSize,
+  Speed,
+  Direction,
+  Size,
+  Food,
+  DefaultSpriteKey,
+  VariantSpriteKey,
+  VisualSize,
+  Observed,
+} from '../components';
 import type { SimulatorWorld } from '../world';
 import type { ConsumedEvent } from '../events';
 
@@ -18,6 +29,21 @@ interface Consumption {
   foodEid: number;
   x: number;
   y: number;
+}
+
+/**
+ * Removes the render-observed components before deleting the entity.
+ * This guarantees observer deltas contain component removals so render worlds
+ * stop drawing consumed food immediately.
+ */
+function clearFoodRenderComponents(world: SimulatorWorld, foodEid: number): void {
+  removeComponent(world, foodEid, Food);
+  removeComponent(world, foodEid, Position);
+  removeComponent(world, foodEid, Size);
+  removeComponent(world, foodEid, DefaultSpriteKey);
+  removeComponent(world, foodEid, VariantSpriteKey);
+  removeComponent(world, foodEid, VisualSize);
+  removeComponent(world, foodEid, Observed);
 }
 
 /** Bots (mobile) and food (Position + Size + Food). One food consumed per bot per tic (first overlap). */
@@ -64,6 +90,7 @@ export function consumptionSystem(world: SimulatorWorld): SimulatorWorld {
       x,
       y,
     } satisfies ConsumedEvent);
+    clearFoodRenderComponents(world, foodEid);
     removeEntity(world, foodEid);
   }
 

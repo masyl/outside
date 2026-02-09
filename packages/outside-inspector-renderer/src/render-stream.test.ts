@@ -4,12 +4,14 @@ import {
   Collided,
   Follow,
   FollowTarget,
-  RENDER_COMPONENTS,
+  RENDER_SNAPSHOT_COMPONENTS,
   createRenderObserverSerializer,
   createSnapshotSerializer,
   createWorld,
+  removeEntity,
   query,
   spawnBot,
+  spawnFood,
   spawnFloorTile,
   Position,
 } from '@outside/simulator';
@@ -32,7 +34,7 @@ describe('inspector render stream', () => {
     addComponent(sim, follower, Collided);
     Collided.ticksRemaining[follower] = 2;
 
-    const snapshot = createSnapshotSerializer(sim, [...RENDER_COMPONENTS]);
+    const snapshot = createSnapshotSerializer(sim, [...RENDER_SNAPSHOT_COMPONENTS]);
     const observer = createRenderObserverSerializer(sim);
 
     const inspector = createInspectorRenderWorld();
@@ -44,5 +46,19 @@ describe('inspector render stream', () => {
 
     applyInspectorStream(inspector, { kind: 'delta', buffer: observer(), tic: 1 });
     expect(inspector.lastTic).toBe(1);
+  });
+
+  it('treats snapshot as full replacement state', () => {
+    const sim = createWorld({ seed: 13, ticDurationMs: 50 });
+    const food = spawnFood(sim, { x: 0, y: 0 });
+    const snapshot = createSnapshotSerializer(sim, [...RENDER_SNAPSHOT_COMPONENTS]);
+
+    const inspector = createInspectorRenderWorld();
+    applyInspectorStream(inspector, { kind: 'snapshot', buffer: snapshot(), tic: 0 });
+    expect(query(inspector.world, [Position]).length).toBe(1);
+
+    removeEntity(sim, food);
+    applyInspectorStream(inspector, { kind: 'snapshot', buffer: snapshot(), tic: 1 });
+    expect(query(inspector.world, [Position]).length).toBe(0);
   });
 });

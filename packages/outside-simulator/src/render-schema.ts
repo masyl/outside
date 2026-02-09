@@ -4,6 +4,7 @@
  */
 
 import {
+  Observed,
   Position,
   VisualSize,
   Size,
@@ -40,3 +41,9 @@ export const RENDER_COMPONENTS = [
   Food,
   Hero,
 ] as const;
+
+/**
+ * Snapshot schema for render-world bootstrap.
+ * Includes Observed so observer deltas can apply add/remove lifecycle consistently.
+ */
+export const RENDER_SNAPSHOT_COMPONENTS = [Observed, ...RENDER_COMPONENTS] as const;

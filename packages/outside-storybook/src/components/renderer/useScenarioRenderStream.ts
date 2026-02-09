@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Position,
-  RENDER_COMPONENTS,
+  RENDER_SNAPSHOT_COMPONENTS,
   createRenderObserverSerializer,
   createSnapshotSerializer,
   createWorld,
@@ -99,6 +99,8 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
   const [bounds, setBounds] = useState<StreamBounds>({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
   const worldRef = useRef<SimulatorWorld | null>(null);
   const observerRef = useRef<ReturnType<typeof createRenderObserverSerializer> | null>(null);
+  const snapshotRef = useRef<ReturnType<typeof createSnapshotSerializer> | null>(null);
+  const positionCountRef = useRef(0);
   const ticRef = useRef(0);
 
   const streamKey = useMemo(() => {
@@ -122,14 +124,17 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     if (options.mode === 'dynamic') {
       options.spawnFn(world, options.seed, options.botCount, options.spawnOptions);
       observerRef.current = createRenderObserverSerializer(world);
+      snapshotRef.current = createSnapshotSerializer(world, RENDER_SNAPSHOT_COMPONENTS);
     } else {
       options.buildWorld(world, options.seed);
       observerRef.current = null;
+      snapshotRef.current = createSnapshotSerializer(world, RENDER_SNAPSHOT_COMPONENTS);
     }
 
     worldRef.current = world;
     ticRef.current = 0;
-    const snapshot = createSnapshotSerializer(world, RENDER_COMPONENTS);
+    positionCountRef.current = query(world, [Position]).length;
+    const snapshot = snapshotRef.current ?? createSnapshotSerializer(world, RENDER_SNAPSHOT_COMPONENTS);
     const nextBounds = computeBounds(world);
     setBounds(nextBounds);
 
@@ -154,7 +159,8 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       if (!running) return;
       const world = worldRef.current;
       const observer = observerRef.current;
-      if (!world || !observer) return;
+      const snapshot = snapshotRef.current;
+      if (!world || !observer || !snapshot) return;
 
       const deltaMs = now - lastTime;
       lastTime = now;
@@ -170,9 +176,12 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       for (let i = 0; i < ticsToRun; i++) {
         runTics(world, 1);
         ticRef.current += 1;
+        const nextPositionCount = query(world, [Position]).length;
+        const shouldEmitSnapshot = nextPositionCount !== positionCountRef.current;
+        positionCountRef.current = nextPositionCount;
         const packet: SharedRenderStreamPacket = {
-          kind: 'delta',
-          buffer: observer(),
+          kind: shouldEmitSnapshot ? 'snapshot' : 'delta',
+          buffer: shouldEmitSnapshot ? snapshot() : observer(),
           tic: ticRef.current,
         };
         setPacketState((prev) => ({

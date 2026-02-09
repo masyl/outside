@@ -89,7 +89,7 @@ export type {
   PrimitiveBrand,
 } from './serialization';
 
-export { RENDER_COMPONENTS } from './render-schema';
+export { RENDER_COMPONENTS, RENDER_SNAPSHOT_COMPONENTS } from './render-schema';
 export { createRenderObserverSerializer } from './render-stream';
 
 export { getEventQueue, drainEventQueue } from './events-api';

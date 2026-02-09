@@ -58,7 +58,7 @@ export function InspectorPrimitivesLayer({
                 data-inspector-kind={tile.kind}
                 fill={overlayMode ? 'none' : wallCollided ? '#6af' : tile.kind === 'wall' ? '#888' : '#2f2f2f'}
                 fillOpacity={overlayMode ? 1 : fillOpacity}
-                stroke={tile.kind === 'wall' ? '#b5b5b5' : '#555'}
+                stroke={wallCollided ? '#6af' : tile.kind === 'wall' ? '#b5b5b5' : '#555'}
                 strokeWidth={overlayMode ? 1.25 : 1}
               />
             );
@@ -136,7 +136,6 @@ export function InspectorPrimitivesLayer({
           const radius = (entity.diameter * tileSize) / 2;
           const isCollisionTinted = showCollisionTint && entity.inCollidedCooldown;
           const collidedOpacity = entity.collidedTicksRemaining / COLLIDED_COOLDOWN_MAX;
-          const isCollisionActive = entity.collidedTicksRemaining >= COLLIDED_COOLDOWN_MAX;
           let fill = '#ff00ff';
           let stroke = '#111';
 
@@ -148,8 +147,8 @@ export function InspectorPrimitivesLayer({
             stroke = '#6a4';
           } else if (entity.kind === 'bot') {
             if (isCollisionTinted) {
-              fill = isCollisionActive ? '#f44' : '#44f';
-              stroke = isCollisionActive ? '#f88' : '#88f';
+              fill = '#44f';
+              stroke = '#6af';
             } else {
               fill = '#4a4';
               stroke = '#6c6';

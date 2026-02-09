@@ -447,6 +447,16 @@ function spawnDungeonActorVariants(
   return spawnedPositions;
 }
 
+function offsetFoodFromActor(seed: number, index: number): { x: number; y: number } {
+  const angle = seededUnit(seed, 9000 + index) * Math.PI * 2;
+  // Keep food close enough to be found quickly, but far enough to avoid instant overlap.
+  const radius = 1.25;
+  return {
+    x: Math.cos(angle) * radius,
+    y: Math.sin(angle) * radius,
+  };
+}
+
 /**
  * WFC dungeon with configurable food/bot counts and hero.
  * Same as spawnDungeonWithFoodAndHero but uses WFC generator.
@@ -481,12 +491,13 @@ export function spawnDungeonWFCWithFoodAndHero(
     spawnOptions,
     botCount
   );
-  const anchoredFoodCount = Math.min(actorPositions.length, resolvedFoodCount);
+  const anchoredFoodCount = Math.min(3, actorPositions.length, resolvedFoodCount);
   for (let i = 0; i < anchoredFoodCount; i++) {
     const anchor = actorPositions[i];
+    const offset = offsetFoodFromActor(seed, 200 + i);
     spawnFood(world, {
-      x: anchor.x,
-      y: anchor.y,
+      x: anchor.x + offset.x,
+      y: anchor.y + offset.y,
       variant: pickFoodVariant(seed, 200 + i),
     });
   }
@@ -549,12 +560,13 @@ export function spawnDungeonWithFoodAndHero(
     spawnOptions,
     botCount
   );
-  const anchoredFoodCount = Math.min(actorPositions.length, resolvedFoodCount);
+  const anchoredFoodCount = Math.min(3, actorPositions.length, resolvedFoodCount);
   for (let i = 0; i < anchoredFoodCount; i++) {
     const anchor = actorPositions[i];
+    const offset = offsetFoodFromActor(seed, 300 + i);
     spawnFood(world, {
-      x: anchor.x,
-      y: anchor.y,
+      x: anchor.x + offset.x,
+      y: anchor.y + offset.y,
       variant: pickFoodVariant(seed, 300 + i),
     });
   }

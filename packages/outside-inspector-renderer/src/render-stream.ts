@@ -4,6 +4,7 @@ import {
   createSnapshotDeserializer,
   Observed,
   RENDER_COMPONENTS,
+  RENDER_SNAPSHOT_COMPONENTS,
 } from '@outside/simulator';
 
 /**
@@ -35,9 +36,23 @@ export function createInspectorRenderWorld(): InspectorRenderWorld {
   return {
     world,
     observerDeserializer: createObserverDeserializer(world, Observed, [...RENDER_COMPONENTS]),
-    snapshotDeserializer: createSnapshotDeserializer(world, [...RENDER_COMPONENTS]),
+    snapshotDeserializer: createSnapshotDeserializer(world, [...RENDER_SNAPSHOT_COMPONENTS]),
     lastTic: 0,
   };
+}
+
+/**
+ * Reinitializes the inspector render world in-place.
+ * Snapshot packets replace prior state completely.
+ *
+ * @param state - Inspector render world state.
+ */
+function resetInspectorWorld(state: InspectorRenderWorld): void {
+  const world = createWorld();
+  state.world = world;
+  state.observerDeserializer = createObserverDeserializer(world, Observed, [...RENDER_COMPONENTS]);
+  state.snapshotDeserializer = createSnapshotDeserializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
+  state.lastTic = 0;
 }
 
 /**
@@ -48,6 +63,7 @@ export function createInspectorRenderWorld(): InspectorRenderWorld {
  */
 export function applyInspectorStream(state: InspectorRenderWorld, packet: RenderStreamPacket): void {
   if (packet.kind === 'snapshot') {
+    resetInspectorWorld(state);
     state.snapshotDeserializer(packet.buffer);
   } else {
     state.observerDeserializer(packet.buffer);

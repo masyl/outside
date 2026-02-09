@@ -3,6 +3,7 @@ import {
   createObserverDeserializer,
   createSnapshotDeserializer,
   RENDER_COMPONENTS,
+  RENDER_SNAPSHOT_COMPONENTS,
   Observed,
 } from '@outside/simulator';
 
@@ -31,7 +32,7 @@ export type RenderStreamPacket = {
 export function createRenderWorld(): RenderWorldState {
   const world = createWorld();
   const observerDeserializer = createObserverDeserializer(world, Observed, RENDER_COMPONENTS);
-  const snapshotDeserializer = createSnapshotDeserializer(world, RENDER_COMPONENTS);
+  const snapshotDeserializer = createSnapshotDeserializer(world, RENDER_SNAPSHOT_COMPONENTS);
   return {
     world,
     observerDeserializer,
@@ -41,10 +42,25 @@ export function createRenderWorld(): RenderWorldState {
 }
 
 /**
+ * Reinitializes the render world and deserializers in-place.
+ * Snapshot packets are treated as full-state replacement, not merge updates.
+ *
+ * @param renderWorld - Render world state to reset.
+ */
+function resetRenderWorld(renderWorld: RenderWorldState): void {
+  const world = createWorld();
+  renderWorld.world = world;
+  renderWorld.observerDeserializer = createObserverDeserializer(world, Observed, RENDER_COMPONENTS);
+  renderWorld.snapshotDeserializer = createSnapshotDeserializer(world, RENDER_SNAPSHOT_COMPONENTS);
+  renderWorld.lastTic = 0;
+}
+
+/**
  * Applies one snapshot or delta packet and updates local tick tracking.
  */
 export function applyRenderStream(renderWorld: RenderWorldState, packet: RenderStreamPacket): void {
   if (packet.kind === 'snapshot') {
+    resetRenderWorld(renderWorld);
     renderWorld.snapshotDeserializer(packet.buffer);
   } else {
     renderWorld.observerDeserializer(packet.buffer);
