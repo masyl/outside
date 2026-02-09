@@ -29,9 +29,12 @@ const MAX_VELOCITY_TPS = 4;
 /** Wander speed range (tiles per second). */
 const WANDER_SPEED_MIN = 1;
 const WANDER_SPEED_MAX = 4;
-/** Wander: tics between direction/speed changes (≈0.5–1.5 s at 50 ms/tic, twice as often). */
-const WANDER_TICS_MIN = 10;
-const WANDER_TICS_MAX = 30;
+/** Wander: tics between direction changes (shorter to keep trajectory organic). */
+const WANDER_DIRECTION_TICS_MIN = 4;
+const WANDER_DIRECTION_TICS_MAX = 16;
+/** Wander: tics between speed changes. */
+const WANDER_SPEED_TICS_MIN = 10;
+const WANDER_SPEED_TICS_MAX = 30;
 /** Wander: max direction change per step (radians). */
 const WANDER_ANGLE_DELTA_MAX = (15 * Math.PI) / 180;
 
@@ -44,6 +47,17 @@ function normalizeAngleDiff(rad: number): number {
   while (r > Math.PI) r -= Math.PI * 2;
   while (r < -Math.PI) r += Math.PI * 2;
   return r;
+}
+
+function randomDirectionIntervalTics(rng: SimulatorWorld['random']): number {
+  return (
+    WANDER_DIRECTION_TICS_MIN +
+    Math.floor(rng.nextFloat() * (WANDER_DIRECTION_TICS_MAX - WANDER_DIRECTION_TICS_MIN + 1))
+  );
+}
+
+function randomSpeedIntervalTics(rng: SimulatorWorld['random']): number {
+  return WANDER_SPEED_TICS_MIN + Math.floor(rng.nextFloat() * (WANDER_SPEED_TICS_MAX - WANDER_SPEED_TICS_MIN + 1));
 }
 
 export function urgeSystem(world: SimulatorWorld): SimulatorWorld {
@@ -111,35 +125,53 @@ export function urgeSystem(world: SimulatorWorld): SimulatorWorld {
     setComponent(world, eid, Speed, { tilesPerSec });
   }
 
-  // Wander: persist direction/speed for 1–3 s then pick new (smooth walk). Skip Wait/Follow.
-  // Use getComponent/setComponent for WanderPersistence so observer path matches Direction/Speed.
+  // Wander: direction and speed each have independent randomized intervals.
+  // This avoids synchronized motion updates while keeping deterministic behavior for a fixed seed.
   const wanderEnts = query(world, [Position, Direction, Speed, Wander]);
   for (let i = 0; i < wanderEnts.length; i++) {
     const eid = wanderEnts[i];
     if (waitSet.has(eid) || followSet.has(eid)) continue;
     const pers = getComponent(world, eid, WanderPersistence);
-    const ticsLeft = pers?.ticsUntilNextChange ?? 0;
-    if (ticsLeft > 0) {
-      setComponent(world, eid, WanderPersistence, { ticsUntilNextChange: ticsLeft - 1 });
-      continue;
+    let directionTicsLeft =
+      pers?.ticsUntilDirectionChange ?? pers?.ticsUntilNextChange ?? 0;
+    let speedTicsLeft =
+      pers?.ticsUntilSpeedChange ?? pers?.ticsUntilNextChange ?? 0;
+
+    if (directionTicsLeft > 0) {
+      directionTicsLeft -= 1;
     }
+    if (speedTicsLeft > 0) {
+      speedTicsLeft -= 1;
+    }
+
     addComponent(world, eid, WanderPersistence);
     const curDir = getComponent(world, eid, Direction);
-    const delta =
-      (rng.nextFloat() * 2 - 1) * WANDER_ANGLE_DELTA_MAX;
-    let angle = curDir.angle + delta;
-    while (angle > Math.PI) angle -= Math.PI * 2;
-    while (angle < -Math.PI) angle += Math.PI * 2;
-    let tilesPerSec = WANDER_SPEED_MIN + rng.nextFloat() * (WANDER_SPEED_MAX - WANDER_SPEED_MIN);
-    const maxSpeed = getComponent(world, eid, MaxSpeed);
-    if (maxSpeed && maxSpeed.tilesPerSec != null) {
-      tilesPerSec = Math.min(tilesPerSec, maxSpeed.tilesPerSec);
+
+    if (directionTicsLeft <= 0) {
+      const delta =
+        (rng.nextFloat() * 2 - 1) * WANDER_ANGLE_DELTA_MAX;
+      let angle = curDir.angle + delta;
+      while (angle > Math.PI) angle -= Math.PI * 2;
+      while (angle < -Math.PI) angle += Math.PI * 2;
+      setComponent(world, eid, Direction, { angle });
+      directionTicsLeft = randomDirectionIntervalTics(rng);
     }
-    setComponent(world, eid, Direction, { angle });
-    setComponent(world, eid, Speed, { tilesPerSec });
-    const nextTics =
-      WANDER_TICS_MIN + Math.floor(rng.nextFloat() * (WANDER_TICS_MAX - WANDER_TICS_MIN + 1));
-    setComponent(world, eid, WanderPersistence, { ticsUntilNextChange: nextTics });
+
+    if (speedTicsLeft <= 0) {
+      let tilesPerSec = WANDER_SPEED_MIN + rng.nextFloat() * (WANDER_SPEED_MAX - WANDER_SPEED_MIN);
+      const maxSpeed = getComponent(world, eid, MaxSpeed);
+      if (maxSpeed && maxSpeed.tilesPerSec != null) {
+        tilesPerSec = Math.min(tilesPerSec, maxSpeed.tilesPerSec);
+      }
+      setComponent(world, eid, Speed, { tilesPerSec });
+      speedTicsLeft = randomSpeedIntervalTics(rng);
+    }
+
+    setComponent(world, eid, WanderPersistence, {
+      ticsUntilNextChange: Math.min(directionTicsLeft, speedTicsLeft),
+      ticsUntilDirectionChange: directionTicsLeft,
+      ticsUntilSpeedChange: speedTicsLeft,
+    });
   }
 
   return world;

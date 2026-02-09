@@ -19,6 +19,10 @@ export interface PixiRendererOptions {
    * Optional icon URL overrides.
    */
   iconUrls?: Partial<typeof DEFAULT_ICON_URLS>;
+  /**
+   * Enables CRT post-processing filter on the stage.
+   */
+  crtEffectEnabled?: boolean;
 }
 
 /**

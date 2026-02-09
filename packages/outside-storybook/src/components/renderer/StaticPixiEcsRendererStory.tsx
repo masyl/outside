@@ -20,6 +20,7 @@ export interface StaticPixiEcsRendererStoryProps {
   seed: number;
   tileSize?: number;
   waitForAssets?: boolean;
+  useCrtEffect?: boolean;
   showInspectorOverlay?: boolean;
   showInspectorFollowLinks?: boolean;
   showInspectorVelocityVectors?: boolean;
@@ -42,6 +43,7 @@ export function StaticPixiEcsRendererStory({
   seed,
   tileSize = 16,
   waitForAssets = false,
+  useCrtEffect = false,
   showInspectorOverlay = false,
   showInspectorFollowLinks = true,
   showInspectorVelocityVectors = true,
@@ -100,6 +102,12 @@ export function StaticPixiEcsRendererStory({
     renderer.setTileSize(tileSize);
     renderer.resetWorld();
   }, [rendererReady, tileSize, stream.streamKey]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer || rendererReady === 0) return;
+    renderer.setCrtEnabled(useCrtEffect);
+  }, [rendererReady, useCrtEffect]);
 
   useEffect(() => {
     if (!stream.packet) {

@@ -78,6 +78,10 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       control: { type: 'boolean' },
       description: 'Delay render until assets load',
     },
+    useCrtEffect: {
+      control: { type: 'boolean' },
+      description: 'Enable CRT TV post-processing filter',
+    },
     showInspectorOverlay: {
       control: { type: 'boolean' },
       description: 'Overlay inspector renderer on top of Pixi',
@@ -117,6 +121,7 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
     showInspectorVelocityVectors: true,
     showInspectorCollisionTint: true,
     showInspectorWallOutlines: true,
+    useCrtEffect: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
   },

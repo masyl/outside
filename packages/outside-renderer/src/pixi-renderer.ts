@@ -1,4 +1,5 @@
 import { Application, Container, type Sprite } from 'pixi.js';
+import { CRTFilter } from 'pixi-filters';
 import { DEFAULT_TILE_SIZE } from './constants';
 import { DEFAULT_ICON_URLS } from './icons';
 import { PixiGridBackground } from './pixi/background';
@@ -27,6 +28,7 @@ export class PixiEcsRenderer {
   private readonly stream: RenderStreamController;
   private readonly view: PixiViewController;
   private readonly rendererId: number;
+  private readonly crtFilter: CRTFilter;
 
   private readonly displayState: RenderDisplayState;
   private readonly assets = createRendererAssets();
@@ -91,6 +93,20 @@ export class PixiEcsRenderer {
       displayIndex: new Map<number, Sprite>(),
       displayKinds: new Map(),
     };
+
+    this.crtFilter = new CRTFilter({
+      curvature: 2,
+      lineWidth: 1,
+      lineContrast: 0.2,
+      noise: 0.15,
+      noiseSize: 1,
+      vignetting: 0.3,
+      vignettingAlpha: 0.7,
+      vignettingBlur: 0.35,
+      time: 0,
+      seed: 0,
+    });
+    this.setCrtEnabled(options.crtEffectEnabled ?? false);
   }
 
   /**
@@ -182,6 +198,16 @@ export class PixiEcsRenderer {
   setViewportSize(width: number, height: number): void {
     this.view.setViewportSize(width, height);
     this.recenter();
+    this.render();
+  }
+
+  /**
+   * Toggles CRT post-processing on the full stage.
+   *
+   * @param enabled `boolean` true to enable CRT filter, false to disable.
+   */
+  setCrtEnabled(enabled: boolean): void {
+    this.app.stage.filters = enabled ? [this.crtFilter] : null;
     this.render();
   }
 

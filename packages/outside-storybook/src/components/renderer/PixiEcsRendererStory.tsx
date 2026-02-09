@@ -26,6 +26,7 @@ interface PixiEcsRendererStoryProps {
   spawnFn: SpawnFn;
   tileSize?: number;
   waitForAssets?: boolean;
+  useCrtEffect?: boolean;
   showInspectorOverlay?: boolean;
   showInspectorFollowLinks?: boolean;
   showInspectorVelocityVectors?: boolean;
@@ -53,6 +54,7 @@ export function PixiEcsRendererStory({
   spawnFn,
   tileSize = 16,
   waitForAssets = false,
+  useCrtEffect = false,
   showInspectorOverlay = false,
   showInspectorFollowLinks = true,
   showInspectorVelocityVectors = true,
@@ -118,6 +120,12 @@ export function PixiEcsRendererStory({
     renderer.resetWorld();
     renderer.setTileSize(tileSize);
   }, [rendererReady, tileSize, stream.streamKey]);
+
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    if (!renderer || rendererReady === 0) return;
+    renderer.setCrtEnabled(useCrtEffect);
+  }, [rendererReady, useCrtEffect]);
 
   useEffect(() => {
     if (!stream.packet) return;

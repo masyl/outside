@@ -238,6 +238,7 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
       options: [8, 12, 16, 24, 32, 48, 64],
     },
     waitForAssets: { control: { type: 'boolean' } },
+    useCrtEffect: { control: { type: 'boolean' } },
     rendererVer: {
       control: { type: 'select' },
       options: [RENDERER_VER],
@@ -262,6 +263,7 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
     showInspectorVelocityVectors: true,
     showInspectorCollisionTint: true,
     showInspectorWallOutlines: true,
+    useCrtEffect: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
   },

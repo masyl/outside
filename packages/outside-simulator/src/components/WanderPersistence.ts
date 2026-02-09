@@ -1,8 +1,10 @@
 /**
- * Tics until next direction/speed change for Wander urge.
- * When > 0, urge system keeps current direction/speed; when 0, picks new and sets 1–3 s.
+ * Independent tics until next direction and speed changes for Wander urge.
+ * Legacy `ticsUntilNextChange` is kept for backward compatibility with older snapshots.
  */
 const WanderPersistence = {
   ticsUntilNextChange: [] as number[],
+  ticsUntilDirectionChange: [] as number[],
+  ticsUntilSpeedChange: [] as number[],
 };
 export default WanderPersistence;
