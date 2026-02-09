@@ -13,6 +13,7 @@ import type { RendererAssets } from './types';
 import { getPlaceholderTexture, setNearestScale } from './assets';
 import { resolveFoodTexture } from './food-textures';
 import { pickTileSubVariantIndex, pickTileVariant } from './tile-variants';
+import type { RenderSpatialIndex } from './render-pass';
 
 /**
  * Builds a new sprite instance for a render kind.
@@ -89,7 +90,8 @@ export function updateSpriteForEntity(
   eid: number,
   tileSize: number,
   renderWorld: RenderWorldState,
-  assets: RendererAssets
+  assets: RendererAssets,
+  spatialIndex?: RenderSpatialIndex
 ): void {
   const world = renderWorld.world;
   const spriteKey = resolveSpriteKey(world, eid);
@@ -115,13 +117,37 @@ export function updateSpriteForEntity(
       kind === 'wall'
         ? assets.tileTextureByKind.wall
         : assets.tileTextureByKind.floor;
-    const tileVariant = pickTileVariant(
+    const variants =
+      kind === 'wall'
+        ? tileBucket.variants.filter((variant) =>
+            shouldAllowWallVariant(variant.spriteKey, posX, posY, eid, spatialIndex)
+          )
+        : tileBucket.variants;
+
+    let tileVariant = pickTileVariant(
       {
         base: tileBucket.base ?? null,
-        variants: tileBucket.variants,
+        variants,
       },
       { kind, worldX: posX, worldY: posY, eid }
     );
+
+    // Keep mouse-hole walls intentionally rare in addition to normal 75/25 variant weighting.
+    // This yields a much sparser decorative placement.
+    if (
+      kind === 'wall' &&
+      tileVariant?.spriteKey === 'tile.wall.mouse-hole' &&
+      !shouldPickRareMouseHole(posX, posY, eid)
+    ) {
+      const withoutMouseHole = variants.filter((variant) => variant.spriteKey !== 'tile.wall.mouse-hole');
+      tileVariant = pickTileVariant(
+        {
+          base: tileBucket.base ?? null,
+          variants: withoutMouseHole,
+        },
+        { kind, worldX: posX, worldY: posY, eid }
+      );
+    }
     if (tileVariant && sprite.texture !== tileVariant.texture) {
       sprite.texture = tileVariant.texture;
       setNearestScale(sprite.texture);
@@ -212,6 +238,29 @@ export function updateSpriteForEntity(
   const size = kind === 'error' ? tileSize : tileSize * diameter;
   sprite.width = size;
   sprite.height = size;
+}
+
+function shouldAllowWallVariant(
+  spriteKey: string,
+  worldX: number,
+  worldY: number,
+  _eid: number,
+  spatialIndex?: RenderSpatialIndex
+): boolean {
+  if (spriteKey !== 'tile.wall.mouse-hole') return true;
+  if (!spatialIndex) return false;
+  const belowKey = `${Math.round(worldX)},${Math.round(worldY - 1)}`;
+  return spatialIndex.floorCells.has(belowKey);
+}
+
+function shouldPickRareMouseHole(worldX: number, worldY: number, eid: number): boolean {
+  const xi = Number.isFinite(worldX) ? Math.round(worldX) : eid;
+  const yi = Number.isFinite(worldY) ? Math.round(worldY) : eid;
+  let hash = ((xi * 2246822519) ^ (yi * 3266489917) ^ (eid * 668265263) ^ 0x9e3779b1) >>> 0;
+  hash = (hash ^ (hash >>> 13)) >>> 0;
+  hash = Math.imul(hash, 1274126177) >>> 0;
+  hash = (hash ^ (hash >>> 16)) >>> 0;
+  return hash % 10 === 0;
 }
 
 /**

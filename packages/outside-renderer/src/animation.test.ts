@@ -5,7 +5,7 @@ import {
   runTics,
   createRenderObserverSerializer,
   createSnapshotSerializer,
-  RENDER_COMPONENTS,
+  RENDER_SNAPSHOT_COMPONENTS,
   Position,
 } from '@outside/simulator';
 import { applyRenderStream, createRenderWorld } from './render-world';
@@ -16,7 +16,7 @@ describe('render animation system', () => {
     const simWorld = createWorld({ seed: 1, ticDurationMs: 50 });
     const eid = spawnBot(simWorld, { x: 0, y: 0, directionRad: 0, tilesPerSec: 1, urge: 'none' });
     const observer = createRenderObserverSerializer(simWorld);
-    const snapshotSerializer = createSnapshotSerializer(simWorld, RENDER_COMPONENTS);
+    const snapshotSerializer = createSnapshotSerializer(simWorld, RENDER_SNAPSHOT_COMPONENTS);
 
     const renderWorld = createRenderWorld();
     applyRenderStream(renderWorld, { kind: 'snapshot', buffer: snapshotSerializer(), tic: 0 });

@@ -47,6 +47,10 @@ export interface RenderDisplayState {
   displayKinds: Map<number, RenderKind>;
 }
 
+export interface RenderSpatialIndex {
+  floorCells: Set<string>;
+}
+
 /**
  * Executes one entity render pass over current render-world state.
  *
@@ -74,6 +78,7 @@ export function runRenderPass(
   // Only render entities that explicitly opt into the sprite-key rendering contract.
   const entities = query(world, [Position, DefaultSpriteKey]);
   const nextIds = new Set<number>();
+  const floorCells = new Set<string>();
   const unresolvedEntities: Array<{
     eid: number;
     position: { x: number; y: number };
@@ -101,6 +106,17 @@ export function runRenderPass(
     tileDisplayCount: 0,
     entityDisplayCount: 0,
   };
+
+  const floorTiles = query(world, [FloorTile, Position]);
+  for (let i = 0; i < floorTiles.length; i++) {
+    const eid = floorTiles[i];
+    if (hasComponent(world, eid, Obstacle)) continue;
+    const x = Position.x[eid];
+    const y = Position.y[eid];
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    floorCells.add(`${Math.round(x)},${Math.round(y)}`);
+  }
+  const spatialIndex: RenderSpatialIndex = { floorCells };
 
   for (let i = 0; i < entities.length; i++) {
     const eid = entities[i];
@@ -162,7 +178,7 @@ export function runRenderPass(
       }
     }
 
-    updateSpriteForEntity(renderer, sprite, kind, eid, tileSize, renderWorld, assets);
+    updateSpriteForEntity(renderer, sprite, kind, eid, tileSize, renderWorld, assets, spatialIndex);
   }
 
   for (const [eid, sprite] of state.displayIndex.entries()) {
