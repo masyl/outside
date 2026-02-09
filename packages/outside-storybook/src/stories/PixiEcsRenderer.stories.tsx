@@ -62,7 +62,7 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
     spawnFn: { table: { disable: true } },
     seed: { control: { type: 'number', min: 0, step: 1 }, description: 'RNG seed' },
     ticsPerSecond: {
-      control: { type: 'number', min: 1, max: 20, step: 1 },
+      control: { type: 'number', min: 1, max: 30, step: 1 },
       description: 'Simulation tics per second',
     },
     botCount: {
@@ -179,19 +179,20 @@ export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
 
 export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
-    seed: 0,
+    seed: 5,
     ticsPerSecond: 10,
-    botCount: 3,
-    dogCount: 2,
-    catCount: 2,
-    foodCount: 12,
+    botCount: 12,
+    dogCount: 8,
+    catCount: 12,
+    foodCount: 27,
     spawnFn: spawnDungeonWithFoodAndHero,
-    tileSize: 32,
+    tileSize: 24,
     waitForAssets: false,
-    showInspectorOverlay: false,
+    showInspectorOverlay: true,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
     resourcePackId: RESOURCE_PACK_ID,
     resourcePackVersion: RESOURCE_PACK_VERSION,
+    showInspectorVelocityVectors: false,
   },
 };

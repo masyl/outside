@@ -120,7 +120,13 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
   }, [options]);
 
   useEffect(() => {
-    const world = createWorld({ seed: options.seed, ticDurationMs: 50 });
+    const world =
+      options.mode === 'dynamic'
+        ? createWorld({
+            seed: options.seed,
+            ticDurationMs: 1000 / Math.max(1, options.ticsPerSecond),
+          })
+        : createWorld({ seed: options.seed, ticDurationMs: 50 });
     if (options.mode === 'dynamic') {
       options.spawnFn(world, options.seed, options.botCount, options.spawnOptions);
       observerRef.current = createRenderObserverSerializer(world);
