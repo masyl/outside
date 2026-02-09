@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { addComponent, addEntity } from 'bitecs';
 import {
   createWorld,
   spawnBot,
@@ -31,5 +32,30 @@ describe('render animation system', () => {
     expect(getFacingDirection(renderWorld, eid)).toBe('right');
     expect(getIsMoving(renderWorld, eid)).toBe(true);
     expect(getWalkFrame(renderWorld, eid)).toBeGreaterThanOrEqual(0);
+  });
+
+  it('keeps walk frame cadence stable when tic throughput increases', () => {
+    function runScenario(steps: number, stepMs: number): number {
+      const renderWorld = createRenderWorld();
+      const eid = addEntity(renderWorld.world);
+      addComponent(renderWorld.world, eid, Position);
+      Position.x[eid] = 0;
+      Position.y[eid] = 0;
+
+      runAnimationTic(renderWorld, 0);
+
+      for (let i = 1; i <= steps; i++) {
+        Position.x[eid] += 0.05;
+        runAnimationTic(renderWorld, i * stepMs);
+      }
+
+      expect(getIsMoving(renderWorld, eid)).toBe(true);
+      return getWalkFrame(renderWorld, eid);
+    }
+
+    const frameAt20Hz = runScenario(20, 50);
+    const frameAt40Hz = runScenario(40, 25);
+
+    expect(frameAt40Hz).toBe(frameAt20Hz);
   });
 });

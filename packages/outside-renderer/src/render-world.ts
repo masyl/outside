@@ -15,6 +15,7 @@ export interface RenderWorldState {
   observerDeserializer: ReturnType<typeof createObserverDeserializer>;
   snapshotDeserializer: ReturnType<typeof createSnapshotDeserializer>;
   lastTic: number;
+  lastAnimationTimeMs: number | null;
 }
 
 /**
@@ -38,6 +39,7 @@ export function createRenderWorld(): RenderWorldState {
     observerDeserializer,
     snapshotDeserializer,
     lastTic: 0,
+    lastAnimationTimeMs: null,
   };
 }
 
@@ -53,6 +55,7 @@ function resetRenderWorld(renderWorld: RenderWorldState): void {
   renderWorld.observerDeserializer = createObserverDeserializer(world, Observed, RENDER_COMPONENTS);
   renderWorld.snapshotDeserializer = createSnapshotDeserializer(world, RENDER_SNAPSHOT_COMPONENTS);
   renderWorld.lastTic = 0;
+  renderWorld.lastAnimationTimeMs = null;
 }
 
 /**

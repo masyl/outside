@@ -47,9 +47,16 @@ function facingFromAngle(angle: number, fallback: number): number {
  * Computes one renderer animation tick from current world state.
  *
  * @param renderWorld `RenderWorldState` world + renderer-only animation caches.
+ * @param nowMs `number` optional timestamp override for deterministic tests.
  */
-export function runAnimationTic(renderWorld: RenderWorldState): void {
+export function runAnimationTic(renderWorld: RenderWorldState, nowMs: number = Date.now()): void {
   const world = renderWorld.world;
+  const previousAnimationTimeMs = renderWorld.lastAnimationTimeMs;
+  const elapsedMs =
+    previousAnimationTimeMs == null
+      ? 0
+      : Math.max(0, nowMs - previousAnimationTimeMs);
+  renderWorld.lastAnimationTimeMs = nowMs;
   const entities = query(world, [Position]);
 
   for (let i = 0; i < entities.length; i++) {
@@ -95,8 +102,8 @@ export function runAnimationTic(renderWorld: RenderWorldState): void {
     RenderIsMoving.value[eid] = isMoving ? 1 : 0;
 
     if (isMoving) {
-      // Distance-based frame progression keeps animation speed stable across variable delta lengths.
-      RenderWalkDistance.value[eid] += distance;
+      // Time-based progression keeps walk animation cadence stable when simulation tic throughput changes.
+      RenderWalkDistance.value[eid] += elapsedMs;
     }
 
     const prevFacing = RenderFacing.dir[eid] ?? FACING.DOWN;
@@ -114,12 +121,9 @@ export function runAnimationTic(renderWorld: RenderWorldState): void {
     if (!isMoving) {
       RenderWalkFrame.index[eid] = 0;
     } else {
-      // Convert accumulated travel distance into looped frame index.
-      // distance * WALK_CYCLES_PER_TILE => completed animation cycles
-      // ... * WALK_FRAMES => frame progression over those cycles
-      const frame =
-        Math.floor(RenderWalkDistance.value[eid] * WALK_FRAMES * WALK_CYCLES_PER_TILE) %
-        WALK_FRAMES;
+      const frameProgress =
+        (RenderWalkDistance.value[eid] * WALK_FRAMES * WALK_CYCLES_PER_TILE) / 1000;
+      const frame = Math.floor(frameProgress) % WALK_FRAMES;
       RenderWalkFrame.index[eid] = frame < 0 ? frame + WALK_FRAMES : frame;
     }
 

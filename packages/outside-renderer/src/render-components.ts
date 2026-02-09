@@ -6,7 +6,7 @@ export const RenderFacing = {
 };
 
 /**
- * Runtime-only accumulated walk distance, used to derive frame index.
+ * Runtime-only accumulated moving time in milliseconds, used to derive walk frame index.
  */
 export const RenderWalkDistance = {
   value: [] as number[],
