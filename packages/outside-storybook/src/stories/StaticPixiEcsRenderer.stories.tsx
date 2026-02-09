@@ -120,6 +120,11 @@ function spawnDungeonFromGrid(
     [1, 0],
     [0, -1],
     [0, 1],
+    // Include diagonals so room corners are enclosed by walls.
+    [-1, -1],
+    [-1, 1],
+    [1, -1],
+    [1, 1],
   ];
 
   for (let x = 0; x < width; x++) {
