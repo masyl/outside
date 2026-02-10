@@ -1,10 +1,75 @@
 # Scratchpad
 
 Random notes taken during development.
+### Next Pitch Blurb
+
+
 
 ## Next Big Prompt
 
-...
+
+# Bug Report
+
+## Context:
+
+* NOGO: We still have bugs.
+* Compilation & build: Ok
+* Console: Ok
+* Versions:
+  * Renderer: 0.1.14
+  * Inspector: 0.1.1
+* Story: Hero and Food.
+* Controls: N/A
+
+## Fixed:
+
+* N/A
+
+## Problems:
+
+* Walk animation is too bound to tics per seconds. Increasing the tic speed also speeds up the animation frame rate.
+
+## Pitch Prompt
+
+Integrate this:
+https://www.reddit.com/r/godot/comments/1k7id1b/pixelperfect_fake_2d_in_3d_my_journey_and_a/
+
+Integrate this:
+https://www.reddit.com/r/godot/comments/1k6nzj7/comment/mos2msb/
+
+
+Write this pitch:
+
+The previous version of the inspector had a pointer mechanic. I need you to bring it back into the new inspector.
+* Include the subgrid
+* Include the visual elements
+* Also bring back the line an dot grid, with a toggle in the controls.
+* This pointer system is bound to the inspector and active only when the inspector layer is on.
+
+## Review and Debugging Session - Food Collisions
+
+- Tooling: I need a way to point at the viewport with the inspector to get entity info and coordinates.
+
+- Weird elastic playback bug. While I was looking at another tab for a few minutes the game was running. When I came back to the tab I saw the game go into overdrive and run through thousands of tics in a few seconds as if it was catching up.
+- Skills/Doc: Document the use of Semver and how we use versionning. (During debugging, compatibility of POV Clients and Simulators, Compatibility of dynamic assets)
+- Draw order for walls, food and bots should all be done according to their Y position.
+- Increase the default "collided" cooldown so that it's counted in milliseconds instead of ticks. Se it to 1 second.
+
+## Review and Debugging Session - Pixi Renderer
+
+You should commit before moving on to more bug fixes
+Other bugs:
+1. In the Hero and Food, there is a lot of bots that are rendered using the apple.
+2. I don't know if it's normal, but the Pixi ECS Default is only showing bots. There is not walls or Floor tiles
+3. When changing the tile size, the background is still not redraw. You should render some default grid and have a black fill for the whole canvas.
+4. The items drawn in the zoo on the right does not have a sprite. And the bottom one is missing walls around him.
+5. The single tile hero show all black...
+6. The tile strip ends with a weird icon that looks like an avatar.
+7. the Walls only is missing 2 tiles ot the bottom of the left and right side. I see similar glitches on the rooms your drawing in the Zoo Showcase
+8. The Mixed Sizes is a mess of bugs, missing wall tiles, just a fruit in the middle, the weird avatar icons appears on the bottom right
+9. I don't know what the Render Kind Palette is supposed to be, but all I see is a black apple icon on a very dark gre background.
+
+
 
 ## Definitions
 
@@ -17,6 +82,25 @@ Random notes taken during development.
 
 ## Review
 
+- Bug: In the new renderer, the tic per second impacts the speed. Both renderer should interpret the Tics per Seconds the same way
+- Architecture: Is there a way for both renderer to share the same pointer data without conflict? Exract and share the pointer resolution? Both doing it at the same time?
+- Proper full size viewport: Remove width/height controls and update on resize like in the original inspector and POC
+- Architecture: Would the concept of a POV help with both renderer behaving the same ?
+
+
+- Highlight the patch number of packages in the Storybook
+- HAVE HIME COMPARE THE NUMBER OF ENTITIES IN BOT SIDES OF THE REMOTING/SYNC
+- Find a method of instrumenting the running app in a way that works accross each agent vendor and is also "human friendly" to allow collaboration. Then bake it into a skill.
+- Add Context7 as a "look up documentation" skill and MCP config
+
+- 
+- Make the routine of bumping the patch version a skill they use
+- I need a skill for bug intake with questionning, clarifications, logging and triage that is quick and efficient.
+- Add LibP2P to some pitch: https://github.com/libp2p/js-libp2p
+- Add specific code quality instructions to ensure that Agents don't code GIANT FUCKING CODE FILES!!! MORONS!!!!
+- Update Storybook: A new version (10.2.7) is available!
+- OpenAI codez keeps using old/deprecated PIxi techniques. Ensure he looks up specs with Context7
+- OpenAI codex can't attache to the browse in VS Code, and he is lazy with instrumenting code for debugging. Got to find a more cross-agent-platform way to do this.
 - Refactor agent skills:
   - Extract usefull generic methods into global utilities if they don't specifically relate to the world object.
   - Put reccurent "Math" operations into utilities (global or local) instead of re-writing each time. Will help for documenting and testing them.
