@@ -7,28 +7,6 @@ Random notes taken during development.
 
 ## Next Big Prompt
 
-
-# Bug Report
-
-## Context:
-
-* NOGO: We still have bugs.
-* Compilation & build: Ok
-* Console: Ok
-* Versions:
-  * Renderer: 0.1.14
-  * Inspector: 0.1.1
-* Story: Hero and Food.
-* Controls: N/A
-
-## Fixed:
-
-* N/A
-
-## Problems:
-
-* Walk animation is too bound to tics per seconds. Increasing the tic speed also speeds up the animation frame rate.
-
 ## Pitch Prompt
 
 Integrate this:
@@ -38,16 +16,10 @@ Integrate this:
 https://www.reddit.com/r/godot/comments/1k6nzj7/comment/mos2msb/
 
 
-Write this pitch:
-
-The previous version of the inspector had a pointer mechanic. I need you to bring it back into the new inspector.
-* Include the subgrid
-* Include the visual elements
-* Also bring back the line an dot grid, with a toggle in the controls.
-* This pointer system is bound to the inspector and active only when the inspector layer is on.
 
 ## Review and Debugging Session - Food Collisions
 
+- Tooling: Merge Updated Doc - Look for an open branch called design-and-pitch or documentation and merge the lastest changes to you branch. These branches are used to write new documentation without conflicting with feature branches.
 - Tooling: I need a way to point at the viewport with the inspector to get entity info and coordinates.
 
 - Weird elastic playback bug. While I was looking at another tab for a few minutes the game was running. When I came back to the tab I saw the game go into overdrive and run through thousands of tics in a few seconds as if it was catching up.
@@ -140,16 +112,28 @@ Other bugs:
 
 [ ] Layered Floor System (aka Ground, TileMap, Terrain). To track where entities are allowed to spawn and move.
 
-## Next pitch
+## Pitch Ideas
 
-Lets create a new feature branch and a pitch for this idea:
+* Soccer ball prefab
+  * Create a pixelated tileset from this project: https://github.com/mustitz/ballgen
+  * The image is here: https://raw.githubusercontent.com/mustitz/ballgen/master/examples/blue-ball.all.png
+  * Read the spritesheet structure from the github repo.
+  * Create a prefab
+  * Add a sprite animation mechanic that is hooked on a sphere in the physics engine so that the ball looks like it's rolling.
+  * When bots get near a ball, they kick it reflexivly
+  * Add components for kicker and klickable
+  * Add a component to add bounciness to simplify the effect without having tweak a lot of different components
+  * If a bot get hit by a ball moving fast, they should feel some recoil.
+* Cats vs Dogs
+  - Cats are enemies of dogs and they fight
+  - Bots are neutral
+  - The push each others hard and they bounce
+  - Weaponless brawl
+* Points of interest entities for wandering
+* 
+- 
 
-Problem: At the moment, changing the level requires editing the demo.txt file, otherwise, bots move around without changing anything.
 
-For testing, it would be useful to be able to insert command manually using a command input box (like a REPL) when in debug mode.
-* Add a panel, similar in style to the other panels, to the bottom of the screen.
-* Use the PixiUI input component to capture commands.
-* On Enter, feed the command in the event queue.
 
 ## DX & Velocity
 
