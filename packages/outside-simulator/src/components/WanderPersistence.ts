@@ -6,5 +6,8 @@ const WanderPersistence = {
   ticsUntilNextChange: [] as number[],
   ticsUntilDirectionChange: [] as number[],
   ticsUntilSpeedChange: [] as number[],
+  targetTileX: [] as number[],
+  targetTileY: [] as number[],
+  ticsUntilRetarget: [] as number[],
 };
 export default WanderPersistence;

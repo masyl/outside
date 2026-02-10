@@ -219,6 +219,9 @@ importers:
       bitecs:
         specifier: ^0.4.0
         version: 0.4.0
+      cannon-es:
+        specifier: ^0.20.0
+        version: 0.20.0
     devDependencies:
       typescript:
         specifier: ^5.3.3
@@ -253,6 +256,9 @@ importers:
       '@outside/simulator':
         specifier: workspace:*
         version: link:../outside-simulator
+      cannon-es:
+        specifier: ^0.20.0
+        version: 0.20.0
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -1922,6 +1928,9 @@ packages:
 
   caniuse-lite@1.0.30001764:
     resolution: {integrity: sha512-9JGuzl2M+vPL+pz70gtMF9sHdMFbY9FJaQBi186cHKH3pSzDvzoUJUPV6fqiKIMyXbud9ZLg4F3Yza1vJ1+93g==}
+
+  cannon-es@0.20.0:
+    resolution: {integrity: sha512-eZhWTZIkFOnMAJOgfXJa9+b3kVlvG+FX4mdkpePev/w/rP5V8NRquGyEozcjPfEoXUlb+p7d9SUcmDSn14prOA==}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -5579,6 +5588,8 @@ snapshots:
       get-intrinsic: 1.3.0
 
   caniuse-lite@1.0.30001764: {}
+
+  cannon-es@0.20.0: {}
 
   ccount@2.0.1: {}
 

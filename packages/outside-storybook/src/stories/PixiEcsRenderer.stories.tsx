@@ -102,6 +102,14 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
       control: { type: 'boolean' },
       description: 'Inspector: draw wall outlines',
     },
+    showInspectorPathfindingPaths: {
+      control: { type: 'boolean' },
+      description: 'Inspector: show pathfinding debug paths',
+    },
+    showInspectorPhysicsShapes: {
+      control: { type: 'boolean' },
+      description: 'Inspector: show physics collider outlines (dotted blue)',
+    },
     rendererVer: {
       control: { type: 'select' },
       options: [RENDERER_VER],
@@ -121,6 +129,8 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
     showInspectorVelocityVectors: true,
     showInspectorCollisionTint: true,
     showInspectorWallOutlines: true,
+    showInspectorPathfindingPaths: false,
+    showInspectorPhysicsShapes: false,
     useCrtEffect: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,
@@ -132,7 +142,7 @@ export default meta;
 export const Default: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     botCount: 25,
     spawnFn: spawnFloorRectThenScattered,
     tileSize: 16,
@@ -146,7 +156,7 @@ export const Default: StoryObj<typeof PixiEcsRendererStory> = {
 export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
     seed: 123,
-    ticsPerSecond: 8,
+    ticsPerSecond: 30,
     botCount: 30,
     spawnFn: spawnDungeonThenScattered,
     tileSize: 8,
@@ -159,14 +169,14 @@ export const WallDensity: StoryObj<typeof PixiEcsRendererStory> = {
 
 export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
   args: {
-    seed: 1,
-    ticsPerSecond: 10,
-    botCount: 0,
+    seed: 4,
+    ticsPerSecond: 30,
+    botCount: 10,
     dogCount: 10,
-    catCount: 0,
-    foodCount: 0,
+    catCount: 10,
+    foodCount: 10,
     spawnFn: spawnDungeonWithFoodAndHero,
-    tileSize: 24,
+    tileSize: 16,
     waitForAssets: false,
     showInspectorOverlay: true,
     rendererVer: RENDERER_VER,
@@ -175,5 +185,7 @@ export const HeroAndFood: StoryObj<typeof PixiEcsRendererStory> = {
     showInspectorFollowLinks: false,
     showInspectorCollisionTint: false,
     showInspectorWallOutlines: false,
+    showInspectorPathfindingPaths: true,
+    showInspectorPhysicsShapes: false,
   },
 };

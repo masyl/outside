@@ -48,7 +48,7 @@ describe('spawnDungeonWithFoodAndHero consumption', () => {
     expect(consumedCount).toBeGreaterThan(0);
   });
 
-  it('spawns exactly one hero and hero wanders with zero bot/dog/cat/food counts', () => {
+  it('spawns exactly one hero and hero stays idle with zero bot/dog/cat/food counts', () => {
     const world = createWorld({ seed: 1, ticDurationMs: 50 });
     spawnDungeonWithFoodAndHero(world, 1, 0, {
       botCount: 0,
@@ -66,6 +66,6 @@ describe('spawnDungeonWithFoodAndHero consumption', () => {
     runTics(world, 20);
 
     const delta = Math.hypot(Position.x[heroEid] - startX, Position.y[heroEid] - startY);
-    expect(delta).toBeGreaterThan(0);
+    expect(delta).toBeLessThan(0.001);
   });
 });

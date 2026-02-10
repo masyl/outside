@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Application } from 'pixi.js';
 import type { SimulatorWorld } from '@outside/simulator';
 import { PixiEcsRenderer } from '@outside/renderer';
@@ -26,6 +26,7 @@ export interface StaticPixiEcsRendererStoryProps {
   showInspectorVelocityVectors?: boolean;
   showInspectorCollisionTint?: boolean;
   showInspectorWallOutlines?: boolean;
+  showInspectorPathfindingPaths?: boolean;
   buildWorld: (world: SimulatorWorld, seed: number) => void;
 }
 
@@ -33,9 +34,11 @@ const EMPTY_FRAME: InspectorFrame = {
   tiles: [],
   entities: [],
   followLinks: [],
+  pathfindingPaths: [],
   collisionEntityCount: 0,
   collisionTileCount: 0,
   followLinkCount: 0,
+  pathfindingPathCount: 0,
   unknownCount: 0,
 };
 
@@ -49,6 +52,7 @@ export function StaticPixiEcsRendererStory({
   showInspectorVelocityVectors = true,
   showInspectorCollisionTint = true,
   showInspectorWallOutlines = true,
+  showInspectorPathfindingPaths = false,
   buildWorld,
 }: StaticPixiEcsRendererStoryProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -239,6 +243,7 @@ export function StaticPixiEcsRendererStory({
           showVelocityVectors={showInspectorVelocityVectors}
           showCollisionTint={showInspectorCollisionTint}
           showWallOutlines={showInspectorWallOutlines}
+          showPathfindingPaths={showInspectorPathfindingPaths}
         />
       </InspectorOverlay>
     </div>

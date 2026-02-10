@@ -1,13 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Follow,
+  FollowTarget,
+  FollowTightness,
+  Hero,
+  TargetPace,
+  TARGET_PACE_STANDING_STILL,
+  addComponent,
+  addEntity,
+  clearEntityPath,
+  getPathfindingDebugPaths as getSimulatorPathfindingDebugPaths,
+  orderEntityToTile,
   Position,
   RENDER_SNAPSHOT_COMPONENTS,
+  removeComponent,
+  removeEntity,
+  resolveEntityAt,
+  setComponent,
   createRenderObserverSerializer,
   createSnapshotSerializer,
   createWorld,
+  debugJumpPulse,
   getViewportFollowTarget,
   query,
   runTics,
+  type PathfindingDebugPath,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import type { SpawnFn } from '../simulator/useSimulatorWorld';
@@ -55,6 +72,38 @@ export interface ScenarioStreamState {
   bounds: StreamBounds;
   center: { x: number; y: number };
   streamKey: string;
+  getPathfindingDebugPaths: () => PathfindingDebugPath[];
+  orderFocusedEntityToTile: (tileX: number, tileY: number) => {
+    ordered: boolean;
+    reason?:
+      | 'not-dynamic'
+      | 'missing-world'
+      | 'no-follow-target'
+      | 'focus-target-not-commandable'
+      | 'focus-follow-pointer-mode'
+      | 'target-not-floor';
+    targetEid: number | null;
+  };
+  toggleFocusedEntityMouseFollowMode: () => {
+    enabled: boolean;
+    targetEid: number | null;
+    reason?: 'not-dynamic' | 'missing-world' | 'no-follow-target' | 'focus-target-not-commandable';
+  };
+  setFocusedEntityFollowPoint: (worldX: number, worldY: number) => {
+    updated: boolean;
+    reason?: 'not-dynamic' | 'missing-world' | 'mode-disabled' | 'missing-anchor';
+  };
+  clearFocusedEntityFollowPoint: () => void;
+  isFocusedEntityMouseFollowModeEnabled: () => boolean;
+  triggerDebugJump: () => {
+    applied: number;
+    targetEid: number | null;
+    bodyYBefore?: number;
+    bodyVyBefore?: number;
+    bodyYAfter?: number;
+    bodyVyAfter?: number;
+    reason?: 'not-dynamic' | 'missing-world' | 'no-follow-target';
+  };
 }
 
 function computeBounds(world: SimulatorWorld): StreamBounds {
@@ -112,9 +161,17 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
   const [bounds, setBounds] = useState<StreamBounds>({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
   const [center, setCenter] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const worldRef = useRef<SimulatorWorld | null>(null);
-  const observerRef = useRef<ReturnType<typeof createRenderObserverSerializer> | null>(null);
+  const focusedFollowModeRef = useRef<{
+    enabled: boolean;
+    targetEid: number | null;
+    anchorEid: number | null;
+  }>({
+    enabled: false,
+    targetEid: null,
+    anchorEid: null,
+  });
   const snapshotRef = useRef<ReturnType<typeof createSnapshotSerializer> | null>(null);
-  const positionCountRef = useRef(0);
+  const observerRef = useRef<ReturnType<typeof createRenderObserverSerializer> | null>(null);
   const ticRef = useRef(0);
 
   const streamKey = useMemo(() => {
@@ -133,6 +190,29 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     return `static:${options.seed}:${options.buildWorld.name}`;
   }, [options]);
 
+  function disableFocusedEntityMouseFollow(world: SimulatorWorld): void {
+    const state = focusedFollowModeRef.current;
+    const targetEid = state.targetEid;
+    const anchorEid = state.anchorEid;
+
+    if (targetEid != null && targetEid > 0) {
+      removeComponent(world, targetEid, Follow);
+      removeComponent(world, targetEid, FollowTarget);
+      removeComponent(world, targetEid, FollowTightness);
+      setComponent(world, targetEid, TargetPace, { value: TARGET_PACE_STANDING_STILL });
+    }
+
+    if (anchorEid != null && anchorEid > 0) {
+      removeEntity(world, anchorEid);
+    }
+
+    focusedFollowModeRef.current = {
+      enabled: false,
+      targetEid: null,
+      anchorEid: null,
+    };
+  }
+
   useEffect(() => {
     const world =
       options.mode === 'dynamic'
@@ -140,21 +220,29 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
             seed: options.seed,
             ticDurationMs: 1000 / Math.max(1, options.ticsPerSecond),
           })
-        : createWorld({ seed: options.seed, ticDurationMs: 50 });
+        : createWorld({
+            seed: options.seed,
+            ticDurationMs: 50,
+          });
     if (options.mode === 'dynamic') {
       options.spawnFn(world, options.seed, options.botCount, options.spawnOptions);
+      snapshotRef.current = createSnapshotSerializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
       observerRef.current = createRenderObserverSerializer(world);
-      snapshotRef.current = createSnapshotSerializer(world, RENDER_SNAPSHOT_COMPONENTS);
     } else {
       options.buildWorld(world, options.seed);
+      snapshotRef.current = createSnapshotSerializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
       observerRef.current = null;
-      snapshotRef.current = createSnapshotSerializer(world, RENDER_SNAPSHOT_COMPONENTS);
     }
 
     worldRef.current = world;
+    focusedFollowModeRef.current = {
+      enabled: false,
+      targetEid: null,
+      anchorEid: null,
+    };
     ticRef.current = 0;
-    positionCountRef.current = query(world, [Position]).length;
-    const snapshot = snapshotRef.current ?? createSnapshotSerializer(world, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshot =
+      snapshotRef.current ?? createSnapshotSerializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
     const nextBounds = computeBounds(world);
     setBounds(nextBounds);
     setCenter(centerFromWorld(world, nextBounds));
@@ -168,7 +256,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
 
   useEffect(() => {
     if (options.mode !== 'dynamic') return undefined;
-    if (!worldRef.current || !observerRef.current) return undefined;
+    if (!worldRef.current) return undefined;
 
     const ticMs = 1000 / Math.max(1, options.ticsPerSecond);
     let lastTime = performance.now();
@@ -179,9 +267,9 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     const step = (now: number) => {
       if (!running) return;
       const world = worldRef.current;
-      const observer = observerRef.current;
       const snapshot = snapshotRef.current;
-      if (!world || !observer || !snapshot) return;
+      const observer = observerRef.current;
+      if (!world || !snapshot || !observer) return;
 
       const deltaMs = now - lastTime;
       lastTime = now;
@@ -197,10 +285,9 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       for (let i = 0; i < ticsToRun; i++) {
         runTics(world, 1);
         ticRef.current += 1;
-        const nextPositionCount = query(world, [Position]).length;
-        const shouldEmitSnapshot = nextPositionCount !== positionCountRef.current;
-        positionCountRef.current = nextPositionCount;
+        const shouldEmitSnapshot = ticRef.current % 120 === 0;
         const packet: SharedRenderStreamPacket = {
+          // Use per-tic deltas for low-latency playback, with periodic snapshots as authority refresh.
           kind: shouldEmitSnapshot ? 'snapshot' : 'delta',
           buffer: shouldEmitSnapshot ? snapshot() : observer(),
           tic: ticRef.current,
@@ -242,5 +329,156 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     bounds,
     center,
     streamKey,
+    getPathfindingDebugPaths: () => {
+      if (options.mode !== 'dynamic') return [];
+      const world = worldRef.current;
+      if (!world) return [];
+      const focusedEid = getViewportFollowTarget(world);
+      return getSimulatorPathfindingDebugPaths(world, {
+        focusedEid: focusedEid != null && focusedEid > 0 ? focusedEid : null,
+      });
+    },
+    orderFocusedEntityToTile: (tileX: number, tileY: number) => {
+      if (options.mode !== 'dynamic') {
+        return { ordered: false, reason: 'not-dynamic' as const, targetEid: null };
+      }
+      const world = worldRef.current;
+      if (!world) {
+        return { ordered: false, reason: 'missing-world' as const, targetEid: null };
+      }
+      if (focusedFollowModeRef.current.enabled) {
+        return {
+          ordered: false,
+          reason: 'focus-follow-pointer-mode' as const,
+          targetEid: focusedFollowModeRef.current.targetEid,
+        };
+      }
+      const targetEid = getViewportFollowTarget(world);
+      if (targetEid == null || targetEid <= 0) {
+        return { ordered: false, reason: 'no-follow-target' as const, targetEid: null };
+      }
+      if (!query(world, [Hero]).includes(targetEid)) {
+        return {
+          ordered: false,
+          reason: 'focus-target-not-commandable' as const,
+          targetEid,
+        };
+      }
+      const resolved = resolveEntityAt(world, tileX, tileY);
+      if (resolved.kind !== 'floor') {
+        return {
+          ordered: false,
+          reason: 'target-not-floor' as const,
+          targetEid,
+        };
+      }
+      orderEntityToTile(world, targetEid, tileX, tileY);
+      return { ordered: true, targetEid };
+    },
+    toggleFocusedEntityMouseFollowMode: () => {
+      if (options.mode !== 'dynamic') {
+        return { enabled: false, targetEid: null, reason: 'not-dynamic' as const };
+      }
+      const world = worldRef.current;
+      if (!world) {
+        return { enabled: false, targetEid: null, reason: 'missing-world' as const };
+      }
+
+      if (focusedFollowModeRef.current.enabled) {
+        const targetEid = focusedFollowModeRef.current.targetEid;
+        disableFocusedEntityMouseFollow(world);
+        return { enabled: false, targetEid };
+      }
+
+      const targetEid = getViewportFollowTarget(world);
+      if (targetEid == null || targetEid <= 0) {
+        return { enabled: false, targetEid: null, reason: 'no-follow-target' as const };
+      }
+      if (!query(world, [Hero]).includes(targetEid)) {
+        return {
+          enabled: false,
+          targetEid,
+          reason: 'focus-target-not-commandable' as const,
+        };
+      }
+
+      clearEntityPath(world, targetEid);
+
+      const anchorEid = addEntity(world);
+      addComponent(world, anchorEid, Position);
+      setComponent(world, anchorEid, Position, {
+        x: Position.x[targetEid],
+        y: Position.y[targetEid],
+      });
+
+      addComponent(world, targetEid, Follow);
+      addComponent(world, targetEid, FollowTarget);
+      setComponent(world, targetEid, FollowTarget, { eid: anchorEid });
+
+      focusedFollowModeRef.current = {
+        enabled: true,
+        targetEid,
+        anchorEid,
+      };
+      return { enabled: true, targetEid };
+    },
+    setFocusedEntityFollowPoint: (worldX: number, worldY: number) => {
+      if (options.mode !== 'dynamic') {
+        return { updated: false, reason: 'not-dynamic' as const };
+      }
+      const world = worldRef.current;
+      if (!world) {
+        return { updated: false, reason: 'missing-world' as const };
+      }
+      const state = focusedFollowModeRef.current;
+      if (!state.enabled) {
+        return { updated: false, reason: 'mode-disabled' as const };
+      }
+      if (state.anchorEid == null || state.anchorEid <= 0) {
+        return { updated: false, reason: 'missing-anchor' as const };
+      }
+      setComponent(world, state.anchorEid, Position, { x: worldX, y: worldY });
+      return { updated: true };
+    },
+    clearFocusedEntityFollowPoint: () => {
+      if (options.mode !== 'dynamic') return;
+      const world = worldRef.current;
+      if (!world) return;
+      const state = focusedFollowModeRef.current;
+      if (!state.enabled || state.anchorEid == null || state.targetEid == null) return;
+      const tx = Position.x[state.targetEid];
+      const ty = Position.y[state.targetEid];
+      if (!Number.isFinite(tx) || !Number.isFinite(ty)) return;
+      setComponent(world, state.anchorEid, Position, { x: tx, y: ty });
+    },
+    isFocusedEntityMouseFollowModeEnabled: () => focusedFollowModeRef.current.enabled,
+    triggerDebugJump: () => {
+      if (options.mode !== 'dynamic') {
+        return { applied: 0, targetEid: null, reason: 'not-dynamic' as const };
+      }
+      const world = worldRef.current;
+      if (!world) {
+        return { applied: 0, targetEid: null, reason: 'missing-world' as const };
+      }
+      const targetEid = getViewportFollowTarget(world);
+      if (targetEid == null) {
+        return { applied: 0, targetEid: null, reason: 'no-follow-target' as const };
+      }
+      const targetBody = world.physics3dState?.bodyByEid.get(targetEid);
+      const bodyYBefore = targetBody?.position.y;
+      const bodyVyBefore = targetBody?.velocity.y;
+      const applied = debugJumpPulse(world, undefined, targetEid);
+      const targetBodyAfter = world.physics3dState?.bodyByEid.get(targetEid);
+      const bodyYAfter = targetBodyAfter?.position.y;
+      const bodyVyAfter = targetBodyAfter?.velocity.y;
+      return {
+        applied,
+        targetEid,
+        bodyYBefore: Number.isFinite(bodyYBefore) ? bodyYBefore : undefined,
+        bodyVyBefore: Number.isFinite(bodyVyBefore) ? bodyVyBefore : undefined,
+        bodyYAfter: Number.isFinite(bodyYAfter) ? bodyYAfter : undefined,
+        bodyVyAfter: Number.isFinite(bodyVyAfter) ? bodyVyAfter : undefined,
+      };
+    },
   };
 }

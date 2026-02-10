@@ -83,7 +83,7 @@ export default meta;
 export const Default: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 15,
     spawnFn: spawnScatteredWithLeaders,
   },
@@ -92,7 +92,7 @@ export const Default: StoryObj<typeof SimulatorRenderer> = {
 export const FewEntities: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 8,
+    ticsPerSecond: 30,
     entityCount: 8,
     spawnFn: spawnScatteredWithLeaders,
   },
@@ -101,7 +101,7 @@ export const FewEntities: StoryObj<typeof SimulatorRenderer> = {
 export const ManyEntities: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 999,
-    ticsPerSecond: 20,
+    ticsPerSecond: 30,
     entityCount: 99,
     spawnFn: spawnScatteredWithLeaders,
   },
@@ -111,7 +111,7 @@ export const ManyEntities: StoryObj<typeof SimulatorRenderer> = {
 export const AllWander: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 20,
     spawnFn: spawnBotsInWorld,
   },
@@ -121,7 +121,7 @@ export const AllWander: StoryObj<typeof SimulatorRenderer> = {
 export const FollowChain: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 5,
     spawnFn: spawnFollowChain,
   },
@@ -131,7 +131,7 @@ export const FollowChain: StoryObj<typeof SimulatorRenderer> = {
 export const FloorGridRect: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 15,
     spawnPreset: 'floorRect',
     roomWidth: 60,
@@ -143,7 +143,7 @@ export const FloorGridRect: StoryObj<typeof SimulatorRenderer> = {
 export const FloorGridDungeon: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 20,
     spawnFn: spawnDungeonThenScattered,
   },
@@ -153,7 +153,7 @@ export const FloorGridDungeon: StoryObj<typeof SimulatorRenderer> = {
 export const FloorGridDungeonWFC: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 20,
     spawnFn: spawnDungeonWFCThenScattered,
   },
@@ -163,7 +163,7 @@ export const FloorGridDungeonWFC: StoryObj<typeof SimulatorRenderer> = {
 export const FloorGridDungeonMetaTiles: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 20,
     spawnPreset: 'metaTileDungeon',
     metaWidth: 5,
@@ -176,7 +176,7 @@ export const FloorGridDungeonMetaTiles: StoryObj<typeof SimulatorRenderer> = {
 export const FloorGridDungeonWithFood: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 20,
     spawnFn: spawnDungeonWithFood,
   },
@@ -186,7 +186,7 @@ export const FloorGridDungeonWithFood: StoryObj<typeof SimulatorRenderer> = {
 export const FloorGridDungeonWithFoodWFC: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 20,
     spawnFn: spawnDungeonWFCWithFood,
   },
@@ -196,7 +196,7 @@ export const FloorGridDungeonWithFoodWFC: StoryObj<typeof SimulatorRenderer> = {
 export const PointerBasicCursor: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 6,
     spawnPreset: 'floorRect',
     roomWidth: 60,
@@ -209,7 +209,7 @@ export const PointerBasicCursor: StoryObj<typeof SimulatorRenderer> = {
 export const PointerClickBot: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 8,
     spawnPreset: 'floorRect',
     roomWidth: 60,
@@ -222,7 +222,7 @@ export const PointerClickBot: StoryObj<typeof SimulatorRenderer> = {
 export const HeroAndPathfinding: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 42,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 4,
     spawnPreset: 'floorRectWithHero',
     roomWidth: 60,
@@ -236,7 +236,7 @@ export const HeroAndPathfinding: StoryObj<typeof SimulatorRenderer> = {
 export const DungeonWithHero: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 9,
     spawnFn: spawnDungeonWithFoodAndHero,
     captionLegend: 'Dungeon: 12 food, 9 bots, 1 hero. Click floor to order hero there.',
@@ -247,7 +247,7 @@ export const DungeonWithHero: StoryObj<typeof SimulatorRenderer> = {
 export const DungeonWithHeroWFC: StoryObj<typeof SimulatorRenderer> = {
   args: {
     seed: 123,
-    ticsPerSecond: 10,
+    ticsPerSecond: 30,
     entityCount: 9,
     spawnFn: spawnDungeonWFCWithFoodAndHero,
     captionLegend: 'WFC dungeon: 12 food, 9 bots, 1 hero. Click floor to order hero there.',

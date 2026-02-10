@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Application } from 'pixi.js';
 import { PixiEcsRenderer } from '@outside/renderer';
 import {
@@ -32,15 +32,19 @@ interface PixiEcsRendererStoryProps {
   showInspectorVelocityVectors?: boolean;
   showInspectorCollisionTint?: boolean;
   showInspectorWallOutlines?: boolean;
+  showInspectorPathfindingPaths?: boolean;
+  showInspectorPhysicsShapes?: boolean;
 }
 
 const EMPTY_FRAME: InspectorFrame = {
   tiles: [],
   entities: [],
   followLinks: [],
+  pathfindingPaths: [],
   collisionEntityCount: 0,
   collisionTileCount: 0,
   followLinkCount: 0,
+  pathfindingPathCount: 0,
   unknownCount: 0,
 };
 
@@ -60,6 +64,8 @@ export function PixiEcsRendererStory({
   showInspectorVelocityVectors = true,
   showInspectorCollisionTint = true,
   showInspectorWallOutlines = true,
+  showInspectorPathfindingPaths = false,
+  showInspectorPhysicsShapes = false,
 }: PixiEcsRendererStoryProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<PixiEcsRenderer | null>(null);
@@ -101,6 +107,51 @@ export function PixiEcsRendererStory({
     setRendererReady((v) => v + 1);
   }, []);
 
+  const handlePointerDown = useCallback(
+    (screenX: number, screenY: number) => {
+      if (stream.isFocusedEntityMouseFollowModeEnabled()) {
+        return;
+      }
+      const worldX = stream.center.x + (screenX - viewportSize.width / 2) / tileSize;
+      const worldY = stream.center.y - (screenY - viewportSize.height / 2) / tileSize;
+      const tileX = Math.floor(worldX);
+      const tileY = Math.floor(worldY);
+      const result = stream.orderFocusedEntityToTile(tileX, tileY);
+      if (!result.ordered) {
+        return;
+      }
+      console.log('[PixiEcsRendererStory] path order', {
+        tileX,
+        tileY,
+        targetEid: result.targetEid,
+      });
+    },
+    [
+      stream.orderFocusedEntityToTile,
+      stream.center.x,
+      stream.center.y,
+      viewportSize.width,
+      viewportSize.height,
+      tileSize,
+    ]
+  );
+
+  const handlePointerMove = useCallback(
+    (screenX: number, screenY: number) => {
+      const worldX = stream.center.x + (screenX - viewportSize.width / 2) / tileSize;
+      const worldY = stream.center.y - (screenY - viewportSize.height / 2) / tileSize;
+      stream.setFocusedEntityFollowPoint(worldX, worldY);
+    },
+    [
+      stream.center.x,
+      stream.center.y,
+      stream.setFocusedEntityFollowPoint,
+      viewportSize.width,
+      viewportSize.height,
+      tileSize,
+    ]
+  );
+
   useEffect(() => {
     applyGenerationRef.current += 1;
     streamControllerRef.current.reset(stream.streamKey);
@@ -129,6 +180,37 @@ export function PixiEcsRendererStory({
   }, [rendererReady, useCrtEffect]);
 
   useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'Escape') {
+        event.preventDefault();
+        const followMode = stream.toggleFocusedEntityMouseFollowMode();
+        console.log('[PixiEcsRendererStory] follow pointer mode', {
+          enabled: followMode.enabled,
+          targetEid: followMode.targetEid,
+          reason: followMode.reason ?? 'ok',
+        });
+        return;
+      }
+      if (event.code !== 'Space') return;
+      const jumped = stream.triggerDebugJump();
+      console.log('[PixiEcsRendererStory] debug jump', {
+        triggeredBy: 'spacebar',
+        targetEid: jumped.targetEid,
+        bodies: jumped.applied,
+        bodyYBefore: jumped.bodyYBefore,
+        bodyVyBefore: jumped.bodyVyBefore,
+        bodyYAfter: jumped.bodyYAfter,
+        bodyVyAfter: jumped.bodyVyAfter,
+        reason: jumped.reason ?? 'ok',
+      });
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [stream.toggleFocusedEntityMouseFollowMode, stream.triggerDebugJump]);
+
+  useEffect(() => {
     if (!stream.packet) return;
     streamControllerRef.current.push(stream.packet);
   }, [stream.packetVersion]);
@@ -136,11 +218,21 @@ export function PixiEcsRendererStory({
   useEffect(() => {
     const unsubscribe = streamControllerRef.current.subscribe('inspector', (packet) => {
       applyInspectorStream(inspectorWorldRef.current, packet);
-      setInspectorFrame(buildInspectorFrame(inspectorWorldRef.current.world));
+      const baseFrame = buildInspectorFrame(inspectorWorldRef.current.world);
+      const pathfindingPaths = stream.getPathfindingDebugPaths();
+      if (pathfindingPaths.length === 0) {
+        setInspectorFrame(baseFrame);
+        return;
+      }
+      setInspectorFrame({
+        ...baseFrame,
+        pathfindingPaths,
+        pathfindingPathCount: pathfindingPaths.length,
+      });
     });
 
     return () => unsubscribe();
-  }, [stream.streamKey]);
+  }, [stream.streamKey, stream.getPathfindingDebugPaths]);
 
   useEffect(() => {
     streamControllerRef.current.setReady('inspector', true);
@@ -238,6 +330,9 @@ export function PixiEcsRendererStory({
         height="100%"
         backgroundColor={0x0b0d12}
         onResize={handleResize}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={stream.clearFocusedEntityFollowPoint}
+        onPointerDown={handlePointerDown}
       >
         {initRenderer}
       </PixiContainerWrapper>
@@ -254,6 +349,8 @@ export function PixiEcsRendererStory({
           showVelocityVectors={showInspectorVelocityVectors}
           showCollisionTint={showInspectorCollisionTint}
           showWallOutlines={showInspectorWallOutlines}
+          showPathfindingPaths={showInspectorPathfindingPaths}
+          showPhysicsShapes={showInspectorPhysicsShapes}
         />
       </InspectorOverlay>
     </div>

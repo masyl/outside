@@ -10,6 +10,9 @@ interface PixiContainerWrapperProps {
   backgroundColor?: number;
   instanceKey?: string;
   onResize?: (app: Application, width: number, height: number) => void;
+  onPointerDown?: (x: number, y: number) => void;
+  onPointerMove?: (x: number, y: number) => void;
+  onPointerLeave?: () => void;
 }
 
 let NEXT_STORYBOOK_PIXI_APP_ID = 1;
@@ -21,6 +24,9 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
   backgroundColor = 0x000000,
   instanceKey = 'default',
   onResize,
+  onPointerDown,
+  onPointerMove,
+  onPointerLeave,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -157,6 +163,23 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
     >
       <canvas
         ref={canvasRef}
+        onPointerMove={(event) => {
+          if (!onPointerMove) return;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          onPointerMove(x, y);
+        }}
+        onPointerLeave={() => {
+          onPointerLeave?.();
+        }}
+        onPointerDown={(event) => {
+          if (!onPointerDown) return;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          onPointerDown(x, y);
+        }}
         style={{
           width: '100%',
           height: '100%',

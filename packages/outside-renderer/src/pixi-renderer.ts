@@ -92,6 +92,7 @@ export class PixiEcsRenderer {
     this.displayState = {
       displayIndex: new Map<number, Sprite>(),
       displayKinds: new Map(),
+      shadowIndex: new Map(),
     };
 
     this.crtFilter = new CRTFilter({
@@ -257,6 +258,11 @@ export class PixiEcsRenderer {
     }
     this.displayState.displayIndex.clear();
     this.displayState.displayKinds.clear();
+    for (const shadow of this.displayState.shadowIndex.values()) {
+      shadow.removeFromParent();
+      shadow.destroy();
+    }
+    this.displayState.shadowIndex.clear();
     this.tileLayer.removeChildren();
     this.entityLayer.removeChildren();
   }

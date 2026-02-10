@@ -14,6 +14,8 @@ export interface InspectorRendererProps {
   showVelocityVectors?: boolean;
   showCollisionTint?: boolean;
   showWallOutlines?: boolean;
+  showPathfindingPaths?: boolean;
+  showPhysicsShapes?: boolean;
 }
 
 function toScreenX(worldX: number, centerX: number, tileSize: number, width: number): number {
@@ -39,6 +41,8 @@ export function InspectorRenderer({
   showVelocityVectors = true,
   showCollisionTint = true,
   showWallOutlines = true,
+  showPathfindingPaths = false,
+  showPhysicsShapes = false,
 }: InspectorRendererProps) {
   return (
     <svg
@@ -58,6 +62,8 @@ export function InspectorRenderer({
         showVelocityVectors={showVelocityVectors}
         showCollisionTint={showCollisionTint}
         showWallOutlines={showWallOutlines}
+        showPathfindingPaths={showPathfindingPaths}
+        showPhysicsShapes={showPhysicsShapes}
       />
     </svg>
   );

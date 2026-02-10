@@ -1,9 +1,9 @@
 /**
- * Tile-grid pathfinding over walkable floor. Used by hero orderHeroTo.
+ * Tile-grid pathfinding over walkable floor. Used by commanded path-following.
  * @packageDocumentation
  */
 
-import { query, getComponent } from 'bitecs';
+import { query } from 'bitecs';
 import { Position, FloorTile, Walkable, Obstacle } from './components';
 import type { SimulatorWorld } from './world';
 
@@ -18,16 +18,14 @@ export function getPassableTiles(world: SimulatorWorld): Set<string> {
   const walkable = new Set<string>();
   const floorWithWalkable = query(world, [Position, FloorTile, Walkable]);
   for (const eid of floorWithWalkable) {
-    const pos = getComponent(world, eid, Position);
-    const tx = Math.floor(pos.x);
-    const ty = Math.floor(pos.y);
+    const tx = Math.floor(Position.x[eid]);
+    const ty = Math.floor(Position.y[eid]);
     walkable.add(key(tx, ty));
   }
   const walls = query(world, [Position, FloorTile, Obstacle]);
   for (const eid of walls) {
-    const pos = getComponent(world, eid, Position);
-    const tx = Math.floor(pos.x);
-    const ty = Math.floor(pos.y);
+    const tx = Math.floor(Position.x[eid]);
+    const ty = Math.floor(Position.y[eid]);
     walkable.delete(key(tx, ty));
   }
   return walkable;

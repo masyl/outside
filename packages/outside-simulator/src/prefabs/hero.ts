@@ -1,6 +1,6 @@
 /**
  * Hero entity prefab: player-controlled character. Same movement components as bot.
- * Hero idles with Wander until user input assigns a path, then returns to Wander after path completion.
+ * Hero is command-driven (no autonomous Wander).
  * Visual: 100% white (renderer interprets via Hero tag).
  *
  * @packageDocumentation
@@ -9,21 +9,30 @@
 import { addPrefab, addEntity, addComponent, set, IsA, setComponent } from 'bitecs';
 import {
   Position,
+  PositionZ,
+  VelocityZ,
+  Grounded,
   VisualSize,
   ObstacleSize,
   Size,
   Obstacle,
   Direction,
   Speed,
+  WalkingSpeed,
+  RunningSpeed,
+  TargetPace,
+  Acceleration,
+  Deceleration,
   MaxSpeed,
   PointerTarget,
   Hero,
-  Wander,
-  WanderPersistence,
   Observed,
   DefaultSpriteKey,
   VariantSpriteKey,
 } from '../components';
+import {
+  TARGET_PACE_STANDING_STILL,
+} from '../pace';
 import type { SimulatorWorld } from '../world';
 
 const prefabByWorld = new WeakMap<SimulatorWorld, number>();
@@ -35,7 +44,11 @@ const DEFAULTS = {
   obstacleDiameter: 0.8,
   directionRad: 0,
   tilesPerSec: 0,
-  maxSpeedTps: 6,
+  walkingSpeedTps: 3,
+  runningSpeedTps: 8,
+  accelerationTps2: 22,
+  decelerationTps2: 26,
+  maxSpeedTps: 10,
 } as const;
 
 /**
@@ -53,6 +66,11 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, Obstacle);
   addComponent(world, prefabEid, set(Direction, { angle: DEFAULTS.directionRad }));
   addComponent(world, prefabEid, set(Speed, { tilesPerSec: DEFAULTS.tilesPerSec }));
+  addComponent(world, prefabEid, set(WalkingSpeed, { tilesPerSec: DEFAULTS.walkingSpeedTps }));
+  addComponent(world, prefabEid, set(RunningSpeed, { tilesPerSec: DEFAULTS.runningSpeedTps }));
+  addComponent(world, prefabEid, set(Acceleration, { tilesPerSec2: DEFAULTS.accelerationTps2 }));
+  addComponent(world, prefabEid, set(Deceleration, { tilesPerSec2: DEFAULTS.decelerationTps2 }));
+  addComponent(world, prefabEid, set(TargetPace, { value: TARGET_PACE_STANDING_STILL }));
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
   addComponent(world, prefabEid, PointerTarget);
   addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.hero' }));
@@ -70,7 +88,7 @@ export interface SpawnHeroOptions {
 }
 
 /**
- * Spawns a hero entity. Hero starts with Wander urge and can be switched to path-follow by heroPath.
+ * Spawns a hero entity. Hero starts standing still and only moves when commanded.
  *
  * @param world - Simulator world
  * @param options - Optional position (default 0,0)
@@ -95,13 +113,11 @@ export function spawnHero(
       y: options.y ?? DEFAULTS.y,
     });
   }
-
-  // Keep hero moving organically until the player issues a path command.
-  addComponent(world, eid, Wander);
-  addComponent(world, eid, WanderPersistence);
-  WanderPersistence.ticsUntilNextChange[eid] = 0;
-  WanderPersistence.ticsUntilDirectionChange[eid] = 0;
-  WanderPersistence.ticsUntilSpeedChange[eid] = 0;
+  const radius = Math.max(0.15, DEFAULTS.obstacleDiameter * 0.5);
+  setComponent(world, eid, PositionZ, { z: radius });
+  setComponent(world, eid, VelocityZ, { z: 0 });
+  setComponent(world, eid, Grounded, { value: 1 });
+  setComponent(world, eid, TargetPace, { value: TARGET_PACE_STANDING_STILL });
 
   return eid;
 }

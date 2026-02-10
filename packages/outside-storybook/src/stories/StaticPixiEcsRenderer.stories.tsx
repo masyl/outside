@@ -256,6 +256,7 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
     showInspectorVelocityVectors: { control: { type: 'boolean' } },
     showInspectorCollisionTint: { control: { type: 'boolean' } },
     showInspectorWallOutlines: { control: { type: 'boolean' } },
+    showInspectorPathfindingPaths: { control: { type: 'boolean' } },
   },
   args: {
     showInspectorOverlay: false,
@@ -263,6 +264,7 @@ const meta: Meta<typeof StaticPixiEcsRendererStory> = {
     showInspectorVelocityVectors: true,
     showInspectorCollisionTint: true,
     showInspectorWallOutlines: true,
+    showInspectorPathfindingPaths: false,
     useCrtEffect: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,

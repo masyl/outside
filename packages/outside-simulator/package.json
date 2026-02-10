@@ -1,6 +1,6 @@
 {
   "name": "@outside/simulator",
-  "version": "0.1.0",
+  "version": "0.1.12",
   "private": true,
   "type": "module",
   "main": "./dist/index.mjs",
@@ -24,7 +24,8 @@
   "dependencies": {
     "@outside/resource-packs": "workspace:*",
     "@outside/utils": "workspace:*",
-    "bitecs": "^0.4.0"
+    "bitecs": "^0.4.0",
+    "cannon-es": "^0.20.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

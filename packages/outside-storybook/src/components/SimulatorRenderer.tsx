@@ -15,8 +15,8 @@ import {
   getViewportFollowTarget,
   setViewportFollowTarget,
   spawnFloorTile,
-  orderHeroTo,
-  getHeroPath,
+  getEntityPath,
+  orderEntityToTile,
 } from '@outside/simulator';
 import type { ResolveEntityKind } from '@outside/simulator';
 import { useCallback, useMemo } from 'react';
@@ -169,7 +169,7 @@ export function SimulatorRenderer({
         heroEids.has(followEid) &&
         resolved.kind === 'floor'
       ) {
-        orderHeroTo(world, followEid, tx, ty);
+        orderEntityToTile(world, followEid, tx, ty);
         invalidate();
         return;
       }
@@ -239,10 +239,10 @@ export function SimulatorRenderer({
           toScreenY={toY}
           showTiles={false}
         />
-        {/* Hero path: dotted yellow line and yellow outlined checkpoints (50% tile) for followed hero */}
+        {/* Commanded path: dotted yellow line and yellow outlined checkpoints (50% tile). */}
         {followEid &&
           (() => {
-            const path = getHeroPath(world, followEid);
+            const path = getEntityPath(world, followEid);
             if (path.length === 0) return null;
             const followPos = getComponent(world, followEid, Position);
             const points: { x: number; y: number }[] = [

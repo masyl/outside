@@ -5,12 +5,19 @@ import {
   Follow,
   FollowTarget,
   Food,
+  Grounded,
   Hero,
   Observed,
   Obstacle,
+  ObstacleSize,
   Position,
+  PositionZ,
   Speed,
   Size,
+  TargetPace,
+  TARGET_PACE_RUNNING,
+  TARGET_PACE_STANDING_STILL,
+  TARGET_PACE_WALKING,
   VisualSize,
 } from '@outside/simulator';
 import { hasComponent, query, type World } from 'bitecs';
@@ -32,12 +39,20 @@ export interface InspectorEntity {
   eid: number;
   x: number;
   y: number;
+  /** Visual sprite diameter used for normal entity rendering. */
   diameter: number;
+  /** Physics collider shape rendered in debug overlay. */
+  physicsShape: 'circle' | 'box';
+  /** Physics collider size in tiles (circle diameter or box side length). */
+  physicsDiameter: number;
   kind: InspectorEntityKind;
   directionRad: number | null;
   speedTilesPerSec: number | null;
+  targetPaceLabel?: 'standingStill' | 'walking' | 'running' | 'unknown';
   inCollidedCooldown: boolean;
   collidedTicksRemaining: number;
+  zLiftTiles: number;
+  isAirborne: boolean;
 }
 
 export interface InspectorFollowLink {
@@ -49,13 +64,22 @@ export interface InspectorFollowLink {
   toY: number;
 }
 
+export interface InspectorPathfindingPath {
+  eid: number;
+  points: Array<{ x: number; y: number }>;
+  checkpoints?: Array<{ x: number; y: number }>;
+  style?: 'ordered' | 'wander';
+}
+
 export interface InspectorFrame {
   tiles: InspectorTile[];
   entities: InspectorEntity[];
   followLinks: InspectorFollowLink[];
+  pathfindingPaths: InspectorPathfindingPath[];
   collisionEntityCount: number;
   collisionTileCount: number;
   followLinkCount: number;
+  pathfindingPathCount: number;
   unknownCount: number;
 }
 
@@ -70,9 +94,17 @@ export function buildInspectorFrame(world: World): InspectorFrame {
   const tiles: InspectorTile[] = [];
   const entities: InspectorEntity[] = [];
   const followLinks: InspectorFollowLink[] = [];
+  const pathfindingPaths: InspectorPathfindingPath[] = [];
   let unknownCount = 0;
   let collisionEntityCount = 0;
   let collisionTileCount = 0;
+
+  function paceLabelFromValue(value: number): 'standingStill' | 'walking' | 'running' | 'unknown' {
+    if (value === TARGET_PACE_STANDING_STILL) return 'standingStill';
+    if (value === TARGET_PACE_WALKING) return 'walking';
+    if (value === TARGET_PACE_RUNNING) return 'running';
+    return 'unknown';
+  }
 
   for (let i = 0; i < eids.length; i++) {
     const eid = eids[i];
@@ -108,6 +140,17 @@ export function buildInspectorFrame(world: World): InspectorFrame {
         ? (Size.diameter[eid] ?? 1)
         : 1;
 
+    const physicsShape: 'circle' | 'box' = hasComponent(world, eid, Food)
+      ? 'box'
+      : 'circle';
+    const physicsDiameter = hasComponent(world, eid, Food)
+      ? Math.max(0.2, Size.diameter[eid] || 0.5) * 0.5
+      : hasComponent(world, eid, ObstacleSize)
+        ? Math.max(0.3, ObstacleSize.diameter[eid] || 0.6)
+        : hasComponent(world, eid, Size)
+          ? (Size.diameter[eid] ?? diameter)
+          : diameter;
+
     let kind: InspectorEntityKind = 'unknown';
     if (hasComponent(world, eid, Hero)) {
       kind = 'hero';
@@ -119,6 +162,10 @@ export function buildInspectorFrame(world: World): InspectorFrame {
     if (kind === 'unknown') unknownCount += 1;
     const directionRad = hasComponent(world, eid, Direction) ? (Direction.angle[eid] ?? 0) : null;
     const speedTilesPerSec = hasComponent(world, eid, Speed) ? (Speed.tilesPerSec[eid] ?? 0) : null;
+    const targetPaceLabel =
+      kind === 'bot' && hasComponent(world, eid, TargetPace)
+        ? paceLabelFromValue(TargetPace.value[eid] ?? TARGET_PACE_STANDING_STILL)
+        : undefined;
     const collidedTicksRemaining = hasComponent(world, eid, Collided)
       ? (Collided.ticksRemaining[eid] ?? 0)
       : 0;
@@ -126,17 +173,32 @@ export function buildInspectorFrame(world: World): InspectorFrame {
     if (inCollidedCooldown) {
       collisionEntityCount += 1;
     }
+    const z = hasComponent(world, eid, PositionZ) ? (PositionZ.z[eid] ?? 0) : 0;
+    const baseHeight =
+      hasComponent(world, eid, ObstacleSize)
+        ? Math.max(0, (ObstacleSize.diameter[eid] ?? 0) * 0.5)
+        : hasComponent(world, eid, Size)
+          ? Math.max(0, (Size.diameter[eid] ?? 0) * 0.5)
+          : 0;
+    const zLiftTiles = Math.max(0, z - baseHeight);
+    const grounded = hasComponent(world, eid, Grounded) ? (Grounded.value[eid] ?? 1) : 1;
+    const isAirborne = grounded <= 0 || zLiftTiles > 0.01;
 
     entities.push({
       eid,
       x,
       y,
       diameter,
+      physicsShape,
+      physicsDiameter,
       kind,
       directionRad,
       speedTilesPerSec,
+      targetPaceLabel,
       inCollidedCooldown,
       collidedTicksRemaining,
+      zLiftTiles,
+      isAirborne,
     });
   }
 
@@ -161,9 +223,11 @@ export function buildInspectorFrame(world: World): InspectorFrame {
     tiles,
     entities,
     followLinks,
+    pathfindingPaths,
     collisionEntityCount,
     collisionTileCount,
     followLinkCount: followLinks.length,
+    pathfindingPathCount: pathfindingPaths.length,
     unknownCount,
   };
 }

@@ -1,4 +1,4 @@
-import type { Container, Renderer, Sprite } from 'pixi.js';
+import { Graphics, type Container, type Renderer, type Sprite } from 'pixi.js';
 import {
   DefaultSpriteKey,
   Food,
@@ -18,7 +18,11 @@ import {
 } from '../render-classify';
 import type { RenderWorldState } from '../render-world';
 import type { RendererAssets } from './types';
-import { createSpriteForKind, updateSpriteForEntity } from './sprite-render';
+import {
+  createSpriteForKind,
+  getEntityDiameter,
+  updateSpriteForEntity,
+} from './sprite-render';
 
 function setNodeLabel(node: { label?: string }, label: string): void {
   node.label = label;
@@ -46,6 +50,7 @@ export interface RenderPassStats {
 export interface RenderDisplayState {
   displayIndex: Map<number, Sprite>;
   displayKinds: Map<number, RenderKind>;
+  shadowIndex: Map<number, Graphics>;
 }
 
 export interface RenderSpatialIndex {
@@ -156,6 +161,7 @@ export function runRenderPass(
     countKind(stats, kind);
 
     let sprite = state.displayIndex.get(eid);
+    let shadow = state.shadowIndex.get(eid);
     const previousKind = state.displayKinds.get(eid);
 
     // Recreate sprite only if classification changed because it may require a layer swap.
@@ -165,6 +171,12 @@ export function runRenderPass(
       state.displayIndex.delete(eid);
       state.displayKinds.delete(eid);
       sprite = undefined;
+    }
+    if (shadow && previousKind && previousKind !== kind) {
+      shadow.removeFromParent();
+      shadow.destroy();
+      state.shadowIndex.delete(eid);
+      shadow = undefined;
     }
 
     if (!sprite) {
@@ -178,8 +190,23 @@ export function runRenderPass(
         entityLayer.addChild(sprite);
       }
     }
+    if (shouldRenderShadow(kind) && !shadow) {
+      shadow = createShadow();
+      setNodeLabel(shadow, `${rendererLabel}:shadow:eid:${eid}`);
+      state.shadowIndex.set(eid, shadow);
+      entityLayer.addChild(shadow);
+    }
+    if (!shouldRenderShadow(kind) && shadow) {
+      shadow.removeFromParent();
+      shadow.destroy();
+      state.shadowIndex.delete(eid);
+      shadow = undefined;
+    }
 
     updateSpriteForEntity(renderer, sprite, kind, eid, tileSize, renderWorld, assets, spatialIndex);
+    if (shadow) {
+      updateShadowForEntity(shadow, kind, eid, tileSize, renderWorld);
+    }
   }
 
   for (const [eid, sprite] of state.displayIndex.entries()) {
@@ -188,6 +215,12 @@ export function runRenderPass(
     sprite.destroy();
     state.displayIndex.delete(eid);
     state.displayKinds.delete(eid);
+  }
+  for (const [eid, shadow] of state.shadowIndex.entries()) {
+    if (nextIds.has(eid)) continue;
+    shadow.removeFromParent();
+    shadow.destroy();
+    state.shadowIndex.delete(eid);
   }
 
   stats.displayCount = state.displayIndex.size;
@@ -200,6 +233,45 @@ export function runRenderPass(
     });
   }
   return stats;
+}
+
+function shouldRenderShadow(kind: RenderKind): boolean {
+  return kind === 'bot' || kind === 'hero' || kind === 'food';
+}
+
+function createShadow(): Graphics {
+  const shadow = new Graphics();
+  shadow.zIndex = 2;
+  shadow.alpha = 1;
+  return shadow;
+}
+
+function updateShadowForEntity(
+  shadow: Graphics,
+  kind: RenderKind,
+  eid: number,
+  tileSize: number,
+  renderWorld: RenderWorldState
+): void {
+  const world = renderWorld.world;
+  const posX = Position.x[eid];
+  const posY = Position.y[eid];
+  const diameter = getEntityDiameter(world, eid, kind);
+  if (!Number.isFinite(posX) || !Number.isFinite(posY) || !Number.isFinite(diameter)) {
+    shadow.visible = false;
+    return;
+  }
+  shadow.visible = true;
+
+  const radius = (diameter * tileSize) / 2;
+  const cx = posX * tileSize;
+  const cy = -posY * tileSize + radius * 0.95;
+  const rx = Math.max(2, radius * 0.58);
+  const ry = Math.max(1.25, radius * 0.24);
+
+  shadow.clear();
+  shadow.ellipse(cx, cy, rx, ry);
+  shadow.fill({ color: 0x000000, alpha: 0.36 });
 }
 
 function countKind(stats: RenderPassStats, kind: RenderKind): void {

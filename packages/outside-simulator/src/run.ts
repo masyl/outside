@@ -1,24 +1,22 @@
 /**
- * Run simulation tics: urge → movement → consumption → obstacleCollision → collision (fixed order).
+ * Run simulation tics with the unified physics pipeline.
  * @packageDocumentation
  */
 
-import { heroPathSystem } from './heroPath';
+import { pathFollowingSystem } from './path-following';
 import { urgeSystem } from './systems/urge';
-import { movementSystem } from './systems/movement';
+import { paceSystem } from './systems/pace';
 import { consumptionSystem } from './systems/consumption';
-import { obstacleCollisionSystem } from './systems/obstacleCollision';
-import { collisionSystem } from './systems/collision';
+import { physics3dSystem } from './systems/physics3d';
 import type { SimulatorWorld } from './world';
 
-const pipeline = (world: SimulatorWorld) => {
+const physicsPipeline = (world: SimulatorWorld) => {
   world.ticCount = (world.ticCount ?? 0) + 1;
-  heroPathSystem(world);
+  pathFollowingSystem(world);
   urgeSystem(world);
-  movementSystem(world);
+  paceSystem(world);
+  physics3dSystem(world);
   consumptionSystem(world);
-  obstacleCollisionSystem(world);
-  collisionSystem(world);
   return world;
 };
 
@@ -32,7 +30,7 @@ const pipeline = (world: SimulatorWorld) => {
  */
 export function runTics(world: SimulatorWorld, n: number): SimulatorWorld {
   for (let i = 0; i < n; i++) {
-    pipeline(world);
+    physicsPipeline(world);
   }
   return world;
 }

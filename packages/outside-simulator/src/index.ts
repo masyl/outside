@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.1.12';
 
 export { createWorld, DEFAULT_TIC_DURATION_MS } from './world';
 export type { SimulatorWorld, CreateWorldOptions } from './world';
@@ -25,7 +25,15 @@ export { registerPipelineObservers, registerComponentForPipelineObserver } from 
 
 export { query } from './state';
 
-export { getComponent, setComponent, set, addComponent, removeComponent, removeEntity } from 'bitecs';
+export {
+  addEntity,
+  getComponent,
+  setComponent,
+  set,
+  addComponent,
+  removeComponent,
+  removeEntity,
+} from 'bitecs';
 
 export { spawnBot, getOrCreateBotPrefab } from './prefabs/bot';
 export type { SpawnBotOptions } from './prefabs/bot';
@@ -40,7 +48,25 @@ export {
   spawnFoodByVariant,
 } from './prefabs/food-variants';
 export type { SpawnFoodVariantOptions } from './prefabs/food-variants';
-export { orderHeroTo, getHeroPath } from './heroPath';
+export {
+  orderEntityToTile,
+  getEntityPath,
+  clearEntityPath,
+  pathFollowingSystem,
+} from './path-following';
+export { findPath, getPassableTiles, simplifyPath } from './pathfinding';
+export {
+  getOrderedPathDebug,
+  getWanderPathDebug,
+  getPathfindingDebugPaths,
+} from './pathfinding-debug';
+export type { PathfindingDebugPath } from './pathfinding-debug';
+export {
+  TARGET_PACE_STANDING_STILL,
+  TARGET_PACE_WALKING,
+  TARGET_PACE_RUNNING,
+} from './pace';
+export type { TargetPaceValue } from './pace';
 
 export {
   setPointerTile,
@@ -95,6 +121,8 @@ export { createRenderObserverSerializer } from './render-stream';
 export { getEventQueue, drainEventQueue } from './events-api';
 
 export { configureTicDurationMs } from './configure';
+export { debugJumpPulse } from './systems/physics3d';
+export { paceSystem } from './systems/pace';
 
 export type { SimulatorEvent, CollisionEvent, ConsumedEvent } from './events';
 

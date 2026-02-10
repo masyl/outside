@@ -20,6 +20,7 @@
     "@outside/resource-packs": "workspace:*",
     "@outside/renderer": "workspace:*",
     "@outside/simulator": "workspace:*",
+    "cannon-es": "^0.20.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "wavefunctioncollapse": "^2.1.0"

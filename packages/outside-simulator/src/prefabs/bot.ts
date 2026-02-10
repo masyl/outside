@@ -16,12 +16,21 @@ import {
 } from 'bitecs';
 import {
   Position,
+  PositionZ,
+  VelocityZ,
+  Grounded,
   VisualSize,
   ObstacleSize,
   Size,
   Obstacle,
   Direction,
   Speed,
+  WalkingSpeed,
+  RunningSpeed,
+  TargetPace,
+  Acceleration,
+  Deceleration,
+  DestinationDeadline,
   Wander,
   WanderPersistence,
   Wait,
@@ -34,19 +43,28 @@ import {
   DefaultSpriteKey,
   VariantSpriteKey,
 } from '../components';
+import {
+  TARGET_PACE_RUNNING,
+  TARGET_PACE_STANDING_STILL,
+  TARGET_PACE_WALKING,
+} from '../pace';
 import type { SimulatorWorld } from '../world';
 
 const prefabByWorld = new WeakMap<SimulatorWorld, number>();
 
-/** Default bot values (overridable at spawn). Visual 1.2 tiles, obstacle 0.8 tiles; speeds 2× for snappier demo. */
+/** Default bot values (overridable at spawn). */
 const DEFAULTS = {
   x: 0,
   y: 0,
   visualDiameter: 1.2,
   obstacleDiameter: 0.8,
   directionRad: 0,
-  tilesPerSec: 1,
-  maxSpeedTps: 4,
+  tilesPerSec: 0,
+  walkingSpeedTps: 3,
+  runningSpeedTps: 9,
+  accelerationTps2: 20,
+  decelerationTps2: 24,
+  maxSpeedTps: 12,
 } as const;
 
 /**
@@ -67,6 +85,11 @@ export function getOrCreateBotPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, Obstacle);
   addComponent(world, prefabEid, set(Direction, { angle: DEFAULTS.directionRad }));
   addComponent(world, prefabEid, set(Speed, { tilesPerSec: DEFAULTS.tilesPerSec }));
+  addComponent(world, prefabEid, set(WalkingSpeed, { tilesPerSec: DEFAULTS.walkingSpeedTps }));
+  addComponent(world, prefabEid, set(RunningSpeed, { tilesPerSec: DEFAULTS.runningSpeedTps }));
+  addComponent(world, prefabEid, set(Acceleration, { tilesPerSec2: DEFAULTS.accelerationTps2 }));
+  addComponent(world, prefabEid, set(Deceleration, { tilesPerSec2: DEFAULTS.decelerationTps2 }));
+  addComponent(world, prefabEid, set(TargetPace, { value: TARGET_PACE_STANDING_STILL }));
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
   addComponent(world, prefabEid, PointerTarget);
   addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.bot' }));
@@ -87,6 +110,10 @@ export interface SpawnBotOptions {
   /** Obstacle diameter in tiles (collision). Default 0.8. */
   obstacleDiameter?: number;
   directionRad?: number;
+  walkingSpeedTps?: number;
+  runningSpeedTps?: number;
+  accelerationTps2?: number;
+  decelerationTps2?: number;
   tilesPerSec?: number;
   /** Urge: wait (no move), wander (random walk), follow (steer toward target), or none (keep initial dir/speed). Default: wander. */
   urge?: 'wait' | 'wander' | 'follow' | 'none';
@@ -138,11 +165,31 @@ export function spawnBot(
       setComponent(world, eid, Size, { diameter: options.obstacleDiameter });
     }
   }
+  const obstacleDiameter =
+    options?.diameter ??
+    options?.obstacleDiameter ??
+    DEFAULTS.obstacleDiameter;
+  const radius = Math.max(0.15, obstacleDiameter * 0.5);
+  setComponent(world, eid, PositionZ, { z: radius });
+  setComponent(world, eid, VelocityZ, { z: 0 });
+  setComponent(world, eid, Grounded, { value: 1 });
   if (options?.directionRad !== undefined) {
     setComponent(world, eid, Direction, { angle: options.directionRad });
   }
   if (options?.tilesPerSec !== undefined) {
     setComponent(world, eid, Speed, { tilesPerSec: options.tilesPerSec });
+  }
+  if (options?.walkingSpeedTps !== undefined) {
+    setComponent(world, eid, WalkingSpeed, { tilesPerSec: options.walkingSpeedTps });
+  }
+  if (options?.runningSpeedTps !== undefined) {
+    setComponent(world, eid, RunningSpeed, { tilesPerSec: options.runningSpeedTps });
+  }
+  if (options?.accelerationTps2 !== undefined) {
+    setComponent(world, eid, Acceleration, { tilesPerSec2: options.accelerationTps2 });
+  }
+  if (options?.decelerationTps2 !== undefined) {
+    setComponent(world, eid, Deceleration, { tilesPerSec2: options.decelerationTps2 });
   }
 
   const urge = options?.urge ?? 'wander';
@@ -154,15 +201,42 @@ export function spawnBot(
       addComponent(world, eid, FollowTightness);
       FollowTightness.value[eid] = options.followTightness;
     }
+    setComponent(world, eid, TargetPace, { value: TARGET_PACE_WALKING });
   } else if (urge === 'wait') {
     addComponent(world, eid, Wait);
+    setComponent(world, eid, TargetPace, { value: TARGET_PACE_STANDING_STILL });
   } else if (urge === 'none') {
     // no urge: entity keeps initial Direction/Speed (deterministic movement)
+    const manualSpeed = Math.max(0, options?.tilesPerSec ?? DEFAULTS.tilesPerSec);
+    setComponent(world, eid, WalkingSpeed, { tilesPerSec: manualSpeed });
+    setComponent(world, eid, RunningSpeed, { tilesPerSec: manualSpeed });
+    if (manualSpeed <= 0) {
+      setComponent(world, eid, TargetPace, { value: TARGET_PACE_STANDING_STILL });
+    } else if (manualSpeed <= DEFAULTS.walkingSpeedTps) {
+      setComponent(world, eid, TargetPace, { value: TARGET_PACE_WALKING });
+    } else {
+      setComponent(world, eid, TargetPace, { value: TARGET_PACE_RUNNING });
+    }
   } else {
     // wander (default): add per-entity so each bot has its own WanderPersistence slot; urge system reads/writes array[eid]
     addComponent(world, eid, Wander);
     addComponent(world, eid, WanderPersistence);
-    WanderPersistence.ticsUntilNextChange[eid] = 0;
+    addComponent(world, eid, DestinationDeadline);
+    const startX = options?.x ?? DEFAULTS.x;
+    const startY = options?.y ?? DEFAULTS.y;
+    setComponent(world, eid, WanderPersistence, {
+      ticsUntilNextChange: 0,
+      ticsUntilDirectionChange: 0,
+      ticsUntilSpeedChange: 0,
+      targetTileX: Math.floor(startX),
+      targetTileY: Math.floor(startY),
+      ticsUntilRetarget: 0,
+    });
+    setComponent(world, eid, DestinationDeadline, {
+      ticsRemaining: 0,
+      pathTiles: 0,
+    });
+    setComponent(world, eid, TargetPace, { value: TARGET_PACE_WALKING });
   }
 
   return eid;

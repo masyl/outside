@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addComponent, addEntity, createWorld } from 'bitecs';
+import { addComponent, addEntity, createWorld as createBitecsWorld } from 'bitecs';
 import {
   Collided,
   Direction,
@@ -12,12 +12,15 @@ import {
   Position,
   Speed,
   Size,
+  TargetPace,
+  TARGET_PACE_RUNNING,
+  Walkable,
 } from '@outside/simulator';
 import { buildInspectorFrame } from './frame';
 
 describe('buildInspectorFrame', () => {
   it('classifies floor, wall, and entity primitives', () => {
-    const world = createWorld();
+    const world = createBitecsWorld();
 
     const floor = addEntity(world);
     addComponent(world, floor, Observed);
@@ -55,10 +58,11 @@ describe('buildInspectorFrame', () => {
     expect(frame.tiles.some((tile) => tile.inCollidedCooldown)).toBe(true);
     expect(frame.entities.some((entity) => entity.kind === 'food')).toBe(true);
     expect(frame.collisionTileCount).toBe(1);
+    expect(frame.pathfindingPathCount).toBe(0);
   });
 
   it('classifies non-tile entities as bots and includes vectors/follow links/collision metadata', () => {
-    const world = createWorld();
+    const world = createBitecsWorld();
     const leader = addEntity(world);
     addComponent(world, leader, Observed);
     addComponent(world, leader, Position);
@@ -74,6 +78,8 @@ describe('buildInspectorFrame', () => {
     Direction.angle[follower] = Math.PI / 2;
     addComponent(world, follower, Speed);
     Speed.tilesPerSec[follower] = 1.5;
+    addComponent(world, follower, TargetPace);
+    TargetPace.value[follower] = TARGET_PACE_RUNNING;
     addComponent(world, follower, Follow);
     addComponent(world, follower, FollowTarget);
     FollowTarget.eid[follower] = leader;
@@ -85,6 +91,7 @@ describe('buildInspectorFrame', () => {
     expect(bot?.kind).toBe('bot');
     expect(bot?.directionRad).toBe(Math.PI / 2);
     expect(bot?.speedTilesPerSec).toBe(1.5);
+    expect(bot?.targetPaceLabel).toBe('running');
     expect(bot?.inCollidedCooldown).toBe(true);
     expect(frame.followLinks).toEqual([
       {
@@ -99,5 +106,28 @@ describe('buildInspectorFrame', () => {
     expect(frame.followLinkCount).toBe(1);
     expect(frame.collisionEntityCount).toBe(1);
     expect(frame.unknownCount).toBe(0);
+    expect(frame.pathfindingPathCount).toBe(0);
+  });
+
+  it('does not compute pathfinding debug paths in inspector frame builder', () => {
+    const world = createBitecsWorld();
+
+    const floorA = addEntity(world);
+    addComponent(world, floorA, Observed);
+    addComponent(world, floorA, Position);
+    Position.x[floorA] = 0;
+    Position.y[floorA] = 0;
+    addComponent(world, floorA, FloorTile);
+    addComponent(world, floorA, Walkable);
+
+    const wanderer = addEntity(world);
+    addComponent(world, wanderer, Observed);
+    addComponent(world, wanderer, Position);
+    Position.x[wanderer] = 0;
+    Position.y[wanderer] = 0;
+
+    const frame = buildInspectorFrame(world);
+    expect(frame.pathfindingPathCount).toBe(0);
+    expect(frame.pathfindingPaths).toEqual([]);
   });
 });

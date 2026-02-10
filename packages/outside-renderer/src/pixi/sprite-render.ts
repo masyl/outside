@@ -1,5 +1,5 @@
 import { Rectangle, Sprite, Texture, type Renderer } from 'pixi.js';
-import { Size, Position, VisualSize } from '@outside/simulator';
+import { Grounded, ObstacleSize, Position, PositionZ, Size, VelocityZ, VisualSize } from '@outside/simulator';
 import { hasComponent, type World } from 'bitecs';
 import { resolveSpriteKey, type RenderKind } from '../render-classify';
 import { SPRITE_SIZE } from '../constants';
@@ -14,6 +14,10 @@ import { getPlaceholderTexture, setNearestScale } from './assets';
 import { resolveFoodTexture } from './food-textures';
 import { pickTileSubVariantIndex, pickTileVariant } from './tile-variants';
 import type { RenderSpatialIndex } from './render-pass';
+
+const AIRBORNE_LIFT_EXAGGERATION = 5;
+const BOT_SHEET_FRAME_PADDING_PX = 2;
+const ACTOR_FRAME_SAFE_PADDING_PX = 4;
 
 /**
  * Builds a new sprite instance for a render kind.
@@ -200,6 +204,19 @@ export function updateSpriteForEntity(
 
   sprite.x = topLeft.x;
   sprite.y = topLeft.y;
+  const verticalVelocity = hasComponent(world, eid, VelocityZ) ? (VelocityZ.z[eid] ?? 0) : 0;
+  const airborne =
+    (hasComponent(world, eid, Grounded) && (Grounded.value[eid] ?? 1) === 0) ||
+    verticalVelocity > 0.05;
+  const baseLiftTiles = getVerticalLiftTiles(world, eid);
+  const visualLiftTiles = airborne
+    ? baseLiftTiles * AIRBORNE_LIFT_EXAGGERATION
+    : baseLiftTiles;
+  sprite.y -= visualLiftTiles * tileSize;
+  if (kind === 'food') {
+    sprite.x = snapToVirtualPixel(sprite.x, tileSize);
+    sprite.y = snapToVirtualPixel(sprite.y, tileSize);
+  }
 
   if (kind === 'bot' || kind === 'hero') {
     const actorVariantSheet = spriteKey
@@ -238,6 +255,36 @@ export function updateSpriteForEntity(
   const size = kind === 'error' ? tileSize : tileSize * diameter;
   sprite.width = size;
   sprite.height = size;
+}
+
+/**
+ * Quantizes render-space coordinates to one virtual pixel (1/16 tile).
+ */
+export function snapToVirtualPixel(valuePx: number, tileSizePx: number): number {
+  if (!Number.isFinite(valuePx) || !Number.isFinite(tileSizePx) || tileSizePx <= 0) {
+    return valuePx;
+  }
+  const quantum = tileSizePx / 16;
+  if (!Number.isFinite(quantum) || quantum <= 0) return valuePx;
+  return Math.round(valuePx / quantum) * quantum;
+}
+
+/**
+ * Computes upward visual lift from 3D state in tile units.
+ * Ground level uses collider half-height so standing entities remain visually grounded.
+ */
+export function getVerticalLiftTiles(world: World, eid: number): number {
+  const z = PositionZ.z[eid];
+  if (!Number.isFinite(z)) return 0;
+
+  const baseHeight =
+    hasComponent(world, eid, ObstacleSize)
+      ? Math.max(0, (ObstacleSize.diameter[eid] ?? 0) * 0.5)
+      : hasComponent(world, eid, Size)
+        ? Math.max(0, (Size.diameter[eid] ?? 0) * 0.5)
+        : 0;
+
+  return Math.max(0, z - baseHeight);
 }
 
 function shouldAllowWallVariant(
@@ -313,11 +360,11 @@ function updateBotSpriteFrame(
       break;
   }
 
-  const padding = 2;
-  // Frames are laid out on a fixed grid: frame width plus symmetric transparent padding.
-  const stride = SPRITE_SIZE + padding * 2;
-  const frameX = frameIndex * stride + padding;
-  const frameY = row * stride + padding + 2;
+  // The 16x16 legacy bot sheet packs each frame on a 20x20 cell with 2px transparent inset.
+  // Keep the same inset on X/Y so top/bottom rows do not get clipped by an accidental extra offset.
+  const stride = SPRITE_SIZE + BOT_SHEET_FRAME_PADDING_PX * 2;
+  const frameX = frameIndex * stride + BOT_SHEET_FRAME_PADDING_PX;
+  const frameY = row * stride + BOT_SHEET_FRAME_PADDING_PX + 2;
 
   sprite.texture = new Texture({
     source: source.source,
@@ -373,22 +420,32 @@ function updateActorVariantSpriteFrame(
     frameStep * animation.framePitchX +
     animation.frameInsetX;
   const frameY = row * animation.framePitchY + animation.frameInsetY;
+  const paddedFrameX = Math.max(0, frameX - ACTOR_FRAME_SAFE_PADDING_PX);
+  const paddedFrameY = Math.max(0, frameY - ACTOR_FRAME_SAFE_PADDING_PX);
+  const paddedFrameWidth = Math.min(
+    animation.frameWidth + ACTOR_FRAME_SAFE_PADDING_PX * 2,
+    sheet.frame.width - paddedFrameX
+  );
+  const paddedFrameHeight = Math.min(
+    animation.frameHeight + ACTOR_FRAME_SAFE_PADDING_PX * 2,
+    sheet.frame.height - paddedFrameY
+  );
 
   sprite.texture = new Texture({
     source: sheet.source,
     frame: new Rectangle(
-      frameX,
-      frameY,
-      animation.frameWidth,
-      animation.frameHeight
+      paddedFrameX,
+      paddedFrameY,
+      paddedFrameWidth,
+      paddedFrameHeight
     ),
   });
   setNearestScale(sprite.texture);
 
   const baseScale = (tileSize / animation.frameWidth) * diameter;
   sprite.anchor.set(0, 0);
-  sprite.pivot.x = 0;
-  sprite.pivot.y = 0;
+  sprite.pivot.x = ACTOR_FRAME_SAFE_PADDING_PX;
+  sprite.pivot.y = ACTOR_FRAME_SAFE_PADDING_PX;
   sprite.scale.x = baseScale;
   sprite.scale.y = baseScale;
 }

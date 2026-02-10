@@ -38,11 +38,16 @@ const BASE_FRAME: InspectorFrame = {
       x: 1,
       y: 1,
       diameter: 1,
+      physicsShape: 'circle',
+      physicsDiameter: 0.6,
       kind: 'bot',
       directionRad: 0,
       speedTilesPerSec: 1,
+      targetPaceLabel: 'running',
       inCollidedCooldown: true,
       collidedTicksRemaining: 2,
+      zLiftTiles: 0.5,
+      isAirborne: true,
     },
   ],
   followLinks: [
@@ -55,9 +60,20 @@ const BASE_FRAME: InspectorFrame = {
       toY: 1,
     },
   ],
+  pathfindingPaths: [
+    {
+      eid: 2,
+      points: [
+        { x: 1, y: 1 },
+        { x: 2, y: 1 },
+        { x: 3, y: 1 },
+      ],
+    },
+  ],
   collisionEntityCount: 1,
   collisionTileCount: 1,
   followLinkCount: 1,
+  pathfindingPathCount: 1,
   unknownCount: 0,
 };
 
@@ -72,12 +88,15 @@ describe('InspectorPrimitivesLayer', () => {
     const elements = flattenElements(tree);
 
     const followLines = elements.filter(
-      (element) => element.type === 'line' && element.props.stroke === '#6af'
+      (element) =>
+        element.type === 'line' &&
+        element.props.stroke === '#1e90ff' &&
+        element.props.strokeDasharray == null
     );
     expect(followLines.length).toBeGreaterThan(0);
 
     const vectorArrows = elements.filter(
-      (element) => element.type === 'polygon' && element.props.fill === '#fc6'
+      (element) => element.type === 'polygon' && element.props.fill === '#1e90ff'
     );
     expect(vectorArrows.length).toBeGreaterThan(0);
 
@@ -107,16 +126,21 @@ describe('InspectorPrimitivesLayer', () => {
       showFollowLinks: false,
       showVelocityVectors: false,
       showCollisionTint: false,
+      showPathfindingPaths: false,
+      showPhysicsShapes: false,
     });
     const elements = flattenElements(tree);
 
     const followLines = elements.filter(
-      (element) => element.type === 'line' && element.props.stroke === '#6af'
+      (element) =>
+        element.type === 'line' &&
+        element.props.stroke === '#1e90ff' &&
+        element.props.strokeDasharray == null
     );
     expect(followLines).toHaveLength(0);
 
     const vectorArrows = elements.filter(
-      (element) => element.type === 'polygon' && element.props.fill === '#fc6'
+      (element) => element.type === 'polygon' && element.props.fill === '#1e90ff'
     );
     expect(vectorArrows).toHaveLength(0);
 
@@ -156,8 +180,110 @@ describe('InspectorPrimitivesLayer', () => {
     expect(botEntity?.props.fill).toBe('none');
 
     const vectorArrowHead = elements.find(
-      (element) => element.type === 'polygon' && element.props.stroke === '#fc6'
+      (element) => element.type === 'polygon' && element.props.stroke === '#1e90ff'
     );
     expect(vectorArrowHead?.props.fill).toBe('none');
+  });
+
+  it('renders pathfinding lines and physics overlays when enabled', () => {
+    const tree = InspectorPrimitivesLayer({
+      frame: BASE_FRAME,
+      tileSize: 16,
+      toScreenX: (x) => x * 16,
+      toScreenY: (y) => y * 16,
+      showPathfindingPaths: true,
+      showPhysicsShapes: true,
+    });
+    const elements = flattenElements(tree);
+
+    const pathLine = elements.find(
+      (element) => element.type === 'polyline' && element.props.stroke === '#1e90ff'
+    );
+    expect(pathLine).toBeDefined();
+
+    const physicsShape = elements.find(
+      (element) => (element.type === 'circle' || element.type === 'rect') && element.props.stroke === '#1e90ff'
+    );
+    expect(physicsShape).toBeDefined();
+  });
+
+  it('renders ordered pathfinding in yellow with checkpoint squares', () => {
+    const orderedPathFrame: InspectorFrame = {
+      ...BASE_FRAME,
+      pathfindingPaths: [
+        {
+          eid: 7,
+          style: 'ordered',
+          points: [
+            { x: 1, y: 1 },
+            { x: 2, y: 1 },
+            { x: 3, y: 2 },
+          ],
+          checkpoints: [
+            { x: 2, y: 1 },
+            { x: 3, y: 2 },
+          ],
+        },
+      ],
+      pathfindingPathCount: 1,
+    };
+    const tree = InspectorPrimitivesLayer({
+      frame: orderedPathFrame,
+      tileSize: 16,
+      toScreenX: (x) => x * 16,
+      toScreenY: (y) => y * 16,
+      showPathfindingPaths: true,
+      showPhysicsShapes: false,
+    });
+    const elements = flattenElements(tree);
+
+    const orderedPathLine = elements.find(
+      (element) => element.type === 'polyline' && element.props.stroke === '#fc0'
+    );
+    expect(orderedPathLine).toBeDefined();
+
+    const checkpointRects = elements.filter(
+      (element) => element.type === 'rect' && element.props.stroke === '#fc0'
+    );
+    expect(checkpointRects.length).toBeGreaterThan(0);
+  });
+
+  it('shows z-lift vector and airborne physics shape even without physics toggle', () => {
+    const tree = InspectorPrimitivesLayer({
+      frame: BASE_FRAME,
+      tileSize: 16,
+      toScreenX: (x) => x * 16,
+      toScreenY: (y) => y * 16,
+      showPhysicsShapes: false,
+    });
+    const elements = flattenElements(tree);
+
+    const zLiftVector = elements.find(
+      (element) => element.type === 'line' && element.props.stroke === '#ffd400' && element.props.strokeWidth === 3
+    );
+    expect(zLiftVector).toBeDefined();
+
+    const physicsCircle = elements.find(
+      (element) => element.type === 'circle' && element.props.stroke === '#1e90ff' && element.props.strokeDasharray === '2 2'
+    );
+    expect(physicsCircle).toBeDefined();
+  });
+
+  it('renders target pace label next to bot entities', () => {
+    const tree = InspectorPrimitivesLayer({
+      frame: BASE_FRAME,
+      tileSize: 16,
+      toScreenX: (x) => x * 16,
+      toScreenY: (y) => y * 16,
+    });
+    const elements = flattenElements(tree);
+
+    const paceLabel = elements.find(
+      (element) =>
+        element.type === 'text' &&
+        element.props.children === 'running' &&
+        element.props.fill === '#ffe26a'
+    );
+    expect(paceLabel).toBeDefined();
   });
 });

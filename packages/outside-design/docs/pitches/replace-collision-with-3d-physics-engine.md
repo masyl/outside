@@ -2,6 +2,7 @@
 Title: Replace Collision with 3D Physics Engine
 Category: Core
 Summary: Migrate from 2D overlap collision to an invisible Cannon-based 3D physics layer driving entity motion.
+DeliveryLink: /deliveries/2026-02-09-1507-replace-collision-with-3d-physics-engine/
 ---
 
 # Replace Collision with 3D Physics Engine

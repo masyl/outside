@@ -10,6 +10,9 @@ import {
   Size,
   Direction,
   Speed,
+  PositionZ,
+  VelocityZ,
+  Grounded,
   PreviousPosition,
   DefaultSpriteKey,
   VariantSpriteKey,
@@ -19,8 +22,10 @@ import {
   FloorTile,
   Walkable,
   Obstacle,
+  ObstacleSize,
   Food,
   Hero,
+  WanderPersistence,
 } from './components';
 
 export const RENDER_COMPONENTS = [
@@ -29,6 +34,9 @@ export const RENDER_COMPONENTS = [
   Size,
   Direction,
   Speed,
+  PositionZ,
+  VelocityZ,
+  Grounded,
   PreviousPosition,
   DefaultSpriteKey,
   VariantSpriteKey,
@@ -38,8 +46,10 @@ export const RENDER_COMPONENTS = [
   FloorTile,
   Walkable,
   Obstacle,
+  ObstacleSize,
   Food,
   Hero,
+  WanderPersistence,
 ] as const;
 
 /**
