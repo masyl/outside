@@ -8,9 +8,11 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
+    "doc": "pnpm --filter @outside/design dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
+    "sync:skills": "./scripts/sync-skills",
     "storybook": "pnpm --filter outside-storybook storybook",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",

@@ -1,4 +1,5 @@
 import {
+  ActualSpeed,
   Collided,
   Direction,
   FloorTile,
@@ -15,9 +16,15 @@ import {
   Speed,
   Size,
   TargetPace,
+  WalkingSpeed,
+  RunningSpeed,
   TARGET_PACE_RUNNING,
+  TARGET_PACE_RUNNING_FAST,
   TARGET_PACE_STANDING_STILL,
   TARGET_PACE_WALKING,
+  TARGET_PACE_WALKING_SLOW,
+  DefaultSpriteKey,
+  VariantSpriteKey,
   VisualSize,
 } from '@outside/simulator';
 import { hasComponent, query, type World } from 'bitecs';
@@ -37,6 +44,7 @@ export interface InspectorTile {
 
 export interface InspectorEntity {
   eid: number;
+  prefabName: string;
   x: number;
   y: number;
   /** Visual sprite diameter used for normal entity rendering. */
@@ -48,7 +56,14 @@ export interface InspectorEntity {
   kind: InspectorEntityKind;
   directionRad: number | null;
   speedTilesPerSec: number | null;
-  targetPaceLabel?: 'standingStill' | 'walking' | 'running' | 'unknown';
+  targetSpeedTilesPerSec: number | null;
+  targetPaceLabel?:
+    | 'standingStill'
+    | 'walking'
+    | 'running'
+    | 'walkSlow'
+    | 'runFast'
+    | 'unknown';
   inCollidedCooldown: boolean;
   collidedTicksRemaining: number;
   zLiftTiles: number;
@@ -99,11 +114,24 @@ export function buildInspectorFrame(world: World): InspectorFrame {
   let collisionEntityCount = 0;
   let collisionTileCount = 0;
 
-  function paceLabelFromValue(value: number): 'standingStill' | 'walking' | 'running' | 'unknown' {
+  function paceLabelFromValue(
+    value: number
+  ): 'standingStill' | 'walking' | 'running' | 'walkSlow' | 'runFast' | 'unknown' {
     if (value === TARGET_PACE_STANDING_STILL) return 'standingStill';
     if (value === TARGET_PACE_WALKING) return 'walking';
     if (value === TARGET_PACE_RUNNING) return 'running';
+    if (value === TARGET_PACE_WALKING_SLOW) return 'walkSlow';
+    if (value === TARGET_PACE_RUNNING_FAST) return 'runFast';
     return 'unknown';
+  }
+
+  function shortPrefabName(value: string): string {
+    if (!value) return 'unknown';
+    const trimmed = value.trim();
+    if (!trimmed) return 'unknown';
+    const parts = trimmed.split('.');
+    const last = parts[parts.length - 1];
+    return last && last.length > 0 ? last : trimmed;
   }
 
   for (let i = 0; i < eids.length; i++) {
@@ -161,10 +189,39 @@ export function buildInspectorFrame(world: World): InspectorFrame {
     }
     if (kind === 'unknown') unknownCount += 1;
     const directionRad = hasComponent(world, eid, Direction) ? (Direction.angle[eid] ?? 0) : null;
-    const speedTilesPerSec = hasComponent(world, eid, Speed) ? (Speed.tilesPerSec[eid] ?? 0) : null;
+    const defaultSpriteKey = hasComponent(world, eid, DefaultSpriteKey)
+      ? (DefaultSpriteKey.value[eid] ?? '')
+      : '';
+    const variantSpriteKey = hasComponent(world, eid, VariantSpriteKey)
+      ? (VariantSpriteKey.value[eid] ?? '')
+      : '';
+    const prefabName =
+      variantSpriteKey && variantSpriteKey.length > 0
+        ? shortPrefabName(variantSpriteKey)
+        : shortPrefabName(defaultSpriteKey);
+    const speedTilesPerSec = hasComponent(world, eid, ActualSpeed)
+      ? (ActualSpeed.tilesPerSec[eid] ?? 0)
+      : hasComponent(world, eid, Speed)
+        ? (Speed.tilesPerSec[eid] ?? 0)
+        : null;
+    const targetPaceValue = hasComponent(world, eid, TargetPace)
+      ? (TargetPace.value[eid] ?? TARGET_PACE_STANDING_STILL)
+      : TARGET_PACE_STANDING_STILL;
+    const targetSpeedTilesPerSec =
+      kind === 'bot'
+        ? targetPaceValue === TARGET_PACE_RUNNING
+          ? Math.max(0, RunningSpeed.tilesPerSec[eid] ?? 0)
+          : targetPaceValue === TARGET_PACE_RUNNING_FAST
+            ? Math.max(0, (WalkingSpeed.tilesPerSec[eid] ?? 0) * 2)
+            : targetPaceValue === TARGET_PACE_WALKING
+              ? Math.max(0, WalkingSpeed.tilesPerSec[eid] ?? 0)
+              : targetPaceValue === TARGET_PACE_WALKING_SLOW
+                ? Math.max(0, (WalkingSpeed.tilesPerSec[eid] ?? 0) * 0.5)
+                : 0
+        : null;
     const targetPaceLabel =
       kind === 'bot' && hasComponent(world, eid, TargetPace)
-        ? paceLabelFromValue(TargetPace.value[eid] ?? TARGET_PACE_STANDING_STILL)
+        ? paceLabelFromValue(targetPaceValue)
         : undefined;
     const collidedTicksRemaining = hasComponent(world, eid, Collided)
       ? (Collided.ticksRemaining[eid] ?? 0)
@@ -186,6 +243,7 @@ export function buildInspectorFrame(world: World): InspectorFrame {
 
     entities.push({
       eid,
+      prefabName,
       x,
       y,
       diameter,
@@ -194,6 +252,7 @@ export function buildInspectorFrame(world: World): InspectorFrame {
       kind,
       directionRad,
       speedTilesPerSec,
+      targetSpeedTilesPerSec,
       targetPaceLabel,
       inCollidedCooldown,
       collidedTicksRemaining,

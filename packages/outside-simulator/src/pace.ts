@@ -2,8 +2,12 @@
 export const TARGET_PACE_STANDING_STILL = 0;
 export const TARGET_PACE_WALKING = 1;
 export const TARGET_PACE_RUNNING = 2;
+export const TARGET_PACE_WALKING_SLOW = 3;
+export const TARGET_PACE_RUNNING_FAST = 4;
 
 export type TargetPaceValue =
   | typeof TARGET_PACE_STANDING_STILL
   | typeof TARGET_PACE_WALKING
-  | typeof TARGET_PACE_RUNNING;
+  | typeof TARGET_PACE_RUNNING
+  | typeof TARGET_PACE_WALKING_SLOW
+  | typeof TARGET_PACE_RUNNING_FAST;

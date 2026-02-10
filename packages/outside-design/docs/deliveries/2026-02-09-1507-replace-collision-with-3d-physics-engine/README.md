@@ -2,8 +2,8 @@
 Title: "Replace Collision with 3D Physics Engine"
 DeliveryDate: 2026-02-09
 Summary: First implementation attempt via a small Cannon-based Storybook dungeon to evaluate wall clipping behavior.
-Status: TODO
-Branch: main
+Status: ONGOING
+Branch: feat/3d-physics-prototype-clipping
 Commit: ""
 ---
 

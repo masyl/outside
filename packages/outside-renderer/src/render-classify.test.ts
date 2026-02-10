@@ -17,6 +17,8 @@ describe('classifyRenderKind', () => {
       ['actor.bot', 'bot'],
       ['actor.hero', 'hero'],
       ['pickup.food', 'food'],
+      ['pickup.ball.soccer', 'ball'],
+      ['ui.cursor.r0c0', 'pointer'],
     ] as const;
 
     for (const [key, expected] of entries) {
@@ -46,6 +48,16 @@ describe('classifyRenderKind', () => {
     addComponent(world, eid, VariantSpriteKey);
     VariantSpriteKey.value[eid] = 'pickup.food.custom-variant';
     expect(classifyRenderKind(world, eid)).toBe('food');
+  });
+
+  it('treats soccer-ball sprite key prefixes as ball kind', () => {
+    const world = makeWorld();
+    const eid = addEntity(world);
+    addComponent(world, eid, DefaultSpriteKey);
+    DefaultSpriteKey.value[eid] = 'pickup.ball.soccer';
+    addComponent(world, eid, VariantSpriteKey);
+    VariantSpriteKey.value[eid] = 'pickup.ball.soccer.custom';
+    expect(classifyRenderKind(world, eid)).toBe('ball');
   });
 
   it('treats actor variant sprite key prefixes as bot/hero kinds', () => {

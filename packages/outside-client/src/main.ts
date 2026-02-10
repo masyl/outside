@@ -30,6 +30,10 @@ import { isTileTappable, routeTileTapToCommands } from './input/tapRouting';
 import { pickWorldAndTileFromScreen } from './input/tilePicking';
 import { zoomManager } from './zoom/zoomState'; // Import zoomManager to sync debug
 import { setupPixiReact } from './pixi-setup';
+import {
+  POINTER_CURSOR_DEFAULT_CSS,
+  POINTER_CURSOR_INTERACTIVE_CSS,
+} from '@outside/resource-packs';
 
 // Initialize Pixi React extensions
 setupPixiReact();
@@ -166,7 +170,9 @@ async function init(options?: {
       const tappable = isTileTappable(store.getState(), { x: gridX, y: gridY });
       const canvas: HTMLCanvasElement | undefined = (app as any).canvas ?? (app as any).view;
       if (canvas) {
-        const nextCursor = tappable ? 'pointer' : 'default';
+        const nextCursor = tappable
+          ? POINTER_CURSOR_INTERACTIVE_CSS
+          : POINTER_CURSOR_DEFAULT_CSS;
         if (canvas.style.cursor !== nextCursor) {
           canvas.style.cursor = nextCursor;
         }

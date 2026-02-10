@@ -4,12 +4,16 @@
  */
 
 import {
+  ActualSpeed,
   Observed,
   Position,
   VisualSize,
   Size,
   Direction,
   Speed,
+  TargetPace,
+  WalkingSpeed,
+  RunningSpeed,
   PositionZ,
   VelocityZ,
   Grounded,
@@ -29,11 +33,15 @@ import {
 } from './components';
 
 export const RENDER_COMPONENTS = [
+  ActualSpeed,
   Position,
   VisualSize,
   Size,
   Direction,
   Speed,
+  TargetPace,
+  WalkingSpeed,
+  RunningSpeed,
   PositionZ,
   VelocityZ,
   Grounded,

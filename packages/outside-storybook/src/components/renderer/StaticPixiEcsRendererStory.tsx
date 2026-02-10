@@ -219,6 +219,19 @@ export function StaticPixiEcsRendererStory({
     rendererRef.current?.setViewportSize(nextWidth, nextHeight);
   }, []);
 
+  const handlePointerMove = useCallback(
+    (screenX: number, screenY: number) => {
+      const worldX = stream.center.x + (screenX - viewportSize.width / 2) / tileSize;
+      const worldY = stream.center.y - (screenY - viewportSize.height / 2) / tileSize;
+      stream.setPointerWorld(worldX, worldY);
+    },
+    [stream.center.x, stream.center.y, stream.setPointerWorld, viewportSize.width, viewportSize.height, tileSize]
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    stream.clearPointer();
+  }, [stream.clearPointer]);
+
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
       <PixiContainerWrapper
@@ -227,6 +240,8 @@ export function StaticPixiEcsRendererStory({
         height="100%"
         backgroundColor={0x0b0d12}
         onResize={handleResize}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
       >
         {initRenderer}
       </PixiContainerWrapper>

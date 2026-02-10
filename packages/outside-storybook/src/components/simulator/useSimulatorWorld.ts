@@ -21,6 +21,18 @@ export type SpawnFn = (
     foodCount?: number;
     dogCount?: number;
     catCount?: number;
+    ballCount?: number;
+    ballBounciness?: number;
+    actorSelection?: string;
+    actorAct?:
+      | 'idle'
+      | 'wander'
+      | 'rotate'
+      | 'jump'
+      | 'follow'
+      | 'follow-mouse';
+    actorPace?: 'walkSlow' | 'walk' | 'run' | 'runFast';
+    pointerVariant?: string;
   }
 ) => void;
 

@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-export const VERSION = '0.1.12';
+export const VERSION = '0.1.13';
 
 export { createWorld, DEFAULT_TIC_DURATION_MS } from './world';
 export type { SimulatorWorld, CreateWorldOptions } from './world';
@@ -42,11 +42,9 @@ export type { SpawnHeroOptions } from './prefabs/hero';
 export { spawnFloorTile, spawnFloorRect, spawnWall } from './prefabs/floor';
 export { spawnFood } from './prefabs/food';
 export type { SpawnFoodOptions } from './prefabs/food';
-export {
-  FOOD_VARIANTS,
-  spawnFoodVariant,
-  spawnFoodByVariant,
-} from './prefabs/food-variants';
+export { spawnSoccerBall } from './prefabs/soccer-ball';
+export type { SpawnSoccerBallOptions } from './prefabs/soccer-ball';
+export { FOOD_VARIANTS, spawnFoodVariant, spawnFoodByVariant } from './prefabs/food-variants';
 export type { SpawnFoodVariantOptions } from './prefabs/food-variants';
 export {
   orderEntityToTile,
@@ -65,12 +63,18 @@ export {
   TARGET_PACE_STANDING_STILL,
   TARGET_PACE_WALKING,
   TARGET_PACE_RUNNING,
+  TARGET_PACE_WALKING_SLOW,
+  TARGET_PACE_RUNNING_FAST,
 } from './pace';
 export type { TargetPaceValue } from './pace';
 
 export {
   setPointerTile,
+  setPointerWorld,
   getPointerTile,
+  getPointerWorld,
+  setPointerSpriteKey,
+  getPointerSpriteKey,
   clearPointerTile,
   resolveEntityAt,
   getViewportFollowTarget,
@@ -121,8 +125,14 @@ export { createRenderObserverSerializer } from './render-stream';
 export { getEventQueue, drainEventQueue } from './events-api';
 
 export { configureTicDurationMs } from './configure';
-export { debugJumpPulse } from './systems/physics3d';
+export {
+  debugJumpPulse,
+  configurePhysics3dTuning,
+  DEFAULT_PHYSICS3D_TUNING,
+} from './systems/physics3d';
+export type { Physics3dTuning } from './systems/physics3d';
 export { paceSystem } from './systems/pace';
+export { pointerSystem } from './systems/pointer';
 
 export type { SimulatorEvent, CollisionEvent, ConsumedEvent } from './events';
 

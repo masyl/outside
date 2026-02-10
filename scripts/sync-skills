@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+SOURCE_DIR="$REPO_ROOT/skills"
+
+if [[ ! -d "$SOURCE_DIR" ]]; then
+  echo "Missing skills directory: $SOURCE_DIR" >&2
+  exit 1
+fi
+
+TARGETS=(
+  ".gemini/skills"
+  ".claude/skills"
+  ".cursor/skills"
+  ".codex/skills"
+)
+
+sync_with_rsync() {
+  local target_dir="$1"
+  mkdir -p "$target_dir"
+  rsync -a --delete "$SOURCE_DIR/" "$target_dir/"
+}
+
+sync_with_cp() {
+  local target_dir="$1"
+  rm -rf "$target_dir"
+  mkdir -p "$target_dir"
+  cp -R "$SOURCE_DIR"/. "$target_dir"/
+}
+
+echo "Syncing skills from $SOURCE_DIR"
+
+for relative_target in "${TARGETS[@]}"; do
+  target_dir="$REPO_ROOT/$relative_target"
+  if command -v rsync >/dev/null 2>&1; then
+    sync_with_rsync "$target_dir"
+  else
+    sync_with_cp "$target_dir"
+  fi
+  echo "  -> $relative_target"
+done
+
+echo "Skill sync complete."

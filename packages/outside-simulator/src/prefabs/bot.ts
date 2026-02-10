@@ -37,16 +37,21 @@ import {
   Follow,
   FollowTarget,
   FollowTightness,
+  Kicker,
+  JumpHeightScale,
   MaxSpeed,
   PointerTarget,
   Observed,
+  SpeedBoostOnJump,
   DefaultSpriteKey,
   VariantSpriteKey,
 } from '../components';
 import {
   TARGET_PACE_RUNNING,
+  TARGET_PACE_RUNNING_FAST,
   TARGET_PACE_STANDING_STILL,
   TARGET_PACE_WALKING,
+  TARGET_PACE_WALKING_SLOW,
 } from '../pace';
 import type { SimulatorWorld } from '../world';
 
@@ -91,6 +96,9 @@ export function getOrCreateBotPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, set(Deceleration, { tilesPerSec2: DEFAULTS.decelerationTps2 }));
   addComponent(world, prefabEid, set(TargetPace, { value: TARGET_PACE_STANDING_STILL }));
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
+  addComponent(world, prefabEid, set(JumpHeightScale, { value: 1 }));
+  addComponent(world, prefabEid, set(SpeedBoostOnJump, { tilesPerSec: 0.7 }));
+  addComponent(world, prefabEid, Kicker);
   addComponent(world, prefabEid, PointerTarget);
   addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.bot' }));
   addComponent(world, prefabEid, set(VariantSpriteKey, { value: '' }));
@@ -208,14 +216,20 @@ export function spawnBot(
   } else if (urge === 'none') {
     // no urge: entity keeps initial Direction/Speed (deterministic movement)
     const manualSpeed = Math.max(0, options?.tilesPerSec ?? DEFAULTS.tilesPerSec);
+    const walkSlowThreshold = DEFAULTS.walkingSpeedTps * 0.5;
+    const runFastThreshold = DEFAULTS.walkingSpeedTps * 2;
     setComponent(world, eid, WalkingSpeed, { tilesPerSec: manualSpeed });
     setComponent(world, eid, RunningSpeed, { tilesPerSec: manualSpeed });
     if (manualSpeed <= 0) {
       setComponent(world, eid, TargetPace, { value: TARGET_PACE_STANDING_STILL });
+    } else if (manualSpeed <= walkSlowThreshold) {
+      setComponent(world, eid, TargetPace, { value: TARGET_PACE_WALKING_SLOW });
     } else if (manualSpeed <= DEFAULTS.walkingSpeedTps) {
       setComponent(world, eid, TargetPace, { value: TARGET_PACE_WALKING });
-    } else {
+    } else if (manualSpeed < runFastThreshold) {
       setComponent(world, eid, TargetPace, { value: TARGET_PACE_RUNNING });
+    } else {
+      setComponent(world, eid, TargetPace, { value: TARGET_PACE_RUNNING_FAST });
     }
   } else {
     // wander (default): add per-entity so each bot has its own WanderPersistence slot; urge system reads/writes array[eid]

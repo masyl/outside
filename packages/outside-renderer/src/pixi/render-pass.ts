@@ -7,20 +7,18 @@ import {
   Observed,
   Obstacle,
   Position,
+  PositionZ,
   VariantSpriteKey,
   Walkable,
 } from '@outside/simulator';
 import { hasComponent, query } from 'bitecs';
-import {
-  classifyRenderKind,
-  resolveSpriteKey,
-  type RenderKind,
-} from '../render-classify';
+import { classifyRenderKind, resolveSpriteKey, type RenderKind } from '../render-classify';
 import type { RenderWorldState } from '../render-world';
 import type { RendererAssets } from './types';
 import {
   createSpriteForKind,
   getEntityDiameter,
+  getVerticalLiftTiles,
   updateSpriteForEntity,
 } from './sprite-render';
 
@@ -36,6 +34,8 @@ export interface RenderPassStats {
   wallCount: number;
   heroCount: number;
   foodCount: number;
+  ballCount: number;
+  pointerCount: number;
   botCount: number;
   errorCount: number;
   entityCount: number;
@@ -56,6 +56,11 @@ export interface RenderDisplayState {
 export interface RenderSpatialIndex {
   floorCells: Set<string>;
 }
+
+const DEPTH_Y_SCALE = 1_000_000;
+const DEPTH_Z_SCALE = 1_000;
+const SHADOW_DEPTH_OFFSET = 1;
+let unresolvedRenderSignature = '';
 
 /**
  * Executes one entity render pass over current render-world state.
@@ -105,6 +110,8 @@ export function runRenderPass(
     wallCount: 0,
     heroCount: 0,
     foodCount: 0,
+    ballCount: 0,
+    pointerCount: 0,
     botCount: 0,
     errorCount: 0,
     entityCount: 0,
@@ -141,10 +148,8 @@ export function runRenderPass(
           y: Position.y[eid],
         },
         resolvedSpriteKey: resolveSpriteKey(world, eid),
-        defaultSpriteKey:
-          typeof defaultSprite === 'string' ? defaultSprite : null,
-        variantSpriteKey:
-          typeof variantSprite === 'string' ? variantSprite : null,
+        defaultSpriteKey: typeof defaultSprite === 'string' ? defaultSprite : null,
+        variantSpriteKey: typeof variantSprite === 'string' ? variantSprite : null,
         components: {
           floorTile: hasComponent(world, eid, FloorTile),
           obstacle: hasComponent(world, eid, Obstacle),
@@ -184,7 +189,7 @@ export function runRenderPass(
       setNodeLabel(sprite, `${rendererLabel}:${kind}:eid:${eid}`);
       state.displayIndex.set(eid, sprite);
       state.displayKinds.set(eid, kind);
-      if (kind === 'floor' || kind === 'wall') {
+      if (kind === 'floor') {
         tileLayer.addChild(sprite);
       } else {
         entityLayer.addChild(sprite);
@@ -204,8 +209,10 @@ export function runRenderPass(
     }
 
     updateSpriteForEntity(renderer, sprite, kind, eid, tileSize, renderWorld, assets, spatialIndex);
+    sprite.zIndex = computeDepthZIndex(world, eid, kind);
     if (shadow) {
       updateShadowForEntity(shadow, kind, eid, tileSize, renderWorld);
+      shadow.zIndex = sprite.zIndex - SHADOW_DEPTH_OFFSET;
     }
   }
 
@@ -227,16 +234,25 @@ export function runRenderPass(
   stats.tileDisplayCount = tileLayer.children.length;
   stats.entityDisplayCount = entityLayer.children.length;
   if (unresolvedEntities.length > 0) {
-    console.log('[PixiEcsRenderer] unresolved render entities', {
-      total: unresolvedEntities.length,
-      entities: unresolvedEntities.slice(0, 50),
-    });
+    const signature = unresolvedEntities
+      .map((entity) => `${entity.eid}:${entity.resolvedSpriteKey ?? ''}:${entity.defaultSpriteKey ?? ''}`)
+      .sort()
+      .join('|');
+    if (signature !== unresolvedRenderSignature) {
+      unresolvedRenderSignature = signature;
+      console.log('[PixiEcsRenderer] unresolved render entities', {
+        total: unresolvedEntities.length,
+        entities: unresolvedEntities.slice(0, 50),
+      });
+    }
+  } else if (unresolvedRenderSignature.length > 0) {
+    unresolvedRenderSignature = '';
   }
   return stats;
 }
 
 function shouldRenderShadow(kind: RenderKind): boolean {
-  return kind === 'bot' || kind === 'hero' || kind === 'food';
+  return kind === 'bot' || kind === 'hero' || kind === 'food' || kind === 'ball';
 }
 
 function createShadow(): Graphics {
@@ -288,6 +304,12 @@ function countKind(stats: RenderPassStats, kind: RenderKind): void {
     case 'food':
       stats.foodCount += 1;
       break;
+    case 'ball':
+      stats.ballCount += 1;
+      break;
+    case 'pointer':
+      stats.pointerCount += 1;
+      break;
     case 'bot':
       stats.botCount += 1;
       break;
@@ -298,4 +320,22 @@ function countKind(stats: RenderPassStats, kind: RenderKind): void {
       stats.botCount += 1;
       break;
   }
+}
+
+function computeDepthZIndex(world: RenderWorldState['world'], eid: number, kind: RenderKind): number {
+  if (kind === 'pointer') {
+    return Number.MAX_SAFE_INTEGER - eid;
+  }
+  const y = Position.y[eid];
+  if (!Number.isFinite(y)) return 0;
+
+  const diameter = getEntityDiameter(world, eid, kind);
+  const footY = kind === 'floor' || kind === 'wall' ? y : y - diameter / 2;
+  const yDepthBucket = Math.round(-footY * 1000);
+
+  const z = Number.isFinite(PositionZ.z[eid]) ? PositionZ.z[eid] : 0;
+  const lift = kind === 'floor' || kind === 'wall' ? 0 : getVerticalLiftTiles(world, eid);
+  const zDepthBucket = Math.round((z + lift) * 100);
+
+  return yDepthBucket * DEPTH_Y_SCALE + zDepthBucket * DEPTH_Z_SCALE + eid;
 }

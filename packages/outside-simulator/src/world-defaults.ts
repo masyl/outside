@@ -4,7 +4,16 @@
  */
 
 import { addEntity, addComponent, setComponent } from 'bitecs';
-import { Grid, GridResolution, View, IsViewportFocus, Pointer, PointerTile } from './components';
+import {
+  DefaultSpriteKey,
+  Grid,
+  GridResolution,
+  IsViewportFocus,
+  Pointer,
+  PointerTile,
+  View,
+} from './components';
+import { POINTER_DEFAULT_SPRITE_KEY } from './pointer';
 import type { SimulatorWorld } from './world';
 
 /** Resolution for floor tiles grid (1 = integer cells). */
@@ -48,7 +57,9 @@ export function addPointerEntity(world: SimulatorWorld): number {
   const pointerEid = addEntity(world);
   addComponent(world, pointerEid, Pointer);
   addComponent(world, pointerEid, PointerTile);
+  addComponent(world, pointerEid, DefaultSpriteKey);
   PointerTile.tileX[pointerEid] = Number.NaN;
   PointerTile.tileY[pointerEid] = Number.NaN;
+  DefaultSpriteKey.value[pointerEid] = POINTER_DEFAULT_SPRITE_KEY;
   return pointerEid;
 }

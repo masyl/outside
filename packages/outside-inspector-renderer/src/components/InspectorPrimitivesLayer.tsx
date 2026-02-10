@@ -2,12 +2,21 @@ import React from 'react';
 import type { InspectorFrame } from '../frame';
 
 const COLLIDED_COOLDOWN_MAX = 2;
-const ARROW_SCALE = 1;
+const ARROW_SCALE = 0.5;
 const ARROW_HEAD_LEN = 8;
 const ARROW_HEAD_HALF_W = 4;
+const VECTOR_NOTCH_HALF_W = 9;
+const TARGET_MARKER_RADIUS = 5;
+const TARGET_MARKER_CROSSHAIR_OFFSET = 9;
+const TARGET_MARKER_CROSSHAIR_HALF = 2;
+const MINI_DEBUG_PANEL_HORIZONTAL_PADDING = 8;
+const MINI_DEBUG_PANEL_VERTICAL_PADDING = 4;
 const VECTOR_BLUE = '#1e90ff';
 const HERO_PATH_YELLOW = '#fc0';
 const Z_VECTOR_YELLOW = '#ffd400';
+const MINI_DEBUG_TEXT_GREEN = '#00ff66';
+const MINI_DEBUG_BACKGROUND_BLACK_50 = 'rgba(0,0,0,0.5)';
+const MINI_DEBUG_FONT_FAMILY = 'Minecraft, monospace';
 
 export interface InspectorPrimitivesLayerProps {
   frame: InspectorFrame;
@@ -97,7 +106,7 @@ export function InspectorPrimitivesLayer({
             if (!Array.isArray(path.points) || path.points.length < 2) return null;
             const points = path.points.map((p) => `${toScreenX(p.x)},${toScreenY(p.y)}`).join(' ');
             const isOrderedPath = path.style === 'ordered';
-            const stroke = isOrderedPath ? HERO_PATH_YELLOW : VECTOR_BLUE;
+            const stroke = HERO_PATH_YELLOW;
             const dash = isOrderedPath ? '4 2' : '4 3';
             const checkpoints = Array.isArray(path.checkpoints) ? path.checkpoints : [];
             const halfTile = tileSize * 0.5;
@@ -138,13 +147,15 @@ export function InspectorPrimitivesLayer({
             if (entity.directionRad == null || entity.speedTilesPerSec == null) {
               return null;
             }
-            const speed = entity.speedTilesPerSec;
-            if (!Number.isFinite(speed) || speed <= 0) {
+            // Keep a minimum visible heading vector even when the actor is standing still.
+            const speed = entity.speedTilesPerSec + 1;
+            if (!Number.isFinite(speed)) {
               return null;
             }
 
             const cx = toScreenX(entity.x);
             const cy = toScreenY(entity.y);
+            const radius = (entity.diameter * tileSize) / 2;
             const len = speed * tileSize * ARROW_SCALE;
             const cos = Math.cos(entity.directionRad);
             const sin = Math.sin(entity.directionRad);
@@ -157,6 +168,32 @@ export function InspectorPrimitivesLayer({
             const rightX = backX - sin * ARROW_HEAD_HALF_W;
             const rightY = backY - cos * ARROW_HEAD_HALF_W;
             const arrowPoints = `${ex},${ey} ${leftX},${leftY} ${rightX},${rightY}`;
+            const notchCount = Math.max(0, Math.floor(speed));
+            const notchLimit = Math.max(0, len - ARROW_HEAD_LEN - 1);
+            const targetSpeed = entity.targetSpeedTilesPerSec ?? 0;
+            const prefabLabel = entity.prefabName;
+            const stateLabel = entity.targetPaceLabel ?? 'unknown';
+            const targetLabel = `${targetSpeed.toFixed(1)} tps`;
+            const actualLabel = `${entity.speedTilesPerSec.toFixed(1)} tps`;
+            const targetVectorSpeed = Math.max(0, targetSpeed) + 1;
+            const targetLen = targetVectorSpeed * tileSize * ARROW_SCALE;
+            const targetX = cx + cos * targetLen;
+            const targetY = cy - sin * targetLen;
+            const panelFontSize = Math.max(8, tileSize * 0.45);
+            const panelTextWidth =
+              Math.max(prefabLabel.length, stateLabel.length, targetLabel.length, actualLabel.length) *
+              panelFontSize *
+              0.6;
+            const panelWidth = panelTextWidth + MINI_DEBUG_PANEL_HORIZONTAL_PADDING * 2;
+            const panelHeight = panelFontSize * 4 + MINI_DEBUG_PANEL_VERTICAL_PADDING * 2;
+            const oppositeScreenX = -cos;
+            const oppositeScreenY = sin;
+            const cornerSignX = oppositeScreenX >= 0 ? 1 : -1;
+            const cornerSignY = oppositeScreenY >= 0 ? 1 : -1;
+            const panelX =
+              cornerSignX > 0 ? cx + radius + 4 : cx - radius - 4 - panelWidth;
+            const panelY =
+              cornerSignY > 0 ? cy + radius + 4 : cy - radius - 4 - panelHeight;
 
             return (
               <g key={`arrow-${entity.eid}`}>
@@ -166,7 +203,7 @@ export function InspectorPrimitivesLayer({
                   x2={backX}
                   y2={backY}
                   stroke={VECTOR_BLUE}
-                  strokeWidth={1.5}
+                  strokeWidth={3}
                   strokeOpacity={0.9}
                 />
                 <polygon
@@ -174,9 +211,95 @@ export function InspectorPrimitivesLayer({
                   fill={overlayMode ? 'none' : VECTOR_BLUE}
                   fillOpacity={overlayMode ? 1 : 0.9}
                   stroke={VECTOR_BLUE}
-                  strokeWidth={overlayMode ? 1.25 : 0}
+                  strokeWidth={overlayMode ? 2.5 : 0}
                   strokeOpacity={0.9}
                 />
+                <circle
+                  cx={targetX}
+                  cy={targetY}
+                  r={TARGET_MARKER_RADIUS}
+                  fill={VECTOR_BLUE}
+                  fillOpacity={0.95}
+                />
+                {[
+                  { dx: -1, dy: -1 },
+                  { dx: 1, dy: -1 },
+                  { dx: 1, dy: 1 },
+                  { dx: -1, dy: 1 },
+                ].map(({ dx, dy }, idx) => {
+                  const cxh = targetX + dx * TARGET_MARKER_CROSSHAIR_OFFSET;
+                  const cyh = targetY + dy * TARGET_MARKER_CROSSHAIR_OFFSET;
+                  return (
+                    <line
+                      key={`target-crosshair-${entity.eid}-${idx}`}
+                      x1={cxh - dx * TARGET_MARKER_CROSSHAIR_HALF}
+                      y1={cyh - dy * TARGET_MARKER_CROSSHAIR_HALF}
+                      x2={cxh + dx * TARGET_MARKER_CROSSHAIR_HALF}
+                      y2={cyh + dy * TARGET_MARKER_CROSSHAIR_HALF}
+                      stroke={VECTOR_BLUE}
+                      strokeWidth={2}
+                      strokeOpacity={0.95}
+                    />
+                  );
+                })}
+                {Array.from({ length: notchCount }, (_, notchIndex) => {
+                  const distance = (notchIndex + 1) * tileSize * ARROW_SCALE;
+                  if (distance > notchLimit) return null;
+                  const nx = cx + cos * distance;
+                  const ny = cy - sin * distance;
+                  const notchLeftX = nx - sin * VECTOR_NOTCH_HALF_W;
+                  const notchLeftY = ny - cos * VECTOR_NOTCH_HALF_W;
+                  const notchRightX = nx + sin * VECTOR_NOTCH_HALF_W;
+                  const notchRightY = ny + cos * VECTOR_NOTCH_HALF_W;
+                  return (
+                    <line
+                      key={`arrow-notch-${entity.eid}-${notchIndex}`}
+                      x1={notchLeftX}
+                      y1={notchLeftY}
+                      x2={notchRightX}
+                      y2={notchRightY}
+                      stroke={VECTOR_BLUE}
+                      strokeWidth={2}
+                      strokeOpacity={0.9}
+                    />
+                  );
+                })}
+                <g data-inspector-component="miniDebugPanel">
+                  <rect
+                    x={panelX}
+                    y={panelY}
+                    width={panelWidth}
+                    height={panelHeight}
+                    fill={MINI_DEBUG_BACKGROUND_BLACK_50}
+                  />
+                  <text
+                    x={panelX + MINI_DEBUG_PANEL_HORIZONTAL_PADDING}
+                    y={panelY + MINI_DEBUG_PANEL_VERTICAL_PADDING + panelFontSize * 0.8}
+                    fill={MINI_DEBUG_TEXT_GREEN}
+                    fontFamily={MINI_DEBUG_FONT_FAMILY}
+                    fontSize={panelFontSize}
+                  >
+                    <tspan x={panelX + MINI_DEBUG_PANEL_HORIZONTAL_PADDING}>{prefabLabel}</tspan>
+                    <tspan
+                      x={panelX + MINI_DEBUG_PANEL_HORIZONTAL_PADDING}
+                      dy={panelFontSize}
+                    >
+                      {stateLabel}
+                    </tspan>
+                    <tspan
+                      x={panelX + MINI_DEBUG_PANEL_HORIZONTAL_PADDING}
+                      dy={panelFontSize}
+                    >
+                      {targetLabel}
+                    </tspan>
+                    <tspan
+                      x={panelX + MINI_DEBUG_PANEL_HORIZONTAL_PADDING}
+                      dy={panelFontSize}
+                    >
+                      {actualLabel}
+                    </tspan>
+                  </text>
+                </g>
               </g>
             );
           })}
@@ -241,28 +364,6 @@ export function InspectorPrimitivesLayer({
             />
           );
         })}
-      </g>
-      <g aria-hidden="true" data-inspector-layer="target-pace-labels">
-        {entities
-          .filter((entity) => entity.kind === 'bot' && entity.targetPaceLabel != null)
-          .map((entity) => {
-            const radius = (entity.diameter * tileSize) / 2;
-            return (
-              <text
-                key={`pace-${entity.eid}`}
-                x={toScreenX(entity.x) + radius + 3}
-                y={toScreenY(entity.y) - radius - 3}
-                fill="#ffe26a"
-                stroke="#111"
-                strokeWidth={0.8}
-                paintOrder="stroke"
-                fontFamily="monospace"
-                fontSize={Math.max(8, tileSize * 0.45)}
-              >
-                {entity.targetPaceLabel}
-              </text>
-            );
-          })}
       </g>
       {showPhysicsShapes || entities.some((entity) => entity.isAirborne) ? (
         <g aria-hidden="true" data-inspector-layer="physics-shapes">

@@ -23,6 +23,18 @@ interface PixiEcsRendererStoryProps {
   foodCount?: number;
   dogCount?: number;
   catCount?: number;
+  ballCount?: number;
+  ballBounciness?: number;
+  kickBaseImpulse?: number;
+  kickSpeedFactor?: number;
+  kickLiftBase?: number;
+  kickLiftBouncinessFactor?: number;
+  ballMaxHorizontalSpeed?: number;
+  ballGroundRestitution?: number;
+  actors?: string;
+  pointerVariant?: string;
+  act?: 'idle' | 'wander' | 'rotate' | 'jump' | 'follow' | 'follow-mouse';
+  pace?: 'walkSlow' | 'walk' | 'run' | 'runFast';
   spawnFn: SpawnFn;
   tileSize?: number;
   waitForAssets?: boolean;
@@ -34,6 +46,7 @@ interface PixiEcsRendererStoryProps {
   showInspectorWallOutlines?: boolean;
   showInspectorPathfindingPaths?: boolean;
   showInspectorPhysicsShapes?: boolean;
+  onClickAction?: 'order-path' | 'jump-random' | 'jump-all' | 'jump-sequence' | 'pick-pointer';
 }
 
 const EMPTY_FRAME: InspectorFrame = {
@@ -55,6 +68,18 @@ export function PixiEcsRendererStory({
   foodCount,
   dogCount,
   catCount,
+  ballCount,
+  ballBounciness = 0.82,
+  kickBaseImpulse = 0.22,
+  kickSpeedFactor = 0.06,
+  kickLiftBase = 1.6,
+  kickLiftBouncinessFactor = 0.8,
+  ballMaxHorizontalSpeed = 9,
+  ballGroundRestitution = 0.72,
+  actors = 'all',
+  pointerVariant = 'ui.cursor.r0c0',
+  act = 'idle',
+  pace = 'walk',
   spawnFn,
   tileSize = 16,
   waitForAssets = false,
@@ -66,6 +91,7 @@ export function PixiEcsRendererStory({
   showInspectorWallOutlines = true,
   showInspectorPathfindingPaths = false,
   showInspectorPhysicsShapes = false,
+  onClickAction = 'order-path',
 }: PixiEcsRendererStoryProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<PixiEcsRenderer | null>(null);
@@ -78,6 +104,11 @@ export function PixiEcsRendererStory({
   const [viewportSize, setViewportSize] = useState({ width: 1, height: 1 });
   const [rendererReady, setRendererReady] = useState(0);
 
+  const assetBaseUrl = (() => {
+    if (typeof window === 'undefined') return '/sprites';
+    return new URL('./sprites', window.location.href).toString().replace(/\/$/, '');
+  })();
+
   const stream = useScenarioRenderStream({
     mode: 'dynamic',
     seed,
@@ -87,6 +118,20 @@ export function PixiEcsRendererStory({
       foodCount,
       dogCount,
       catCount,
+      ballCount,
+      ballBounciness,
+      actorSelection: actors,
+      actorAct: act,
+      actorPace: pace,
+      pointerVariant,
+    },
+    physics3dTuning: {
+      botKickBaseImpulse: kickBaseImpulse,
+      botKickSpeedFactor: kickSpeedFactor,
+      ballKickLiftBase: kickLiftBase,
+      ballKickLiftBouncinessFactor: kickLiftBouncinessFactor,
+      ballMaxHorizontalSpeed,
+      ballGroundRestitution,
     },
     ticsPerSecond,
     spawnFn,
@@ -100,6 +145,7 @@ export function PixiEcsRendererStory({
     }
     const renderer = new PixiEcsRenderer(app, {
       tileSize,
+      assetBaseUrl,
     });
     rendererRef.current = renderer;
     rendererAppRef.current = app;
@@ -109,13 +155,37 @@ export function PixiEcsRendererStory({
 
   const handlePointerDown = useCallback(
     (screenX: number, screenY: number) => {
-      if (stream.isFocusedEntityMouseFollowModeEnabled()) {
+      if (
+        onClickAction === 'jump-random' ||
+        onClickAction === 'jump-all' ||
+        onClickAction === 'jump-sequence'
+      ) {
+        const jumpResult = stream.triggerZooActorJump(
+          onClickAction === 'jump-all'
+            ? 'all'
+            : onClickAction === 'jump-sequence'
+              ? 'sequence'
+              : 'random'
+        );
+        console.log('[PixiEcsRendererStory] zoo click jump', {
+          mode: onClickAction,
+          applied: jumpResult.applied,
+          jumpedEids: jumpResult.jumpedEids,
+          reason: jumpResult.reason ?? 'ok',
+        });
         return;
       }
       const worldX = stream.center.x + (screenX - viewportSize.width / 2) / tileSize;
       const worldY = stream.center.y - (screenY - viewportSize.height / 2) / tileSize;
       const tileX = Math.floor(worldX);
       const tileY = Math.floor(worldY);
+      if (onClickAction === 'pick-pointer') {
+        stream.pickPointerVariantAtTile(tileX, tileY);
+        return;
+      }
+      if (stream.isFocusedEntityMouseFollowModeEnabled()) {
+        return;
+      }
       const result = stream.orderFocusedEntityToTile(tileX, tileY);
       if (!result.ordered) {
         return;
@@ -128,11 +198,14 @@ export function PixiEcsRendererStory({
     },
     [
       stream.orderFocusedEntityToTile,
+      stream.pickPointerVariantAtTile,
+      stream.triggerZooActorJump,
       stream.center.x,
       stream.center.y,
       viewportSize.width,
       viewportSize.height,
       tileSize,
+      onClickAction,
     ]
   );
 
@@ -140,17 +213,26 @@ export function PixiEcsRendererStory({
     (screenX: number, screenY: number) => {
       const worldX = stream.center.x + (screenX - viewportSize.width / 2) / tileSize;
       const worldY = stream.center.y - (screenY - viewportSize.height / 2) / tileSize;
+      stream.setPointerWorld(worldX, worldY);
+      stream.setZooActorsFollowPoint(worldX, worldY);
       stream.setFocusedEntityFollowPoint(worldX, worldY);
     },
     [
       stream.center.x,
       stream.center.y,
+      stream.setPointerWorld,
+      stream.setZooActorsFollowPoint,
       stream.setFocusedEntityFollowPoint,
       viewportSize.width,
       viewportSize.height,
       tileSize,
     ]
   );
+
+  const handlePointerLeave = useCallback(() => {
+    stream.clearPointer();
+    stream.clearFocusedEntityFollowPoint();
+  }, [stream.clearPointer, stream.clearFocusedEntityFollowPoint]);
 
   useEffect(() => {
     applyGenerationRef.current += 1;
@@ -331,7 +413,7 @@ export function PixiEcsRendererStory({
         backgroundColor={0x0b0d12}
         onResize={handleResize}
         onPointerMove={handlePointerMove}
-        onPointerLeave={stream.clearFocusedEntityFollowPoint}
+        onPointerLeave={handlePointerLeave}
         onPointerDown={handlePointerDown}
       >
         {initRenderer}

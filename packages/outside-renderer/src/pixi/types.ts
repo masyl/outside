@@ -59,6 +59,9 @@ export interface TileTextureVariantPool {
 export interface RendererAssets {
   botIdle?: Texture;
   botWalk?: Texture;
+  soccerBallSheet?: Texture;
+  pointerCursor?: Texture;
+  pointerCursorBySpriteKey: Map<string, Texture>;
   foodTextureBySpriteKey: Map<string, Texture>;
   actorVariantSheetBySpriteKey: Map<string, ActorVariantSheet>;
   tileTextureByKind: {

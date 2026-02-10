@@ -1,11 +1,25 @@
 import {
+  addEntity,
+  addComponent,
+  DefaultSpriteKey,
+  Observed,
+  PointerKind,
+  Position,
   spawnBot,
   spawnFloorRect,
   spawnFloorTile,
   spawnWall,
   spawnFood,
+  setComponent,
+  TargetPace,
+  TARGET_PACE_STANDING_STILL,
   spawnHero,
+  spawnSoccerBall,
   setViewportFollowTarget,
+  FollowStopRange,
+  JumpHeightScale,
+  SpeedBoostOnJump,
+  setPointerSpriteKey,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import { foodVariantIds, type FoodVariantId } from '@outside/resource-packs/pixel-platter/meta';
@@ -14,6 +28,11 @@ import {
   GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
   GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
 } from '@outside/resource-packs/paws-whiskers/meta';
+import {
+  POINTER_DEFAULT_VARIANT_ID,
+  findPointerVariantById,
+  pointersPack,
+} from '@outside/resource-packs/pointers/meta';
 import { generateDungeon } from '../../utils/dungeonLayout';
 import { generateDungeonWFC } from '../../utils/dungeonLayoutWFC';
 import { generateDungeonMetaTiles } from '../../utils/metatileDungeon';
@@ -21,11 +40,7 @@ import { generateDungeonMetaTiles } from '../../utils/metatileDungeon';
 /**
  * Spawns count bots in a follow chain: first is leader (Wander), rest Follow previous.
  */
-export function spawnFollowChain(
-  world: SimulatorWorld,
-  _seed: number,
-  count: number
-): void {
+export function spawnFollowChain(world: SimulatorWorld, _seed: number, count: number): void {
   if (count < 1) return;
   const leader = spawnBot(world, { x: 0, y: 0 });
   let prev = leader;
@@ -48,7 +63,8 @@ export function seededUnit(seed: number, index: number): number {
 
 function pickFoodVariant(seed: number, index: number): FoodVariantId {
   const variants = foodVariantIds;
-  const variantIndex = Math.floor(seededUnit(seed, 7000 + index) * variants.length) % variants.length;
+  const variantIndex =
+    Math.floor(seededUnit(seed, 7000 + index) * variants.length) % variants.length;
   return variants[Math.max(0, variantIndex)] as FoodVariantId;
 }
 
@@ -57,6 +73,107 @@ interface DynamicSpawnOptions {
   foodCount?: number;
   dogCount?: number;
   catCount?: number;
+  ballCount?: number;
+  ballBounciness?: number;
+  actorSelection?: ActorZooSelection;
+  actorAct?: ActorZooAct;
+  actorPace?: ActorZooPace;
+  pointerVariant?: string;
+}
+
+export const ACTOR_ZOO_ALL_OPTION = 'all';
+export const ACTOR_ZOO_ACT_OPTIONS = [
+  'idle',
+  'wander',
+  'rotate',
+  'jump',
+  'follow',
+  'follow-mouse',
+] as const;
+export const ACTOR_ZOO_PACE_OPTIONS = ['walkSlow', 'walk', 'run', 'runFast'] as const;
+export type ActorZooAct = (typeof ACTOR_ZOO_ACT_OPTIONS)[number];
+export type ActorZooPace = (typeof ACTOR_ZOO_PACE_OPTIONS)[number];
+
+export const ACTOR_ZOO_VARIANTS = [
+  {
+    id: 'actor.bot',
+    label: 'Bot',
+    variantSpriteKey: '',
+  },
+  {
+    id: 'actor.bot.golden-retriever',
+    label: 'Golden Retriever',
+    variantSpriteKey: GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
+  },
+  {
+    id: 'actor.bot.beige-cat',
+    label: 'Beige Cat',
+    variantSpriteKey: BEIGE_CAT_BOT_SPRITE_KEY,
+  },
+] as const;
+
+export type ActorZooVariantId = (typeof ACTOR_ZOO_VARIANTS)[number]['id'];
+export type ActorZooSelection = ActorZooVariantId | typeof ACTOR_ZOO_ALL_OPTION;
+
+const ACTOR_ZOO_DEFAULT_SELECTION: ActorZooSelection = ACTOR_ZOO_ALL_OPTION;
+const ACTOR_ZOO_DEFAULT_ACT: ActorZooAct = 'idle';
+const ACTOR_ZOO_DEFAULT_PACE: ActorZooPace = 'walk';
+const ACTOR_ZOO_PER_ACTOR_PADDING_TILES = 4;
+const ACTOR_ZOO_INNER_PADDING_TILES = 4;
+const ACTOR_ZOO_ROW_HEIGHT_TILES = 1 + ACTOR_ZOO_PER_ACTOR_PADDING_TILES * 2;
+const ACTOR_ZOO_SLOT_WIDTH_TILES = ACTOR_ZOO_ROW_HEIGHT_TILES;
+const ACTOR_ZOO_WALK_SPEED_TPS = 2.4;
+const ACTOR_ZOO_RUN_SPEED_TPS = 5.2;
+const SOUTH_DIRECTION_RAD = Math.PI / 2;
+const BOT_JUMP_HEIGHT_SCALE = 1;
+const DOG_JUMP_HEIGHT_SCALE = 0.75;
+const CAT_JUMP_HEIGHT_SCALE = 1.5;
+const BOT_JUMP_SPEED_BOOST = 0.7;
+const CAT_JUMP_SPEED_BOOST = 1.1;
+const BOT_SPEED_MULTIPLIER = 1;
+const DOG_SPEED_MULTIPLIER = 1.25;
+const CAT_SPEED_MULTIPLIER = 1.5;
+
+export const POINTER_ZOO_VARIANTS = pointersPack.pointers.map((pointer) => ({
+  id: pointer.spriteKey,
+  label: pointer.displayName,
+}));
+export const POINTER_ZOO_DEFAULT_POINTER_SPRITE_KEY =
+  findPointerVariantById(POINTER_DEFAULT_VARIANT_ID)?.spriteKey ?? 'ui.cursor.r0c0';
+const POINTER_ZOO_CELL_SPACING_TILES = 2;
+const POINTER_ZOO_INNER_PADDING_TILES = 2;
+
+function jumpHeightScaleForVariant(variantId: ActorZooVariantId): number {
+  if (variantId === 'actor.bot.golden-retriever') return DOG_JUMP_HEIGHT_SCALE;
+  if (variantId === 'actor.bot.beige-cat') return CAT_JUMP_HEIGHT_SCALE;
+  return BOT_JUMP_HEIGHT_SCALE;
+}
+
+function jumpSpeedBoostForVariant(variantId: ActorZooVariantId): number {
+  if (variantId === 'actor.bot.beige-cat') return CAT_JUMP_SPEED_BOOST;
+  return BOT_JUMP_SPEED_BOOST;
+}
+
+function speedMultiplierForVariant(variantId: ActorZooVariantId): number {
+  if (variantId === 'actor.bot.golden-retriever') return DOG_SPEED_MULTIPLIER;
+  if (variantId === 'actor.bot.beige-cat') return CAT_SPEED_MULTIPLIER;
+  return BOT_SPEED_MULTIPLIER;
+}
+
+function speedForZooPace(pace: ActorZooPace): number {
+  if (pace === 'walkSlow') return ACTOR_ZOO_WALK_SPEED_TPS * 0.5;
+  if (pace === 'runFast') return ACTOR_ZOO_WALK_SPEED_TPS * 2;
+  if (pace === 'run') return ACTOR_ZOO_RUN_SPEED_TPS;
+  return ACTOR_ZOO_WALK_SPEED_TPS;
+}
+
+function getActorZooVariants(
+  selection: ActorZooSelection
+): ReadonlyArray<(typeof ACTOR_ZOO_VARIANTS)[number]> {
+  if (selection === ACTOR_ZOO_ALL_OPTION) {
+    return ACTOR_ZOO_VARIANTS;
+  }
+  return ACTOR_ZOO_VARIANTS.filter((variant) => variant.id === selection);
 }
 
 /**
@@ -86,11 +203,7 @@ function scatterPositions(
 /**
  * Creates a world, spawns entityCount bots in a scattered cloud (near center first, further as count grows).
  */
-export function spawnBotsInWorld(
-  world: SimulatorWorld,
-  seed: number,
-  entityCount: number
-): void {
+export function spawnBotsInWorld(world: SimulatorWorld, seed: number, entityCount: number): void {
   const positions = scatterPositions(seed, entityCount);
   for (let i = 0; i < entityCount; i++) {
     const p = positions[i];
@@ -155,6 +268,129 @@ export function createFloorRectSpawn(
 }
 
 /**
+ * Spawns a dynamic "zoo" room containing one row of actor prefabs.
+ * Room dimensions scale with the number of showcased actors.
+ */
+export function spawnActorZoo(
+  world: SimulatorWorld,
+  _seed: number,
+  _entityCount: number,
+  spawnOptions?: DynamicSpawnOptions
+): void {
+  const selection = (spawnOptions?.actorSelection ??
+    ACTOR_ZOO_DEFAULT_SELECTION) as ActorZooSelection;
+  const act = (spawnOptions?.actorAct ?? ACTOR_ZOO_DEFAULT_ACT) as ActorZooAct;
+  const pace = (spawnOptions?.actorPace ?? ACTOR_ZOO_DEFAULT_PACE) as ActorZooPace;
+  const variants = getActorZooVariants(selection);
+  if (variants.length === 0) return;
+
+  const roomWidth =
+    ACTOR_ZOO_INNER_PADDING_TILES * 2 + variants.length * ACTOR_ZOO_SLOT_WIDTH_TILES;
+  const roomHeight = ACTOR_ZOO_INNER_PADDING_TILES * 2 + ACTOR_ZOO_ROW_HEIGHT_TILES;
+  const xMin = -Math.floor(roomWidth / 2);
+  const yMin = -Math.floor(roomHeight / 2);
+  const xMax = xMin + roomWidth - 1;
+  const yMax = yMin + roomHeight - 1;
+
+  spawnFloorRect(world, xMin, yMin, xMax, yMax, true);
+  for (let x = xMin - 1; x <= xMax + 1; x++) {
+    spawnWall(world, x, yMin - 1);
+    spawnWall(world, x, yMax + 1);
+  }
+  for (let y = yMin; y <= yMax; y++) {
+    spawnWall(world, xMin - 1, y);
+    spawnWall(world, xMax + 1, y);
+  }
+
+  const rowY = yMin + ACTOR_ZOO_INNER_PADDING_TILES + Math.floor(ACTOR_ZOO_ROW_HEIGHT_TILES / 2) + 0.5;
+  const paceSpeed = speedForZooPace(pace);
+  for (let i = 0; i < variants.length; i++) {
+    const variant = variants[i];
+    const rowX =
+      xMin +
+      ACTOR_ZOO_INNER_PADDING_TILES +
+      i * ACTOR_ZOO_SLOT_WIDTH_TILES +
+      Math.floor(ACTOR_ZOO_SLOT_WIDTH_TILES / 2) +
+      0.5;
+    const eid = spawnBot(world, {
+      x: rowX,
+      y: rowY,
+      directionRad: SOUTH_DIRECTION_RAD,
+      urge: act === 'wander' ? 'wander' : 'wait',
+      walkingSpeedTps: paceSpeed * speedMultiplierForVariant(variant.id),
+      runningSpeedTps: paceSpeed * speedMultiplierForVariant(variant.id),
+      variantSpriteKey: variant.variantSpriteKey,
+    });
+    addComponent(world, eid, FollowStopRange);
+    setComponent(world, eid, FollowStopRange, { tiles: 2 });
+    addComponent(world, eid, JumpHeightScale);
+    setComponent(world, eid, JumpHeightScale, {
+      value: jumpHeightScaleForVariant(variant.id),
+    });
+    addComponent(world, eid, SpeedBoostOnJump);
+    setComponent(world, eid, SpeedBoostOnJump, {
+      tilesPerSec: jumpSpeedBoostForVariant(variant.id),
+    });
+    if (act === 'idle') {
+      setComponent(world, eid, TargetPace, { value: TARGET_PACE_STANDING_STILL });
+    }
+  }
+}
+
+/**
+ * Spawns a compact square "pointer zoo" with one cursor variant per tile in a grid.
+ * Clicking a pointer tile can promote that sprite as the active custom pointer.
+ */
+export function spawnPointerZoo(
+  world: SimulatorWorld,
+  _seed: number,
+  _entityCount: number,
+  spawnOptions?: DynamicSpawnOptions
+): void {
+  const columns = Math.max(1, pointersPack.layout.columns);
+  const rows = Math.max(1, pointersPack.layout.rows);
+  const roomInnerSize =
+    Math.max(columns, rows) * POINTER_ZOO_CELL_SPACING_TILES + POINTER_ZOO_INNER_PADDING_TILES * 2;
+  const xMin = -Math.floor(roomInnerSize / 2);
+  const yMin = -Math.floor(roomInnerSize / 2);
+  const xMax = xMin + roomInnerSize - 1;
+  const yMax = yMin + roomInnerSize - 1;
+
+  spawnFloorRect(world, xMin, yMin, xMax, yMax, true);
+  for (let x = xMin - 1; x <= xMax + 1; x++) {
+    spawnWall(world, x, yMin - 1);
+    spawnWall(world, x, yMax + 1);
+  }
+  for (let y = yMin; y <= yMax; y++) {
+    spawnWall(world, xMin - 1, y);
+    spawnWall(world, xMax + 1, y);
+  }
+
+  const startX = xMin + POINTER_ZOO_INNER_PADDING_TILES + 0.5;
+  const startY = yMax - POINTER_ZOO_INNER_PADDING_TILES + 0.5;
+  for (let i = 0; i < pointersPack.pointers.length; i++) {
+    const pointer = pointersPack.pointers[i];
+    const row = Math.floor(i / columns);
+    const col = i % columns;
+    const x = startX + col * POINTER_ZOO_CELL_SPACING_TILES;
+    const y = startY - row * POINTER_ZOO_CELL_SPACING_TILES;
+    const eid = addEntity(world);
+    addComponent(world, eid, Position);
+    addComponent(world, eid, Observed);
+    addComponent(world, eid, DefaultSpriteKey);
+    addComponent(world, eid, PointerKind);
+    setComponent(world, eid, Position, { x, y });
+    setComponent(world, eid, PointerKind, { value: pointer.spriteKey });
+    DefaultSpriteKey.value[eid] = pointer.spriteKey;
+  }
+
+  setPointerSpriteKey(
+    world,
+    spawnOptions?.pointerVariant?.trim() || POINTER_ZOO_DEFAULT_POINTER_SPRITE_KEY
+  );
+}
+
+/**
  * Floor rect with wall perimeter, one hero at center (0,0), then entityCount bots scattered with leaders.
  * Sets viewport follow target to the hero so the camera follows the player character by default.
  */
@@ -204,8 +440,7 @@ function pickRoomCell(
   salt: number,
   blockedCells?: ReadonlySet<string>
 ): { x: number; y: number } {
-  const startIndex =
-    Math.floor(seededUnit(seed, salt) * roomCells.length) % roomCells.length;
+  const startIndex = Math.floor(seededUnit(seed, salt) * roomCells.length) % roomCells.length;
   if (blockedCells == null || blockedCells.size === 0) {
     return roomCells[startIndex];
   }
@@ -287,8 +522,7 @@ export function spawnDungeonThenScattered(
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
   for (let i = 0; i < entityCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+    const idx = Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
     const p = roomCells[idx];
     const cx = p.x + offsetX + 0.5;
     const cy = p.y + offsetY + 0.5;
@@ -320,9 +554,7 @@ export function spawnDungeonWithFood(
   const offsetX = -40;
   const offsetY = -25;
   for (let i = 0; i < DUNGEON_FOOD_COUNT; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
-      roomCells.length;
+    const idx = Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) % roomCells.length;
     const p = roomCells[idx];
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
@@ -353,8 +585,7 @@ export function spawnDungeonWFCThenScattered(
   spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
   if (roomCells.length === 0) return;
   for (let i = 0; i < entityCount; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+    const idx = Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
     const p = roomCells[idx];
     const cx = p.x + offsetX + 0.5;
     const cy = p.y + offsetY + 0.5;
@@ -383,9 +614,7 @@ export function spawnDungeonWFCWithFood(
   const offsetX = -40;
   const offsetY = -25;
   for (let i = 0; i < DUNGEON_FOOD_COUNT; i++) {
-    const idx =
-      Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) %
-      roomCells.length;
+    const idx = Math.floor(seededUnit(seed, 1000 + i) * roomCells.length) % roomCells.length;
     const p = roomCells[idx];
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
@@ -408,10 +637,7 @@ function spawnDungeonActorVariants(
   fallbackBotCount: number,
   blockedCells?: ReadonlySet<string>
 ): Array<{ x: number; y: number }> {
-  const resolvedBotCount = Math.max(
-    0,
-    Math.floor(spawnOptions?.botCount ?? fallbackBotCount)
-  );
+  const resolvedBotCount = Math.max(0, Math.floor(spawnOptions?.botCount ?? fallbackBotCount));
   const resolvedDogCount = Math.max(
     0,
     Math.floor(spawnOptions?.dogCount ?? DUNGEON_HERO_DOG_COUNT)
@@ -513,7 +739,10 @@ export function spawnDungeonWFCWithFoodAndHero(
     variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
   });
   setViewportFollowTarget(world, heroEid);
-  const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
+  const resolvedFoodCount = Math.max(
+    0,
+    Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT)
+  );
   const actorPositions = spawnDungeonActorVariants(
     world,
     seed,
@@ -544,6 +773,7 @@ export function spawnDungeonWFCWithFoodAndHero(
 
 /** Food count for dungeon-with-hero preset. */
 const DUNGEON_HERO_FOOD_COUNT = 12;
+const DUNGEON_SOCCER_BALL_COUNT = 4;
 
 /**
  * Dungeon layout with configurable food/bot counts and 1 hero. Camera follows the hero.
@@ -580,7 +810,10 @@ export function spawnDungeonWithFoodAndHero(
     variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
   });
   setViewportFollowTarget(world, heroEid);
-  const resolvedFoodCount = Math.max(0, Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT));
+  const resolvedFoodCount = Math.max(
+    0,
+    Math.floor(spawnOptions?.foodCount ?? DUNGEON_HERO_FOOD_COUNT)
+  );
   const actorPositions = spawnDungeonActorVariants(
     world,
     seed,
@@ -610,6 +843,112 @@ export function spawnDungeonWithFoodAndHero(
 }
 
 /**
+ * Dungeon layout with configurable bots and soccer balls.
+ * Intended for early soccer-ball interaction validation.
+ */
+export function spawnDungeonWithSoccerBalls(
+  world: SimulatorWorld,
+  seed: number,
+  botCount: number,
+  spawnOptions?: DynamicSpawnOptions
+): void {
+  const width = 80;
+  const height = 50;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+  const { grid, roomCells } = generateDungeon(width, height, seed);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) {
+        spawnFloorTile(world, x + offsetX, y + offsetY, true);
+      }
+    }
+  }
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+  if (roomCells.length === 0) return;
+
+  spawnDungeonActorVariants(world, seed, roomCells, offsetX, offsetY, spawnOptions, botCount);
+  const resolvedBallCount = Math.max(
+    0,
+    Math.floor(spawnOptions?.ballCount ?? DUNGEON_SOCCER_BALL_COUNT)
+  );
+  for (let i = 0; i < resolvedBallCount; i++) {
+    const p = pickRoomCell(roomCells, seed, 12000 + i);
+    const x = p.x + offsetX + 0.5;
+    const y = p.y + offsetY + 0.5;
+    spawnSoccerBall(world, {
+      x,
+      y,
+      bounciness: spawnOptions?.ballBounciness ?? 0.82,
+    });
+  }
+}
+
+/**
+ * Dungeon layout with soccer balls and one controllable hero (dog variant).
+ * Camera follows hero so click-to-move interaction matches other hero stories.
+ */
+export function spawnDungeonWithSoccerBallsAndHero(
+  world: SimulatorWorld,
+  seed: number,
+  botCount: number,
+  spawnOptions?: DynamicSpawnOptions
+): void {
+  const width = 80;
+  const height = 50;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+  const { grid, roomCells } = generateDungeon(width, height, seed);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) {
+        spawnFloorTile(world, x + offsetX, y + offsetY, true);
+      }
+    }
+  }
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+  if (roomCells.length === 0) return;
+
+  const heroCell = pickRoomCell(roomCells, seed, 2000);
+  const heroCellKey = key(heroCell.x, heroCell.y);
+  const blockedHeroCellSet = new Set([heroCellKey]);
+  const heroX = heroCell.x + offsetX + 0.5;
+  const heroY = heroCell.y + offsetY + 0.5;
+  const heroEid = spawnHero(world, {
+    x: heroX,
+    y: heroY,
+    variantSpriteKey: GOLDEN_RETRIEVER_HERO_SPRITE_KEY,
+  });
+  setViewportFollowTarget(world, heroEid);
+
+  spawnDungeonActorVariants(
+    world,
+    seed,
+    roomCells,
+    offsetX,
+    offsetY,
+    spawnOptions,
+    botCount,
+    blockedHeroCellSet
+  );
+
+  const resolvedBallCount = Math.max(
+    0,
+    Math.floor(spawnOptions?.ballCount ?? DUNGEON_SOCCER_BALL_COUNT)
+  );
+  for (let i = 0; i < resolvedBallCount; i++) {
+    const p = pickRoomCell(roomCells, seed, 12000 + i, blockedHeroCellSet);
+    const x = p.x + offsetX + 0.5;
+    const y = p.y + offsetY + 0.5;
+    spawnSoccerBall(world, {
+      x,
+      y,
+      bounciness: spawnOptions?.ballBounciness ?? 0.82,
+    });
+  }
+}
+
+/**
  * Creates a spawn function that generates a MetaTile dungeon (16×16 tiles per metatile).
  * Uses grid + wallGrid: Floor and Wall are placed explicitly; Empty cells get no entity.
  * Default 5×5 metatiles = 80×80 tiles; use metaWidth/metaHeight for controls.
@@ -619,11 +958,7 @@ export function createMetaTileDungeonSpawn(
   metaHeight: number
 ): (world: SimulatorWorld, seed: number, entityCount: number) => void {
   return (world, seed, entityCount) => {
-    const { grid, roomCells, wallGrid } = generateDungeonMetaTiles(
-      metaWidth,
-      metaHeight,
-      seed
-    );
+    const { grid, roomCells, wallGrid } = generateDungeonMetaTiles(metaWidth, metaHeight, seed);
     const width = grid.length;
     const height = grid[0].length;
     const offsetX = -width / 2;
@@ -639,8 +974,7 @@ export function createMetaTileDungeonSpawn(
     }
     if (roomCells.length === 0) return;
     for (let i = 0; i < entityCount; i++) {
-      const idx =
-        Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
+      const idx = Math.floor(seededUnit(seed, i) * roomCells.length) % roomCells.length;
       const p = roomCells[idx];
       const cx = p.x + offsetX + 0.5;
       const cy = p.y + offsetY + 0.5;

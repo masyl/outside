@@ -218,7 +218,7 @@ function spawnFoodVariantGallery(world: SimulatorWorld, _seed: number): void {
 }
 
 const meta: Meta<typeof StaticPixiEcsRendererStory> = {
-  title: 'Renderer/Pixi ECS (Static)',
+  title: 'RENDERED/Pixi ECS (Static)',
   component: StaticPixiEcsRendererStory,
   decorators: [FullHeightDecorator],
   parameters: {

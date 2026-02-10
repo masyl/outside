@@ -9,6 +9,13 @@ import {
   beigeCatSheetUrl,
   goldenRetrieverSheetUrl,
 } from '@outside/resource-packs/paws-whiskers/atlas';
+import { blueBallSheetUrl } from '@outside/resource-packs/soccer-ball/atlas';
+import { lightCursorSheetUrl, pointerCursorDefaultUrl } from '@outside/resource-packs/pointers/atlas';
+import {
+  POINTER_DEFAULT_VARIANT_ID,
+  findPointerVariantById,
+  pointersPack,
+} from '@outside/resource-packs/pointers/meta';
 import {
   BEIGE_CAT_ANIMATION_LAYOUT,
   BEIGE_CAT_BOT_SPRITE_KEY,
@@ -28,6 +35,7 @@ import { buildTileSubVariants } from './tile-variants';
  */
 export function createRendererAssets(): RendererAssets {
   return {
+    pointerCursorBySpriteKey: new Map<string, Texture>(),
     foodTextureBySpriteKey: new Map<string, Texture>(),
     actorVariantSheetBySpriteKey: new Map(),
     tileTextureByKind: {
@@ -71,12 +79,17 @@ export async function loadRendererAssets(
 
   assets.botIdle = await Assets.load(idleUrl);
   assets.botWalk = await Assets.load(walkUrl);
+  assets.soccerBallSheet = await Assets.load(blueBallSheetUrl);
+  assets.pointerCursor = await Assets.load(pointerCursorDefaultUrl);
+  const pointerSheet = await Assets.load(lightCursorSheetUrl);
   assets.icons.bot = await Assets.load(options.iconUrls.bot);
   assets.icons.hero = await Assets.load(options.iconUrls.hero);
   assets.icons.food = await Assets.load(options.iconUrls.food);
 
   const foodAtlas = await Assets.load(pixelPlatterAtlasUrl);
   setNearestScale(foodAtlas);
+  setNearestScale(pointerSheet);
+  assets.pointerCursorBySpriteKey.clear();
   assets.foodTextureBySpriteKey.clear();
   assets.tileTextureByKind.floor.base = undefined;
   assets.tileTextureByKind.floor.variants = [];
@@ -86,12 +99,7 @@ export async function loadRendererAssets(
   for (const variant of pixelPlatterPack.foodVariants) {
     const texture = new Texture({
       source: foodAtlas.source,
-      frame: new Rectangle(
-        variant.frame.x,
-        variant.frame.y,
-        variant.frame.w,
-        variant.frame.h
-      ),
+      frame: new Rectangle(variant.frame.x, variant.frame.y, variant.frame.w, variant.frame.h),
     });
     setNearestScale(texture);
     assets.foodTextureBySpriteKey.set(variant.spriteKey, texture);
@@ -108,17 +116,34 @@ export async function loadRendererAssets(
     }
   }
 
-  const dungeonAtlas = await Assets.load(pixelLandsDungeonsAtlasUrl);
-  setNearestScale(dungeonAtlas);
-  for (const variant of pixelLandsDungeonsPack.tileVariants) {
+  for (const variant of pointersPack.pointers) {
     const texture = new Texture({
-      source: dungeonAtlas.source,
+      source: pointerSheet.source,
       frame: new Rectangle(
         variant.frame.x,
         variant.frame.y,
         variant.frame.w,
         variant.frame.h
       ),
+    });
+    setNearestScale(texture);
+    assets.pointerCursorBySpriteKey.set(variant.spriteKey, texture);
+  }
+
+  const defaultPointerSpriteKey = findPointerVariantById(POINTER_DEFAULT_VARIANT_ID)?.spriteKey;
+  if (defaultPointerSpriteKey) {
+    const defaultPointerTexture = assets.pointerCursorBySpriteKey.get(defaultPointerSpriteKey);
+    if (defaultPointerTexture) {
+      assets.pointerCursor = defaultPointerTexture;
+    }
+  }
+
+  const dungeonAtlas = await Assets.load(pixelLandsDungeonsAtlasUrl);
+  setNearestScale(dungeonAtlas);
+  for (const variant of pixelLandsDungeonsPack.tileVariants) {
+    const texture = new Texture({
+      source: dungeonAtlas.source,
+      frame: new Rectangle(variant.frame.x, variant.frame.y, variant.frame.w, variant.frame.h),
     });
     setNearestScale(texture);
     const bucket =
@@ -162,6 +187,8 @@ export async function loadRendererAssets(
 
   setNearestScale(assets.botIdle);
   setNearestScale(assets.botWalk);
+  setNearestScale(assets.soccerBallSheet);
+  setNearestScale(assets.pointerCursor);
   setNearestScale(assets.icons.bot);
   setNearestScale(assets.icons.hero);
   setNearestScale(assets.icons.food);
@@ -186,13 +213,7 @@ export function getPlaceholderTexture(
   if (cached) return cached;
 
   const color =
-    kind === 'bot'
-      ? 0x4aa8ff
-      : kind === 'hero'
-        ? 0xffd166
-        : kind === 'food'
-          ? 0xff3b30
-          : 0xd40000;
+    kind === 'bot' ? 0x4aa8ff : kind === 'hero' ? 0xffd166 : kind === 'food' ? 0xff3b30 : 0xd40000;
   const g = new Graphics();
   const size = 16;
   const inset = 2;
@@ -203,8 +224,12 @@ export function getPlaceholderTexture(
       .stroke({ color: 0x5b0b0b, width: 2 });
   } else if (kind === 'error') {
     g.rect(0, 0, size, size).fill(0x160000);
-    g.moveTo(2, 2).lineTo(size - 2, size - 2).stroke({ color, width: 3 });
-    g.moveTo(size - 2, 2).lineTo(2, size - 2).stroke({ color, width: 3 });
+    g.moveTo(2, 2)
+      .lineTo(size - 2, size - 2)
+      .stroke({ color, width: 3 });
+    g.moveTo(size - 2, 2)
+      .lineTo(2, size - 2)
+      .stroke({ color, width: 3 });
   } else {
     g.circle(size / 2, size / 2, size / 2 - 1)
       .fill(color)

@@ -3,6 +3,7 @@
 ## Ongoing topics
 
 - [Choosing an ECS Library](./choosing-ecs-library.md)
+- [Open Source Dependencies](./open-source-dependencies.md)
 
 ## Ongoing Goals
 

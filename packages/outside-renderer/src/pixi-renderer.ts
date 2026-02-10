@@ -58,6 +58,7 @@ export class PixiEcsRenderer {
 
     this.tileLayer = new Container();
     this.entityLayer = new Container();
+    this.entityLayer.sortableChildren = true;
     this.tileLayer.zIndex = 0;
     this.entityLayer.zIndex = 1;
     setNodeLabel(this.tileLayer, `renderer#${this.rendererId}:tile-layer`);

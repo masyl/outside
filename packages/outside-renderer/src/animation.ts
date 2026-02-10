@@ -9,6 +9,7 @@ import {
 import type { RenderWorldState } from './render-world';
 import {
   RenderFacing,
+  RenderIdleDuration,
   RenderIsMoving,
   RenderLastPosition,
   RenderWalkDistance,
@@ -27,6 +28,7 @@ const FACING = {
   RIGHT: 2,
   UP: 3,
 } as const;
+const WALK_FRAME_RESET_IDLE_MS = 180;
 
 function facingFromVector(dx: number, dy: number, fallback: number): number {
   if (Math.abs(dx) < 0.0001 && Math.abs(dy) < 0.0001) return fallback;
@@ -86,6 +88,10 @@ export function runAnimationTic(renderWorld: RenderWorldState, nowMs: number = D
       addComponent(world, eid, RenderIsMoving);
       RenderIsMoving.value[eid] = 0;
     }
+    if (!hasComponent(world, eid, RenderIdleDuration)) {
+      addComponent(world, eid, RenderIdleDuration);
+      RenderIdleDuration.value[eid] = 0;
+    }
 
     const prevX = Number.isFinite(PreviousPosition.x[eid])
       ? PreviousPosition.x[eid]
@@ -99,11 +105,11 @@ export function runAnimationTic(renderWorld: RenderWorldState, nowMs: number = D
     const distance = Math.hypot(dx, dy);
     const isMoving = distance > 0.0001;
 
-    RenderIsMoving.value[eid] = isMoving ? 1 : 0;
-
+    const wasMoving = (RenderIsMoving.value[eid] ?? 0) > 0;
     if (isMoving) {
       // Time-based progression keeps walk animation cadence stable when simulation tic throughput changes.
       RenderWalkDistance.value[eid] += elapsedMs;
+      RenderIdleDuration.value[eid] = 0;
     }
 
     const prevFacing = RenderFacing.dir[eid] ?? FACING.DOWN;
@@ -118,13 +124,20 @@ export function runAnimationTic(renderWorld: RenderWorldState, nowMs: number = D
 
     RenderFacing.dir[eid] = nextFacing;
 
-    if (!isMoving) {
-      RenderWalkFrame.index[eid] = 0;
-    } else {
+    if (isMoving) {
+      RenderIsMoving.value[eid] = 1;
       const frameProgress =
         (RenderWalkDistance.value[eid] * WALK_FRAMES * WALK_CYCLES_PER_TILE) / 1000;
       const frame = Math.floor(frameProgress) % WALK_FRAMES;
       RenderWalkFrame.index[eid] = frame < 0 ? frame + WALK_FRAMES : frame;
+    } else {
+      const idleDurationMs = (RenderIdleDuration.value[eid] ?? 0) + elapsedMs;
+      RenderIdleDuration.value[eid] = idleDurationMs;
+      const shouldKeepMovingFrame = wasMoving && idleDurationMs < WALK_FRAME_RESET_IDLE_MS;
+      RenderIsMoving.value[eid] = shouldKeepMovingFrame ? 1 : 0;
+      if (!shouldKeepMovingFrame) {
+        RenderWalkFrame.index[eid] = 0;
+      }
     }
 
     RenderLastPosition.x[eid] = Position.x[eid];

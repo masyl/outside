@@ -33,3 +33,10 @@ export const RenderLastPosition = {
 export const RenderIsMoving = {
   value: [] as number[],
 };
+
+/**
+ * Runtime-only accumulated idle duration in milliseconds, used to debounce walk-frame resets.
+ */
+export const RenderIdleDuration = {
+  value: [] as number[],
+};

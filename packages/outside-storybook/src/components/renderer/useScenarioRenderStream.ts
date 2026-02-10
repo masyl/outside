@@ -1,14 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Follow,
+  FollowStopRange,
   FollowTarget,
   FollowTightness,
   Hero,
+  Pointer,
+  DefaultSpriteKey,
+  Direction,
   TargetPace,
+  Wait,
+  Wander,
+  TARGET_PACE_RUNNING,
+  TARGET_PACE_RUNNING_FAST,
   TARGET_PACE_STANDING_STILL,
+  TARGET_PACE_WALKING,
+  TARGET_PACE_WALKING_SLOW,
   addComponent,
   addEntity,
   clearEntityPath,
+  clearPointerTile,
+  configurePhysics3dTuning,
+  getComponent,
   getPathfindingDebugPaths as getSimulatorPathfindingDebugPaths,
   orderEntityToTile,
   Position,
@@ -16,6 +29,8 @@ import {
   removeComponent,
   removeEntity,
   resolveEntityAt,
+  setPointerSpriteKey as setPointerSpriteKeyInSimulation,
+  setPointerWorld as setPointerWorldInSimulation,
   setComponent,
   createRenderObserverSerializer,
   createSnapshotSerializer,
@@ -25,6 +40,7 @@ import {
   query,
   runTics,
   type PathfindingDebugPath,
+  type Physics3dTuning,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import type { SpawnFn } from '../simulator/useSimulatorWorld';
@@ -54,7 +70,20 @@ interface DynamicScenarioStreamOptions extends BaseScenarioStreamOptions {
     foodCount?: number;
     dogCount?: number;
     catCount?: number;
+    ballCount?: number;
+    ballBounciness?: number;
+    actorSelection?: string;
+    actorAct?:
+      | 'idle'
+      | 'wander'
+      | 'rotate'
+      | 'jump'
+      | 'follow'
+      | 'follow-mouse';
+    actorPace?: 'walkSlow' | 'walk' | 'run' | 'runFast';
+    pointerVariant?: string;
   };
+  physics3dTuning?: Partial<Physics3dTuning>;
   ticsPerSecond: number;
   spawnFn: SpawnFn;
 }
@@ -73,7 +102,10 @@ export interface ScenarioStreamState {
   center: { x: number; y: number };
   streamKey: string;
   getPathfindingDebugPaths: () => PathfindingDebugPath[];
-  orderFocusedEntityToTile: (tileX: number, tileY: number) => {
+  orderFocusedEntityToTile: (
+    tileX: number,
+    tileY: number
+  ) => {
     ordered: boolean;
     reason?:
       | 'not-dynamic'
@@ -89,10 +121,25 @@ export interface ScenarioStreamState {
     targetEid: number | null;
     reason?: 'not-dynamic' | 'missing-world' | 'no-follow-target' | 'focus-target-not-commandable';
   };
-  setFocusedEntityFollowPoint: (worldX: number, worldY: number) => {
+  setFocusedEntityFollowPoint: (
+    worldX: number,
+    worldY: number
+  ) => {
     updated: boolean;
     reason?: 'not-dynamic' | 'missing-world' | 'mode-disabled' | 'missing-anchor';
   };
+  setZooActorsFollowPoint: (worldX: number, worldY: number) => void;
+  setPointerWorld: (worldX: number, worldY: number) => void;
+  setPointerSpriteKey: (spriteKey: string) => void;
+  pickPointerVariantAtTile: (
+    tileX: number,
+    tileY: number
+  ) => {
+    picked: boolean;
+    spriteKey?: string;
+    reason?: 'missing-world' | 'not-pointer-tile';
+  };
+  clearPointer: () => void;
   clearFocusedEntityFollowPoint: () => void;
   isFocusedEntityMouseFollowModeEnabled: () => boolean;
   triggerDebugJump: () => {
@@ -104,6 +151,26 @@ export interface ScenarioStreamState {
     bodyVyAfter?: number;
     reason?: 'not-dynamic' | 'missing-world' | 'no-follow-target';
   };
+  triggerZooActorJump: (
+    mode: 'random' | 'all' | 'sequence'
+  ) => {
+    applied: number;
+    jumpedEids: number[];
+    reason?: 'not-dynamic' | 'missing-world' | 'no-zoo-actors';
+  };
+}
+
+const ZOO_ROTATION_PERIOD_SEC = 3;
+const ZOO_JUMP_PERIOD_SEC = 2;
+const TWO_PI = Math.PI * 2;
+const SOUTH_DIRECTION_RAD = Math.PI / 2;
+const ZOO_CLICK_SEQUENCE_STEP_SEC = 0.2;
+
+function targetPaceForZooPace(pace: 'walkSlow' | 'walk' | 'run' | 'runFast' | undefined): number {
+  if (pace === 'walkSlow') return TARGET_PACE_WALKING_SLOW;
+  if (pace === 'runFast') return TARGET_PACE_RUNNING_FAST;
+  if (pace === 'run') return TARGET_PACE_RUNNING;
+  return TARGET_PACE_WALKING;
 }
 
 function computeBounds(world: SimulatorWorld): StreamBounds {
@@ -117,6 +184,7 @@ function computeBounds(world: SimulatorWorld): StreamBounds {
     const eid = entities[i];
     const x = Position.x[eid];
     const y = Position.y[eid];
+    if (DefaultSpriteKey.value[eid]?.startsWith('ui.cursor.')) continue;
     if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
     minX = Math.min(minX, x);
     maxX = Math.max(maxX, x);
@@ -149,12 +217,101 @@ function centerFromWorld(world: SimulatorWorld, bounds: StreamBounds): { x: numb
   return centerFromBounds(bounds);
 }
 
+function shouldApplyZooAct(options: DynamicScenarioStreamOptions): boolean {
+  return options.spawnOptions?.actorSelection != null;
+}
+
+function applyZooTimedAct(
+  world: SimulatorWorld,
+  options: DynamicScenarioStreamOptions,
+  tic: number,
+  pointerWorld: { x: number; y: number } | null
+): void {
+  if (!shouldApplyZooAct(options)) return;
+  const actorAct = options.spawnOptions?.actorAct;
+  if (
+    actorAct !== 'rotate' &&
+    actorAct !== 'jump' &&
+    actorAct !== 'follow' &&
+    actorAct !== 'follow-mouse'
+  ) {
+    return;
+  }
+  const actorEids = query(world, [DefaultSpriteKey, Direction, Position]);
+  const zooActorEids = actorEids.filter((eid) => DefaultSpriteKey.value[eid] === 'actor.bot');
+  if (zooActorEids.length === 0) return;
+  if (actorAct === 'rotate') {
+    const ticsPerRotation = Math.max(
+      1,
+      Math.round(options.ticsPerSecond * ZOO_ROTATION_PERIOD_SEC)
+    );
+    const normalized = (tic % ticsPerRotation) / ticsPerRotation;
+    const angle = SOUTH_DIRECTION_RAD + normalized * TWO_PI;
+    for (let i = 0; i < zooActorEids.length; i++) {
+      const eid = zooActorEids[i];
+      setComponent(world, eid, Direction, { angle });
+    }
+    return;
+  }
+
+  if (actorAct === 'follow') {
+    if (pointerWorld == null) return;
+    for (let i = 0; i < zooActorEids.length; i++) {
+      const eid = zooActorEids[i];
+      const x = Position.x[eid];
+      const y = Position.y[eid];
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      const angle = Math.atan2(pointerWorld.y - y, pointerWorld.x - x);
+      if (!Number.isFinite(angle)) continue;
+      setComponent(world, eid, Direction, { angle });
+    }
+    return;
+  }
+
+  if (actorAct === 'follow-mouse') {
+    if (pointerWorld == null) return;
+    const movingPace = targetPaceForZooPace(options.spawnOptions?.actorPace);
+    for (let i = 0; i < zooActorEids.length; i++) {
+      const eid = zooActorEids[i];
+      removeComponent(world, eid, Wait);
+      removeComponent(world, eid, Wander);
+      removeComponent(world, eid, Follow);
+      removeComponent(world, eid, FollowTarget);
+      removeComponent(world, eid, FollowTightness);
+      const x = Position.x[eid];
+      const y = Position.y[eid];
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      const dx = pointerWorld.x - x;
+      const dy = pointerWorld.y - y;
+      const dist = Math.hypot(dx, dy);
+      const stopRange = Math.max(0, getComponent(world, eid, FollowStopRange)?.tiles ?? 2);
+      const angle = Math.atan2(dy, dx);
+      if (Number.isFinite(angle)) {
+        setComponent(world, eid, Direction, { angle });
+      }
+      setComponent(world, eid, TargetPace, {
+        value: dist > stopRange ? movingPace : TARGET_PACE_STANDING_STILL,
+      });
+    }
+    return;
+  }
+
+  const ticsPerJump = Math.max(1, Math.round(options.ticsPerSecond * ZOO_JUMP_PERIOD_SEC));
+  if (tic % ticsPerJump !== 0) return;
+  for (let i = 0; i < zooActorEids.length; i++) {
+    debugJumpPulse(world, undefined, zooActorEids[i]);
+  }
+}
+
 /**
  * Produces simulator render-stream packets for one scenario.
  * Dynamic mode emits snapshot then per-tick deltas; static mode emits snapshot only.
  */
 export function useScenarioRenderStream(options: ScenarioStreamOptions): ScenarioStreamState {
-  const [packetState, setPacketState] = useState<{ packet: SharedRenderStreamPacket | null; packetVersion: number }>({
+  const [packetState, setPacketState] = useState<{
+    packet: SharedRenderStreamPacket | null;
+    packetVersion: number;
+  }>({
     packet: null,
     packetVersion: 0,
   });
@@ -173,6 +330,13 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
   const snapshotRef = useRef<ReturnType<typeof createSnapshotSerializer> | null>(null);
   const observerRef = useRef<ReturnType<typeof createRenderObserverSerializer> | null>(null);
   const ticRef = useRef(0);
+  const zooFollowPointRef = useRef<{ x: number; y: number } | null>(null);
+  const pendingPointerWorldRef = useRef<{ x: number; y: number } | null>(null);
+  const zooJumpSequenceRef = useRef<{
+    remainingEids: number[];
+    nextTic: number;
+    stepTics: number;
+  } | null>(null);
 
   const streamKey = useMemo(() => {
     if (options.mode === 'dynamic') {
@@ -185,6 +349,12 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
         options.spawnOptions?.foodCount ?? '',
         options.spawnOptions?.dogCount ?? '',
         options.spawnOptions?.catCount ?? '',
+        options.spawnOptions?.ballCount ?? '',
+        options.spawnOptions?.ballBounciness ?? '',
+        options.spawnOptions?.actorSelection ?? '',
+        options.spawnOptions?.actorAct ?? '',
+        options.spawnOptions?.actorPace ?? '',
+        options.spawnOptions?.pointerVariant ?? '',
       ].join(':');
     }
     return `static:${options.seed}:${options.buildWorld.name}`;
@@ -211,6 +381,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       targetEid: null,
       anchorEid: null,
     };
+    zooFollowPointRef.current = null;
   }
 
   useEffect(() => {
@@ -225,6 +396,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
             ticDurationMs: 50,
           });
     if (options.mode === 'dynamic') {
+      configurePhysics3dTuning(world, options.physics3dTuning ?? {});
       options.spawnFn(world, options.seed, options.botCount, options.spawnOptions);
       snapshotRef.current = createSnapshotSerializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
       observerRef.current = createRenderObserverSerializer(world);
@@ -235,12 +407,17 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     }
 
     worldRef.current = world;
+    if (pendingPointerWorldRef.current) {
+      const pending = pendingPointerWorldRef.current;
+      setPointerWorldInSimulation(world, pending.x, pending.y);
+    }
     focusedFollowModeRef.current = {
       enabled: false,
       targetEid: null,
       anchorEid: null,
     };
     ticRef.current = 0;
+    zooJumpSequenceRef.current = null;
     const snapshot =
       snapshotRef.current ?? createSnapshotSerializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
     const nextBounds = computeBounds(world);
@@ -251,8 +428,25 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       packet: { kind: 'snapshot', buffer: snapshot(), tic: 0 },
       packetVersion: prev.packetVersion + 1,
     }));
-
   }, [streamKey]);
+
+  useEffect(() => {
+    if (options.mode !== 'dynamic') return;
+    const world = worldRef.current;
+    if (!world) return;
+    configurePhysics3dTuning(world, options.physics3dTuning ?? {});
+  }, [
+    options.mode,
+    options.mode === 'dynamic' ? options.physics3dTuning?.botKickBaseImpulse : null,
+    options.mode === 'dynamic' ? options.physics3dTuning?.botKickSpeedFactor : null,
+    options.mode === 'dynamic' ? options.physics3dTuning?.ballKickLiftBase : null,
+    options.mode === 'dynamic' ? options.physics3dTuning?.ballKickLiftBouncinessFactor : null,
+    options.mode === 'dynamic' ? options.physics3dTuning?.ballMaxHorizontalSpeed : null,
+    options.mode === 'dynamic' ? options.physics3dTuning?.ballGroundRestitution : null,
+    options.mode === 'dynamic' ? options.physics3dTuning?.ballActorRestitution : null,
+    options.mode === 'dynamic' ? options.physics3dTuning?.ballBallRestitution : null,
+    streamKey,
+  ]);
 
   useEffect(() => {
     if (options.mode !== 'dynamic') return undefined;
@@ -285,6 +479,18 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       for (let i = 0; i < ticsToRun; i++) {
         runTics(world, 1);
         ticRef.current += 1;
+        applyZooTimedAct(world, options, ticRef.current, zooFollowPointRef.current);
+        const sequence = zooJumpSequenceRef.current;
+        if (sequence && sequence.remainingEids.length > 0 && ticRef.current >= sequence.nextTic) {
+          const nextEid = sequence.remainingEids.shift();
+          if (nextEid != null) {
+            debugJumpPulse(world, undefined, nextEid);
+          }
+          sequence.nextTic += sequence.stepTics;
+          if (sequence.remainingEids.length === 0) {
+            zooJumpSequenceRef.current = null;
+          }
+        }
         const shouldEmitSnapshot = ticRef.current % 120 === 0;
         const packet: SharedRenderStreamPacket = {
           // Use per-tic deltas for low-latency playback, with periodic snapshots as authority refresh.
@@ -322,6 +528,52 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       window.cancelAnimationFrame(frameId);
     };
   }, [streamKey, options.mode === 'dynamic' ? options.ticsPerSecond : null]);
+
+  const emitImmediatePacket = (): void => {
+    const world = worldRef.current;
+    if (!world) return;
+
+    const packet: SharedRenderStreamPacket | null =
+      options.mode === 'dynamic'
+        ? (() => {
+            const observer = observerRef.current;
+            if (!observer) return null;
+            return {
+              kind: 'delta' as const,
+              buffer: observer(),
+              tic: ticRef.current,
+            };
+          })()
+        : (() => {
+            const snapshot = snapshotRef.current;
+            if (!snapshot) return null;
+            return {
+              kind: 'snapshot' as const,
+              buffer: snapshot(),
+              tic: ticRef.current,
+            };
+          })();
+
+    if (!packet) return;
+    setPacketState((prev) => ({
+      packet,
+      packetVersion: prev.packetVersion + 1,
+    }));
+
+    const nextBounds = computeBounds(world);
+    setBounds((prev) =>
+      prev.minX === nextBounds.minX &&
+      prev.maxX === nextBounds.maxX &&
+      prev.minY === nextBounds.minY &&
+      prev.maxY === nextBounds.maxY
+        ? prev
+        : nextBounds
+    );
+    setCenter((prev) => {
+      const next = centerFromWorld(world, nextBounds);
+      return prev.x === next.x && prev.y === next.y ? prev : next;
+    });
+  };
 
   return {
     packet: packetState.packet,
@@ -451,6 +703,60 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       if (!Number.isFinite(tx) || !Number.isFinite(ty)) return;
       setComponent(world, state.anchorEid, Position, { x: tx, y: ty });
     },
+    setZooActorsFollowPoint: (worldX: number, worldY: number) => {
+      if (options.mode !== 'dynamic') return;
+      if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return;
+      zooFollowPointRef.current = { x: worldX, y: worldY };
+    },
+    setPointerWorld: (worldX: number, worldY: number) => {
+      if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return;
+      pendingPointerWorldRef.current = { x: worldX, y: worldY };
+      const world = worldRef.current;
+      if (!world) return;
+      setPointerWorldInSimulation(world, worldX, worldY);
+      emitImmediatePacket();
+    },
+    setPointerSpriteKey: (spriteKey: string) => {
+      const world = worldRef.current;
+      if (!world) return;
+      setPointerSpriteKeyInSimulation(world, spriteKey);
+      emitImmediatePacket();
+    },
+    pickPointerVariantAtTile: (tileX: number, tileY: number) => {
+      const world = worldRef.current;
+      if (!world) {
+        return { picked: false, reason: 'missing-world' as const };
+      }
+      const tx = Math.floor(tileX);
+      const ty = Math.floor(tileY);
+      const pointerEids = new Set(query(world, [Pointer]));
+      const pointerVariantEid = query(world, [Position, DefaultSpriteKey]).find((eid) => {
+        if (pointerEids.has(eid)) return false;
+        const spriteKey = DefaultSpriteKey.value[eid];
+        if (typeof spriteKey !== 'string' || !spriteKey.startsWith('ui.cursor.')) return false;
+        const x = Position.x[eid];
+        const y = Position.y[eid];
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+        return Math.floor(x) === tx && Math.floor(y) === ty;
+      });
+      if (pointerVariantEid == null) {
+        return { picked: false, reason: 'not-pointer-tile' as const };
+      }
+      const spriteKey = DefaultSpriteKey.value[pointerVariantEid];
+      if (typeof spriteKey !== 'string') {
+        return { picked: false, reason: 'not-pointer-tile' as const };
+      }
+      setPointerSpriteKeyInSimulation(world, spriteKey);
+      emitImmediatePacket();
+      return { picked: true, spriteKey };
+    },
+    clearPointer: () => {
+      pendingPointerWorldRef.current = null;
+      const world = worldRef.current;
+      if (!world) return;
+      clearPointerTile(world);
+      emitImmediatePacket();
+    },
     isFocusedEntityMouseFollowModeEnabled: () => focusedFollowModeRef.current.enabled,
     triggerDebugJump: () => {
       if (options.mode !== 'dynamic') {
@@ -478,6 +784,61 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
         bodyVyBefore: Number.isFinite(bodyVyBefore) ? bodyVyBefore : undefined,
         bodyYAfter: Number.isFinite(bodyYAfter) ? bodyYAfter : undefined,
         bodyVyAfter: Number.isFinite(bodyVyAfter) ? bodyVyAfter : undefined,
+      };
+    },
+    triggerZooActorJump: (mode: 'random' | 'all' | 'sequence') => {
+      if (options.mode !== 'dynamic') {
+        return { applied: 0, jumpedEids: [], reason: 'not-dynamic' as const };
+      }
+      const world = worldRef.current;
+      if (!world) {
+        return { applied: 0, jumpedEids: [], reason: 'missing-world' as const };
+      }
+      const actorEids = query(world, [DefaultSpriteKey]).filter(
+        (eid) => DefaultSpriteKey.value[eid] === 'actor.bot'
+      );
+      if (actorEids.length === 0) {
+        return { applied: 0, jumpedEids: [], reason: 'no-zoo-actors' as const };
+      }
+
+      if (mode === 'all') {
+        let applied = 0;
+        for (let i = 0; i < actorEids.length; i++) {
+          applied += debugJumpPulse(world, undefined, actorEids[i]);
+        }
+        return {
+          applied,
+          jumpedEids: actorEids,
+        };
+      }
+
+      if (mode === 'sequence') {
+        const orderedEids = [...actorEids].sort((a, b) => {
+          const ax = Position.x[a] ?? 0;
+          const bx = Position.x[b] ?? 0;
+          if (ax !== bx) return ax - bx;
+          const ay = Position.y[a] ?? 0;
+          const by = Position.y[b] ?? 0;
+          return ay - by;
+        });
+        const stepTics = Math.max(1, Math.round(options.ticsPerSecond * ZOO_CLICK_SEQUENCE_STEP_SEC));
+        zooJumpSequenceRef.current = {
+          remainingEids: orderedEids,
+          nextTic: ticRef.current,
+          stepTics,
+        };
+        return {
+          applied: 0,
+          jumpedEids: orderedEids,
+        };
+      }
+
+      const randomIndex = Math.floor(world.random.nextFloat() * actorEids.length) % actorEids.length;
+      const eid = actorEids[randomIndex];
+      const applied = debugJumpPulse(world, undefined, eid);
+      return {
+        applied,
+        jumpedEids: [eid],
       };
     },
   };

@@ -40,10 +40,30 @@
       "types": "./dist/pixel-lands-dungeons/atlas.d.ts",
       "import": "./src/pixel-lands-dungeons/atlas.ts",
       "default": "./src/pixel-lands-dungeons/atlas.ts"
+    },
+    "./soccer-ball/meta": {
+      "types": "./dist/soccer-ball/meta.d.ts",
+      "import": "./src/soccer-ball/meta.ts",
+      "default": "./src/soccer-ball/meta.ts"
+    },
+    "./soccer-ball/atlas": {
+      "types": "./dist/soccer-ball/atlas.d.ts",
+      "import": "./src/soccer-ball/atlas.ts",
+      "default": "./src/soccer-ball/atlas.ts"
+    },
+    "./pointers/meta": {
+      "types": "./dist/pointers/meta.d.ts",
+      "import": "./src/pointers/meta.ts",
+      "default": "./src/pointers/meta.ts"
+    },
+    "./pointers/atlas": {
+      "types": "./dist/pointers/atlas.d.ts",
+      "import": "./src/pointers/atlas.ts",
+      "default": "./src/pointers/atlas.ts"
     }
   },
   "scripts": {
-    "build:pack": "node ./scripts/build-pixel-platter-pack.mjs && node ./scripts/build-paws-whiskers-pack.mjs && node ./scripts/build-pixel-lands-dungeons-pack.mjs",
+    "build:pack": "node ./scripts/build-pixel-platter-pack.mjs && node ./scripts/build-paws-whiskers-pack.mjs && node ./scripts/build-pixel-lands-dungeons-pack.mjs && node ./scripts/build-pointers-pack.mjs",
     "dev": "tsc --watch",
     "build": "pnpm run build:pack && tsc --noEmit",
     "test": "vitest",

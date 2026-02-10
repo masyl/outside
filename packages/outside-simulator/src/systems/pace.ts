@@ -10,8 +10,10 @@ import {
 } from '../components';
 import {
   TARGET_PACE_RUNNING,
+  TARGET_PACE_RUNNING_FAST,
   TARGET_PACE_STANDING_STILL,
   TARGET_PACE_WALKING,
+  TARGET_PACE_WALKING_SLOW,
 } from '../pace';
 import type { SimulatorWorld } from '../world';
 
@@ -20,8 +22,14 @@ function desiredSpeedFromPace(eid: number): number {
   if (pace === TARGET_PACE_RUNNING) {
     return Math.max(0, RunningSpeed.tilesPerSec[eid] ?? 0);
   }
+  if (pace === TARGET_PACE_RUNNING_FAST) {
+    return Math.max(0, (WalkingSpeed.tilesPerSec[eid] ?? 0) * 2);
+  }
   if (pace === TARGET_PACE_WALKING) {
     return Math.max(0, WalkingSpeed.tilesPerSec[eid] ?? 0);
+  }
+  if (pace === TARGET_PACE_WALKING_SLOW) {
+    return Math.max(0, (WalkingSpeed.tilesPerSec[eid] ?? 0) * 0.5);
   }
   return 0;
 }

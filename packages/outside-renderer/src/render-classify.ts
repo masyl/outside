@@ -13,7 +13,7 @@ import type { RenderWorldState } from './render-world';
 /**
  * Render-layer classification used by sprite/layer selection.
  */
-export type RenderKind = 'floor' | 'wall' | 'bot' | 'hero' | 'food' | 'error';
+export type RenderKind = 'floor' | 'wall' | 'bot' | 'hero' | 'food' | 'ball' | 'pointer' | 'error';
 
 const SPRITE_KEY_TO_RENDER_KIND = {
   'tile.floor': 'floor',
@@ -21,6 +21,7 @@ const SPRITE_KEY_TO_RENDER_KIND = {
   'actor.bot': 'bot',
   'actor.hero': 'hero',
   'pickup.food': 'food',
+  'pickup.ball.soccer': 'ball',
 } as const satisfies Record<string, RenderKind>;
 
 function readSpriteKey(value: unknown): string | null {
@@ -32,10 +33,7 @@ function readSpriteKey(value: unknown): string | null {
 /**
  * Resolves `variantSpriteKey` first, then falls back to `defaultSpriteKey`.
  */
-export function resolveSpriteKey(
-  world: RenderWorldState['world'],
-  eid: number
-): string | null {
+export function resolveSpriteKey(world: RenderWorldState['world'], eid: number): string | null {
   const variant = hasComponent(world, eid, VariantSpriteKey)
     ? readSpriteKey(VariantSpriteKey.value[eid])
     : null;
@@ -53,8 +51,14 @@ export function resolveSpriteKey(
 export function classifyRenderKind(world: RenderWorldState['world'], eid: number): RenderKind {
   const spriteKey = resolveSpriteKey(world, eid);
   if (spriteKey) {
+    if (spriteKey.startsWith('ui.cursor.')) {
+      return 'pointer';
+    }
     if (spriteKey.startsWith(`${DEFAULT_FOOD_SPRITE_KEY}.`)) {
       return 'food';
+    }
+    if (spriteKey.startsWith('pickup.ball.')) {
+      return 'ball';
     }
     if (spriteKey.startsWith('actor.bot.')) {
       return 'bot';

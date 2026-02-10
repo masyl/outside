@@ -30,6 +30,24 @@
       </div>
       <p class="summary">{{ delivery.Summary || '' }}</p>
     </div>
+
+    <!-- Planned Deliveries -->
+    <h2>Planned Deliveries</h2>
+    <div v-if="planned.length === 0">
+      <p class="empty">- None</p>
+    </div>
+    <div v-else>
+      <div v-for="delivery in planned" :key="delivery.folderName" class="delivery-item">
+        <h3>
+          <a :href="delivery.path">{{ delivery.Title || 'Untitled' }}</a>
+        </h3>
+        <div class="meta">
+          <span class="date">{{ formatDate(delivery.DeliveryDate) }}</span>
+          <span class="status" :class="delivery.Status?.toLowerCase()">{{ delivery.Status }}</span>
+        </div>
+        <p class="summary">{{ delivery.Summary || '' }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -42,11 +60,15 @@ const deliveries = computed(() => deliveriesData)
 
 // Group by status
 const ongoing = computed(() => 
-  deliveries.value.filter(d => d.Status === 'TODO' || d.Status === 'DOING')
+  deliveries.value.filter(d => ['ONGOING', 'IN_PROGRESS', 'DOING'].includes(d.Status))
 )
 
 const completed = computed(() => 
   deliveries.value.filter(d => d.Status === 'DONE')
+)
+
+const planned = computed(() =>
+  deliveries.value.filter(d => d.Status === 'TODO')
 )
 
 const formatDate = (dateString) => {
@@ -120,6 +142,12 @@ const formatDate = (dateString) => {
 }
 
 .status.doing {
+  background-color: var(--vp-c-yellow-1);
+  color: black;
+}
+
+.status.ongoing,
+.status.in_progress {
   background-color: var(--vp-c-yellow-1);
   color: black;
 }

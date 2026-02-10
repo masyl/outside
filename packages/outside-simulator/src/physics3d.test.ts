@@ -8,6 +8,7 @@ import {
   spawnWall,
   Direction,
   Speed,
+  ActualSpeed,
   Position,
   PositionZ,
   Grounded,
@@ -16,6 +17,7 @@ import {
   Obstacle,
   query,
   debugJumpPulse,
+  setComponent,
 } from './index';
 
 function setupCorridorWorld() {
@@ -161,6 +163,34 @@ describe('physics3d simulator mode', () => {
     const heroVz = getComponent(world, hero, VelocityZ).z;
     const otherVz = getComponent(world, other, VelocityZ).z;
     expect(heroVz).toBeGreaterThan(otherVz);
+  });
+
+  it('should report actual physics speed from body velocity while turning', () => {
+    const world = createWorld({ seed: 91, ticDurationMs: 50 });
+    spawnFloorRect(world, -20, -20, 20, 20, true);
+    const eid = spawnBot(world, {
+      x: 0,
+      y: 0,
+      directionRad: 0,
+      tilesPerSec: 5,
+      urge: 'none',
+      obstacleDiameter: 0.8,
+    });
+
+    const samples: number[] = [];
+    for (let tic = 0; tic < 80; tic++) {
+      if (tic === 20) setComponent(world, eid, Direction, { angle: Math.PI / 2 });
+      if (tic === 40) setComponent(world, eid, Direction, { angle: Math.PI });
+      if (tic === 60) setComponent(world, eid, Direction, { angle: (3 * Math.PI) / 2 });
+      runTics(world, 1);
+      const measured = getComponent(world, eid, ActualSpeed)?.tilesPerSec ?? 0;
+      samples.push(measured);
+    }
+
+    const min = Math.min(...samples);
+    const max = Math.max(...samples);
+    expect(max).toBeGreaterThan(0.1);
+    expect(max - min).toBeGreaterThan(0.02);
   });
 
   it('bot collision shoves one bot laterally out of the way', () => {

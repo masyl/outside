@@ -185,6 +185,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
           height: '100%',
           display: 'block',
           imageRendering: 'pixelated',
+          cursor: 'none',
         }}
       />
     </div>

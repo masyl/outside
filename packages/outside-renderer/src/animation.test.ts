@@ -58,4 +58,33 @@ describe('render animation system', () => {
 
     expect(frameAt40Hz).toBe(frameAt20Hz);
   });
+
+  it('does not instantly reset walk frame on short idle jitter', () => {
+    const renderWorld = createRenderWorld();
+    const eid = addEntity(renderWorld.world);
+    addComponent(renderWorld.world, eid, Position);
+    Position.x[eid] = 0;
+    Position.y[eid] = 0;
+
+    runAnimationTic(renderWorld, 0);
+
+    // Move long enough to leave walk frame 0.
+    for (let i = 1; i <= 10; i++) {
+      Position.x[eid] += 0.05;
+      runAnimationTic(renderWorld, i * 50);
+    }
+    const movingFrame = getWalkFrame(renderWorld, eid);
+    expect(movingFrame).toBeGreaterThan(0);
+    expect(getIsMoving(renderWorld, eid)).toBe(true);
+
+    // Short idle gap should keep current moving frame (debounced reset).
+    runAnimationTic(renderWorld, 530);
+    expect(getIsMoving(renderWorld, eid)).toBe(true);
+    expect(getWalkFrame(renderWorld, eid)).toBe(movingFrame);
+
+    // After enough idle time, it should settle to idle frame.
+    runAnimationTic(renderWorld, 760);
+    expect(getIsMoving(renderWorld, eid)).toBe(false);
+    expect(getWalkFrame(renderWorld, eid)).toBe(0);
+  });
 });

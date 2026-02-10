@@ -17,7 +17,7 @@ const WorldPreview = ({ width, height, seed }: { width: number; height: number; 
 };
 
 const meta: Meta<typeof WorldPreview> = {
-  title: 'World/Empty Worlds',
+  title: 'ARCHIVED/Empty Worlds',
   component: WorldPreview,
   parameters: {
     layout: 'fullscreen',

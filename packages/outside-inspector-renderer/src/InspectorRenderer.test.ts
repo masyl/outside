@@ -35,6 +35,7 @@ const BASE_FRAME: InspectorFrame = {
   entities: [
     {
       eid: 2,
+      prefabName: 'actor.bot',
       x: 1,
       y: 1,
       diameter: 1,
@@ -43,6 +44,7 @@ const BASE_FRAME: InspectorFrame = {
       kind: 'bot',
       directionRad: 0,
       speedTilesPerSec: 1,
+      targetSpeedTilesPerSec: 2,
       targetPaceLabel: 'running',
       inCollidedCooldown: true,
       collidedTicksRemaining: 2,
@@ -197,7 +199,7 @@ describe('InspectorPrimitivesLayer', () => {
     const elements = flattenElements(tree);
 
     const pathLine = elements.find(
-      (element) => element.type === 'polyline' && element.props.stroke === '#1e90ff'
+      (element) => element.type === 'polyline' && element.props.stroke === '#fc0'
     );
     expect(pathLine).toBeDefined();
 
@@ -269,7 +271,7 @@ describe('InspectorPrimitivesLayer', () => {
     expect(physicsCircle).toBeDefined();
   });
 
-  it('renders target pace label next to bot entities', () => {
+  it('renders target pace in mini debug panel and no standalone pace label', () => {
     const tree = InspectorPrimitivesLayer({
       frame: BASE_FRAME,
       tileSize: 16,
@@ -278,12 +280,17 @@ describe('InspectorPrimitivesLayer', () => {
     });
     const elements = flattenElements(tree);
 
-    const paceLabel = elements.find(
+    const miniPanelState = elements.find(
       (element) =>
-        element.type === 'text' &&
+        element.type === 'tspan' &&
         element.props.children === 'running' &&
-        element.props.fill === '#ffe26a'
+        typeof element.props.x !== 'undefined'
     );
-    expect(paceLabel).toBeDefined();
+    expect(miniPanelState).toBeDefined();
+
+    const standalonePaceLabel = elements.find(
+      (element) => element.type === 'text' && element.props.fill === '#ffe26a'
+    );
+    expect(standalonePaceLabel).toBeUndefined();
   });
 });

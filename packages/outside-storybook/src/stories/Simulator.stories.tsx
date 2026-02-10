@@ -8,6 +8,7 @@ import {
   spawnDungeonThenScattered,
   spawnDungeonWithFood,
   spawnDungeonWithFoodAndHero,
+  spawnDungeonWithSoccerBalls,
   spawnDungeonWFCThenScattered,
   spawnDungeonWFCWithFood,
   spawnDungeonWFCWithFoodAndHero,
@@ -30,7 +31,7 @@ function FullHeightDecorator(Story: React.ComponentType) {
 }
 
 const meta: Meta<typeof SimulatorRenderer> = {
-  title: 'Simulator/ECS Core',
+  title: 'SIMULATOR/ECS Core',
   component: SimulatorRenderer,
   decorators: [FullHeightDecorator],
   parameters: {
@@ -251,5 +252,16 @@ export const DungeonWithHeroWFC: StoryObj<typeof SimulatorRenderer> = {
     entityCount: 9,
     spawnFn: spawnDungeonWFCWithFoodAndHero,
     captionLegend: 'WFC dungeon: 12 food, 9 bots, 1 hero. Click floor to order hero there.',
+  },
+};
+
+/** Dungeon + soccer balls: bots should kick nearby balls and keep them moving. */
+export const DungeonWithSoccerBalls: StoryObj<typeof SimulatorRenderer> = {
+  args: {
+    seed: 19,
+    ticsPerSecond: 30,
+    entityCount: 14,
+    spawnFn: spawnDungeonWithSoccerBalls,
+    captionLegend: 'Dungeon: bots kick nearby soccer balls (physics-driven).',
   },
 };

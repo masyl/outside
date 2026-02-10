@@ -1,6 +1,8 @@
 export { pixelPlatterAtlasUrl } from './pixel-platter/atlas';
 export { goldenRetrieverSheetUrl, beigeCatSheetUrl } from './paws-whiskers/atlas';
 export { pixelLandsDungeonsAtlasUrl } from './pixel-lands-dungeons/atlas';
+export { blueBallSheetUrl } from './soccer-ball/atlas';
+export { lightCursorSheetUrl, pointerCursorDefaultUrl } from './pointers/atlas';
 
 export {
   pixelPlatterPack,
@@ -35,6 +37,18 @@ export {
   PIXEL_LANDS_DUNGEONS_PACK_ID,
   PIXEL_LANDS_DUNGEONS_PACK_VERSION,
 } from './pixel-lands-dungeons/meta';
+export { SOCCER_BALL_SPRITE_KEY, SOCCER_BALL_SHEET_LAYOUT } from './soccer-ball/meta';
+export {
+  pointersPack,
+  pointerVariantIds,
+  POINTER_DEFAULT_VARIANT_ID,
+  POINTER_INTERACTIVE_VARIANT_ID,
+  POINTER_CURSOR_DEFAULT_CSS,
+  POINTER_CURSOR_INTERACTIVE_CSS,
+  findPointerVariantById,
+  POINTERS_PACK_ID,
+  POINTERS_PACK_VERSION,
+} from './pointers/meta';
 
 export type {
   ResourcePackManifest,
@@ -57,3 +71,11 @@ export type {
   DungeonTileTransformFlags,
   DungeonTileVariant,
 } from './pixel-lands-dungeons/manifest.types';
+export type {
+  PointerPackManifest,
+  PointerPackCredits,
+  PointerPackLayout,
+  PointerPackFrame,
+  PointerPackHotspot,
+  PointerPackVariant,
+} from './pointers/manifest.types';

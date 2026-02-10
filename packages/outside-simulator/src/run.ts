@@ -6,12 +6,14 @@
 import { pathFollowingSystem } from './path-following';
 import { urgeSystem } from './systems/urge';
 import { paceSystem } from './systems/pace';
+import { pointerSystem } from './systems/pointer';
 import { consumptionSystem } from './systems/consumption';
 import { physics3dSystem } from './systems/physics3d';
 import type { SimulatorWorld } from './world';
 
 const physicsPipeline = (world: SimulatorWorld) => {
   world.ticCount = (world.ticCount ?? 0) + 1;
+  pointerSystem(world);
   pathFollowingSystem(world);
   urgeSystem(world);
   paceSystem(world);

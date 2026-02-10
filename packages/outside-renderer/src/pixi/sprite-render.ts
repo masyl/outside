@@ -1,13 +1,20 @@
 import { Rectangle, Sprite, Texture, type Renderer } from 'pixi.js';
-import { Grounded, ObstacleSize, Position, PositionZ, Size, VelocityZ, VisualSize } from '@outside/simulator';
+import {
+  Direction,
+  Grounded,
+  ObstacleSize,
+  Position,
+  PositionZ,
+  PreviousPosition,
+  Size,
+  VelocityZ,
+  VisualSize,
+} from '@outside/simulator';
+import { SOCCER_BALL_SHEET_LAYOUT } from '@outside/resource-packs/soccer-ball/meta';
 import { hasComponent, type World } from 'bitecs';
 import { resolveSpriteKey, type RenderKind } from '../render-classify';
 import { SPRITE_SIZE } from '../constants';
-import {
-  getFacingDirection,
-  getIsMoving,
-  getWalkFrame,
-} from '../animation';
+import { getFacingDirection, getIsMoving, getWalkFrame } from '../animation';
 import type { RenderWorldState } from '../render-world';
 import type { RendererAssets } from './types';
 import { getPlaceholderTexture, setNearestScale } from './assets';
@@ -15,9 +22,11 @@ import { resolveFoodTexture } from './food-textures';
 import { pickTileSubVariantIndex, pickTileVariant } from './tile-variants';
 import type { RenderSpatialIndex } from './render-pass';
 
-const AIRBORNE_LIFT_EXAGGERATION = 5;
+const AIRBORNE_LIFT_EXAGGERATION = 2;
 const BOT_SHEET_FRAME_PADDING_PX = 2;
 const ACTOR_FRAME_SAFE_PADDING_PX = 4;
+const SOCCER_BALL_ROLL_FRAMES_PER_TILE = SOCCER_BALL_SHEET_LAYOUT.columns;
+const SOCCER_BALL_VERTICAL_OFFSET_VIRTUAL_PX = 2;
 
 /**
  * Builds a new sprite instance for a render kind.
@@ -49,11 +58,29 @@ export function createSpriteForKind(
       sprite.zIndex = 3;
       return sprite;
     }
+    case 'ball': {
+      const texture =
+        assets.soccerBallSheet ??
+        resolveFoodTexture(assets.foodTextureBySpriteKey, null) ??
+        getPlaceholderTexture(renderer, assets, 'error');
+      const sprite = new Sprite(texture);
+      sprite.roundPixels = true;
+      sprite.zIndex = 3;
+      return sprite;
+    }
+    case 'pointer': {
+      const texture =
+        assets.pointerCursorBySpriteKey.get('ui.cursor.r0c0') ??
+        assets.pointerCursor ??
+        getPlaceholderTexture(renderer, assets, 'hero');
+      const sprite = new Sprite(texture);
+      sprite.roundPixels = true;
+      sprite.zIndex = 10;
+      return sprite;
+    }
     case 'hero': {
       const texture =
-        assets.botIdle ??
-        assets.icons.bot ??
-        getPlaceholderTexture(renderer, assets, 'bot');
+        assets.botIdle ?? assets.icons.bot ?? getPlaceholderTexture(renderer, assets, 'bot');
       const sprite = new Sprite(texture);
       sprite.roundPixels = true;
       sprite.zIndex = 4;
@@ -65,9 +92,7 @@ export function createSpriteForKind(
       const texture =
         kind === 'error'
           ? getPlaceholderTexture(renderer, assets, 'error')
-          : assets.botIdle ??
-            assets.icons.bot ??
-            getPlaceholderTexture(renderer, assets, 'bot');
+          : (assets.botIdle ?? assets.icons.bot ?? getPlaceholderTexture(renderer, assets, 'bot'));
       const sprite = new Sprite(texture);
       sprite.roundPixels = true;
       sprite.zIndex = kind === 'error' ? 5 : 3;
@@ -118,9 +143,7 @@ export function updateSpriteForEntity(
 
   if (kind === 'floor' || kind === 'wall') {
     const tileBucket =
-      kind === 'wall'
-        ? assets.tileTextureByKind.wall
-        : assets.tileTextureByKind.floor;
+      kind === 'wall' ? assets.tileTextureByKind.wall : assets.tileTextureByKind.floor;
     const variants =
       kind === 'wall'
         ? tileBucket.variants.filter((variant) =>
@@ -143,7 +166,9 @@ export function updateSpriteForEntity(
       tileVariant?.spriteKey === 'tile.wall.mouse-hole' &&
       !shouldPickRareMouseHole(posX, posY, eid)
     ) {
-      const withoutMouseHole = variants.filter((variant) => variant.spriteKey !== 'tile.wall.mouse-hole');
+      const withoutMouseHole = variants.filter(
+        (variant) => variant.spriteKey !== 'tile.wall.mouse-hole'
+      );
       tileVariant = pickTileVariant(
         {
           base: tileBucket.base ?? null,
@@ -191,11 +216,45 @@ export function updateSpriteForEntity(
       setNearestScale(sprite.texture);
     }
   }
+  if (kind === 'pointer') {
+    const texture =
+      (spriteKey ? assets.pointerCursorBySpriteKey.get(spriteKey) : undefined) ??
+      assets.pointerCursor ??
+      getPlaceholderTexture(renderer, assets, 'hero');
+    if (sprite.texture !== texture) {
+      sprite.texture = texture;
+      setNearestScale(sprite.texture);
+    }
+    const pointerSize = tileSize;
+    const pointerHotspotOffsetPx = tileSize / 16;
+    sprite.anchor.set(0, 0);
+    sprite.rotation = 0;
+    sprite.scale.set(1, 1);
+    sprite.width = pointerSize;
+    sprite.height = pointerSize;
+    sprite.x = posX * tileSize - pointerHotspotOffsetPx;
+    sprite.y = -posY * tileSize - pointerHotspotOffsetPx;
+    return;
+  }
+  if (kind === 'ball') {
+    if (assets.soccerBallSheet) {
+      updateSoccerBallSpriteFrame(sprite, assets.soccerBallSheet, eid, diameter, tileSize);
+    } else {
+      const texture =
+        resolveFoodTexture(assets.foodTextureBySpriteKey, spriteKey) ??
+        getPlaceholderTexture(renderer, assets, 'error');
+      if (sprite.texture !== texture) {
+        sprite.texture = texture;
+        setNearestScale(sprite.texture);
+      }
+      const size = tileSize * diameter;
+      sprite.width = size;
+      sprite.height = size;
+    }
+  }
   if (kind === 'bot') {
     const texture =
-      assets.botIdle ??
-      assets.icons.bot ??
-      getPlaceholderTexture(renderer, assets, 'bot');
+      assets.botIdle ?? assets.icons.bot ?? getPlaceholderTexture(renderer, assets, 'bot');
     if (sprite.texture !== texture) {
       sprite.texture = texture;
       setNearestScale(sprite.texture);
@@ -209,13 +268,15 @@ export function updateSpriteForEntity(
     (hasComponent(world, eid, Grounded) && (Grounded.value[eid] ?? 1) === 0) ||
     verticalVelocity > 0.05;
   const baseLiftTiles = getVerticalLiftTiles(world, eid);
-  const visualLiftTiles = airborne
-    ? baseLiftTiles * AIRBORNE_LIFT_EXAGGERATION
-    : baseLiftTiles;
+  const visualLiftTiles = airborne ? baseLiftTiles * AIRBORNE_LIFT_EXAGGERATION : baseLiftTiles;
   sprite.y -= visualLiftTiles * tileSize;
   if (kind === 'food') {
     sprite.x = snapToVirtualPixel(sprite.x, tileSize);
     sprite.y = snapToVirtualPixel(sprite.y, tileSize);
+  }
+  if (kind === 'ball') {
+    sprite.y += (tileSize / 16) * SOCCER_BALL_VERTICAL_OFFSET_VIRTUAL_PX;
+    return;
   }
 
   if (kind === 'bot' || kind === 'hero') {
@@ -231,6 +292,7 @@ export function updateSpriteForEntity(
         actorVariantSheet.texture,
         actorVariantSheet.animation,
         facing,
+        Number.isFinite(Direction.angle[eid]) ? Direction.angle[eid] : undefined,
         isMoving,
         frame,
         diameter,
@@ -239,15 +301,7 @@ export function updateSpriteForEntity(
       return;
     }
     if (assets.botIdle && assets.botWalk) {
-      updateBotSpriteFrame(
-        sprite,
-        assets,
-        facing,
-        isMoving,
-        frame,
-        diameter,
-        tileSize
-      );
+      updateBotSpriteFrame(sprite, assets, facing, isMoving, frame, diameter, tileSize);
       return;
     }
   }
@@ -277,12 +331,11 @@ export function getVerticalLiftTiles(world: World, eid: number): number {
   const z = PositionZ.z[eid];
   if (!Number.isFinite(z)) return 0;
 
-  const baseHeight =
-    hasComponent(world, eid, ObstacleSize)
-      ? Math.max(0, (ObstacleSize.diameter[eid] ?? 0) * 0.5)
-      : hasComponent(world, eid, Size)
-        ? Math.max(0, (Size.diameter[eid] ?? 0) * 0.5)
-        : 0;
+  const baseHeight = hasComponent(world, eid, ObstacleSize)
+    ? Math.max(0, (ObstacleSize.diameter[eid] ?? 0) * 0.5)
+    : hasComponent(world, eid, Size)
+      ? Math.max(0, (Size.diameter[eid] ?? 0) * 0.5)
+      : 0;
 
   return Math.max(0, z - baseHeight);
 }
@@ -399,6 +452,7 @@ function updateActorVariantSpriteFrame(
     framePitchY: number;
     frameInsetX: number;
     frameInsetY: number;
+    directionCount?: number;
     cardinalDirectionToGroup: {
       down: number;
       right: number;
@@ -407,14 +461,16 @@ function updateActorVariantSpriteFrame(
     };
   },
   direction: 'up' | 'down' | 'left' | 'right',
+  angleRad: number | undefined,
   isMoving: boolean,
   frameIndex: number,
   diameter: number,
   tileSize: number
 ): void {
   const row = isMoving ? animation.walkRow : animation.idleRow;
-  const group = animation.cardinalDirectionToGroup[direction];
-  const frameStep = ((frameIndex % animation.frameCount) + animation.frameCount) % animation.frameCount;
+  const group = resolveActorVariantDirectionGroup(animation, direction, angleRad);
+  const frameStep =
+    ((frameIndex % animation.frameCount) + animation.frameCount) % animation.frameCount;
   const frameX =
     group * animation.frameCount * animation.framePitchX +
     frameStep * animation.framePitchX +
@@ -433,12 +489,7 @@ function updateActorVariantSpriteFrame(
 
   sprite.texture = new Texture({
     source: sheet.source,
-    frame: new Rectangle(
-      paddedFrameX,
-      paddedFrameY,
-      paddedFrameWidth,
-      paddedFrameHeight
-    ),
+    frame: new Rectangle(paddedFrameX, paddedFrameY, paddedFrameWidth, paddedFrameHeight),
   });
   setNearestScale(sprite.texture);
 
@@ -448,4 +499,125 @@ function updateActorVariantSpriteFrame(
   sprite.pivot.y = ACTOR_FRAME_SAFE_PADDING_PX;
   sprite.scale.x = baseScale;
   sprite.scale.y = baseScale;
+}
+
+function resolveActorVariantDirectionGroup(
+  animation: {
+    directionCount?: number;
+    cardinalDirectionToGroup: {
+      down: number;
+      right: number;
+      up: number;
+      left: number;
+    };
+  },
+  direction: 'up' | 'down' | 'left' | 'right',
+  angleRad: number | undefined
+): number {
+  const fallback = animation.cardinalDirectionToGroup[direction];
+  if (!Number.isFinite(angleRad) || animation.directionCount !== 8) {
+    return fallback;
+  }
+  const directionCount = 8;
+  const groupByOctant = buildEightDirectionGroupMap(animation.cardinalDirectionToGroup);
+  const tau = Math.PI * 2;
+  const normalized = ((angleRad % tau) + tau) % tau;
+  const octant = Math.round(normalized / (tau / 8)) % 8;
+  return groupByOctant[octant] ?? fallback;
+}
+
+function buildEightDirectionGroupMap(cardinal: {
+  down: number;
+  right: number;
+  up: number;
+  left: number;
+}): number[] {
+  const n = 8;
+  const map = new Array<number>(n);
+  map[0] = mod(cardinal.right, n);
+  map[2] = mod(cardinal.down, n);
+  map[4] = mod(cardinal.left, n);
+  map[6] = mod(cardinal.up, n);
+  map[1] = midpointIndex(map[0], map[2], n);
+  map[3] = midpointIndex(map[2], map[4], n);
+  map[5] = midpointIndex(map[4], map[6], n);
+  map[7] = midpointIndex(map[6], map[0], n);
+  return map;
+}
+
+function midpointIndex(a: number, b: number, n: number): number {
+  let diff = mod(b - a, n);
+  if (diff > n / 2) diff -= n;
+  return mod(a + Math.round(diff / 2), n);
+}
+
+function mod(value: number, n: number): number {
+  return ((value % n) + n) % n;
+}
+
+function updateSoccerBallSpriteFrame(
+  sprite: Sprite,
+  sheet: Texture,
+  eid: number,
+  diameter: number,
+  tileSize: number
+): void {
+  const anySprite = sprite as Sprite & {
+    __ballRollPhase?: number;
+    __ballRollRow?: number;
+  };
+
+  const currentX = Position.x[eid];
+  const currentY = Position.y[eid];
+  const prevX = Number.isFinite(PreviousPosition.x[eid]) ? PreviousPosition.x[eid] : currentX;
+  const prevY = Number.isFinite(PreviousPosition.y[eid]) ? PreviousPosition.y[eid] : currentY;
+  const dx = currentX - prevX;
+  const dy = currentY - prevY;
+  const distanceTiles = Math.hypot(dx, dy);
+
+  let rollPhase = anySprite.__ballRollPhase ?? 0;
+  let rollRow = anySprite.__ballRollRow ?? 0;
+
+  if (distanceTiles > 0.0001) {
+    rollPhase += distanceTiles * SOCCER_BALL_ROLL_FRAMES_PER_TILE;
+    rollRow = directionToRow(dx, dy, SOCCER_BALL_SHEET_LAYOUT.rows, rollRow);
+  }
+
+  anySprite.__ballRollPhase = rollPhase;
+  anySprite.__ballRollRow = rollRow;
+
+  const col =
+    ((Math.floor(rollPhase) % SOCCER_BALL_SHEET_LAYOUT.columns) +
+      SOCCER_BALL_SHEET_LAYOUT.columns) %
+    SOCCER_BALL_SHEET_LAYOUT.columns;
+  const frameX = col * SOCCER_BALL_SHEET_LAYOUT.frameWidth;
+  const frameY = rollRow * SOCCER_BALL_SHEET_LAYOUT.frameHeight;
+
+  sprite.texture = new Texture({
+    source: sheet.source,
+    frame: new Rectangle(
+      frameX,
+      frameY,
+      SOCCER_BALL_SHEET_LAYOUT.frameWidth,
+      SOCCER_BALL_SHEET_LAYOUT.frameHeight
+    ),
+  });
+  setNearestScale(sprite.texture);
+
+  const baseScale = (tileSize / SOCCER_BALL_SHEET_LAYOUT.frameWidth) * diameter;
+  sprite.anchor.set(0, 0);
+  sprite.pivot.x = 0;
+  sprite.pivot.y = 0;
+  sprite.scale.x = baseScale;
+  sprite.scale.y = baseScale;
+}
+
+function directionToRow(dx: number, dy: number, rows: number, fallback: number): number {
+  if (!Number.isFinite(dx) || !Number.isFinite(dy) || rows <= 0) return fallback;
+  const length = Math.hypot(dx, dy);
+  if (length <= 1e-6) return fallback;
+  const angle = Math.atan2(dy, dx);
+  const normalized = ((angle + Math.PI * 2) % (Math.PI * 2)) / (Math.PI * 2);
+  const row = Math.floor(normalized * rows);
+  return Math.max(0, Math.min(rows - 1, row));
 }

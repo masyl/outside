@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
-  title: 'Outside Design',
-  description: 'Design documentation and process for the Outside game',
+  title: 'Ȯutside Documentation',
+  description: 'Documentation for the Ȯutside game plateform',
 
   markdown: {
     theme: {
@@ -30,10 +30,14 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Deliveries', link: '/deliveries/' },
       { text: 'Pitches', link: '/pitches/' },
-      { text: 'Design Process', link: '/design-process/' },
-      { text: 'Components', link: '/components/' },
+      { text: 'Deliveries', link: '/deliveries/' },
+      { text: 'Questions', link: '/questions/' },
+      { text: 'Design', link: '/design-process/' },
+      { text: 'Architecture', link: '/architecture/' },
+      { text: 'Dev', link: '/development-process/' },
+      { text: 'API', link: '/api/' },
+      { text: 'Storybook', link: '/storybook' },
     ],
 
     sidebar: {
@@ -56,7 +60,26 @@ export default defineConfig({
             { text: 'Overview', link: '/design-process/' },
             { text: 'Research Phase', link: '/design-process/research' },
             { text: 'Ideation Phase', link: '/design-process/ideation' },
+            { text: 'Pitch Phase', link: '/design-process/pitch-phase' },
+            { text: 'Meaning of Design', link: '/design-process/meaning-of-design' },
           ],
+        },
+      ],
+      '/development-process/': [
+        {
+          text: 'Development Process',
+          items: [
+            { text: 'Overview', link: '/development-process/' },
+            { text: 'Quick Start', link: '/development-process/quick-start' },
+            { text: 'Skills Sync', link: '/development-process/skills-sync' },
+            { text: 'Storybook Component Testing', link: '/storybook' },
+          ],
+        },
+      ],
+      '/api/': [
+        {
+          text: 'API',
+          items: [{ text: 'Overview', link: '/api/' }],
         },
       ],
       '/components/': [

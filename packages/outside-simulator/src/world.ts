@@ -7,7 +7,7 @@ import type { World } from 'bitecs';
 import { createWorld as bitecsCreateWorld } from 'bitecs';
 import { Random } from '@outside/utils';
 import type { SimulatorEvent } from './events';
-import type { Physics3dState } from './systems/physics3d';
+import type { Physics3dState, Physics3dTuning } from './systems/physics3d';
 import { registerPipelineObservers } from './observers';
 import { addDefaultGrids, addViewEntity, addPointerEntity } from './world-defaults';
 
@@ -24,6 +24,7 @@ export interface SimulatorWorld extends World<{
   seed: number;
   random: Random;
   physics3dState?: Physics3dState;
+  physics3dTuning?: Partial<Physics3dTuning>;
 }> {
   eventQueue: SimulatorEvent[];
   ticDurationMs: number;
@@ -31,6 +32,7 @@ export interface SimulatorWorld extends World<{
   seed: number;
   random: Random;
   physics3dState?: Physics3dState;
+  physics3dTuning?: Partial<Physics3dTuning>;
 }
 
 /**
@@ -58,6 +60,7 @@ export function createWorld(options?: CreateWorldOptions): SimulatorWorld {
     seed,
     random: new Random(seed),
     physics3dState: undefined,
+    physics3dTuning: undefined,
   }) as SimulatorWorld;
   registerPipelineObservers(world);
   addDefaultGrids(world);

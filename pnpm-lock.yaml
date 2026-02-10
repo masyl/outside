@@ -49,6 +49,9 @@ importers:
       '@outside/core':
         specifier: workspace:*
         version: link:../outside-core
+      '@outside/resource-packs':
+        specifier: workspace:*
+        version: link:../resourcePacks
       '@outside/utils':
         specifier: workspace:*
         version: link:../outside-utils

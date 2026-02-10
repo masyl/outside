@@ -24,15 +24,16 @@ import {
   Acceleration,
   Deceleration,
   MaxSpeed,
+  JumpHeightScale,
   PointerTarget,
   Hero,
+  Kicker,
   Observed,
+  SpeedBoostOnJump,
   DefaultSpriteKey,
   VariantSpriteKey,
 } from '../components';
-import {
-  TARGET_PACE_STANDING_STILL,
-} from '../pace';
+import { TARGET_PACE_STANDING_STILL } from '../pace';
 import type { SimulatorWorld } from '../world';
 
 const prefabByWorld = new WeakMap<SimulatorWorld, number>();
@@ -72,7 +73,10 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, set(Deceleration, { tilesPerSec2: DEFAULTS.decelerationTps2 }));
   addComponent(world, prefabEid, set(TargetPace, { value: TARGET_PACE_STANDING_STILL }));
   addComponent(world, prefabEid, set(MaxSpeed, { tilesPerSec: DEFAULTS.maxSpeedTps }));
+  addComponent(world, prefabEid, set(JumpHeightScale, { value: 1 }));
+  addComponent(world, prefabEid, set(SpeedBoostOnJump, { tilesPerSec: 0.7 }));
   addComponent(world, prefabEid, PointerTarget);
+  addComponent(world, prefabEid, Kicker);
   addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.hero' }));
   addComponent(world, prefabEid, set(VariantSpriteKey, { value: '' }));
 
@@ -94,15 +98,13 @@ export interface SpawnHeroOptions {
  * @param options - Optional position (default 0,0)
  * @returns New entity id
  */
-export function spawnHero(
-  world: SimulatorWorld,
-  options?: SpawnHeroOptions
-): number {
+export function spawnHero(world: SimulatorWorld, options?: SpawnHeroOptions): number {
   const prefabEid = getOrCreateHeroPrefab(world);
   const eid = addEntity(world);
   addComponent(world, eid, IsA(prefabEid));
   addComponent(world, eid, Observed);
   addComponent(world, eid, Hero);
+  addComponent(world, eid, Kicker);
   // Always materialize sprite keys on instance so renderer does not depend on IsA copy behavior.
   setComponent(world, eid, DefaultSpriteKey, { value: options?.spriteKey ?? 'actor.hero' });
   setComponent(world, eid, VariantSpriteKey, { value: options?.variantSpriteKey ?? '' });

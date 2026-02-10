@@ -40,6 +40,12 @@ Framing scope of development work through structured work orders.
 
 [Learn more about the Pitch Phase →](/design-process/pitch-phase)
 
+### 4. Meaning of Design
+
+How this project defines design across disciplines.
+
+[Learn about the meaning of design →](/design-process/meaning-of-design)
+
 ## Key Principles
 
 - **User First**: Every design decision starts with the user experience

@@ -301,4 +301,4 @@ This monorepo is optimized for AI-assisted development with clear project struct
 
 ## AI Skills
 
-Skills live in `skills/` and are symlinked into vendor-specific folders. See [Skills Symlink Setup](./docs/skills-symlinks.md).
+Skills live in `skills/` and are synced into vendor-specific folders with `pnpm run sync:skills`. See [Skills Sync Setup](./docs/skills-symlinks.md).
