@@ -3,9 +3,46 @@
 Random notes taken during development.
 ### Next Pitch Blurb
 
+---
+Works nice. Commit.
 
+Now, let's an another system related to the pointer style.
+
+* Add a "pointerKind" component.
+* When an entity is being pointed at, it overrides the pointer style, and return to the previous pointer once it is not pointed at anymore.
+* In the Pointers story, Add this component for each cursor displayed.
+
+---
+
+- Debug: A FPS counter
+- Debug: A TPS counter
+- Debug: A bandwidth counter for the renderer
+
+---
+
+Make the blue to of target velocity twice as wide, and put 4 small diagonal line around it to form a sort of crossair. Same thickness and color
+
+---
+
+The was ambiguity in my instructions when we worked on the Actors Zoo story.
+
+When I said they should face south, you made them face north.
+I'd like for the concept of the 8 cardinal directions to be a core part of the engine.
+
+Create a common utiliy for using cardinal directions:
+* Add all 8 types
+* Add labels for each types to be able to translate them later.
+* As an example, this will be used later to parse text commands such as "Move north 8 tiles".
+* Then do a refactor pass to identify places where you referenced cardinal directions (such as sprite orientation).
+* Then add the resolved cardinal direction in the minidebugpanel for the vector in the inspector 
 
 ## Next Big Prompt
+
+...
+
+## BIG CONCEPT
+
+* A tool for pixel art asset creators to feature their asset packs
 
 ## Pitch Prompt
 
@@ -15,6 +52,9 @@ https://www.reddit.com/r/godot/comments/1k7id1b/pixelperfect_fake_2d_in_3d_my_jo
 Integrate this:
 https://www.reddit.com/r/godot/comments/1k6nzj7/comment/mos2msb/
 
+* Replace the word "Bot" everywhere in the code for Actor
+
+* Remove the concept of waitForAssets	
 
 
 ## Review and Debugging Session - Food Collisions
