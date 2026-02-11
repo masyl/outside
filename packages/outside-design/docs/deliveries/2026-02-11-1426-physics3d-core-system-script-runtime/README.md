@@ -2,7 +2,7 @@
 Title: 'Physics3D Core System Script Runtime (System Scripting series: 1)'
 DeliveryDate: 2026-02-11
 Summary: Migrate physics3d from compiled TypeScript execution to Lua core system scripts with fail-fast behavior for this testing phase.
-Status: DONE
+Status: IN_PROGRESS
 Branch: main
 Commit: ''
 ---

@@ -1,7 +1,7 @@
 ---
 title: 'Physics3D Core System Script Runtime Roadmap'
 delivery_date: '2026-02-11'
-status: 'done'
+status: 'in_progress'
 type: 'roadmap'
 related_documents:
   - './pitch.md'
