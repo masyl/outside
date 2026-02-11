@@ -10,7 +10,7 @@
 export const VERSION = '0.1.13';
 
 export { createWorld, DEFAULT_TIC_DURATION_MS } from './world';
-export type { SimulatorWorld, CreateWorldOptions } from './world';
+export type { SimulatorWorld, CreateWorldOptions, Physics3dRuntimeMode } from './world';
 export {
   addDefaultGrids,
   addViewEntity,
@@ -20,6 +20,58 @@ export {
 } from './world-defaults';
 
 export { runTics } from './run';
+export {
+  registerCommandScript,
+  unregisterCommandScript,
+  clearCommandScripts,
+  listCommandScripts,
+  queueCommandScript,
+  drainCommandScriptErrors,
+  drainCommandScriptTrace,
+} from './command-scripts';
+export type {
+  CommandScriptRegistration,
+  CommandScriptDescriptor,
+  CommandScriptInvocationRequest,
+  CommandScriptArgs,
+  CommandScriptArgValue,
+  CommandScriptError,
+  CommandScriptFailurePolicy,
+} from './command-scripts';
+export {
+  registerEventScript,
+  unregisterEventScript,
+  clearEventScripts,
+  listEventScripts,
+  emitScriptEvent,
+  drainEventScriptErrors,
+  drainEventScriptTrace,
+} from './event-scripts';
+export type {
+  EventScriptRegistration,
+  EventScriptDescriptor,
+  EventScriptEmitRequest,
+  EventScriptPayload,
+  EventScriptPayloadValue,
+  EventScriptError,
+  EventScriptFailurePolicy,
+} from './event-scripts';
+export {
+  registerExternalSystemScript,
+  unregisterExternalSystemScript,
+  clearExternalSystemScripts,
+  listExternalSystemScripts,
+  drainExternalSystemScriptTrace,
+  drainExternalSystemScriptErrors,
+} from './system-script-hooks';
+export type {
+  SystemScriptHookPoint,
+  CoreSystemHookTarget,
+  ExternalSystemScriptRegistration,
+  ExternalSystemScriptDescriptor,
+  ExternalSystemScriptError,
+  ExternalSystemScriptFailurePolicy,
+} from './system-script-hooks';
 
 export { registerPipelineObservers, registerComponentForPipelineObserver } from './observers';
 
@@ -121,10 +173,24 @@ export type {
 
 export { RENDER_COMPONENTS, RENDER_SNAPSHOT_COMPONENTS } from './render-schema';
 export { createRenderObserverSerializer } from './render-stream';
+export {
+  runPhysics3dRuntimeBenchmark,
+} from './physics3d-runtime-benchmark';
+export type {
+  Physics3dRuntimeBenchmarkOptions,
+  Physics3dRuntimeBenchmarkResult,
+  Physics3dRuntimeBenchmarkSummary,
+} from './physics3d-runtime-benchmark';
 
 export { getEventQueue, drainEventQueue } from './events-api';
 
-export { configureTicDurationMs } from './configure';
+export {
+  configureTicDurationMs,
+  configurePhysics3dRuntimeMode,
+  configureExternalSystemScriptFailurePolicy,
+  configureCommandScriptFailurePolicy,
+  configureEventScriptFailurePolicy,
+} from './configure';
 export {
   debugJumpPulse,
   configurePhysics3dTuning,

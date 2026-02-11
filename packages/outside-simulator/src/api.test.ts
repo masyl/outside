@@ -8,6 +8,7 @@ import {
   spawnFood,
   drainEventQueue,
   configureTicDurationMs,
+  configurePhysics3dRuntimeMode,
   Position,
   VisualSize,
   Direction,
@@ -26,6 +27,8 @@ describe('Simulator API', () => {
     expect(getComponent(world, entities[0], VisualSize).diameter).toBe(1);
     expect(world.seed).toBe(42);
     expect(world.ticDurationMs).toBe(50);
+    expect(world.physics3dRuntimeMode).toBe('lua');
+    expect(world.physics3dRuntimeMetrics.ticCountMeasured).toBe(0);
   });
 
   it('should run tics and update positions', () => {
@@ -98,5 +101,23 @@ describe('Simulator API', () => {
     const entities = query(world, [Position, VisualSize, Direction, Speed]);
     const pos = getComponent(world, entities[0], Position);
     expect(Math.hypot(pos.x, pos.y)).toBeGreaterThan(0); // entity moved (Wander)
+  });
+
+  it('should allow configuring physics3d runtime mode', () => {
+    const world = createWorld({ seed: 42, ticDurationMs: 50 });
+    expect(world.physics3dRuntimeMode).toBe('lua');
+    configurePhysics3dRuntimeMode(world, 'ts');
+    expect(world.physics3dRuntimeMode).toBe('ts');
+  });
+
+  it('should record runtime metrics in ts mode', () => {
+    const world = createWorld({ seed: 42, ticDurationMs: 50, physics3dRuntimeMode: 'ts' });
+    spawnBot(world, { x: 0, y: 0, diameter: 1.2 });
+    runTics(world, 2);
+    expect(world.physics3dRuntimeMetrics.ticCountMeasured).toBe(2);
+    expect(world.physics3dRuntimeMetrics.lastTicTotalMs).toBeGreaterThanOrEqual(0);
+    expect(world.physics3dRuntimeMetrics.totalMs).toBeGreaterThanOrEqual(
+      world.physics3dRuntimeMetrics.lastTicTotalMs
+    );
   });
 });

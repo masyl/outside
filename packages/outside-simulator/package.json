@@ -25,7 +25,8 @@
     "@outside/resource-packs": "workspace:*",
     "@outside/utils": "workspace:*",
     "bitecs": "^0.4.0",
-    "cannon-es": "^0.20.0"
+    "cannon-es": "^0.20.0",
+    "fengari": "^0.1.5"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

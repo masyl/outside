@@ -7,12 +7,24 @@ import type { World } from 'bitecs';
 import { createWorld as bitecsCreateWorld } from 'bitecs';
 import { Random } from '@outside/utils';
 import type { SimulatorEvent } from './events';
-import type { Physics3dState, Physics3dTuning } from './systems/physics3d';
+import type {
+  Physics3dPhaseId,
+  Physics3dState,
+  Physics3dTuning,
+} from './systems/physics3d';
 import { registerPipelineObservers } from './observers';
 import { addDefaultGrids, addViewEntity, addPointerEntity } from './world-defaults';
 
 /** Default tic duration in milliseconds (e.g. 50 ms) */
 export const DEFAULT_TIC_DURATION_MS = 50;
+export type Physics3dRuntimeMode = 'lua' | 'ts';
+export interface Physics3dRuntimeMetrics {
+  lastTicTotalMs: number;
+  totalMs: number;
+  lastTicMsByPhase: Partial<Record<Physics3dPhaseId, number>>;
+  totalMsByPhase: Partial<Record<Physics3dPhaseId, number>>;
+  ticCountMeasured: number;
+}
 
 /**
  * Extended world state: ECS world plus event queue, tic config, tic count, and RNG.
@@ -23,6 +35,8 @@ export interface SimulatorWorld extends World<{
   ticCount: number;
   seed: number;
   random: Random;
+  physics3dRuntimeMode: Physics3dRuntimeMode;
+  physics3dRuntimeMetrics: Physics3dRuntimeMetrics;
   physics3dState?: Physics3dState;
   physics3dTuning?: Partial<Physics3dTuning>;
 }> {
@@ -31,6 +45,8 @@ export interface SimulatorWorld extends World<{
   ticCount: number;
   seed: number;
   random: Random;
+  physics3dRuntimeMode: Physics3dRuntimeMode;
+  physics3dRuntimeMetrics: Physics3dRuntimeMetrics;
   physics3dState?: Physics3dState;
   physics3dTuning?: Partial<Physics3dTuning>;
 }
@@ -43,6 +59,8 @@ export interface CreateWorldOptions {
   ticDurationMs?: number;
   /** Master seed for deterministic simulation (default: random) */
   seed?: number;
+  /** Physics3d execution runtime (default: lua) */
+  physics3dRuntimeMode?: Physics3dRuntimeMode;
 }
 
 /**
@@ -59,6 +77,14 @@ export function createWorld(options?: CreateWorldOptions): SimulatorWorld {
     ticCount: 0,
     seed,
     random: new Random(seed),
+    physics3dRuntimeMode: options?.physics3dRuntimeMode ?? 'lua',
+    physics3dRuntimeMetrics: {
+      lastTicTotalMs: 0,
+      totalMs: 0,
+      lastTicMsByPhase: {},
+      totalMsByPhase: {},
+      ticCountMeasured: 0,
+    },
     physics3dState: undefined,
     physics3dTuning: undefined,
   }) as SimulatorWorld;

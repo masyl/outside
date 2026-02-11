@@ -3,6 +3,7 @@ import { mergeConfig } from 'vite';
 import type { StorybookConfig } from '@storybook/react-vite';
 
 const rootDir = process.cwd();
+const processShim = JSON.stringify({ env: {} });
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
@@ -13,6 +14,11 @@ const config: StorybookConfig = {
   },
   async viteFinal(baseConfig) {
     return mergeConfig(baseConfig, {
+      define: {
+        global: 'globalThis',
+        process: processShim,
+        'process.env': '{}',
+      },
       plugins: [
         {
           name: 'outside-storybook-vitest-mocker-shim',
@@ -37,6 +43,13 @@ const config: StorybookConfig = {
       },
       optimizeDeps: {
         exclude: ['@outside/simulator', '@outside/renderer'],
+        esbuildOptions: {
+          define: {
+            global: 'globalThis',
+            process: processShim,
+            'process.env': '{}',
+          },
+        },
       },
       server: {
         fs: {

@@ -77,6 +77,29 @@ const BOT_COLLISION_SHOVE_IMPULSE = 0.22;
 const BALL_RECOIL_THRESHOLD_SPEED = 5;
 const BALL_RECOIL_IMPULSE = 0.12;
 
+export type Physics3dPhaseId =
+  | 'ensure_state'
+  | 'apply_contact_tuning'
+  | 'clear_dynamic_collided'
+  | 'rebuild_bodies'
+  | 'apply_desired_velocity'
+  | 'step_world'
+  | 'emit_dynamic_collision_events'
+  | 'sync_back_to_ecs';
+
+export const PHYSICS3D_PHASE_SEQUENCE_TS: readonly Physics3dPhaseId[] = [
+  'ensure_state',
+  'apply_contact_tuning',
+  'clear_dynamic_collided',
+  'rebuild_bodies',
+  'apply_desired_velocity',
+  'step_world',
+  'emit_dynamic_collision_events',
+  'sync_back_to_ecs',
+] as const;
+
+export const PHYSICS3D_PHASE_IDS: readonly Physics3dPhaseId[] = PHYSICS3D_PHASE_SEQUENCE_TS;
+
 function pairKey(a: number, b: number): string {
   return a < b ? `${a}:${b}` : `${b}:${a}`;
 }
@@ -145,6 +168,49 @@ function createPhysicsState(world: SimulatorWorld): Physics3dState {
   return state;
 }
 
+function ensurePhysicsState(world: SimulatorWorld): Physics3dState {
+  if (!world.physics3dState) {
+    world.physics3dState = createPhysicsState(world);
+  }
+  return world.physics3dState;
+}
+
+function getPhysicsStateOrThrow(world: SimulatorWorld): Physics3dState {
+  const state = world.physics3dState;
+  if (!state) {
+    throw new Error('physics3d state was not initialized before phase execution');
+  }
+  return state;
+}
+
+export function getPhysics3dTuningSnapshot(world: SimulatorWorld): Physics3dTuning {
+  return getPhysics3dTuning(world);
+}
+
+export function ensurePhysics3dState(world: SimulatorWorld): Physics3dState {
+  return ensurePhysicsState(world);
+}
+
+export function setPhysics3dContactTuning(
+  world: SimulatorWorld,
+  ballGroundRestitution: number,
+  ballActorRestitution: number,
+  ballBallRestitution: number
+): void {
+  const state = ensurePhysicsState(world);
+  applyContactTuning(state, {
+    ...getPhysics3dTuning(world),
+    ballGroundRestitution,
+    ballActorRestitution,
+    ballBallRestitution,
+  });
+}
+
+export function stepPhysics3dWorld(world: SimulatorWorld, dtSec: number): void {
+  const state = getPhysicsStateOrThrow(world);
+  state.world.step(Math.max(0.001, dtSec));
+}
+
 function clearDynamicCollided(world: SimulatorWorld): void {
   const collided = query(world, [Collided]);
   for (let i = 0; i < collided.length; i++) {
@@ -154,6 +220,24 @@ function clearDynamicCollided(world: SimulatorWorld): void {
       setComponent(world, eid, Collided, { ticksRemaining: ticks - 1 });
     }
   }
+}
+
+export function clearPhysics3dDynamicCollided(world: SimulatorWorld): void {
+  clearDynamicCollided(world);
+}
+
+export function listPhysics3dCollidedEntities(world: SimulatorWorld): number[] {
+  return Array.from(query(world, [Collided]));
+}
+
+export function getPhysics3dCollidedTicks(world: SimulatorWorld, eid: number): number {
+  return Collided.ticksRemaining[eid] ?? 0;
+}
+
+export function setPhysics3dCollidedTicks(world: SimulatorWorld, eid: number, ticks: number): void {
+  setComponent(world, eid, Collided, {
+    ticksRemaining: Math.max(0, ticks),
+  });
 }
 
 function bodyShapeFromEntity(world: SimulatorWorld, state: Physics3dState, eid: number): Body {
@@ -234,6 +318,46 @@ function rebuildBodies(world: SimulatorWorld, state: Physics3dState): void {
   }
 }
 
+export function rebuildPhysics3dBodies(world: SimulatorWorld): void {
+  rebuildBodies(world, getPhysicsStateOrThrow(world));
+}
+
+export function listPhysics3dPositionEntityCandidates(world: SimulatorWorld): number[] {
+  return Array.from(query(world, [Position]));
+}
+
+export function shouldPhysics3dEntityHaveBody(world: SimulatorWorld, eid: number): boolean {
+  return shouldHaveBody(world, eid);
+}
+
+export function hasPhysics3dBodyForEntity(world: SimulatorWorld, eid: number): boolean {
+  const state = getPhysicsStateOrThrow(world);
+  return state.bodyByEid.has(eid);
+}
+
+export function addPhysics3dBodyForEntity(world: SimulatorWorld, eid: number): void {
+  const state = getPhysicsStateOrThrow(world);
+  if (state.bodyByEid.has(eid)) return;
+  const body = bodyShapeFromEntity(world, state, eid);
+  state.world.addBody(body);
+  state.bodyByEid.set(eid, body);
+  state.eidByBodyId.set(body.id, eid);
+}
+
+export function listPhysics3dBodyEntityIds(world: SimulatorWorld): number[] {
+  const state = getPhysicsStateOrThrow(world);
+  return Array.from(state.bodyByEid.keys());
+}
+
+export function removePhysics3dBodyForEntity(world: SimulatorWorld, eid: number): void {
+  const state = getPhysicsStateOrThrow(world);
+  const body = state.bodyByEid.get(eid);
+  if (!body) return;
+  state.world.removeBody(body);
+  state.bodyByEid.delete(eid);
+  state.eidByBodyId.delete(body.id);
+}
+
 function applyDesiredVelocity(world: SimulatorWorld, state: Physics3dState): void {
   for (const [eid, body] of state.bodyByEid.entries()) {
     if (!hasComponent(world, eid, ObstacleSize)) continue;
@@ -248,6 +372,62 @@ function applyDesiredVelocity(world: SimulatorWorld, state: Physics3dState): voi
     const impulseZ = (desiredZ - body.velocity.z) * 0.08;
     body.applyImpulse(new Vec3(impulseX, 0, impulseZ));
   }
+}
+
+export function applyPhysics3dDesiredVelocity(world: SimulatorWorld): void {
+  applyDesiredVelocity(world, getPhysicsStateOrThrow(world));
+}
+
+function hasDesiredVelocityInputs(world: SimulatorWorld, eid: number): boolean {
+  return (
+    hasComponent(world, eid, ObstacleSize) &&
+    hasComponent(world, eid, Direction) &&
+    hasComponent(world, eid, Speed)
+  );
+}
+
+function getPhysicsBodyByEntityId(world: SimulatorWorld, eid: number): Body | null {
+  const state = getPhysicsStateOrThrow(world);
+  return state.bodyByEid.get(eid) ?? null;
+}
+
+export function listPhysics3dDesiredVelocityEntities(world: SimulatorWorld): number[] {
+  const state = getPhysicsStateOrThrow(world);
+  const result: number[] = [];
+  for (const [eid] of state.bodyByEid.entries()) {
+    if (!hasDesiredVelocityInputs(world, eid)) continue;
+    result.push(eid);
+  }
+  return result;
+}
+
+export function getPhysics3dDirectionAngle(world: SimulatorWorld, eid: number): number {
+  return Direction.angle[eid] ?? 0;
+}
+
+export function getPhysics3dSpeedTilesPerSec(world: SimulatorWorld, eid: number): number {
+  return Math.max(0, Speed.tilesPerSec[eid] ?? 0);
+}
+
+export function getPhysics3dBodyVelocityX(world: SimulatorWorld, eid: number): number {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  return body?.velocity.x ?? 0;
+}
+
+export function getPhysics3dBodyVelocityZ(world: SimulatorWorld, eid: number): number {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  return body?.velocity.z ?? 0;
+}
+
+export function applyPhysics3dBodyImpulseXZ(
+  world: SimulatorWorld,
+  eid: number,
+  impulseX: number,
+  impulseZ: number
+): void {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  if (!body) return;
+  body.applyImpulse(new Vec3(impulseX, 0, impulseZ));
 }
 
 function syncBackToEcs(world: SimulatorWorld, state: Physics3dState): void {
@@ -296,6 +476,93 @@ function syncBackToEcs(world: SimulatorWorld, state: Physics3dState): void {
   }
 }
 
+export function syncPhysics3dBackToEcs(world: SimulatorWorld): void {
+  syncBackToEcs(world, getPhysicsStateOrThrow(world));
+}
+
+export function hasPhysics3dPositionComponent(world: SimulatorWorld, eid: number): boolean {
+  return hasComponent(world, eid, Position);
+}
+
+export function hasPhysics3dObstacleSizeComponent(world: SimulatorWorld, eid: number): boolean {
+  return hasComponent(world, eid, ObstacleSize);
+}
+
+export function getPhysics3dBodyPositionX(world: SimulatorWorld, eid: number): number {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  return body?.position.x ?? 0;
+}
+
+export function getPhysics3dBodyPositionY(world: SimulatorWorld, eid: number): number {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  return body?.position.y ?? 0;
+}
+
+export function getPhysics3dBodyPositionZ(world: SimulatorWorld, eid: number): number {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  return body?.position.z ?? 0;
+}
+
+export function getPhysics3dBodyVelocityY(world: SimulatorWorld, eid: number): number {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  return body?.velocity.y ?? 0;
+}
+
+export function getPhysics3dBodyVelocityLength(world: SimulatorWorld, eid: number): number {
+  const body = getPhysicsBodyByEntityId(world, eid);
+  return body?.velocity.length() ?? 0;
+}
+
+export function setPhysics3dPositionXY(
+  world: SimulatorWorld,
+  eid: number,
+  x: number,
+  y: number
+): void {
+  setComponent(world, eid, Position, { x, y });
+}
+
+export function setPhysics3dPositionZ(world: SimulatorWorld, eid: number, z: number): void {
+  if (!hasComponent(world, eid, PositionZ)) {
+    addComponent(world, eid, PositionZ);
+  }
+  setComponent(world, eid, PositionZ, { z });
+}
+
+export function setPhysics3dVelocityZ(world: SimulatorWorld, eid: number, z: number): void {
+  if (!hasComponent(world, eid, VelocityZ)) {
+    addComponent(world, eid, VelocityZ);
+  }
+  setComponent(world, eid, VelocityZ, { z });
+}
+
+export function getPhysics3dObstacleRadius(world: SimulatorWorld, eid: number): number {
+  if (!hasComponent(world, eid, ObstacleSize)) return 0;
+  return Math.max(0.15, (ObstacleSize.diameter[eid] || 0.6) * 0.5);
+}
+
+export function setPhysics3dGrounded(world: SimulatorWorld, eid: number, value: number): void {
+  if (!hasComponent(world, eid, Grounded)) {
+    addComponent(world, eid, Grounded);
+  }
+  setComponent(world, eid, Grounded, {
+    value,
+  });
+}
+
+export function setPhysics3dActualSpeed(
+  world: SimulatorWorld,
+  eid: number,
+  tilesPerSec: number
+): void {
+  if (!hasComponent(world, eid, ActualSpeed)) {
+    addComponent(world, eid, ActualSpeed);
+  }
+  setComponent(world, eid, ActualSpeed, {
+    tilesPerSec,
+  });
+}
+
 function emitDynamicCollisionEvents(world: SimulatorWorld, state: Physics3dState): void {
   state.collisionPairSeenThisTic.clear();
 
@@ -325,6 +592,81 @@ function emitDynamicCollisionEvents(world: SimulatorWorld, state: Physics3dState
     applyBallRecoilForPair(world, eidA, eidB, contact.bi, contact.bj);
     applyBotCollisionShove(world, eidA, eidB, contact.bi, contact.bj);
   }
+}
+
+export function emitPhysics3dDynamicCollisionEvents(world: SimulatorWorld): void {
+  emitDynamicCollisionEvents(world, getPhysicsStateOrThrow(world));
+}
+
+export function clearPhysics3dCollisionPairSeenThisTic(world: SimulatorWorld): void {
+  const state = getPhysicsStateOrThrow(world);
+  state.collisionPairSeenThisTic.clear();
+}
+
+export function listPhysics3dContactIndices(world: SimulatorWorld): number[] {
+  const state = getPhysicsStateOrThrow(world);
+  const result: number[] = [];
+  for (let i = 0; i < state.world.contacts.length; i++) {
+    result.push(i);
+  }
+  return result;
+}
+
+export function getPhysics3dContactEntityA(world: SimulatorWorld, contactIndex: number): number {
+  const state = getPhysicsStateOrThrow(world);
+  const contact = state.world.contacts[contactIndex];
+  if (!contact) return -1;
+  return state.eidByBodyId.get(contact.bi.id) ?? -1;
+}
+
+export function getPhysics3dContactEntityB(world: SimulatorWorld, contactIndex: number): number {
+  const state = getPhysicsStateOrThrow(world);
+  const contact = state.world.contacts[contactIndex];
+  if (!contact) return -1;
+  return state.eidByBodyId.get(contact.bj.id) ?? -1;
+}
+
+export function canPhysics3dEntitiesCollide(world: SimulatorWorld, eidA: number, eidB: number): boolean {
+  if (eidA < 0 || eidB < 0) return false;
+  if (!hasComponent(world, eidA, ObstacleSize)) return false;
+  if (!hasComponent(world, eidB, ObstacleSize)) return false;
+  return true;
+}
+
+export function markPhysics3dCollisionPairSeenIfNew(
+  world: SimulatorWorld,
+  eidA: number,
+  eidB: number
+): boolean {
+  const state = getPhysicsStateOrThrow(world);
+  const key = pairKey(eidA, eidB);
+  if (state.collisionPairSeenThisTic.has(key)) {
+    return false;
+  }
+  state.collisionPairSeenThisTic.add(key);
+  return true;
+}
+
+export function emitPhysics3dCollisionEvent(world: SimulatorWorld, eidA: number, eidB: number): void {
+  world.eventQueue.push({
+    type: 'collision',
+    entityA: eidA,
+    entityB: eidB,
+  } satisfies CollisionEvent);
+}
+
+export function applyPhysics3dCollisionResponsesForContact(
+  world: SimulatorWorld,
+  contactIndex: number,
+  eidA: number,
+  eidB: number
+): void {
+  const state = getPhysicsStateOrThrow(world);
+  const contact = state.world.contacts[contactIndex];
+  if (!contact) return;
+  applyKickImpulseForPair(world, eidA, eidB, contact.bi, contact.bj);
+  applyBallRecoilForPair(world, eidA, eidB, contact.bi, contact.bj);
+  applyBotCollisionShove(world, eidA, eidB, contact.bi, contact.bj);
 }
 
 function isShovableBot(world: SimulatorWorld, eid: number): boolean {
@@ -464,18 +806,67 @@ function applyBotCollisionShove(
 }
 
 export function physics3dSystem(world: SimulatorWorld): SimulatorWorld {
-  if (!world.physics3dState) {
-    world.physics3dState = createPhysicsState(world);
-  }
+  runPhysics3dPipeline(world, PHYSICS3D_PHASE_SEQUENCE_TS);
+  return world;
+}
 
-  const state = world.physics3dState;
-  applyContactTuning(state, getPhysics3dTuning(world));
-  clearDynamicCollided(world);
-  rebuildBodies(world, state);
-  applyDesiredVelocity(world, state);
-  state.world.step(Math.max(0.001, world.ticDurationMs / 1000));
-  emitDynamicCollisionEvents(world, state);
-  syncBackToEcs(world, state);
+export function runPhysics3dPhase(
+  world: SimulatorWorld,
+  phaseId: Physics3dPhaseId
+): SimulatorWorld {
+  switch (phaseId) {
+    case 'ensure_state': {
+      ensurePhysics3dState(world);
+      return world;
+    }
+    case 'apply_contact_tuning': {
+      const tuning = getPhysics3dTuningSnapshot(world);
+      setPhysics3dContactTuning(
+        world,
+        tuning.ballGroundRestitution,
+        tuning.ballActorRestitution,
+        tuning.ballBallRestitution
+      );
+      return world;
+    }
+    case 'clear_dynamic_collided': {
+      clearPhysics3dDynamicCollided(world);
+      return world;
+    }
+    case 'rebuild_bodies': {
+      rebuildPhysics3dBodies(world);
+      return world;
+    }
+    case 'apply_desired_velocity': {
+      applyPhysics3dDesiredVelocity(world);
+      return world;
+    }
+    case 'step_world': {
+      stepPhysics3dWorld(world, world.ticDurationMs / 1000);
+      return world;
+    }
+    case 'emit_dynamic_collision_events': {
+      emitPhysics3dDynamicCollisionEvents(world);
+      return world;
+    }
+    case 'sync_back_to_ecs': {
+      syncPhysics3dBackToEcs(world);
+      return world;
+    }
+    default: {
+      const exhaustive: never = phaseId;
+      return exhaustive;
+    }
+  }
+}
+
+export function runPhysics3dPipeline(
+  world: SimulatorWorld,
+  phases: readonly Physics3dPhaseId[]
+): SimulatorWorld {
+  for (let i = 0; i < phases.length; i++) {
+    runPhysics3dPhase(world, phases[i]);
+  }
   return world;
 }
 
