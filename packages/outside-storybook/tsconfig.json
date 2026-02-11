@@ -18,7 +18,9 @@
     "baseUrl": ".",
     "paths": {
       "@outside/core": ["../outside-core/src"],
-      "@outside/client": ["../outside-client/src"]
+      "@outside/client": ["../outside-client/src"],
+      "@outside/controller-core": ["../outside-controller-core/src"],
+      "@outside/test-player": ["../outside-test-player/src"]
     }
   },
   "include": ["src"]

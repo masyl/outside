@@ -37,12 +37,19 @@ const config: StorybookConfig = {
       ],
       resolve: {
         alias: {
+          '@outside/controller-core': resolve(rootDir, '../outside-controller-core/src/index.ts'),
+          '@outside/test-player': resolve(rootDir, '../outside-test-player/src/index.ts'),
           '@outside/simulator': resolve(rootDir, '../outside-simulator/src/index.ts'),
           '@outside/renderer': resolve(rootDir, '../outside-renderer/src/index.ts'),
         },
       },
       optimizeDeps: {
-        exclude: ['@outside/simulator', '@outside/renderer'],
+        exclude: [
+          '@outside/controller-core',
+          '@outside/test-player',
+          '@outside/simulator',
+          '@outside/renderer',
+        ],
         esbuildOptions: {
           define: {
             global: 'globalThis',

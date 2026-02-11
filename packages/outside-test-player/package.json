@@ -1,0 +1,36 @@
+{
+  "name": "@outside/test-player",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "echo \"No standalone build for @outside/test-player\"",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "echo \"No linter configured yet\"",
+    "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {
+    "@outside/controller-core": "workspace:*",
+    "@outside/inspector-renderer": "workspace:*",
+    "@outside/renderer": "workspace:*",
+    "@outside/simulator": "workspace:*",
+    "pixi.js": "^8.7.3",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  }
+}

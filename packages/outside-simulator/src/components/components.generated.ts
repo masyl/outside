@@ -39,6 +39,7 @@ import Size from './Size';
 import SoccerBall from './SoccerBall';
 import Speed from './Speed';
 import SpeedBoostOnJump from './SpeedBoostOnJump';
+import TargetDirection from './TargetDirection';
 import TargetPace from './TargetPace';
 import VariantSpriteKey from './VariantSpriteKey';
 import VelocityZ from './VelocityZ';
@@ -90,6 +91,7 @@ export interface SimulatorComponents {
   SoccerBall: typeof SoccerBall;
   Speed: typeof Speed;
   SpeedBoostOnJump: typeof SpeedBoostOnJump;
+  TargetDirection: typeof TargetDirection;
   TargetPace: typeof TargetPace;
   VariantSpriteKey: typeof VariantSpriteKey;
   VelocityZ: typeof VelocityZ;
@@ -102,4 +104,55 @@ export interface SimulatorComponents {
   WanderPersistence: typeof WanderPersistence;
 }
 
-export { Acceleration, ActualSpeed, Bounciness, Collided, Deceleration, DefaultSpriteKey, DestinationDeadline, Direction, FloorTile, Follow, FollowStopRange, FollowTarget, FollowTightness, Food, Grid, GridResolution, Grounded, Hero, IsViewportFocus, JumpHeightScale, Kickable, Kicker, MaxSpeed, Observed, Obstacle, ObstacleSize, Pointer, PointerKind, PointerTarget, PointerTile, Position, PositionZ, PreviousPosition, RandomWalk, RunningSpeed, Size, SoccerBall, Speed, SpeedBoostOnJump, TargetPace, VariantSpriteKey, VelocityZ, View, VisualSize, Wait, Walkable, WalkingSpeed, Wander, WanderPersistence };
+export {
+  Acceleration,
+  ActualSpeed,
+  Bounciness,
+  Collided,
+  Deceleration,
+  DefaultSpriteKey,
+  DestinationDeadline,
+  Direction,
+  FloorTile,
+  Follow,
+  FollowStopRange,
+  FollowTarget,
+  FollowTightness,
+  Food,
+  Grid,
+  GridResolution,
+  Grounded,
+  Hero,
+  IsViewportFocus,
+  JumpHeightScale,
+  Kickable,
+  Kicker,
+  MaxSpeed,
+  Observed,
+  Obstacle,
+  ObstacleSize,
+  Pointer,
+  PointerKind,
+  PointerTarget,
+  PointerTile,
+  Position,
+  PositionZ,
+  PreviousPosition,
+  RandomWalk,
+  RunningSpeed,
+  Size,
+  SoccerBall,
+  Speed,
+  SpeedBoostOnJump,
+  TargetDirection,
+  TargetPace,
+  VariantSpriteKey,
+  VelocityZ,
+  View,
+  VisualSize,
+  Wait,
+  Walkable,
+  WalkingSpeed,
+  Wander,
+  WanderPersistence,
+};

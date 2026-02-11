@@ -1,14 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import {
+  addComponent,
   createWorld,
   DestinationDeadline,
+  Hero,
   spawnBot,
+  spawnHero,
   runTics,
   query,
   getComponent,
   Position,
   Direction,
   Speed,
+  setComponent,
+  TargetDirection,
+  TargetPace,
+  TARGET_PACE_RUNNING,
+  TARGET_PACE_RUNNING_FAST,
+  TARGET_PACE_STANDING_STILL,
+  TARGET_PACE_WALKING,
   Wait,
   Wander,
   WanderPersistence,
@@ -161,10 +171,7 @@ describe('Urge system', () => {
     const followerPos = getComponent(world, follower, Position);
     const leaderPos = getComponent(world, leader, Position);
     const distBefore = 10;
-    const distAfter = Math.hypot(
-      leaderPos.x - followerPos.x,
-      leaderPos.y - followerPos.y
-    );
+    const distAfter = Math.hypot(leaderPos.x - followerPos.x, leaderPos.y - followerPos.y);
     expect(distAfter).toBeLessThan(distBefore);
   });
 
@@ -182,5 +189,43 @@ describe('Urge system', () => {
     const leaderPos = getComponent(world, leader, Position);
     const d = Math.hypot(leaderPos.x - followerPos.x, leaderPos.y - followerPos.y);
     expect(d).toBeLessThanOrEqual(2.5); // close-enough 2 tiles + small tolerance
+  });
+
+  it('Hero target-direction: drives movement intent without replacing Direction state', () => {
+    const world = createWorld({ seed: 12, ticDurationMs: 50 });
+    const heroEid = spawnHero(world, { x: 0, y: 0 });
+    setComponent(world, heroEid, Direction, { angle: Math.PI });
+    addComponent(world, heroEid, TargetDirection);
+    setComponent(world, heroEid, TargetDirection, { x: 1, y: 0, magnitude: 1 });
+
+    runTics(world, 1);
+    const directionAfterOneTic = getComponent(world, heroEid, Direction).angle;
+    const paceAfterOneTic = TargetPace.value[heroEid];
+    expect(directionAfterOneTic).not.toBe(Math.PI);
+    expect(directionAfterOneTic).not.toBe(0);
+    expect(paceAfterOneTic).toBe(TARGET_PACE_RUNNING_FAST);
+
+    runTics(world, 12);
+    const position = getComponent(world, heroEid, Position);
+    expect(position.x).toBeGreaterThan(0.2);
+  });
+
+  it('Hero target-direction: overrides wait while input is active and stops when cleared', () => {
+    const world = createWorld({ seed: 19, ticDurationMs: 50 });
+    const heroEid = spawnHero(world, { x: 0, y: 0 });
+    addComponent(world, heroEid, Wait);
+    addComponent(world, heroEid, TargetDirection);
+    setComponent(world, heroEid, TargetDirection, { x: 0, y: 1, magnitude: 0.4 });
+
+    runTics(world, 2);
+    const movedPosition = getComponent(world, heroEid, Position);
+    const activePace = TargetPace.value[heroEid];
+    expect(Math.hypot(movedPosition.x, movedPosition.y)).toBeGreaterThan(0);
+    expect(activePace).toBe(TARGET_PACE_WALKING);
+
+    setComponent(world, heroEid, TargetDirection, { x: 0, y: 0, magnitude: 0 });
+    runTics(world, 1);
+    expect(TargetPace.value[heroEid]).toBe(TARGET_PACE_STANDING_STILL);
+    expect(query(world, [Hero])).toContain(heroEid);
   });
 });

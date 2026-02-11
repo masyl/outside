@@ -4,7 +4,14 @@
  * @packageDocumentation
  */
 
-import { addComponent, getComponent, hasComponent, query, removeComponent, setComponent } from 'bitecs';
+import {
+  addComponent,
+  getComponent,
+  hasComponent,
+  query,
+  removeComponent,
+  setComponent,
+} from 'bitecs';
 import {
   DestinationDeadline,
   Direction,
@@ -14,6 +21,7 @@ import {
   Hero,
   Position,
   RunningSpeed,
+  TargetDirection,
   TargetPace,
   Wait,
   WalkingSpeed,
@@ -23,6 +31,7 @@ import {
 import { findPath, getPassableTiles } from '../pathfinding';
 import {
   TARGET_PACE_RUNNING,
+  TARGET_PACE_RUNNING_FAST,
   TARGET_PACE_STANDING_STILL,
   TARGET_PACE_WALKING,
   type TargetPaceValue,
@@ -41,6 +50,10 @@ const WANDER_RUN_CHANCE = 0.55;
 const DESTINATION_RETRY_TICS = 8;
 const DEADLINE_MIN_BUFFER_SEC = 0.8;
 const DEADLINE_BUFFER_RATIO = 0.35;
+const CONTROLLED_STOP_MAGNITUDE = 0.1;
+const CONTROLLED_RUN_MAGNITUDE = 0.55;
+const CONTROLLED_RUN_FAST_MAGNITUDE = 0.88;
+const CONTROLLED_TURN_BLEND = 0.45;
 
 function angleToward(x: number, y: number, toX: number, toY: number): number {
   return Math.atan2(toY - y, toX - x);
@@ -120,7 +133,10 @@ function computeDestinationDeadlineTics(
   const walkingSpeed = Math.max(0.5, WalkingSpeed.tilesPerSec[eid] ?? 0);
   const runningSpeed = Math.max(0, RunningSpeed.tilesPerSec[eid] ?? 0);
   // Use a conservative cruise estimate so short stalls/collisions do not force early retarget.
-  const cruiseSpeed = Math.max(0.5, Math.min(walkingSpeed * 1.2, Math.max(walkingSpeed, runningSpeed * 0.6)));
+  const cruiseSpeed = Math.max(
+    0.5,
+    Math.min(walkingSpeed * 1.2, Math.max(walkingSpeed, runningSpeed * 0.6))
+  );
   const travelSec = Math.max(0, pathTileCount) / cruiseSpeed;
   const bufferSec = Math.max(DEADLINE_MIN_BUFFER_SEC, travelSec * DEADLINE_BUFFER_RATIO);
   return Math.max(1, Math.ceil((travelSec + bufferSec) * ticsPerSecond));
@@ -170,17 +186,56 @@ export function urgeSystem(world: SimulatorWorld): SimulatorWorld {
   const rng = world.random;
   const heroSet = new Set(query(world, [Hero]));
   const passable = getPassableTiles(world);
+  const controlledHeroEnts = query(world, [Hero, Direction, TargetPace, TargetDirection]);
+  const controlledHeroSet = new Set(controlledHeroEnts);
+
+  for (let i = 0; i < controlledHeroEnts.length; i++) {
+    const eid = controlledHeroEnts[i];
+    const inputX = TargetDirection.x[eid] ?? 0;
+    const inputY = TargetDirection.y[eid] ?? 0;
+    const inputMagnitude = TargetDirection.magnitude[eid] ?? 0;
+    const magnitude = Math.min(1, Math.max(0, inputMagnitude));
+    const currentDirection = getComponent(world, eid, Direction);
+    if (!currentDirection) continue;
+
+    if (
+      !Number.isFinite(inputX) ||
+      !Number.isFinite(inputY) ||
+      !Number.isFinite(magnitude) ||
+      magnitude <= CONTROLLED_STOP_MAGNITUDE
+    ) {
+      setTargetPace(world, eid, TARGET_PACE_STANDING_STILL);
+      continue;
+    }
+
+    const targetAngle = Math.atan2(inputY, inputX);
+    const angleDiff = normalizeAngleDiff(targetAngle - currentDirection.angle);
+    setComponent(world, eid, Direction, {
+      angle: currentDirection.angle + angleDiff * CONTROLLED_TURN_BLEND,
+    });
+
+    if (magnitude >= CONTROLLED_RUN_FAST_MAGNITUDE) {
+      setTargetPace(world, eid, TARGET_PACE_RUNNING_FAST);
+    } else if (magnitude >= CONTROLLED_RUN_MAGNITUDE) {
+      setTargetPace(world, eid, TARGET_PACE_RUNNING);
+    } else {
+      setTargetPace(world, eid, TARGET_PACE_WALKING);
+    }
+  }
 
   const waitEnts = query(world, [Position, Direction, TargetPace, Wait]);
   const waitSet = new Set(waitEnts);
   for (let i = 0; i < waitEnts.length; i++) {
-    setTargetPace(world, waitEnts[i], TARGET_PACE_STANDING_STILL);
+    const eid = waitEnts[i];
+    if (controlledHeroSet.has(eid)) continue;
+    setTargetPace(world, eid, TARGET_PACE_STANDING_STILL);
   }
 
   const followEnts = query(world, [Position, Direction, TargetPace, Follow, FollowTarget]);
   const followSet = new Set(followEnts);
   for (let i = 0; i < followEnts.length; i++) {
     const eid = followEnts[i];
+    if (controlledHeroSet.has(eid)) continue;
     const targetEid = FollowTarget.eid[eid];
     const pos = getComponent(world, eid, Position);
     const curDir = getComponent(world, eid, Direction);
@@ -216,7 +271,7 @@ export function urgeSystem(world: SimulatorWorld): SimulatorWorld {
   const wanderEnts = query(world, [Position, Direction, TargetPace, Wander]);
   for (let i = 0; i < wanderEnts.length; i++) {
     const eid = wanderEnts[i];
-    if (waitSet.has(eid) || followSet.has(eid)) continue;
+    if (controlledHeroSet.has(eid) || waitSet.has(eid) || followSet.has(eid)) continue;
 
     const pers = getComponent(world, eid, WanderPersistence);
     const deadline = getComponent(world, eid, DestinationDeadline);
@@ -242,21 +297,17 @@ export function urgeSystem(world: SimulatorWorld): SimulatorWorld {
     let targetTileY = Number.isFinite(persistedTargetY)
       ? Math.floor(persistedTargetY)
       : Math.floor(curPos.y);
-    const hasStoredTarget =
-      Number.isFinite(persistedTargetX) &&
-      Number.isFinite(persistedTargetY);
-    const currentTargetDist = Math.hypot(targetTileX + 0.5 - curPos.x, targetTileY + 0.5 - curPos.y);
+    const hasStoredTarget = Number.isFinite(persistedTargetX) && Number.isFinite(persistedTargetY);
+    const currentTargetDist = Math.hypot(
+      targetTileX + 0.5 - curPos.x,
+      targetTileY + 0.5 - curPos.y
+    );
     const targetPassable = passable.has(key(targetTileX, targetTileY));
     const destinationExpired = deadlineTicsLeft <= 0;
     let destinationChanged = false;
     const pathStart = resolveNavigablePathStart(passable, curPos.x, curPos.y);
 
-    if (
-      !hasStoredTarget ||
-      !targetPassable ||
-      currentTargetDist < 0.4 ||
-      destinationExpired
-    ) {
+    if (!hasStoredTarget || !targetPassable || currentTargetDist < 0.4 || destinationExpired) {
       const nextTarget = pickNearbyReachableTarget(world, passable, curPos.x, curPos.y, rng);
       if (nextTarget) {
         targetTileX = nextTarget.x;
@@ -295,7 +346,11 @@ export function urgeSystem(world: SimulatorWorld): SimulatorWorld {
     const hasRoute = pathToTarget.length >= 2;
     if (hasRoute) {
       const pathTiles = Math.max(0, pathToTarget.length - 1);
-      if (destinationChanged || destinationExpired || !Number.isFinite(deadline?.pathTiles ?? NaN)) {
+      if (
+        destinationChanged ||
+        destinationExpired ||
+        !Number.isFinite(deadline?.pathTiles ?? NaN)
+      ) {
         deadlineTicsLeft = computeDestinationDeadlineTics(world, eid, pathTiles);
       }
       setComponent(world, eid, DestinationDeadline, {

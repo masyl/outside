@@ -15,11 +15,13 @@
   },
   "dependencies": {
     "@outside/client": "workspace:*",
+    "@outside/controller-core": "workspace:*",
     "@outside/core": "workspace:*",
     "@outside/inspector-renderer": "workspace:*",
     "@outside/resource-packs": "workspace:*",
     "@outside/renderer": "workspace:*",
     "@outside/simulator": "workspace:*",
+    "@outside/test-player": "workspace:*",
     "cannon-es": "^0.20.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

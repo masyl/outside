@@ -1,12 +1,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { PixiEcsRendererStory } from '../components/renderer/PixiEcsRendererStory';
+import { TestPlayer } from '@outside/test-player';
 import {
   ACTOR_ZOO_ALL_OPTION,
   ACTOR_ZOO_PACE_OPTIONS,
   ACTOR_ZOO_VARIANTS,
-  spawnActorZoo,
 } from '../components/simulator/spawnCloud';
+import { ZOO_ACTORS_TEST_PLAYER_CONFIG } from './configs/zoo-actors.test-player.config';
 
 function FullHeightDecorator(Story: React.ComponentType) {
   return (
@@ -28,14 +28,7 @@ const actorLabels = {
   [ACTOR_ZOO_ALL_OPTION]: 'All',
   ...Object.fromEntries(ACTOR_ZOO_VARIANTS.map((variant) => [variant.id, variant.label])),
 } as const;
-const actOptions = [
-  'idle',
-  'wander',
-  'rotate',
-  'jump',
-  'follow',
-  'follow-mouse',
-] as const;
+const actOptions = ['idle', 'wander', 'rotate', 'jump', 'follow', 'follow-mouse'] as const;
 const actLabels = {
   idle: 'Idle',
   wander: 'Wander',
@@ -57,9 +50,9 @@ const onClickLabels = {
   'jump-sequence': 'Jump Sequence',
 } as const;
 
-const meta: Meta<typeof PixiEcsRendererStory> = {
+const meta: Meta<typeof TestPlayer> = {
   title: 'Zoo/Actors',
-  component: PixiEcsRendererStory,
+  component: TestPlayer,
   decorators: [FullHeightDecorator],
   parameters: {
     layout: 'fullscreen',
@@ -140,13 +133,13 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
 
 export default meta;
 
-export const Actors: StoryObj<typeof PixiEcsRendererStory> = {
+export const Actors: StoryObj<typeof TestPlayer> = {
   render: (args) => {
     const shouldShowWalkDebug = args.pace === 'walk';
     const shouldShowVectorDebug =
       shouldShowWalkDebug || args.act === 'follow' || args.act === 'follow-mouse';
     return (
-      <PixiEcsRendererStory
+      <TestPlayer
         {...args}
         showInspectorOverlay={args.inspector === true}
         showInspectorFollowLinks={false}
@@ -159,23 +152,7 @@ export const Actors: StoryObj<typeof PixiEcsRendererStory> = {
     );
   },
   args: {
-    seed: 42,
-    ticsPerSecond: 30,
-    botCount: 1,
-    actors: ACTOR_ZOO_ALL_OPTION,
-    act: 'idle',
-    pace: 'walk',
-    spawnFn: spawnActorZoo,
-    tileSize: 32,
-    waitForAssets: false,
-    useCrtEffect: false,
-    showInspectorOverlay: false,
-    showInspectorFollowLinks: false,
-    showInspectorVelocityVectors: false,
-    showInspectorCollisionTint: false,
-    showInspectorWallOutlines: false,
-    showInspectorPathfindingPaths: false,
-    showInspectorPhysicsShapes: false,
+    ...ZOO_ACTORS_TEST_PLAYER_CONFIG,
     inspector: false,
     onClickAction: 'jump-random',
   },

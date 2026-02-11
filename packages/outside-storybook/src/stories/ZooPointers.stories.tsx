@@ -1,11 +1,8 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { PixiEcsRendererStory } from '../components/renderer/PixiEcsRendererStory';
-import {
-  POINTER_ZOO_DEFAULT_POINTER_SPRITE_KEY,
-  POINTER_ZOO_VARIANTS,
-  spawnPointerZoo,
-} from '../components/simulator/spawnCloud';
+import { TestPlayer } from '@outside/test-player';
+import { POINTER_ZOO_VARIANTS } from '../components/simulator/spawnCloud';
+import { ZOO_POINTERS_TEST_PLAYER_CONFIG } from './configs/zoo-pointers.test-player.config';
 
 function FullHeightDecorator(Story: React.ComponentType) {
   return (
@@ -27,9 +24,9 @@ const pointerLabels = Object.fromEntries(
   POINTER_ZOO_VARIANTS.map((variant) => [variant.id, variant.label])
 );
 
-const meta: Meta<typeof PixiEcsRendererStory> = {
+const meta: Meta<typeof TestPlayer> = {
   title: 'Zoo/Pointers',
-  component: PixiEcsRendererStory,
+  component: TestPlayer,
   decorators: [FullHeightDecorator],
   parameters: {
     layout: 'fullscreen',
@@ -93,9 +90,9 @@ const meta: Meta<typeof PixiEcsRendererStory> = {
 
 export default meta;
 
-export const Pointers: StoryObj<typeof PixiEcsRendererStory> = {
+export const Pointers: StoryObj<typeof TestPlayer> = {
   render: (args) => (
-    <PixiEcsRendererStory
+    <TestPlayer
       {...args}
       showInspectorOverlay={args.inspector === true}
       showInspectorFollowLinks={false}
@@ -107,22 +104,7 @@ export const Pointers: StoryObj<typeof PixiEcsRendererStory> = {
     />
   ),
   args: {
-    seed: 42,
-    ticsPerSecond: 30,
-    botCount: 1,
-    spawnFn: spawnPointerZoo,
-    pointerVariant: POINTER_ZOO_DEFAULT_POINTER_SPRITE_KEY,
-    onClickAction: 'pick-pointer',
-    tileSize: 32,
-    waitForAssets: false,
-    useCrtEffect: false,
-    showInspectorOverlay: false,
-    showInspectorFollowLinks: false,
-    showInspectorVelocityVectors: false,
-    showInspectorCollisionTint: false,
-    showInspectorWallOutlines: false,
-    showInspectorPathfindingPaths: false,
-    showInspectorPhysicsShapes: false,
+    ...ZOO_POINTERS_TEST_PLAYER_CONFIG,
     inspector: false,
   },
 };

@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     // Use simulator source in dev so behavior/ECS changes apply without rebuilding the package
     alias: {
+      '@outside/controller-core': resolve(__dirname, '../outside-controller-core/src/index.ts'),
+      '@outside/test-player': resolve(__dirname, '../outside-test-player/src/index.ts'),
       '@outside/simulator': resolve(__dirname, '../outside-simulator/src/index.ts'),
     },
   },
