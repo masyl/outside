@@ -291,6 +291,7 @@ export const ZoosShowcase: StoryObj<typeof StaticPixiEcsRendererStory> = {
     buildWorld: spawnZoosWorld,
     tileSize: 16,
     waitForAssets: false,
+    hideSystemCursor: true,
     showInspectorOverlay: false,
     rendererVer: RENDERER_VER,
     inspectorVer: INSPECTOR_VER,

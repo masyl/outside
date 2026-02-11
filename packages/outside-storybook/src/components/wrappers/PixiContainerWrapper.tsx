@@ -7,6 +7,7 @@ interface PixiContainerWrapperProps {
   children: (app: Application) => void;
   width?: CSSProperties['width'];
   height?: CSSProperties['height'];
+  cursor?: CSSProperties['cursor'];
   backgroundColor?: number;
   instanceKey?: string;
   onResize?: (app: Application, width: number, height: number) => void;
@@ -21,6 +22,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
   children,
   width = '100%',
   height = '100%',
+  cursor = 'default',
   backgroundColor = 0x000000,
   instanceKey = 'default',
   onResize,
@@ -185,7 +187,7 @@ export const PixiContainerWrapper: React.FC<PixiContainerWrapperProps> = ({
           height: '100%',
           display: 'block',
           imageRendering: 'pixelated',
-          cursor: 'none',
+          cursor,
         }}
       />
     </div>

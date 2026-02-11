@@ -27,6 +27,7 @@ export interface StaticPixiEcsRendererStoryProps {
   showInspectorCollisionTint?: boolean;
   showInspectorWallOutlines?: boolean;
   showInspectorPathfindingPaths?: boolean;
+  hideSystemCursor?: boolean;
   buildWorld: (world: SimulatorWorld, seed: number) => void;
 }
 
@@ -53,6 +54,7 @@ export function StaticPixiEcsRendererStory({
   showInspectorCollisionTint = true,
   showInspectorWallOutlines = true,
   showInspectorPathfindingPaths = false,
+  hideSystemCursor = false,
   buildWorld,
 }: StaticPixiEcsRendererStoryProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -238,6 +240,7 @@ export function StaticPixiEcsRendererStory({
         instanceKey="pixi-ecs-static"
         width="100%"
         height="100%"
+        cursor={hideSystemCursor ? 'none' : 'default'}
         backgroundColor={0x0b0d12}
         onResize={handleResize}
         onPointerMove={handlePointerMove}
