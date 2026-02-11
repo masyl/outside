@@ -15,6 +15,8 @@ const config: StorybookConfig = {
     return mergeConfig(baseConfig, {
       define: {
         global: 'globalThis',
+        process: 'undefined',
+        'process.env.FENGARICONF': 'undefined',
         'process.env': '{}',
       },
       plugins: [
@@ -44,6 +46,8 @@ const config: StorybookConfig = {
         esbuildOptions: {
           define: {
             global: 'globalThis',
+            process: 'undefined',
+            'process.env.FENGARICONF': 'undefined',
             'process.env': '{}',
           },
         },
