@@ -305,7 +305,7 @@
     "Kiwi"
   ],
   "notes": [
-    "Atlas generated from source PNG files in agent-collab/Pixel Platter.",
+    "Atlas generated from source PNG files in packages/resourcePacks/sources/pixel-platter.",
     "Each frame occupies a 16x16 tile with 2px outer padding per cell.",
     "Sprites smaller than 16x16 are horizontally centered and aligned 2px above tile bottom."
   ]

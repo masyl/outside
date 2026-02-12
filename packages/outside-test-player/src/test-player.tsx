@@ -60,6 +60,7 @@ export function TestPlayer({
   showInspectorPathfindingPaths = false,
   showInspectorPhysicsShapes = false,
   onClickAction = 'order-path',
+  physics3dRuntimeMode = 'lua',
   physics3dTuning,
   controller,
 }: TestPlayerProps) {
@@ -119,6 +120,7 @@ export function TestPlayer({
       ballGroundRestitution,
       ...physics3dTuning,
     },
+    physics3dRuntimeMode,
     ticsPerSecond,
     spawnFn,
   });

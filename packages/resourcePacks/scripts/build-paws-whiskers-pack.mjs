@@ -11,10 +11,7 @@ const RETRIEVED_AT_ISO = '2026-02-08T00:00:00.000Z';
 
 const PACKS = [
   {
-    sourceDir: path.resolve(
-      repoRoot,
-      'agent-collab/Paws & Whiskers - Isometric Dogs Pack (Free)'
-    ),
+    sourceDir: path.resolve(__dirname, '../sources/paws-whiskers/dogs'),
     sourceSheetName: 'GoldenRetriever_spritesheet_free.png',
     sourceReadmeName: 'readme_free.txt',
     outputBaseName: 'golden-retriever',
@@ -30,10 +27,7 @@ const PACKS = [
     legacyLicenseFile: 'license.md',
   },
   {
-    sourceDir: path.resolve(
-      repoRoot,
-      'agent-collab/Paws & Whiskers - Isometric Cats Pack (Free)'
-    ),
+    sourceDir: path.resolve(__dirname, '../sources/paws-whiskers/cats'),
     sourceSheetName: 'Cat_1_spritesheet_free.png',
     sourceReadmeName: 'readme_free.txt',
     outputBaseName: 'beige-cat',

@@ -9,7 +9,12 @@ export default defineConfig({
     alias: {
       '@outside/controller-core': resolve(__dirname, '../outside-controller-core/src/index.ts'),
       '@outside/test-player': resolve(__dirname, '../outside-test-player/src/index.ts'),
+      '@outside/inspector-renderer': resolve(
+        __dirname,
+        '../outside-inspector-renderer/src/index.ts'
+      ),
       '@outside/simulator': resolve(__dirname, '../outside-simulator/src/index.ts'),
+      'pixi.js': resolve(__dirname, 'node_modules/pixi.js/lib/index.js'),
     },
   },
   server: {

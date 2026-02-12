@@ -5,10 +5,9 @@ import { PNG } from 'pngjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const repoRoot = path.resolve(__dirname, '../../..');
 const outputDir = path.resolve(__dirname, '../src/pointers');
 
-const SOURCE_SHEET = path.resolve(repoRoot, 'agent-collab/light_cursor_spritesheet.png');
+const SOURCE_SHEET = path.resolve(__dirname, '../sources/pointers/light_cursor_spritesheet.png');
 const OUTPUT_SHEET_NAME = 'light_cursor_spritesheet.png';
 const OUTPUT_CURSOR_NAME = 'cursor-default.png';
 const RETRIEVED_AT_ISO = '2026-02-10T00:00:00.000Z';
@@ -120,7 +119,7 @@ function buildManifest() {
     },
     pointers,
     notes: [
-      'Source spritesheet copied from agent-collab/light_cursor_spritesheet.png.',
+      'Source spritesheet copied from packages/resourcePacks/sources/pointers/light_cursor_spritesheet.png.',
       'Sheet interpreted as a 7x7 grid of 16x16 cursor cells.',
       'A default cursor asset is extracted from cell r0c0 for CSS cursor usage.',
     ],

@@ -185,7 +185,7 @@ export const pixelLandsDungeonsPack = {
     }
   ],
   "notes": [
-    "Atlas is copied from agent-collab/Pixel Lands Dungeons Demo/dungeons_demo.png.",
+    "Atlas is copied from packages/resourcePacks/sources/pixel-lands-dungeons/dungeons_demo.png.",
     "Tile size is 16x16 with no padding.",
     "Source coordinates are interpreted as [row, column].",
     "Renderer-side weighted selection uses 75% base tile and 25% variant tiles.",

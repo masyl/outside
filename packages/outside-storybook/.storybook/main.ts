@@ -40,7 +40,12 @@ const config: StorybookConfig = {
           '@outside/controller-core': resolve(rootDir, '../outside-controller-core/src/index.ts'),
           '@outside/test-player': resolve(rootDir, '../outside-test-player/src/index.ts'),
           '@outside/simulator': resolve(rootDir, '../outside-simulator/src/index.ts'),
+          '@outside/inspector-renderer': resolve(
+            rootDir,
+            '../outside-inspector-renderer/src/index.ts'
+          ),
           '@outside/renderer': resolve(rootDir, '../outside-renderer/src/index.ts'),
+          'pixi.js': resolve(rootDir, 'node_modules/pixi.js/lib/index.js'),
         },
       },
       optimizeDeps: {
@@ -48,6 +53,7 @@ const config: StorybookConfig = {
           '@outside/controller-core',
           '@outside/test-player',
           '@outside/simulator',
+          '@outside/inspector-renderer',
           '@outside/renderer',
         ],
         esbuildOptions: {

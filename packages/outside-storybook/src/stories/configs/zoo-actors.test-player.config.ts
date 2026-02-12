@@ -19,6 +19,7 @@ export const ZOO_ACTORS_TEST_PLAYER_CONFIG = defineTestPlayerConfig({
   showInspectorWallOutlines: false,
   showInspectorPathfindingPaths: false,
   showInspectorPhysicsShapes: false,
+  physics3dRuntimeMode: 'lua',
   onClickAction: 'jump-random',
   controller: {
     enabled: true,

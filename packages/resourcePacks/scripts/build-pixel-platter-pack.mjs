@@ -5,8 +5,7 @@ import { PNG } from 'pngjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const repoRoot = path.resolve(__dirname, '../../..');
-const sourceDir = path.resolve(repoRoot, 'agent-collab/Pixel Platter');
+const sourceDir = path.resolve(__dirname, '../sources/pixel-platter');
 const outputDir = path.resolve(__dirname, '../src/pixel-platter');
 
 const TILE_SIZE = 16;
@@ -160,7 +159,7 @@ function buildAtlasAndManifest() {
       foodVariants,
       itemsFromHomepage,
       notes: [
-        'Atlas generated from source PNG files in agent-collab/Pixel Platter.',
+        'Atlas generated from source PNG files in packages/resourcePacks/sources/pixel-platter.',
         'Each frame occupies a 16x16 tile with 2px outer padding per cell.',
         'Sprites smaller than 16x16 are horizontally centered and aligned 2px above tile bottom.',
       ],

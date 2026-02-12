@@ -21,6 +21,7 @@ export const ZOO_POINTERS_TEST_PLAYER_CONFIG = defineTestPlayerConfig({
   showInspectorWallOutlines: false,
   showInspectorPathfindingPaths: false,
   showInspectorPhysicsShapes: false,
+  physics3dRuntimeMode: 'lua',
   controller: {
     enabled: true,
     pollFps: 60,

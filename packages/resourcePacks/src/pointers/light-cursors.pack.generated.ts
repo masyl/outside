@@ -812,7 +812,7 @@ export const lightCursorsPack = {
     }
   ],
   "notes": [
-    "Source spritesheet copied from agent-collab/light_cursor_spritesheet.png.",
+    "Source spritesheet copied from packages/resourcePacks/sources/pointers/light_cursor_spritesheet.png.",
     "Sheet interpreted as a 7x7 grid of 16x16 cursor cells.",
     "A default cursor asset is extracted from cell r0c0 for CSS cursor usage."
   ]

@@ -1,4 +1,4 @@
-import type { createWorld, Physics3dTuning } from '@outside/simulator';
+import type { createWorld, Physics3dRuntimeMode, Physics3dTuning } from '@outside/simulator';
 
 export type TestPlayerAct = 'idle' | 'wander' | 'rotate' | 'jump' | 'follow' | 'follow-mouse';
 
@@ -73,6 +73,7 @@ export interface TestPlayerProps {
   showInspectorPhysicsShapes?: boolean;
   inspector?: boolean;
   onClickAction?: TestPlayerOnClickAction;
+  physics3dRuntimeMode?: Physics3dRuntimeMode;
   physics3dTuning?: Partial<Physics3dTuning>;
   controller?: TestPlayerControllerConfig;
 }

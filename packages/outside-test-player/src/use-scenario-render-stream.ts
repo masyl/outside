@@ -42,6 +42,7 @@ import {
   query,
   runTics,
   type PathfindingDebugPath,
+  type Physics3dRuntimeMode,
   type Physics3dTuning,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
@@ -68,6 +69,7 @@ interface DynamicScenarioStreamOptions extends BaseScenarioStreamOptions {
   mode: 'dynamic';
   botCount: number;
   spawnOptions?: TestPlayerSpawnOptions;
+  physics3dRuntimeMode?: Physics3dRuntimeMode;
   physics3dTuning?: Partial<Physics3dTuning>;
   ticsPerSecond: number;
   spawnFn: TestPlayerSpawnFn;
@@ -384,6 +386,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
         options.spawnOptions?.actorAct ?? '',
         options.spawnOptions?.actorPace ?? '',
         options.spawnOptions?.pointerVariant ?? '',
+        options.physics3dRuntimeMode ?? 'lua',
       ].join(':');
     }
     return `static:${options.seed}:${options.buildWorld.name}`;
@@ -419,6 +422,7 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
         ? createWorld({
             seed: options.seed,
             ticDurationMs: 1000 / Math.max(1, options.ticsPerSecond),
+            physics3dRuntimeMode: options.physics3dRuntimeMode,
           })
         : createWorld({
             seed: options.seed,

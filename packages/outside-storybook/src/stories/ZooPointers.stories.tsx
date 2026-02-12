@@ -51,6 +51,12 @@ const meta: Meta<typeof TestPlayer> = {
     kickLiftBouncinessFactor: { table: { disable: true } },
     ballMaxHorizontalSpeed: { table: { disable: true } },
     ballGroundRestitution: { table: { disable: true } },
+    physics3dRuntimeMode: {
+      control: { type: 'select' },
+      options: ['lua', 'ts'],
+      name: 'Physics Runtime',
+      description: 'Select which physics3d runtime executes each tic.',
+    },
     actors: { table: { disable: true } },
     act: { table: { disable: true } },
     pace: { table: { disable: true } },

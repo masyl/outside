@@ -4,8 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const repoRoot = path.resolve(__dirname, '../../..');
-const sourceDir = path.resolve(repoRoot, 'agent-collab/Pixel Lands Dungeons Demo');
+const sourceDir = path.resolve(__dirname, '../sources/pixel-lands-dungeons');
 const outputDir = path.resolve(__dirname, '../src/pixel-lands-dungeons');
 
 const sourceSheet = path.resolve(sourceDir, 'dungeons_demo.png');
@@ -180,7 +179,7 @@ function buildManifest() {
       sourceCell: tile.sourceCell,
     })),
     notes: [
-      'Atlas is copied from agent-collab/Pixel Lands Dungeons Demo/dungeons_demo.png.',
+      'Atlas is copied from packages/resourcePacks/sources/pixel-lands-dungeons/dungeons_demo.png.',
       'Tile size is 16x16 with no padding.',
       'Source coordinates are interpreted as [row, column].',
       'Renderer-side weighted selection uses 75% base tile and 25% variant tiles.',
