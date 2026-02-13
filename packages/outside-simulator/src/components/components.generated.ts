@@ -23,6 +23,7 @@ import JumpHeightScale from './JumpHeightScale';
 import Kickable from './Kickable';
 import Kicker from './Kicker';
 import MaxSpeed from './MaxSpeed';
+import MinimapPixel from './MinimapPixel';
 import Observed from './Observed';
 import Obstacle from './Obstacle';
 import ObstacleSize from './ObstacleSize';
@@ -75,6 +76,7 @@ export interface SimulatorComponents {
   Kickable: typeof Kickable;
   Kicker: typeof Kicker;
   MaxSpeed: typeof MaxSpeed;
+  MinimapPixel: typeof MinimapPixel;
   Observed: typeof Observed;
   Obstacle: typeof Obstacle;
   ObstacleSize: typeof ObstacleSize;
@@ -104,4 +106,4 @@ export interface SimulatorComponents {
   WanderPersistence: typeof WanderPersistence;
 }
 
-export { Acceleration, ActualSpeed, Bounciness, Collided, Deceleration, DefaultSpriteKey, DestinationDeadline, Direction, FloorTile, Follow, FollowStopRange, FollowTarget, FollowTightness, Food, Grid, GridResolution, Grounded, Hero, IsViewportFocus, JumpHeightScale, Kickable, Kicker, MaxSpeed, Observed, Obstacle, ObstacleSize, Pointer, PointerKind, PointerTarget, PointerTile, Position, PositionZ, PreviousPosition, RandomWalk, RunningSpeed, Size, SoccerBall, Speed, SpeedBoostOnJump, TargetDirection, TargetPace, VariantSpriteKey, VelocityZ, View, VisualSize, Wait, Walkable, WalkingSpeed, Wander, WanderPersistence };
+export { Acceleration, ActualSpeed, Bounciness, Collided, Deceleration, DefaultSpriteKey, DestinationDeadline, Direction, FloorTile, Follow, FollowStopRange, FollowTarget, FollowTightness, Food, Grid, GridResolution, Grounded, Hero, IsViewportFocus, JumpHeightScale, Kickable, Kicker, MaxSpeed, MinimapPixel, Observed, Obstacle, ObstacleSize, Pointer, PointerKind, PointerTarget, PointerTile, Position, PositionZ, PreviousPosition, RandomWalk, RunningSpeed, Size, SoccerBall, Speed, SpeedBoostOnJump, TargetDirection, TargetPace, VariantSpriteKey, VelocityZ, View, VisualSize, Wait, Walkable, WalkingSpeed, Wander, WanderPersistence };

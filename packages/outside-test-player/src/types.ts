@@ -11,6 +11,9 @@ export type TestPlayerOnClickAction =
   | 'jump-sequence'
   | 'pick-pointer';
 
+export type TestPlayerMinimapShape = 'round' | 'square';
+export type TestPlayerMinimapPlacement = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
 export interface TestPlayerSpawnOptions {
   botCount?: number;
   foodCount?: number;
@@ -73,6 +76,15 @@ export interface TestPlayerProps {
   showInspectorPhysicsShapes?: boolean;
   inspector?: boolean;
   onClickAction?: TestPlayerOnClickAction;
+  showMinimap?: boolean;
+  minimapShape?: TestPlayerMinimapShape;
+  minimapPlacement?: TestPlayerMinimapPlacement;
+  minimapZoomLevel?: number;
+  minimapOpacity?: number;
+  minimapSnapToGrid?: boolean;
+  minimapSizeRatio?: number;
+  minimapPaddingXRatio?: number;
+  minimapPaddingYRatio?: number;
   physics3dRuntimeMode?: Physics3dRuntimeMode;
   physics3dTuning?: Partial<Physics3dTuning>;
   controller?: TestPlayerControllerConfig;

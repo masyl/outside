@@ -45,6 +45,7 @@ import {
   SpeedBoostOnJump,
   DefaultSpriteKey,
   VariantSpriteKey,
+  MinimapPixel,
 } from '../components';
 import {
   TARGET_PACE_RUNNING,
@@ -102,6 +103,7 @@ export function getOrCreateBotPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, PointerTarget);
   addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.bot' }));
   addComponent(world, prefabEid, set(VariantSpriteKey, { value: '' }));
+  addComponent(world, prefabEid, set(MinimapPixel, { r: 132, g: 214, b: 255 }));
   // Wander + WanderPersistence are added per-entity in spawnBot so each bot has its own slot (no prefab inheritance for urge state)
 
   prefabByWorld.set(world, prefabEid);
@@ -153,6 +155,7 @@ export function spawnBot(
   // Always materialize sprite keys on instance so renderer does not depend on IsA copy behavior.
   setComponent(world, eid, DefaultSpriteKey, { value: options?.spriteKey ?? 'actor.bot' });
   setComponent(world, eid, VariantSpriteKey, { value: options?.variantSpriteKey ?? '' });
+  setComponent(world, eid, MinimapPixel, { r: 132, g: 214, b: 255 });
 
   if (options?.x !== undefined || options?.y !== undefined) {
     setComponent(world, eid, Position, {

@@ -36,17 +36,46 @@ const config: StorybookConfig = {
         },
       ],
       resolve: {
-        alias: {
-          '@outside/controller-core': resolve(rootDir, '../outside-controller-core/src/index.ts'),
-          '@outside/test-player': resolve(rootDir, '../outside-test-player/src/index.ts'),
-          '@outside/simulator': resolve(rootDir, '../outside-simulator/src/index.ts'),
-          '@outside/inspector-renderer': resolve(
-            rootDir,
-            '../outside-inspector-renderer/src/index.ts'
-          ),
-          '@outside/renderer': resolve(rootDir, '../outside-renderer/src/index.ts'),
-          'pixi.js': resolve(rootDir, 'node_modules/pixi.js/lib/index.js'),
-        },
+        alias: [
+          {
+            find: '@outside/controller-core',
+            replacement: resolve(rootDir, '../outside-controller-core/src/index.ts'),
+          },
+          {
+            find: '@outside/test-player',
+            replacement: resolve(rootDir, '../outside-test-player/src/index.ts'),
+          },
+          {
+            find: '@outside/simulator',
+            replacement: resolve(rootDir, '../outside-simulator/src/index.ts'),
+          },
+          {
+            find: '@outside/inspector-renderer',
+            replacement: resolve(rootDir, '../outside-inspector-renderer/src/index.ts'),
+          },
+          {
+            find: '@outside/renderer',
+            replacement: resolve(rootDir, '../outside-renderer/src/index.ts'),
+          },
+          {
+            find: /^react\/jsx-runtime$/,
+            replacement: resolve(rootDir, 'node_modules/react/jsx-runtime.js'),
+          },
+          {
+            find: /^react\/jsx-dev-runtime$/,
+            replacement: resolve(rootDir, 'node_modules/react/jsx-dev-runtime.js'),
+          },
+          {
+            find: /^react$/,
+            replacement: resolve(rootDir, 'node_modules/react/index.js'),
+          },
+          {
+            find: /^react-dom$/,
+            replacement: resolve(rootDir, 'node_modules/react-dom/index.js'),
+          },
+          { find: 'pixi.js', replacement: resolve(rootDir, 'node_modules/pixi.js/lib/index.js') },
+        ],
+        dedupe: ['react', 'react-dom'],
       },
       optimizeDeps: {
         exclude: [

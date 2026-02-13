@@ -6,6 +6,8 @@ export type {
   TestPlayerControllerConfig,
   TestPlayerOnClickAction,
   TestPlayerPace,
+  TestPlayerMinimapPlacement,
+  TestPlayerMinimapShape,
   TestPlayerProps,
   TestPlayerSpawnFn,
   TestPlayerSpawnOptions,

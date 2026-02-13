@@ -32,6 +32,7 @@ import {
   SpeedBoostOnJump,
   DefaultSpriteKey,
   VariantSpriteKey,
+  MinimapPixel,
 } from '../components';
 import { TARGET_PACE_STANDING_STILL } from '../pace';
 import type { SimulatorWorld } from '../world';
@@ -79,6 +80,7 @@ export function getOrCreateHeroPrefab(world: SimulatorWorld): number {
   addComponent(world, prefabEid, Kicker);
   addComponent(world, prefabEid, set(DefaultSpriteKey, { value: 'actor.hero' }));
   addComponent(world, prefabEid, set(VariantSpriteKey, { value: '' }));
+  addComponent(world, prefabEid, set(MinimapPixel, { r: 255, g: 255, b: 255 }));
 
   prefabByWorld.set(world, prefabEid);
   return prefabEid;
@@ -108,6 +110,7 @@ export function spawnHero(world: SimulatorWorld, options?: SpawnHeroOptions): nu
   // Always materialize sprite keys on instance so renderer does not depend on IsA copy behavior.
   setComponent(world, eid, DefaultSpriteKey, { value: options?.spriteKey ?? 'actor.hero' });
   setComponent(world, eid, VariantSpriteKey, { value: options?.variantSpriteKey ?? '' });
+  setComponent(world, eid, MinimapPixel, { r: 255, g: 255, b: 255 });
 
   if (options?.x !== undefined || options?.y !== undefined) {
     setComponent(world, eid, Position, {
