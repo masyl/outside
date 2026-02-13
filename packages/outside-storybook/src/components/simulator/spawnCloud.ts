@@ -1092,3 +1092,75 @@ export function spawnScatteredWithLeaders(
     }
   }
 }
+
+/**
+ * Minimal arena: 12x12 room with 1 cat, 1 dog, 1 hero, 5 fruit.
+ * Used for testing entity accumulation and collision system.
+ */
+export function spawnMinimalArena(world: SimulatorWorld, seed: number, _entityCount: number): void {
+  const width = 12;
+  const height = 12;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+
+  // Create a simple rectangular room
+  const grid: boolean[][] = [];
+  for (let x = 0; x < width; x++) {
+    grid[x] = [];
+    for (let y = 0; y < height; y++) {
+      grid[x][y] = true; // All cells are floor
+    }
+  }
+
+  // Spawn floor tiles
+  const floorCells: Array<{ x: number; y: number }> = [];
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      spawnFloorTile(world, x + offsetX, y + offsetY, true);
+      floorCells.push({ x: x + offsetX + 0.5, y: y + offsetY + 0.5 });
+    }
+  }
+
+  // Spawn walls around the perimeter
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+
+  setCanonSystemFloorCells(world, floorCells);
+
+  // Hero at center
+  const heroX = offsetX + width / 2;
+  const heroY = offsetY + height / 2;
+  const heroEid = spawnHero(world, { x: heroX, y: heroY });
+  setViewportFollowTarget(world, heroEid);
+
+  // 1 Cat at (left, top)
+  spawnCat(world, {
+    x: offsetX + 3,
+    y: offsetY + 3,
+    directionRad: 0,
+    urge: 'wander',
+  });
+
+  // 1 Dog at (right, top)
+  spawnDog(world, {
+    x: offsetX + width - 3,
+    y: offsetY + 3,
+    directionRad: Math.PI,
+    urge: 'wander',
+  });
+
+  // 5 fruit scattered around
+  const fruitVariants = [
+    foodVariantIds[0],
+    foodVariantIds[5],
+    foodVariantIds[10],
+    foodVariantIds[15],
+    foodVariantIds[20],
+  ];
+  for (let i = 0; i < fruitVariants.length; i++) {
+    const angle = (Math.PI * 2 * i) / fruitVariants.length;
+    const dist = 2;
+    const fx = heroX + Math.cos(angle) * dist;
+    const fy = heroY + Math.sin(angle) * dist;
+    spawnFood(world, { x: fx, y: fy, variant: fruitVariants[i] });
+  }
+}
