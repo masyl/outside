@@ -4,20 +4,14 @@
 local host = __canon_host
 
 local projectiles = host.list_projectiles()
-host.log_projectile_count(#projectiles)
-
-local despawned_count = 0
-local collided_count = 0
 
 for i = 1, #projectiles do
   local eid = projectiles[i]
   local should_despawn = false
-  local collided = host.has_collided(eid)
 
   -- Despawn if explicitly marked as collided
-  if collided == 1 then
+  if host.has_collided(eid) == 1 then
     should_despawn = true
-    collided_count = collided_count + 1
   end
 
   -- SAFETY: Also despawn ALL projectiles periodically to prevent accumulation.
@@ -29,8 +23,5 @@ for i = 1, #projectiles do
 
   if should_despawn then
     host.despawn_projectile(eid)
-    despawned_count = despawned_count + 1
   end
 end
-
-host.log_despawn_summary(despawned_count, collided_count)

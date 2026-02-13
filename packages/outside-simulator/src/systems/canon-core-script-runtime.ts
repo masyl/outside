@@ -476,20 +476,7 @@ function createRuntimeState(world: SimulatorWorld): CanonRuntimeState {
 
   setTrackedHostFunction('list_projectiles', (state) => {
     const projectiles = query(world, [Projectile]);
-    const projectileArray = Array.from(projectiles);
-
-    // Log first few projectiles to verify they have Projectile component
-    if (projectileArray.length > 0) {
-      const sample = projectileArray.slice(0, Math.min(3, projectileArray.length));
-      sample.forEach(eid => {
-        const hasProj = hasComponent(world, eid, Projectile);
-        const hasPos = hasComponent(world, eid, Position);
-        const hasCollided = hasComponent(world, eid, Collided);
-        (globalThis as any).console?.log(`[list_projectiles] eid=${eid} Projectile=${hasProj} Position=${hasPos} Collided=${hasCollided}`);
-      });
-    }
-
-    pushIntArray(state, projectileArray);
+    pushIntArray(state, Array.from(projectiles));
     return 1;
   });
 
@@ -634,27 +621,6 @@ function createRuntimeState(world: SimulatorWorld): CanonRuntimeState {
     removeComponent(world, eid, Obstacle);
     removeComponent(world, eid, Projectile);
     removeEntity(world, eid);
-    return 0;
-  });
-
-  setTrackedHostFunction('log_projectile_count', (state) => {
-    const count = Math.trunc(luaApi.lua_tonumber(state, 1));
-    const allEntitiesWithCollided = query(world, [Collided]);
-    const actualProjectiles = query(world, [Projectile]);
-    (globalThis as any).console?.log(
-      `[despawn_projectiles] Projectiles found: ${count}, ` +
-      `Actual Projectile components: ${actualProjectiles.length}, ` +
-      `All Collided components: ${allEntitiesWithCollided.length}`
-    );
-    return 0;
-  });
-
-  setTrackedHostFunction('log_despawn_summary', (state) => {
-    const despawnedCount = Math.trunc(luaApi.lua_tonumber(state, 1));
-    const collidedCount = Math.trunc(luaApi.lua_tonumber(state, 2));
-    (globalThis as any).console?.log(
-      `[despawn_projectiles] Despawned: ${despawnedCount}, Were collided: ${collidedCount}`
-    );
     return 0;
   });
 
