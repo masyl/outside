@@ -1,7 +1,6 @@
 ---
 Title: Simulator Based Status bar
 Category: Rendering
-DeliveryLink: /deliveries/2026-02-13-0658-simulator-based-status-bar/
 ---
 
 # Simulator Based Status bar
