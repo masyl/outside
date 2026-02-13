@@ -245,6 +245,19 @@ function eventToPayload(event: SimulatorEvent): EventScriptPayload {
       entityB: event.entityB,
     };
   }
+  if (event.type === 'food_loaded_in_canon') {
+    return {
+      canonEntity: event.canonEntity,
+      foodEntity: event.foodEntity,
+    };
+  }
+  if (event.type === 'projectile_fired') {
+    return {
+      shooterEntity: event.shooterEntity,
+      projectileEntity: event.projectileEntity,
+      foodEntity: event.foodEntity,
+    };
+  }
   return {
     entity: event.entity,
     foodEntity: event.foodEntity,

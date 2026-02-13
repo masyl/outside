@@ -20,6 +20,9 @@ import {
   JumpHeightScale,
   SpeedBoostOnJump,
   setPointerSpriteKey,
+  spawnCat,
+  spawnDog,
+  setCanonSystemFloorCells,
 } from '@outside/simulator';
 import type { SimulatorWorld } from '@outside/simulator';
 import { foodVariantIds, type FoodVariantId } from '@outside/resource-packs/pixel-platter/meta';
@@ -839,6 +842,75 @@ export function spawnDungeonWithFoodAndHero(
     const x = p.x + offsetX + 0.5;
     const y = p.y + offsetY + 0.5;
     spawnFood(world, { x, y, variant: pickFoodVariant(seed, 300 + i) });
+  }
+}
+
+/**
+ * Food Fight Dungeon: large dungeon with cats vs dogs armed with food canons.
+ * All 22 food variants spawned as pickups; hero starts neutral.
+ * Pick up food to load your canon, then press F / R2 to fire.
+ */
+export function spawnFoodFightDungeon(
+  world: SimulatorWorld,
+  seed: number,
+  _entityCount: number
+): void {
+  const width = 100;
+  const height = 70;
+  const offsetX = -width / 2;
+  const offsetY = -height / 2;
+  const { grid, roomCells } = generateDungeon(width, height, seed);
+
+  const floorCells: Array<{ x: number; y: number }> = [];
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      if (grid[x][y]) {
+        spawnFloorTile(world, x + offsetX, y + offsetY, true);
+        floorCells.push({ x: x + offsetX + 0.5, y: y + offsetY + 0.5 });
+      }
+    }
+  }
+  spawnWallsAroundFloor(world, grid, width, height, offsetX, offsetY);
+  if (roomCells.length === 0) return;
+
+  setCanonSystemFloorCells(world, floorCells);
+
+  // Hero
+  const heroCell = pickRoomCell(roomCells, seed, 2000);
+  const heroCellKey = key(heroCell.x, heroCell.y);
+  const blockedCells = new Set([heroCellKey]);
+  const heroX = heroCell.x + offsetX + 0.5;
+  const heroY = heroCell.y + offsetY + 0.5;
+  const heroEid = spawnHero(world, { x: heroX, y: heroY });
+  setViewportFollowTarget(world, heroEid);
+
+  // Cats (faction=cat, hostile to dogs)
+  const catCount = 6;
+  for (let i = 0; i < catCount; i++) {
+    const p = pickRoomCell(roomCells, seed, 3000 + i, blockedCells);
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, 4000 + i) * Math.PI * 2;
+    spawnCat(world, { x: cx, y: cy, directionRad: angle, urge: 'wander' });
+  }
+
+  // Dogs (faction=dog, hostile to cats)
+  const dogCount = 6;
+  for (let i = 0; i < dogCount; i++) {
+    const p = pickRoomCell(roomCells, seed, 5000 + i, blockedCells);
+    const cx = p.x + offsetX + 0.5;
+    const cy = p.y + offsetY + 0.5;
+    const angle = seededUnit(seed, 6000 + i) * Math.PI * 2;
+    spawnDog(world, { x: cx, y: cy, directionRad: angle, urge: 'wander' });
+  }
+
+  // All 22 food variants as pickups, one of each
+  const allFoodVariants = foodVariantIds;
+  for (let i = 0; i < allFoodVariants.length; i++) {
+    const p = pickRoomCell(roomCells, seed, 7000 + i, blockedCells);
+    const fx = p.x + offsetX + 0.5;
+    const fy = p.y + offsetY + 0.5;
+    spawnFood(world, { x: fx, y: fy, variant: allFoodVariants[i] });
   }
 }
 

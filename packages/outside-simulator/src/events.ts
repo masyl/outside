@@ -24,4 +24,24 @@ export interface ConsumedEvent {
   y: number;
 }
 
-export type SimulatorEvent = CollisionEvent | ConsumedEvent;
+/**
+ * Food loaded into canon: a bot with a FoodCanon walked over a food entity.
+ * The food is hidden (not deleted) and linked to the canon.
+ */
+export interface FoodLoadedInCanonEvent {
+  type: 'food_loaded_in_canon';
+  canonEntity: number;
+  foodEntity: number;
+}
+
+/**
+ * Projectile fired: a canon entity spawned a food projectile.
+ */
+export interface ProjectileFiredEvent {
+  type: 'projectile_fired';
+  shooterEntity: number;
+  projectileEntity: number;
+  foodEntity: number;
+}
+
+export type SimulatorEvent = CollisionEvent | ConsumedEvent | FoodLoadedInCanonEvent | ProjectileFiredEvent;

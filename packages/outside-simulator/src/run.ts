@@ -14,6 +14,7 @@ import type { SimulatorWorld } from './world';
 import { runExternalSystemHook, type CoreSystemHookTarget } from './system-script-hooks';
 import { runQueuedCommandScripts } from './command-scripts';
 import { runQueuedEventScripts } from './event-scripts';
+import { runCanonSystemFromCoreScript } from './systems/canon-core-script-runtime';
 
 function nowMs(): number {
   return Date.now();
@@ -41,6 +42,7 @@ const physicsPipeline = (world: SimulatorWorld) => {
     world.physics3dRuntimeMetrics.ticCountMeasured += 1;
   });
   runSystemWithHooks(world, 'consumption', () => consumptionSystem(world));
+  runCanonSystemFromCoreScript(world);
   runQueuedEventScripts(world);
   runQueuedCommandScripts(world);
 

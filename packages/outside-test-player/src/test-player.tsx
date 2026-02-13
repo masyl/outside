@@ -83,9 +83,11 @@ export function TestPlayer({
   const controllerPollFps = controller?.pollFps ?? 60;
   const controllerGamepadIndex = controller?.gamepadIndex;
   const controllerShowDeviceSelector = controller?.showDeviceSelector !== false;
-  const [controllerSelection, setControllerSelection] = useState<ControllerSelection>(() =>
-    controllerGamepadIndex != null ? controllerGamepadIndex : 'none'
-  );
+  const [controllerSelection, setControllerSelection] = useState<ControllerSelection>(() => {
+    if (controllerGamepadIndex != null) return controllerGamepadIndex;
+    if (controllerEnabled) return 'auto';
+    return 'none';
+  });
   const [availableGamepads, setAvailableGamepads] = useState<Array<{ index: number; id: string }>>(
     []
   );

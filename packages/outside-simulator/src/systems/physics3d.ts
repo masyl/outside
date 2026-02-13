@@ -586,8 +586,18 @@ function emitDynamicCollisionEvents(world: SimulatorWorld, state: Physics3dState
       entityB: eidB,
     } satisfies CollisionEvent);
 
-    setComponent(world, eidA, Collided, { ticksRemaining: 2 });
-    setComponent(world, eidB, Collided, { ticksRemaining: 2 });
+    // Only mark DYNAMIC entities as Collided (not static terrain/walls)
+    // Static obstacles have ObstacleSize but no VelocityZ
+    const eidAIsDynamic = hasComponent(world, eidA, VelocityZ);
+    const eidBIsDynamic = hasComponent(world, eidB, VelocityZ);
+
+    if (eidAIsDynamic) {
+      setComponent(world, eidA, Collided, { ticksRemaining: 2 });
+    }
+    if (eidBIsDynamic) {
+      setComponent(world, eidB, Collided, { ticksRemaining: 2 });
+    }
+
     applyKickImpulseForPair(world, eidA, eidB, contact.bi, contact.bj);
     applyBallRecoilForPair(world, eidA, eidB, contact.bi, contact.bj);
     applyBotCollisionShove(world, eidA, eidB, contact.bi, contact.bj);

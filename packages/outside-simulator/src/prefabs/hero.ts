@@ -32,8 +32,12 @@ import {
   SpeedBoostOnJump,
   DefaultSpriteKey,
   VariantSpriteKey,
+  FoodCanon,
+  Faction,
+  ShootIntent,
 } from '../components';
 import { TARGET_PACE_STANDING_STILL } from '../pace';
+import { FACTION_NEUTRAL } from '../faction';
 import type { SimulatorWorld } from '../world';
 
 const prefabByWorld = new WeakMap<SimulatorWorld, number>();
@@ -120,6 +124,13 @@ export function spawnHero(world: SimulatorWorld, options?: SpawnHeroOptions): nu
   setComponent(world, eid, VelocityZ, { z: 0 });
   setComponent(world, eid, Grounded, { value: 1 });
   setComponent(world, eid, TargetPace, { value: TARGET_PACE_STANDING_STILL });
+
+  addComponent(world, eid, FoodCanon);
+  setComponent(world, eid, FoodCanon, { loadedFoodEid: 0, ammoRemaining: 0 });
+  addComponent(world, eid, Faction);
+  setComponent(world, eid, Faction, { value: FACTION_NEUTRAL });
+  addComponent(world, eid, ShootIntent);
+  setComponent(world, eid, ShootIntent, { value: 0 });
 
   return eid;
 }

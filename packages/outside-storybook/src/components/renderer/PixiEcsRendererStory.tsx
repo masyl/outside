@@ -273,6 +273,16 @@ export function PixiEcsRendererStory({
         });
         return;
       }
+      if (event.code === 'KeyF') {
+        const shot = stream.triggerHeroShoot();
+        console.log('[PixiEcsRendererStory] hero shoot', {
+          triggeredBy: 'F key',
+          triggered: shot.triggered,
+          targetEid: shot.targetEid,
+          reason: shot.reason ?? 'ok',
+        });
+        return;
+      }
       if (event.code !== 'Space') return;
       const jumped = stream.triggerDebugJump();
       console.log('[PixiEcsRendererStory] debug jump', {
@@ -290,7 +300,7 @@ export function PixiEcsRendererStory({
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [stream.toggleFocusedEntityMouseFollowMode, stream.triggerDebugJump]);
+  }, [stream.toggleFocusedEntityMouseFollowMode, stream.triggerDebugJump, stream.triggerHeroShoot]);
 
   useEffect(() => {
     if (!stream.packet) return;

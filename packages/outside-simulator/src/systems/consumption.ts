@@ -1,10 +1,13 @@
 /**
- * Consumption system: when a bot overlaps a food entity, remove the food and emit a consumed event.
+ * Consumption system: when a bot overlaps a food entity:
+ * - If the bot has a FoodCanon with an empty chamber, the food is loaded into the canon
+ *   (hidden, kept alive, linked via FoodCanon.loadedFoodEid). Emits FoodLoadedInCanonEvent.
+ * - Otherwise the food is removed and a ConsumedEvent is emitted (original behaviour).
  * Runs after movement, before obstacle/collision. Food is walk-through (overlap only).
  * @packageDocumentation
  */
 
-import { query, getComponent, removeComponent, removeEntity } from 'bitecs';
+import { query, getComponent, removeComponent, removeEntity, hasComponent } from 'bitecs';
 import {
   Position,
   ObstacleSize,
@@ -16,9 +19,11 @@ import {
   VariantSpriteKey,
   VisualSize,
   Observed,
+  FoodCanon,
+  ShotCount,
 } from '../components';
 import type { SimulatorWorld } from '../world';
-import type { ConsumedEvent } from '../events';
+import type { ConsumedEvent, FoodLoadedInCanonEvent } from '../events';
 
 function distance(x1: number, y1: number, x2: number, y2: number): number {
   return Math.hypot(x2 - x1, y2 - y1);
@@ -33,8 +38,6 @@ interface Consumption {
 
 /**
  * Removes the render-observed components before deleting the entity.
- * This guarantees observer deltas contain component removals so render worlds
- * stop drawing consumed food immediately.
  */
 function clearFoodRenderComponents(world: SimulatorWorld, foodEid: number): void {
   removeComponent(world, foodEid, Food);
@@ -44,6 +47,17 @@ function clearFoodRenderComponents(world: SimulatorWorld, foodEid: number): void
   removeComponent(world, foodEid, VariantSpriteKey);
   removeComponent(world, foodEid, VisualSize);
   removeComponent(world, foodEid, Observed);
+}
+
+/**
+ * Hides a food entity into a canon: removes render/position components but keeps the entity
+ * alive so it can be used as a projectile template and later respawned.
+ */
+function hideFoodIntoCanon(world: SimulatorWorld, foodEid: number): void {
+  removeComponent(world, foodEid, Position);
+  removeComponent(world, foodEid, Size);
+  removeComponent(world, foodEid, Observed);
+  // Keep: Food tag, DefaultSpriteKey, VariantSpriteKey, Bounciness, ProjectileMass, ShotCount
 }
 
 /** Bots (mobile) and food (Position + Size + Food). One food consumed per bot per tic (first overlap). */
@@ -83,15 +97,34 @@ export function consumptionSystem(world: SimulatorWorld): SimulatorWorld {
   }
 
   for (const { botEid, foodEid, x, y } of consumptions) {
-    queue.push({
-      type: 'consumed',
-      entity: botEid,
-      foodEntity: foodEid,
-      x,
-      y,
-    } satisfies ConsumedEvent);
-    clearFoodRenderComponents(world, foodEid);
-    removeEntity(world, foodEid);
+    // If the consumer has an empty FoodCanon, load the food rather than destroying it.
+    if (
+      hasComponent(world, botEid, FoodCanon) &&
+      FoodCanon.loadedFoodEid[botEid] === 0
+    ) {
+      const shotMax = hasComponent(world, foodEid, ShotCount)
+        ? ShotCount.max[foodEid]
+        : 1;
+      FoodCanon.loadedFoodEid[botEid] = foodEid;
+      FoodCanon.ammoRemaining[botEid] = shotMax;
+      ShotCount.remaining[foodEid] = shotMax;
+      hideFoodIntoCanon(world, foodEid);
+      queue.push({
+        type: 'food_loaded_in_canon',
+        canonEntity: botEid,
+        foodEntity: foodEid,
+      } satisfies FoodLoadedInCanonEvent);
+    } else {
+      queue.push({
+        type: 'consumed',
+        entity: botEid,
+        foodEntity: foodEid,
+        x,
+        y,
+      } satisfies ConsumedEvent);
+      clearFoodRenderComponents(world, foodEid);
+      removeEntity(world, foodEid);
+    }
   }
 
   return world;

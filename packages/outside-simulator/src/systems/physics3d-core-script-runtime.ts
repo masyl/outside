@@ -76,6 +76,7 @@ interface LuaStateHandle {
 interface LuaAuxlibHandle {
   luaL_dostring: (L: unknown, source: unknown) => number;
   luaL_newstate: () => unknown;
+  luaL_traceback: (L: unknown, L1: unknown, msg: unknown, level: number) => number;
 }
 
 interface LuaLibHandle {
@@ -85,6 +86,10 @@ interface LuaLibHandle {
 interface Physics3dCoreRuntimeState {
   luaState: unknown;
   phaseOrder: readonly Physics3dPhaseId[];
+  /** Current tic counter for debug context. */
+  currentTic: number;
+  /** Track last few host function calls for debugging. */
+  hostCallHistory: Array<{ name: string; args: unknown[]; timestamp: number }>;
 }
 
 const luaApi = lua as LuaStateHandle;
@@ -138,13 +143,94 @@ function parsePhaseOrder(raw: string): readonly Physics3dPhaseId[] {
   return parsed as Physics3dPhaseId[];
 }
 
-function runLuaChunk(luaState: unknown, source: string, label: string): void {
-  luaApi.lua_settop(luaState, 0);
-  const status = lauxlibApi.luaL_dostring(luaState, to_luastring(source));
-  if (status !== luaApi.LUA_OK) {
-    const message = luaApi.lua_tojsstring(luaState, -1) ?? 'unknown Lua error';
+function extractLuaTraceback(luaState: unknown): string {
+  try {
     luaApi.lua_settop(luaState, 0);
-    throw new Error(`physics3d core script failed (${label}): ${message}`);
+    const errMsg = luaApi.lua_tojsstring(luaState, -1) ?? 'unknown error';
+    lauxlibApi.luaL_traceback(luaState, luaState, to_luastring(errMsg), 1);
+    const traceback = luaApi.lua_tojsstring(luaState, -1) ?? errMsg;
+    return traceback;
+  } catch {
+    return 'traceback extraction failed';
+  }
+}
+
+function snapshotECSState(_world: SimulatorWorld): Record<string, unknown> {
+  // Physics3d debug snapshot - component introspection requires direct access to BitECS stores
+  // which are not easily accessible from this scope. Return basic timing info instead.
+  return {
+    timestamp: Date.now(),
+    note: 'physics3d ECS introspection not available in debug snapshot',
+  };
+}
+
+interface Physics3dDebugSnapshot {
+  system: string;
+  phase: string;
+  tic: number;
+  timestamp: number;
+  luaError: string;
+  luaTraceback: string;
+  ecsState: Record<string, unknown>;
+  hostCallHistory: Array<{ name: string; args: unknown[]; timestamp: number }>;
+}
+
+function runLuaChunk(
+  luaState: unknown,
+  source: string,
+  label: string,
+  runtime?: Physics3dCoreRuntimeState,
+  world?: SimulatorWorld
+): void {
+  try {
+    luaApi.lua_settop(luaState, 0);
+    const status = lauxlibApi.luaL_dostring(luaState, to_luastring(source));
+    if (status !== luaApi.LUA_OK) {
+      const message = luaApi.lua_tojsstring(luaState, -1) ?? 'unknown Lua error';
+      luaApi.lua_settop(luaState, 0);
+      throw new Error(`physics3d core script failed (${label}): ${message}`);
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const traceback = extractLuaTraceback(luaState);
+    const ecsState = world ? snapshotECSState(world) : { error: 'no world context' };
+
+    const debugSnapshot: Physics3dDebugSnapshot = {
+      system: 'physics3d-core-script-runtime',
+      phase: label,
+      tic: runtime?.currentTic ?? -1,
+      timestamp: Date.now(),
+      luaError: msg,
+      luaTraceback: traceback,
+      ecsState,
+      hostCallHistory: runtime?.hostCallHistory.slice(-10) ?? [],
+    };
+
+    (globalThis as any).console?.error(
+      '%c=== PHYSICS3D SYSTEM FAILURE ===',
+      'font-size: 14px; font-weight: bold; color: red;'
+    );
+    (globalThis as any).console?.error(
+      '%cCopy the object below and paste into issue/debug:',
+      'font-size: 12px; color: #ff6b00;'
+    );
+    (globalThis as any).console?.error(debugSnapshot);
+
+    // Store error globally for UI access (storybook crash reporter)
+    const globalObj = globalThis as any;
+    if (globalObj && typeof globalObj === 'object') {
+      globalObj.__luaError = debugSnapshot;
+    }
+
+    const details = [
+      `Physics3D Phase: ${label}`,
+      `System: physics3d-core-script-runtime`,
+      `Tic: ${debugSnapshot.tic}`,
+      `Lua execution failed`,
+      `Error: ${msg}`,
+      `Traceback:\n${traceback}`,
+    ];
+    throw new Error(details.join('\n'));
   }
 }
 
@@ -550,7 +636,15 @@ function createLuaRuntimeState(world: SimulatorWorld): Physics3dCoreRuntimeState
   lualibApi.luaL_openlibs(luaState);
   createHostApi(luaState, world);
 
-  runLuaChunk(luaState, phaseOrderSource, 'phase_order');
+  // Create a partial runtime object for initialization
+  const partialRuntime: Physics3dCoreRuntimeState = {
+    luaState,
+    phaseOrder: [],
+    currentTic: 0,
+    hostCallHistory: [],
+  };
+
+  runLuaChunk(luaState, phaseOrderSource, 'phase_order', partialRuntime, world);
   if (luaApi.lua_gettop(luaState) < 1 || luaApi.lua_type(luaState, -1) !== luaApi.LUA_TSTRING) {
     throw new Error(
       'physics3d core script must return a newline-delimited string of phase ids'
@@ -568,10 +662,8 @@ function createLuaRuntimeState(world: SimulatorWorld): Physics3dCoreRuntimeState
     }
   }
 
-  return {
-    luaState,
-    phaseOrder,
-  };
+  partialRuntime.phaseOrder = phaseOrder;
+  return partialRuntime;
 }
 
 function getOrCreateRuntimeState(world: SimulatorWorld): Physics3dCoreRuntimeState {
@@ -601,13 +693,15 @@ export function setPhysics3dCoreScriptOverrides(
 
 export function runPhysics3dSystemFromCoreScript(world: SimulatorWorld): SimulatorWorld {
   const runtime = getOrCreateRuntimeState(world);
+  runtime.currentTic++;
+  runtime.hostCallHistory = []; // Clear history each tic for a focused view
   const lastTicMsByPhase = world.physics3dRuntimeMetrics.lastTicMsByPhase;
   const totalMsByPhase = world.physics3dRuntimeMetrics.totalMsByPhase;
   for (let i = 0; i < runtime.phaseOrder.length; i++) {
     const phaseId = runtime.phaseOrder[i];
     const source = getPhaseScriptSource(world, phaseId);
     const startedAt = nowMs();
-    runLuaChunk(runtime.luaState, source, phaseId);
+    runLuaChunk(runtime.luaState, source, phaseId, runtime, world);
     const elapsed = nowMs() - startedAt;
     lastTicMsByPhase[phaseId] = elapsed;
     totalMsByPhase[phaseId] = (totalMsByPhase[phaseId] ?? 0) + elapsed;

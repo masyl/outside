@@ -5,6 +5,8 @@ import {
   FollowTarget,
   FollowTightness,
   Hero,
+  ShootIntent,
+  FoodCanon,
   TargetDirection,
   Pointer,
   DefaultSpriteKey,
@@ -19,6 +21,7 @@ import {
   TARGET_PACE_WALKING_SLOW,
   addComponent,
   addEntity,
+  hasComponent,
   clearEntityPath,
   clearPointerTile,
   configurePhysics3dTuning,
@@ -147,6 +150,11 @@ export interface ScenarioStreamState {
   clearPointer: () => void;
   clearFocusedEntityFollowPoint: () => void;
   isFocusedEntityMouseFollowModeEnabled: () => boolean;
+  triggerHeroShoot: () => {
+    triggered: boolean;
+    targetEid: number | null;
+    reason?: 'not-dynamic' | 'missing-world' | 'no-follow-target' | 'no-canon';
+  };
   triggerDebugJump: () => {
     applied: number;
     targetEid: number | null;
@@ -884,6 +892,24 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       emitImmediatePacket();
     },
     isFocusedEntityMouseFollowModeEnabled: () => focusedFollowModeRef.current.enabled,
+    triggerHeroShoot: () => {
+      if (options.mode !== 'dynamic') {
+        return { triggered: false, targetEid: null, reason: 'not-dynamic' as const };
+      }
+      const world = worldRef.current;
+      if (!world) {
+        return { triggered: false, targetEid: null, reason: 'missing-world' as const };
+      }
+      const targetEid = getViewportFollowTarget(world);
+      if (targetEid == null) {
+        return { triggered: false, targetEid: null, reason: 'no-follow-target' as const };
+      }
+      if (!hasComponent(world, targetEid, FoodCanon)) {
+        return { triggered: false, targetEid, reason: 'no-canon' as const };
+      }
+      setComponent(world, targetEid, ShootIntent, { value: 1 });
+      return { triggered: true, targetEid };
+    },
     triggerDebugJump: () => {
       if (options.mode !== 'dynamic') {
         return { applied: 0, targetEid: null, reason: 'not-dynamic' as const };

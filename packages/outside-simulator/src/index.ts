@@ -83,14 +83,21 @@ export {
   setComponent,
   set,
   addComponent,
+  hasComponent,
   removeComponent,
   removeEntity,
 } from 'bitecs';
 
 export { spawnBot, getOrCreateBotPrefab } from './prefabs/bot';
 export type { SpawnBotOptions } from './prefabs/bot';
+export { spawnCat } from './prefabs/cat';
+export type { SpawnCatOptions } from './prefabs/cat';
+export { spawnDog } from './prefabs/dog';
+export type { SpawnDogOptions } from './prefabs/dog';
 export { spawnHero, getOrCreateHeroPrefab } from './prefabs/hero';
 export type { SpawnHeroOptions } from './prefabs/hero';
+export { setCanonSystemFloorCells, runCanonSystemFromCoreScript } from './systems/canon-core-script-runtime';
+export { FACTION_NEUTRAL, FACTION_CAT, FACTION_DOG, CAT_HOSTILE_MASK, DOG_HOSTILE_MASK } from './faction';
 export { spawnFloorTile, spawnFloorRect, spawnWall } from './prefabs/floor';
 export { spawnFood } from './prefabs/food';
 export type { SpawnFoodOptions } from './prefabs/food';
