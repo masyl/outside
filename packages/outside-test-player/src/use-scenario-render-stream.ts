@@ -28,6 +28,7 @@ import {
   getComponent,
   getPathfindingDebugPaths as getSimulatorPathfindingDebugPaths,
   orderEntityToTile,
+  Observed,
   Position,
   RENDER_SNAPSHOT_COMPONENTS,
   removeComponent,
@@ -1060,15 +1061,9 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
     getEntityCount: () => {
       const world = worldRef.current;
       if (!world) return { total: 0 };
-      // Count all entities in the world by checking the entityMap
-      const entityMap = (world as any).entityMap as Map<number, any> | number[];
-      let totalCount = 0;
-      if (entityMap instanceof Map) {
-        totalCount = entityMap.size;
-      } else if (Array.isArray(entityMap)) {
-        totalCount = entityMap.filter((e) => e != null).length;
-      }
-      return { total: totalCount };
+      // Count entities with Observed component (all significant entities have this)
+      const observedEntities = Array.from(query(world, [Observed]));
+      return { total: observedEntities.length };
     },
   };
 }
