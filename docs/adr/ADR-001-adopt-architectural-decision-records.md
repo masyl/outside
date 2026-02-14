@@ -1,6 +1,9 @@
-# ADR-001: Adopt Architectural Decision Records
+---
+Name: ADR-001: Adopt Architectural Decision Records
+Status: Accepted
+---
 
-**Status:** Accepted
+# ADR-001: Adopt Architectural Decision Records
 
 **Context:**
 

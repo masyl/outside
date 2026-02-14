@@ -1,6 +1,9 @@
-# ADR-003: Select bitECS as Reference ECS Implementation
+---
+Name: ADR-003: Select bitECS as Reference ECS Implementation
+Status: Accepted
+---
 
-**Status:** Accepted
+# ADR-003: Select bitECS as Reference ECS Implementation
 
 **Context:**
 

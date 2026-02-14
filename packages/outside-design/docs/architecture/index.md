@@ -1,10 +1,10 @@
 # Software Architecture
 
-## Architecture Decision Records
+## Latest Decisions
 
-This section documents significant architectural decisions made during the design and development of Outside. These records capture the context, rationale, and implications of major technical choices.
+Recent architectural decisions made for the Outside project. These records capture context, rationale, and implications of major technical choices.
 
-<ADRsList />
+<ADRsList :limit="5" />
 
 ## Ongoing Topics
 
