@@ -467,8 +467,12 @@ export function TestPlayer({
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const count = stream.getEntityCount();
-      setEntityCount(count.total);
+      try {
+        const count = stream.getEntityCount();
+        setEntityCount(count.total);
+      } catch (error) {
+        (globalThis as any).console?.error?.('Error getting entity count:', error);
+      }
     }, 500);
 
     return () => clearInterval(intervalId);
