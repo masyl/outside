@@ -43,8 +43,12 @@ export interface RendererManagerOptions {
   minimap?: RendererManagerMinimapOptions;
 }
 
+export type StatusBarHit =
+  | { kind: 'fullscreen' }
+  | { kind: 'hero'; index: number };
+
 /**
- * Composes primary and minimap renderer instances on a single Pixi application.
+ * Composes primary, minimap, and status-bar renderer instances on a single Pixi application.
  */
 export class RendererManager {
   private readonly app: Application;
@@ -62,6 +66,11 @@ export class RendererManager {
   private minimapViewportOutline: Graphics | null = null;
   private minimapConfig: Required<RendererManagerMinimapOptions>;
 
+  private statusBarRenderer: PixiEcsRenderer | null = null;
+  private statusBarHost: Container | null = null;
+  private statusBarBackground: Graphics | null = null;
+  private statusBarMask: Graphics | null = null;
+
   constructor(app: Application, options: RendererManagerOptions) {
     this.app = app;
     this.assetBaseUrl = options.assetBaseUrl;
@@ -74,6 +83,7 @@ export class RendererManager {
     });
 
     this.syncMinimapRenderer();
+    this.syncStatusBarRenderer();
   }
 
   isBoundTo(app: Application): boolean {
@@ -93,6 +103,10 @@ export class RendererManager {
     this.minimapRenderer?.applyStream(packet);
   }
 
+  applyStatusBarStream(packet: RenderStreamPacket): void {
+    this.statusBarRenderer?.applyStream(packet);
+  }
+
   resetWorld(): void {
     this.mainRenderer.resetWorld();
     this.minimapRenderer?.resetWorld();
@@ -105,6 +119,10 @@ export class RendererManager {
       this.minimapRenderer.setTileSize(this.getMinimapTileSize());
       this.updateMinimapViewportOutline();
     }
+    if (this.statusBarRenderer) {
+      this.statusBarRenderer.setTileSize(tileSize);
+      this.syncStatusBarLayout();
+    }
   }
 
   setViewportSize(width: number, height: number): void {
@@ -112,6 +130,7 @@ export class RendererManager {
     this.viewportHeight = Math.max(1, Math.floor(height));
     this.mainRenderer.setViewportSize(this.viewportWidth, this.viewportHeight);
     this.syncMinimapRendererLayout();
+    this.syncStatusBarLayout();
   }
 
   setViewCenter(worldX: number, worldY: number): void {
@@ -131,6 +150,7 @@ export class RendererManager {
   }
 
   destroy(): void {
+    this.destroyStatusBarRenderer();
     this.destroyMinimapRenderer();
     this.mainRenderer.destroy();
   }
@@ -330,5 +350,104 @@ export class RendererManager {
     this.minimapBackground = null;
     this.minimapMask = null;
     this.minimapViewportOutline = null;
+  }
+
+  // ── Status Bar ──────────────────────────────────────────────────────────────
+
+  /**
+   * Returns the hit type if (screenX, screenY) lands within the status bar strip,
+   * given the current number of hero slots. Returns null if the click is outside.
+   */
+  handleStatusBarClick(screenX: number, screenY: number, heroCount: number): StatusBarHit | null {
+    if (!this.statusBarHost) return null;
+    const tileSize = this.mainTileSize;
+    // The status bar occupies the top tileSize pixels of the viewport.
+    if (screenY < 0 || screenY >= tileSize) return null;
+    if (screenX < 0 || screenX >= this.viewportWidth) return null;
+
+    // Center is set so that world x=0 (fullscreen) is at the rightmost tile.
+    const n = Math.floor(this.viewportWidth / tileSize);
+    const centerX = 0.5 - n / 2;
+    const worldX = centerX + (screenX - this.viewportWidth / 2) / tileSize;
+    const tileHit = Math.round(worldX);
+
+    if (tileHit === 0) return { kind: 'fullscreen' };
+    if (tileHit >= -heroCount && tileHit <= -1) {
+      return { kind: 'hero', index: -tileHit - 1 };
+    }
+    return null;
+  }
+
+  private syncStatusBarRenderer(): void {
+    if (this.statusBarRenderer) return; // Already initialised.
+
+    const host = new Container();
+    host.zIndex = 30; // Above minimap (zIndex 20).
+    host.sortableChildren = true;
+    this.statusBarHost = host;
+
+    const bg = new Graphics();
+    bg.zIndex = 0;
+    setNodeLabel(bg, 'renderer-manager:status-bar:background');
+    this.statusBarBackground = bg;
+
+    const mask = new Graphics();
+    mask.zIndex = 100;
+    this.statusBarMask = mask;
+
+    host.addChild(bg);
+    host.addChild(mask);
+    host.mask = mask;
+    this.app.stage.addChild(host);
+
+    this.statusBarRenderer = new PixiEcsRenderer(this.app, {
+      tileSize: this.mainTileSize,
+      assetBaseUrl: this.assetBaseUrl,
+      stageContainer: host,
+      backgroundEnabled: false,
+      alpha: 1,
+    });
+
+    this.syncStatusBarLayout();
+  }
+
+  private syncStatusBarLayout(): void {
+    if (!this.statusBarRenderer || !this.statusBarHost || !this.statusBarMask) return;
+
+    const tileSize = this.mainTileSize;
+    const vpW = this.viewportWidth;
+    const n = Math.floor(vpW / tileSize);
+
+    // Position the host at the top-left of the viewport.
+    this.statusBarHost.x = 0;
+    this.statusBarHost.y = 0;
+
+    // 50% opaque black background spanning the full width, 1 tile tall.
+    this.statusBarBackground?.clear();
+    this.statusBarBackground?.rect(0, 0, vpW, tileSize);
+    this.statusBarBackground?.fill({ color: 0x000000, alpha: 0.5 });
+
+    // Rectangular mask matching the background.
+    this.statusBarMask.clear();
+    this.statusBarMask.rect(0, 0, vpW, tileSize);
+    this.statusBarMask.fill(0xffffff);
+
+    // The renderer viewport is full-width, 1 tile tall.
+    this.statusBarRenderer.setViewportSize(vpW, tileSize);
+
+    // Center so world x=0 (fullscreen) sits at the rightmost tile.
+    // centerX = 0.5 - n/2  →  world x=0 maps to screenX = vpW - tileSize/2.
+    const centerX = 0.5 - n / 2;
+    this.statusBarRenderer.setViewCenter(centerX, 0);
+  }
+
+  private destroyStatusBarRenderer(): void {
+    this.statusBarRenderer?.destroy();
+    this.statusBarRenderer = null;
+    this.statusBarHost?.removeFromParent();
+    this.statusBarHost?.destroy({ children: true });
+    this.statusBarHost = null;
+    this.statusBarBackground = null;
+    this.statusBarMask = null;
   }
 }

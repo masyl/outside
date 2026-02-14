@@ -11,9 +11,11 @@ import {
 } from '@outside/inspector-renderer';
 import { TestPlayerCanvas } from './pixi-container';
 import { RendererManager } from './renderer-manager';
+import type { StatusBarHit } from './renderer-manager';
 import { createStreamController } from './stream-controller';
 import type { TestPlayerProps } from './types';
 import { useScenarioRenderStream } from './use-scenario-render-stream';
+import { useStatusBarStream } from './use-status-bar-stream';
 
 const EMPTY_FRAME: InspectorFrame = {
   tiles: [],
@@ -102,6 +104,8 @@ export function TestPlayer({
     if (typeof window === 'undefined') return '/sprites';
     return new URL('./sprites', window.location.href).toString().replace(/\/$/, '');
   })();
+
+  const statusBarStream = useStatusBarStream();
 
   const stream = useScenarioRenderStream({
     mode: 'dynamic',
@@ -250,8 +254,45 @@ export function TestPlayer({
     ]
   );
 
+  const handleStatusBarHit = useCallback(
+    (hit: StatusBarHit) => {
+      if (hit.kind === 'fullscreen') {
+        if (typeof document !== 'undefined') {
+          if (!document.fullscreenElement) {
+            void containerRef.current?.requestFullscreen();
+          } else {
+            void document.exitFullscreen();
+          }
+        }
+        return;
+      }
+      if (hit.kind === 'hero') {
+        const spriteKeys = stream.getControllableHeroSpriteKeys();
+        const targetIndex = hit.index;
+        if (targetIndex >= 0 && targetIndex < spriteKeys.length) {
+          // Reset focus to hero 0 (ensureControllerHeroActor picks the first candidate),
+          // then cycle 'next' targetIndex times to land on the desired hero.
+          stream.ensureControllerHeroActor();
+          for (let i = 0; i < targetIndex; i++) {
+            stream.cycleControllerHeroActor('next');
+          }
+        }
+      }
+    },
+    [stream.getControllableHeroSpriteKeys, stream.ensureControllerHeroActor, stream.cycleControllerHeroActor]
+  );
+
   const handlePointerDown = useCallback(
     (screenX: number, screenY: number) => {
+      const statusBarHit = rendererManagerRef.current?.handleStatusBarClick(
+        screenX,
+        screenY,
+        statusBarStream.heroCount
+      );
+      if (statusBarHit != null) {
+        handleStatusBarHit(statusBarHit);
+        return;
+      }
       if (rendererManagerRef.current?.handleMinimapClick(screenX, screenY)) {
         return;
       }
@@ -261,6 +302,8 @@ export function TestPlayer({
       applyWorldAction(worldX, worldY, 'pointer');
     },
     [
+      statusBarStream.heroCount,
+      handleStatusBarHit,
       stream.center.x,
       stream.center.y,
       viewportSize.width,
@@ -577,6 +620,30 @@ export function TestPlayer({
       streamControllerRef.current.setReady('pixi', false);
     };
   }, [rendererReady, stream.streamKey]);
+
+  // Apply status bar stream packets to the renderer.
+  useEffect(() => {
+    if (rendererReady === 0) return;
+    const manager = rendererManagerRef.current;
+    if (!manager) return;
+    const packet = statusBarStream.packet;
+    if (!packet) return;
+    manager.applyStatusBarStream({
+      kind: packet.kind,
+      tic: packet.tic,
+      buffer: packet.buffer,
+    });
+  }, [rendererReady, statusBarStream.packetVersion]);
+
+  // Sync hero sprites from main stream to status bar world once per second.
+  useEffect(() => {
+    const syncNow = () => {
+      statusBarStream.syncHeroes(stream.getControllableHeroSpriteKeys());
+    };
+    syncNow();
+    const intervalId = window.setInterval(syncNow, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [stream.streamKey, stream.getControllableHeroSpriteKeys, statusBarStream.syncHeroes]);
 
   useEffect(() => {
     const manager = rendererManagerRef.current;

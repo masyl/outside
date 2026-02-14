@@ -171,6 +171,7 @@ export interface ScenarioStreamState {
     heroEid: number | null;
     reason?: 'not-dynamic' | 'missing-world' | 'no-actors' | 'single-actor';
   };
+  getControllableHeroSpriteKeys: () => string[];
 }
 
 const ZOO_ROTATION_PERIOD_SEC = 3;
@@ -1027,6 +1028,14 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       setControllerHeroActor(world, nextHeroEid);
       emitImmediatePacket();
       return { switched: nextHeroEid !== currentTarget, heroEid: nextHeroEid };
+    },
+    getControllableHeroSpriteKeys: () => {
+      if (options.mode !== 'dynamic') return [];
+      const world = worldRef.current;
+      if (!world) return [];
+      return controllerActorCandidates(world)
+        .map((eid) => DefaultSpriteKey.value[eid] ?? '')
+        .filter((key) => key.length > 0);
     },
   };
 }
