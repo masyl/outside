@@ -11,8 +11,8 @@
         </div>
       </div>
     </div>
-    <div v-if="showViewAllButton" class="view-all">
-      <a href="/architecture-decisions" class="view-all-button">View all {{ allADRs.length }} decisions →</a>
+    <div v-if="displayedADRs.length > 0" class="view-all">
+      <a href="/architecture-decisions" class="view-all-link">View all architecture decisions →</a>
     </div>
   </div>
 </template>
@@ -39,10 +39,6 @@ const displayedADRs = computed(() => {
     return allADRs.value;
   }
   return allADRs.value.slice(0, props.limit);
-});
-
-const showViewAllButton = computed(() => {
-  return props.limit && allADRs.value.length > props.limit;
 });
 
 const padADRNumber = (num) => {
@@ -120,22 +116,15 @@ const padADRNumber = (num) => {
   border-top: 1px solid var(--vp-c-divider);
 }
 
-.view-all-button {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background-color: var(--vp-c-bg-soft);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 4px;
+.view-all-link {
   color: var(--vp-c-brand-1);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: all 0.2s;
 }
 
-.view-all-button:hover {
-  background-color: var(--vp-c-bg-mute);
-  border-color: var(--vp-c-brand-1);
+.view-all-link:hover {
+  text-decoration: underline;
 }
 
 .empty {
