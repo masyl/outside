@@ -21,7 +21,7 @@
 import { computed } from 'vue';
 import { data as adrsData } from '../../architecture-decisions/adr.data';
 
-defineProps({
+const props = defineProps({
   limit: {
     type: Number,
     default: null
@@ -35,21 +35,19 @@ const allADRs = computed(() => {
 });
 
 const displayedADRs = computed(() => {
-  if (!limit.value) {
+  if (!props.limit) {
     return allADRs.value;
   }
-  return allADRs.value.slice(0, limit.value);
+  return allADRs.value.slice(0, props.limit);
 });
 
 const showViewAllButton = computed(() => {
-  return limit.value && allADRs.value.length > limit.value;
+  return props.limit && allADRs.value.length > props.limit;
 });
 
 const padADRNumber = (num) => {
   return String(num).padStart(3, '0');
 };
-
-const limit = computed(() => $props.limit);
 </script>
 
 <style scoped>
