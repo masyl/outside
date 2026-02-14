@@ -16,6 +16,8 @@ import {
   findPointerVariantById,
   pointersPack,
 } from '@outside/resource-packs/pointers/meta';
+import { statusBarFullscreenUrl } from '@outside/resource-packs/ui-icons/atlas';
+import { STATUS_BAR_FULLSCREEN_SPRITE_KEY } from '@outside/resource-packs/ui-icons/meta';
 import {
   BEIGE_CAT_ANIMATION_LAYOUT,
   BEIGE_CAT_BOT_SPRITE_KEY,
@@ -37,6 +39,7 @@ export function createRendererAssets(): RendererAssets {
   return {
     pointerCursorBySpriteKey: new Map<string, Texture>(),
     foodTextureBySpriteKey: new Map<string, Texture>(),
+    uiTextureBySpriteKey: new Map<string, Texture>(),
     actorVariantSheetBySpriteKey: new Map(),
     tileTextureByKind: {
       floor: { variants: [] },
@@ -138,6 +141,11 @@ export async function loadRendererAssets(
     }
   }
 
+  const statusBarFullscreenTexture = await Assets.load(statusBarFullscreenUrl);
+  setNearestScale(statusBarFullscreenTexture);
+  assets.uiTextureBySpriteKey.clear();
+  assets.uiTextureBySpriteKey.set(STATUS_BAR_FULLSCREEN_SPRITE_KEY, statusBarFullscreenTexture);
+
   const dungeonAtlas = await Assets.load(pixelLandsDungeonsAtlasUrl);
   setNearestScale(dungeonAtlas);
   for (const variant of pixelLandsDungeonsPack.tileVariants) {
@@ -236,11 +244,7 @@ export function getPlaceholderTexture(
       .stroke({ color: 0x0b0d12, width: 2 });
   }
 
-  const texture = renderer.generateTexture(g, {
-    resolution: 1,
-    region: undefined,
-    antialias: false,
-  });
+  const texture = renderer.generateTexture(g);
   setNearestScale(texture);
   assets.placeholders[kind] = texture;
   return texture;

@@ -78,6 +78,15 @@ export function createSpriteForKind(
       sprite.zIndex = 10;
       return sprite;
     }
+    case 'ui': {
+      const texture =
+        assets.uiTextureBySpriteKey.values().next().value ??
+        getPlaceholderTexture(renderer, assets, 'error');
+      const sprite = new Sprite(texture);
+      sprite.roundPixels = true;
+      sprite.zIndex = 5;
+      return sprite;
+    }
     case 'hero': {
       const texture =
         assets.botIdle ?? assets.icons.bot ?? getPlaceholderTexture(renderer, assets, 'bot');
@@ -234,6 +243,23 @@ export function updateSpriteForEntity(
     sprite.height = pointerSize;
     sprite.x = posX * tileSize - pointerHotspotOffsetPx;
     sprite.y = -posY * tileSize - pointerHotspotOffsetPx;
+    return;
+  }
+  if (kind === 'ui') {
+    const texture =
+      (spriteKey ? assets.uiTextureBySpriteKey.get(spriteKey) : undefined) ??
+      getPlaceholderTexture(renderer, assets, 'error');
+    if (sprite.texture !== texture) {
+      sprite.texture = texture;
+      setNearestScale(sprite.texture);
+    }
+    sprite.anchor.set(0.5, 0.5);
+    sprite.rotation = 0;
+    sprite.scale.set(1, 1);
+    sprite.width = tileSize;
+    sprite.height = tileSize;
+    sprite.x = posX * tileSize + tileSize / 2;
+    sprite.y = -(posY + 1) * tileSize + tileSize / 2;
     return;
   }
   if (kind === 'ball') {
@@ -521,7 +547,7 @@ function resolveActorVariantDirectionGroup(
   const directionCount = 8;
   const groupByOctant = buildEightDirectionGroupMap(animation.cardinalDirectionToGroup);
   const tau = Math.PI * 2;
-  const normalized = ((angleRad % tau) + tau) % tau;
+  const normalized = (((angleRad as number) % tau) + tau) % tau;
   const octant = Math.round(normalized / (tau / 8)) % 8;
   return groupByOctant[octant] ?? fallback;
 }

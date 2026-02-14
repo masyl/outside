@@ -23,7 +23,7 @@ describe('jump tic-by-tic pipeline', () => {
     spawnFloorRect(sim, -4, -4, 4, 4, true);
     const heroEid = spawnHero(sim, { x: 0.5, y: 0.5 });
 
-    const snapshot = createSnapshotSerializer(sim, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshot = createSnapshotSerializer(sim, [...RENDER_SNAPSHOT_COMPONENTS]);
     const observer = createRenderObserverSerializer(sim);
     const render = createRenderWorld();
 

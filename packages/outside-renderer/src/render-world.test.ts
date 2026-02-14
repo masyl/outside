@@ -25,7 +25,7 @@ describe('render stream sync', () => {
     spawnFood(simWorld, { x: 0.5, y: -0.5 });
 
     const observer = createRenderObserverSerializer(simWorld);
-    const snapshotSerializer = createSnapshotSerializer(simWorld, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshotSerializer = createSnapshotSerializer(simWorld, [...RENDER_SNAPSHOT_COMPONENTS]);
 
     const renderWorld = createRenderWorld();
     const snapshot = snapshotSerializer();
@@ -47,7 +47,7 @@ describe('render stream sync', () => {
   it('treats snapshot as full replacement state', () => {
     const simWorld = createWorld({ seed: 11, ticDurationMs: 50 });
     const foodEid = spawnFood(simWorld, { x: 0, y: 0 });
-    const snapshotSerializer = createSnapshotSerializer(simWorld, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshotSerializer = createSnapshotSerializer(simWorld, [...RENDER_SNAPSHOT_COMPONENTS]);
 
     const renderWorld = createRenderWorld();
     applyRenderStream(renderWorld, { kind: 'snapshot', buffer: snapshotSerializer(), tic: 0 });
@@ -61,7 +61,7 @@ describe('render stream sync', () => {
   it('streams pointer entity when pointer world position is set', () => {
     const simWorld = createWorld({ seed: 17, ticDurationMs: 50 });
     setPointerWorld(simWorld, 3.25, -2.5);
-    const snapshotSerializer = createSnapshotSerializer(simWorld, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshotSerializer = createSnapshotSerializer(simWorld, [...RENDER_SNAPSHOT_COMPONENTS]);
     const renderWorld = createRenderWorld();
 
     applyRenderStream(renderWorld, { kind: 'snapshot', buffer: snapshotSerializer(), tic: 0 });
