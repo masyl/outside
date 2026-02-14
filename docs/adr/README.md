@@ -19,6 +19,7 @@ We use the MADR (Markdown Architecture Decision Records) format. Each ADR includ
 |---|---|---|
 | [ADR-001](ADR-001-adopt-architectural-decision-records.md) | Adopt Architectural Decision Records | Accepted |
 | [ADR-002](ADR-002-adopt-smithery-for-unified-mcp-and-skill-management.md) | Adopt Smithery for Unified MCP and Skill Management | Accepted |
+| [ADR-003](ADR-003-select-bitecs-as-reference-ecs-implementation.md) | Select bitECS as Reference ECS Implementation | Accepted |
 
 ## Adding a New ADR
 

@@ -1,6 +1,12 @@
-# Software architecture
+# Software Architecture
 
-## Ongoing topics
+## Architecture Decision Records
+
+This section documents significant architectural decisions made during the design and development of Outside. These records capture the context, rationale, and implications of major technical choices.
+
+<ADRsList />
+
+## Ongoing Topics
 
 - [Choosing an ECS Library](./choosing-ecs-library.md)
 - [Open Source Dependencies](./open-source-dependencies.md)
