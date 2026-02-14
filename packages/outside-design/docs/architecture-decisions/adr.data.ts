@@ -34,11 +34,14 @@ export default createContentLoader('../../../docs/adr/*.md', {
           ? page.frontmatter.name.replace(/ – Ȯ$/, '')
           : extractADRTitle(slug);
 
+        // Generate path within the VitePress site (under /adr/ symlink in docs)
+        const adrPath = `/adr/${slug}`;
+
         return {
           adrNumber,
           title,
           status: (page.frontmatter?.status ?? 'Proposed').toString(),
-          path: page.url,
+          path: adrPath,
           slug,
         };
       })
