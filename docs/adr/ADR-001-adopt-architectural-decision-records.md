@@ -1,6 +1,6 @@
 ---
-Name: ADR-001: Adopt Architectural Decision Records
-Status: Accepted
+name: "ADR-001: Adopt Architectural Decision Records"
+status: Accepted
 ---
 
 # ADR-001: Adopt Architectural Decision Records

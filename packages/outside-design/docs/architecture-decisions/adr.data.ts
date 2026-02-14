@@ -37,7 +37,7 @@ export default createContentLoader('../../../docs/adr/*.md', {
         return {
           adrNumber,
           title,
-          status: (page.frontmatter?.Status ?? 'Proposed').toString(),
+          status: (page.frontmatter?.status ?? 'Proposed').toString(),
           path: page.url,
           slug,
         };

@@ -1,6 +1,6 @@
 ---
-Name: ADR-003: Select bitECS as Reference ECS Implementation
-Status: Accepted
+name: "ADR-003: Select bitECS as Reference ECS Implementation"
+status: Accepted
 ---
 
 # ADR-003: Select bitECS as Reference ECS Implementation

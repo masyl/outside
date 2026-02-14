@@ -1,6 +1,6 @@
 ---
-Name: ADR-002: Adopt Smithery for Unified MCP and Skill Management
-Status: Accepted
+name: "ADR-002: Adopt Smithery for Unified MCP and Skill Management"
+status: Accepted
 ---
 
 # ADR-002: Adopt Smithery for Unified MCP and Skill Management
