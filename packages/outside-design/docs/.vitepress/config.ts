@@ -35,6 +35,7 @@ export default defineConfig({
       { text: 'Questions', link: '/questions/' },
       { text: 'Design', link: '/design-process/' },
       { text: 'Architecture', link: '/architecture/' },
+      { text: 'ADRs', link: '/architecture-decisions' },
       { text: 'Dev', link: '/development-process/' },
       { text: 'API', link: '/api/' },
       { text: 'Storybook', link: '/storybook' },
@@ -90,6 +91,12 @@ export default defineConfig({
             { text: 'UI Elements', link: '/components/ui-elements' },
             { text: 'Game Components', link: '/components/game-components' },
           ],
+        },
+      ],
+      '/architecture-decisions': [
+        {
+          text: 'Architecture Decision Records',
+          items: [{ text: 'Overview', link: '/architecture-decisions' }],
         },
       ],
     },

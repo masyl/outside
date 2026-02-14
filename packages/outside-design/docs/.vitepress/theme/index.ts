@@ -3,12 +3,14 @@ import { onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vitepress';
 import DeliveriesList from '../components/DeliveriesList.vue';
 import PitchesList from '../components/PitchesList.vue';
+import ADRsList from '../components/ADRsList.vue';
 
 export default {
   ...DefaultTheme,
   enhanceApp({ app }) {
     app.component('DeliveriesList', DeliveriesList);
     app.component('PitchesList', PitchesList);
+    app.component('ADRsList', ADRsList);
   },
   setup() {
     const route = useRoute();
