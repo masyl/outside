@@ -110,6 +110,7 @@ export class RendererManager {
   resetWorld(): void {
     this.mainRenderer.resetWorld();
     this.minimapRenderer?.resetWorld();
+    this.statusBarRenderer?.resetWorld();
   }
 
   setTileSize(tileSize: number): void {
