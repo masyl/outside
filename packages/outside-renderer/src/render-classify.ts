@@ -13,7 +13,7 @@ import type { RenderWorldState } from './render-world';
 /**
  * Render-layer classification used by sprite/layer selection.
  */
-export type RenderKind = 'floor' | 'wall' | 'bot' | 'hero' | 'food' | 'ball' | 'pointer' | 'error';
+export type RenderKind = 'floor' | 'wall' | 'bot' | 'hero' | 'food' | 'ball' | 'pointer' | 'ui' | 'error';
 
 const SPRITE_KEY_TO_RENDER_KIND = {
   'tile.floor': 'floor',
@@ -53,6 +53,9 @@ export function classifyRenderKind(world: RenderWorldState['world'], eid: number
   if (spriteKey) {
     if (spriteKey.startsWith('ui.cursor.')) {
       return 'pointer';
+    }
+    if (spriteKey.startsWith('ui.status-bar.')) {
+      return 'ui';
     }
     if (spriteKey.startsWith(`${DEFAULT_FOOD_SPRITE_KEY}.`)) {
       return 'food';

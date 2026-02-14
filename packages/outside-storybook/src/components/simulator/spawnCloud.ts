@@ -990,6 +990,50 @@ export function createMetaTileDungeonSpawn(
 }
 
 /**
+ * Small 12×12 dungeon with one wandering dog and one wandering cat. No hero, no food.
+ * Intended for status bar / HUD stories where the game world serves as background.
+ */
+export function spawnSmallDungeonWithDogAndCat(
+  world: SimulatorWorld,
+  seed: number,
+  _entityCount: number
+): void {
+  const width = 12;
+  const height = 12;
+  const xMin = -width / 2;
+  const yMin = -height / 2;
+  const xMax = xMin + width - 1;
+  const yMax = yMin + height - 1;
+
+  spawnFloorRect(world, xMin, yMin, xMax, yMax, true);
+  for (let x = xMin - 1; x <= xMax + 1; x++) {
+    spawnWall(world, x, yMin - 1);
+    spawnWall(world, x, yMax + 1);
+  }
+  for (let y = yMin; y <= yMax; y++) {
+    spawnWall(world, xMin - 1, y);
+    spawnWall(world, xMax + 1, y);
+  }
+
+  const dogAngle = seededUnit(seed, 1) * Math.PI * 2;
+  const catAngle = seededUnit(seed, 2) * Math.PI * 2;
+  spawnBot(world, {
+    x: xMin + 3.5,
+    y: yMin + 3.5,
+    directionRad: dogAngle,
+    urge: 'wander',
+    variantSpriteKey: GOLDEN_RETRIEVER_BOT_SPRITE_KEY,
+  });
+  spawnBot(world, {
+    x: xMax - 3.5,
+    y: yMax - 3.5,
+    directionRad: catAngle,
+    urge: 'wander',
+    variantSpriteKey: BEIGE_CAT_BOT_SPRITE_KEY,
+  });
+}
+
+/**
  * Same scattering algorithm as spawnBotsInWorld; 1 in 5 bots are leaders (Wander), rest Follow that leader.
  */
 export function spawnScatteredWithLeaders(

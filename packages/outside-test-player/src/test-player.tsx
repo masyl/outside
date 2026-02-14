@@ -643,7 +643,7 @@ export function TestPlayer({
     syncNow();
     const intervalId = window.setInterval(syncNow, 1000);
     return () => window.clearInterval(intervalId);
-  }, [stream.streamKey, stream.getControllableHeroSpriteKeys, statusBarStream.syncHeroes]);
+  }, [stream.streamKey, statusBarStream.syncHeroes]); // getControllableHeroSpriteKeys reads a ref — stable, omitted from deps
 
   useEffect(() => {
     const manager = rendererManagerRef.current;

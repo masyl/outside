@@ -83,6 +83,7 @@ export interface RendererAssets {
   pointerCursor?: Texture;
   pointerCursorBySpriteKey: Map<string, Texture>;
   foodTextureBySpriteKey: Map<string, Texture>;
+  uiTextureBySpriteKey: Map<string, Texture>;
   actorVariantSheetBySpriteKey: Map<string, ActorVariantSheet>;
   tileTextureByKind: {
     floor: TileTextureVariantPool;

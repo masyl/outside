@@ -26,7 +26,7 @@
     "@outside/simulator": "workspace:*",
     "bitecs": "^0.4.0",
     "pixi-filters": "^6.1.5",
-    "pixi.js": "^8.7.3"
+    "pixi.js": "^8.16.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3",

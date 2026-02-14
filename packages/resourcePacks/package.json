@@ -60,6 +60,16 @@
       "types": "./dist/pointers/atlas.d.ts",
       "import": "./src/pointers/atlas.ts",
       "default": "./src/pointers/atlas.ts"
+    },
+    "./ui-icons/meta": {
+      "types": "./dist/ui-icons/meta.d.ts",
+      "import": "./src/ui-icons/meta.ts",
+      "default": "./src/ui-icons/meta.ts"
+    },
+    "./ui-icons/atlas": {
+      "types": "./dist/ui-icons/atlas.d.ts",
+      "import": "./src/ui-icons/atlas.ts",
+      "default": "./src/ui-icons/atlas.ts"
     }
   },
   "scripts": {

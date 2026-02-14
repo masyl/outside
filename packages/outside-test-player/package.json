@@ -25,11 +25,11 @@
     "@outside/inspector-renderer": "workspace:*",
     "@outside/renderer": "workspace:*",
     "@outside/simulator": "workspace:*",
-    "pixi.js": "^8.7.3",
-    "react": "^18.2.0"
+    "pixi.js": "^8.16.0",
+    "react": "^19.2.4"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
+    "@types/react": "^19.2.14",
     "typescript": "^5.3.3",
     "vitest": "^4.0.18"
   }
