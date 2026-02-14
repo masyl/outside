@@ -179,6 +179,9 @@ export interface ScenarioStreamState {
     heroEid: number | null;
     reason?: 'not-dynamic' | 'missing-world' | 'no-actors' | 'single-actor';
   };
+  getEntityCount: () => {
+    total: number;
+  };
 }
 
 const ZOO_ROTATION_PERIOD_SEC = 3;
@@ -1053,6 +1056,19 @@ export function useScenarioRenderStream(options: ScenarioStreamOptions): Scenari
       setControllerHeroActor(world, nextHeroEid);
       emitImmediatePacket();
       return { switched: nextHeroEid !== currentTarget, heroEid: nextHeroEid };
+    },
+    getEntityCount: () => {
+      const world = worldRef.current;
+      if (!world) return { total: 0 };
+      // Count all entities in the world by checking the entityMap
+      const entityMap = (world as any).entityMap as Map<number, any> | number[];
+      let totalCount = 0;
+      if (entityMap instanceof Map) {
+        totalCount = entityMap.size;
+      } else if (Array.isArray(entityMap)) {
+        totalCount = entityMap.filter((e) => e != null).length;
+      }
+      return { total: totalCount };
     },
   };
 }

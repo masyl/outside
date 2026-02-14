@@ -78,6 +78,7 @@ export function TestPlayer({
   const [inspectorFrame, setInspectorFrame] = useState<InspectorFrame>(EMPTY_FRAME);
   const [viewportSize, setViewportSize] = useState({ width: 1, height: 1 });
   const [rendererReady, setRendererReady] = useState(0);
+  const [entityCount, setEntityCount] = useState(0);
 
   const controllerEnabled = controller?.enabled === true;
   const controllerPollFps = controller?.pollFps ?? 60;
@@ -465,6 +466,15 @@ export function TestPlayer({
   }, [stream.streamKey, stream.getPathfindingDebugPaths]);
 
   useEffect(() => {
+    const intervalId = setInterval(() => {
+      const count = stream.getEntityCount();
+      setEntityCount(count.total);
+    }, 500);
+
+    return () => clearInterval(intervalId);
+  }, [stream]);
+
+  useEffect(() => {
     streamControllerRef.current.setReady('inspector', true);
     return () => {
       streamControllerRef.current.setReady('inspector', false);
@@ -628,6 +638,23 @@ export function TestPlayer({
           </select>
         </label>
       ) : null}
+      <div
+        style={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          zIndex: 4,
+          padding: '6px 8px',
+          borderRadius: 8,
+          background: 'rgba(12, 18, 28, 0.86)',
+          color: '#d8e0ea',
+          fontFamily: 'monospace',
+          fontSize: 12,
+          border: '1px solid rgba(216, 224, 234, 0.22)',
+        }}
+      >
+        Entities: {entityCount}
+      </div>
       <InspectorOverlay visible={showInspectorOverlay} pointerEvents="none">
         <InspectorRenderer
           frame={inspectorFrame}
