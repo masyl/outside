@@ -56,6 +56,7 @@ export default defineConfig({
       { text: 'Questions', link: '/questions/' },
       { text: 'Design', link: '/design-process/' },
       { text: 'Architecture', link: '/architecture/' },
+      { text: 'Specs', link: '/specifications/' },
       { text: 'Dev', link: '/development-process/' },
       { text: 'API', link: '/api/' },
       { text: 'Storybook', link: '/storybook' },
@@ -115,6 +116,61 @@ export default defineConfig({
           items: [{ text: 'Overview', link: '/api/' }],
         },
       ],
+      '/specifications/': [
+        {
+          text: 'Specifications',
+          collapsed: false,
+          items: [
+            { text: 'Overview', link: '/specifications/' },
+            { text: 'Glossary', link: '/specifications/glossary' },
+          ],
+        },
+        {
+          text: 'Sprite Rendering System',
+          collapsed: false,
+          items: [
+            { text: 'Bixels', link: '/specifications/bixels' },
+            {
+              text: 'Bixels Details',
+              items: [
+                { text: 'Overview', link: '/specifications/bixels#overview' },
+                { text: 'Core Definition', link: '/specifications/bixels#core-definition' },
+                { text: 'Mathematical Foundation', link: '/specifications/bixels#mathematical-foundation' },
+                { text: 'Bixel Sizes', link: '/specifications/bixels#bixel-sizes' },
+                { text: 'Composition System', link: '/specifications/bixels#composition-system' },
+                { text: 'Use Cases', link: '/specifications/bixels#use-cases' },
+                { text: 'Data Representation', link: '/specifications/bixels#data-representation' },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Algorithms & Techniques',
+          collapsed: false,
+          items: [
+            { text: 'Bixel Line Drawing', link: '/specifications/bixel-line-drawing' },
+            {
+              text: 'Line Drawing Details',
+              items: [
+                { text: 'Overview', link: '/specifications/bixel-line-drawing#overview' },
+                { text: 'Algorithm', link: '/specifications/bixel-line-drawing#algorithm-bixel-bresenham-line' },
+                { text: 'Variations', link: '/specifications/bixel-line-drawing#variations' },
+                { text: 'Use Cases', link: '/specifications/bixel-line-drawing#use-cases' },
+                { text: 'Optimizations', link: '/specifications/bixel-line-drawing#optimization-strategies' },
+              ],
+            },
+          ],
+        },
+        {
+          text: 'Coming Soon',
+          collapsed: true,
+          items: [
+            { text: 'Glyphs', link: '#' },
+            { text: 'Fonts', link: '#' },
+            { text: 'Sprite Rendering Engine', link: '#' },
+          ],
+        },
+      ],
       '/components/': [
         {
           text: 'Components',
@@ -131,6 +187,19 @@ export default defineConfig({
 
     search: {
       provider: 'local',
+    },
+
+    editLink: {
+      pattern: 'https://github.com/masyl/outside/edit/main/packages/outside-design/docs/:path',
+      text: 'Edit this page on GitHub',
+    },
+
+    lastUpdated: {
+      text: 'Last updated',
+      formatOptions: {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      },
     },
   },
 });

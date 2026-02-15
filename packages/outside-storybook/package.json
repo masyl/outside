@@ -14,6 +14,7 @@
     "storybook:clear-cache": "rm -rf node_modules/.cache/storybook node_modules/.cache/vite 2>/dev/null; echo Cache cleared"
   },
   "dependencies": {
+    "@outside/bixel": "workspace:*",
     "@outside/client": "workspace:*",
     "@outside/controller-core": "workspace:*",
     "@outside/core": "workspace:*",

@@ -38,6 +38,10 @@ const config: StorybookConfig = {
       resolve: {
         alias: [
           {
+            find: '@outside/bixel',
+            replacement: resolve(rootDir, '../outside-bixel/src/index.ts'),
+          },
+          {
             find: '@outside/controller-core',
             replacement: resolve(rootDir, '../outside-controller-core/src/index.ts'),
           },

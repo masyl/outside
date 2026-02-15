@@ -1,0 +1,4 @@
+export { BixelLineComparison } from './BixelLineComparison'
+export type { BixelLineComparisonProps, LineConfig } from './BixelLineComparison'
+export { BixelBenchmark } from './BixelBenchmark'
+export type { BixelBenchmarkProps } from './BixelBenchmark'
