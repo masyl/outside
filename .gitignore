@@ -36,6 +36,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+.claude/*
+!.claude/skills/
 .cursor/*
 !.cursor/skills/
 *.swp
