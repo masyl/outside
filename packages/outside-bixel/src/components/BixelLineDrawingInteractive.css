@@ -1,0 +1,249 @@
+.bixel-interactive-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.bixel-interactive-demo .demo-controls {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.bixel-interactive-demo .info-panel {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+.bixel-interactive-demo h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.bixel-interactive-demo .instructions {
+  margin: 0 0 1.5rem 0;
+  padding: 0 0 0 1.5rem;
+  list-style: disc;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.bixel-interactive-demo .instructions li {
+  margin: 0.5rem 0;
+}
+
+.bixel-interactive-demo .instructions strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.bixel-interactive-demo .stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border-left: 3px solid #4ecdc4;
+  margin-bottom: 1rem;
+}
+
+.bixel-interactive-demo .stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bixel-interactive-demo .stat-item .label {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.bixel-interactive-demo .stat-item .value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #4ecdc4;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.bixel-interactive-demo .clear-button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bixel-interactive-demo .clear-button:hover {
+  background: #ff5252;
+}
+
+.bixel-interactive-demo .bixel-canvas {
+  position: relative;
+  background: white;
+  border: 2px solid #333;
+  border-radius: 4px;
+  cursor: crosshair;
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: inline-block;
+}
+
+.bixel-interactive-demo .grid-overlay {
+  pointer-events: none;
+}
+
+.bixel-interactive-demo .grid-line {
+  stroke: #e0e0e0;
+  stroke-width: 0.5;
+  shape-rendering: crispEdges;
+}
+
+.bixel-interactive-demo .line-pixel {
+  fill: #4ecdc4;
+  opacity: 0.8;
+}
+
+.bixel-interactive-demo .line-reference {
+  stroke: rgba(78, 205, 196, 0.3);
+  stroke-width: 0.5;
+  stroke-dasharray: 2,2;
+  pointer-events: none;
+}
+
+.bixel-interactive-demo .selected-tile {
+  fill: #fff59d;
+  opacity: 0.6;
+  stroke: #fbc02d;
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.bixel-interactive-demo .hovered-tile {
+  fill: #b3e5fc;
+  opacity: 0.4;
+  stroke: #0288d1;
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.bixel-interactive-demo .endpoint {
+  fill: white;
+  stroke-width: 2;
+  pointer-events: auto;
+  transition: r 0.2s;
+}
+
+.bixel-interactive-demo .endpoint.start {
+  stroke: #4ecdc4;
+}
+
+.bixel-interactive-demo .endpoint.end {
+  stroke: #ff6b6b;
+}
+
+.bixel-interactive-demo .endpoint:hover {
+  r: 6;
+}
+
+.bixel-interactive-demo .lines-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.bixel-interactive-demo .line-delete-container {
+  position: absolute;
+  pointer-events: auto;
+}
+
+.bixel-interactive-demo .delete-button {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid #ff6b6b;
+  background: white;
+  color: #ff6b6b;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.bixel-interactive-demo .delete-button:hover {
+  background: #ff6b6b;
+  color: white;
+  transform: scale(1.2);
+}
+
+.bixel-interactive-demo .demo-info {
+  background: #e3f2fd;
+  padding: 1rem;
+  border-left: 4px solid #1976d2;
+  border-radius: 4px;
+  color: #0d47a1;
+  font-size: 0.9rem;
+}
+
+.bixel-interactive-demo .demo-info p {
+  margin: 0.5rem 0;
+}
+
+.bixel-interactive-demo .demo-info p:first-child {
+  margin-top: 0;
+}
+
+.bixel-interactive-demo .demo-info p:last-child {
+  margin-bottom: 0;
+}
+
+.bixel-interactive-demo .demo-info strong {
+  color: #0d47a1;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .bixel-interactive-demo {
+    flex-direction: column;
+  }
+
+  .bixel-interactive-demo .demo-controls {
+    flex-direction: column;
+  }
+
+  .bixel-interactive-demo .info-panel {
+    min-width: auto;
+  }
+
+  .bixel-interactive-demo .bixel-canvas {
+    max-width: 100%;
+    width: 256px;
+  }
+}
