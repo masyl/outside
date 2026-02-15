@@ -48,21 +48,30 @@ Rename main to trunk, update all references.
 
 ## Phase 2: CI/CD Pipeline Enhancement
 
-Ensure full CI/CD suite runs on trunk, add security scanning.
+Ensure full CI/CD suite runs on trunk using GitHub Actions, add security scanning.
 
 ### Checklist
 
-- [ ] Identify CI/CD platform in use (GitHub Actions, CircleCI, GitLab CI, other)
-- [ ] List all active workflows (tests, type checks, lint, builds)
-- [ ] Update all workflows to trigger on `trunk` branch pushes
-- [ ] Verify tests run end-to-end on trunk
+- [x] **CI/CD Platform Selected**: GitHub Actions (supports 2,000 minutes/month for private repos)
+- [ ] Review all active GitHub Actions workflows (tests, type checks, lint, builds)
+- [ ] Update all workflows to trigger on `trunk` branch pushes and PRs to `trunk`
+- [ ] Verify tests run end-to-end on trunk (GitHub Actions)
 - [ ] Verify TypeScript type checks pass on trunk
 - [ ] Verify linting passes on trunk
-- [ ] Add SAST (static application security testing) if not present
-- [ ] Add dependency security scanning (e.g., Dependabot, Snyk)
-- [ ] Configure PR checks to block merge if any check fails
-- [ ] Document CI/CD pipeline in `docs/ci-cd/pipeline-overview.md`
+- [ ] Add Dependabot for dependency security scanning
+- [ ] Consider SAST (SonarQube, CodeQL) for code quality analysis
+- [ ] Configure branch protection rules: require all checks to pass before merge
+- [ ] Document CI/CD pipeline in `docs/ci-cd/pipeline-overview.md` with GitHub Actions details
+- [ ] Document test execution strategy: local-first, CI as safety net (see Phase 2 notes below)
 - [ ] **INTEGRATION POINT**: Create PR with CI/CD updates, merge to trunk
+
+### Notes: Test Execution Strategy
+
+Since GitHub Actions provides 2,000 minutes/month for private repos:
+- **Local Testing**: Developers run full test suite locally before pushing (saves CI minutes, faster feedback)
+- **CI/CD Validation**: GitHub Actions serves as automated safety check for environment-specific issues
+- **Budget-Friendly**: With local testing as primary, CI minutes used only for validation, not primary test execution
+- **Optimization**: Use npm/pytest caching in GitHub Actions to minimize workflow runtime
 
 **Completion Criteria**:
 - All checks run on `trunk` pushes
@@ -197,44 +206,61 @@ Implement feature flags to gate incomplete/WIP features.
 
 ## Phase 6: Automated Production Deployment
 
-Deploy to production automatically on trunk merge.
+Deploy to production automatically on trunk merge using Render for backend services.
 
 ### Checklist
 
-- [ ] **Identify deployment target**
-  - [ ] Where does production run? (Vercel, Docker, custom infrastructure)
-  - [ ] Access credentials and deployment procedures
+- [x] **Deployment Target Selected**: Render (persistent Node.js services, no cold starts)
+  - [x] Render supports long-running game simulations and stateful backends (unlike serverless)
+  - [x] No function timeouts (100+ minutes for requests vs 60s on Vercel)
+  - [x] Web services and background workers for async processing
+  - [x] See ADR-004 for detailed rationale and alternatives considered
 
-- [ ] **Create deployment workflow**
-  - [ ] GitHub Actions workflow: trigger on `trunk` push
-  - [ ] Or: external deployment trigger (e.g., webhook, scheduled job)
-  - [ ] Workflow steps: build, test, deploy
+- [ ] **Create GitHub Actions deployment workflow**
+  - [ ] GitHub Actions workflow: trigger on `trunk` push after all checks pass
+  - [ ] Workflow steps: build, run tests, deploy to Render
+  - [ ] Use `render deploy` CLI or Render API via `curl`
+  - [ ] Workflow file: `.github/workflows/deploy-render.yml`
 
 - [ ] **Environment configuration**
-  - [ ] Document production environment variables
-  - [ ] Document secrets management (GitHub Secrets, env files, vault)
-  - [ ] Ensure sensitive config is not committed
+  - [ ] Document production environment variables for Render services
+  - [ ] Store secrets in GitHub Secrets (Render API token, database credentials, etc.)
+  - [ ] Map GitHub Secrets to Render environment variables in deployment workflow
+  - [ ] Document which environment variables are service-critical
+
+- [ ] **Render service setup**
+  - [ ] Create Render web service(s) for game simulation API and other backends
+  - [ ] Configure auto-deploy from GitHub (optional: let GitHub Actions handle it instead)
+  - [ ] Set environment variables and secrets in Render dashboard
+  - [ ] Document Render service IDs and URLs
 
 - [ ] **Health checks and monitoring**
-  - [ ] Define health check endpoint (or checklist of checks)
-  - [ ] Implement health check in deployment workflow
-  - [ ] Wait for health checks to pass before marking deployment done
-  - [ ] Set up alerting on deployment failure (Slack, email, PagerDuty, etc.)
+  - [ ] Define health check endpoint for each Render service (e.g., `/health`)
+  - [ ] Implement health check in GitHub Actions workflow after deployment
+  - [ ] Wait for health checks to pass (3-5 retries with 30s intervals) before marking deployment done
+  - [ ] Set up alerting on deployment failure (Slack, Discord, email)
 
 - [ ] **Automatic rollback on failure**
-  - [ ] If health checks fail, trigger rollback
-  - [ ] Rollback: revert to previous successful deployment or previous trunk commit
-  - [ ] Document rollback process
+  - [ ] If health checks fail, trigger rollback to previous Render deployment
+  - [ ] Use Render API to query previous successful deployment and redeploy it
+  - [ ] Or: use `git revert` to create rollback commit if health checks detect breakage
+  - [ ] Document rollback process and decision tree
 
 - [ ] **Deployment logging and status**
-  - [ ] Log all deployments: commit, timestamp, success/failure, duration
+  - [ ] Log all deployments: commit, timestamp, success/failure, duration, Render deployment ID
   - [ ] Create simple status page or metrics: "Last deployment: X minutes ago, status: OK"
+  - [ ] Include deployment logs in Slack notification for debugging
 
 - [ ] **Notification on deployment**
-  - [ ] When deployment starts: notify (optional, to avoid noise)
-  - [ ] When deployment succeeds: notify with commits included
-  - [ ] When deployment fails: notify with error details
-  - [ ] Notification channels: Slack, Discord, email, etc.
+  - [ ] When deployment starts: notify (optional, to reduce noise)
+  - [ ] When deployment succeeds: notify with commits included and links to services
+  - [ ] When deployment fails: notify with error details and rollback status
+  - [ ] Notification channels: Slack or Discord
+
+- [ ] **Render cost management**
+  - [ ] Monitor Render usage monthly (free tier: ~7.5 days uptime; paid tier: $7+/service/month)
+  - [ ] Document cost breakdown in `docs/operations/deployment-costs.md`
+  - [ ] Set up Render billing alerts to prevent surprise charges
 
 - [ ] Test full deployment pipeline with real trunk commit
 - [ ] Test rollback procedure with intentional health check failure
@@ -434,27 +460,34 @@ This demonstrates the TBD workflow as we implement it.
 
 ### Open Questions Resolved
 
-From the pitch, the following need to be clarified:
+From the pitch, the following have been clarified:
 
-1. **CI/CD Platform**: GitHub Actions / CircleCI / other?
-   - **Assumption**: GitHub Actions (detected from repo)
-   - **Action**: Confirm in Phase 2
+1. **CI/CD Platform**: GitHub Actions
+   - **Decision**: GitHub Actions (Accepted in ADR-004)
+   - **Rationale**: Native GitHub integration, 2,000 minutes/month for private repos (paid plan), industry standard
+   - **Test Strategy**: Local-first (developers run full suite locally), GitHub Actions as safety net
+   - **Budget**: With local testing primary, CI minutes used only for validation, not repeated test execution
+   - **Action**: Implement in Phase 2
 
-2. **Deployment Target**: Vercel / Docker / custom?
-   - **Assumption**: Vercel (common for web projects)
-   - **Action**: Confirm in Phase 6
+2. **Deployment Target**: Render
+   - **Decision**: Render persistent web services (Accepted in ADR-004)
+   - **Rationale**: Purpose-built for long-running processes (game simulations, stateful APIs), no cold starts, 100+ minute request timeouts, free tier for dev
+   - **Why Not Vercel**: Serverless model with strict function timeouts (60s free) incompatible with game simulation servers
+   - **Why Not Fly.io**: Excellent platform but moved to usage-based billing; Render offers clearer cost structure
+   - **Why Not Self-Hosted**: Reduces operational overhead vs managing infrastructure
+   - **Action**: Implement in Phase 6
 
-3. **Feature Flag Implementation**: Config / env / service?
-   - **Recommendation**: Config-based YAML in Phase 5, migrate to service-based later
+3. **Feature Flag Implementation**: Config-based (YAML/JSON)
+   - **Recommendation**: Config-based in Phase 5, migrate to service-based if needed later
    - **Action**: Implement in Phase 5
 
-4. **Breaking Change Detection**: Automatic / manual?
-   - **Recommendation**: Manual (commit message convention) in Phase 4, automate later
+4. **Breaking Change Detection**: Manual (commit convention)
+   - **Recommendation**: Manual detection via commit message convention in Phase 4, automate later
    - **Action**: Implement in Phase 4
 
-5. **Deployment Notification**: Slack / Discord / email?
-   - **Assumption**: Slack (most common)
-   - **Action**: Implement in Phase 6
+5. **Deployment Notification**: Slack or Discord
+   - **Recommendation**: Slack (most common) or Discord for team preference
+   - **Action**: Implement in Phase 6 (configurable)
 
 ### References
 
