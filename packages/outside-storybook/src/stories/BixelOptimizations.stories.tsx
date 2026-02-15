@@ -1,14 +1,9 @@
 import React, { useState, useMemo } from 'react'
 import {
   bresenhamBixelLine,
-  bresenhamPixelLine,
   getBixelPixels,
-  pixelToBixel,
   pixelToBixelFast,
-  bixelToPixelFast,
-  getBixelPixelsFast,
   bresenhamBixelLineFlatArray,
-  getBixelPixelsFlatArray,
   createBixelMemoizer,
   pointsToNumericSet,
   createBitmaskFromPoints,
@@ -52,9 +47,27 @@ interface OptimizationMetrics {
   memoryEstimate: string
 }
 
-interface BenchmarkResults {
-  lineCount: number
-  results: OptimizationMetrics[]
+// Helper: Generate random test lines
+function generateTestLines(count: number, gridSize: number, useRepeats: boolean): Array<{ start: Point; end: Point }> {
+  const lines: Array<{ start: Point; end: Point }> = []
+  for (let i = 0; i < count; i++) {
+    if (useRepeats && i > 0 && i % 100 === 0 && lines.length > 0) {
+      // Repeat first line periodically
+      lines.push(lines[0])
+    } else {
+      lines.push({
+        start: {
+          x: Math.floor(Math.random() * gridSize),
+          y: Math.floor(Math.random() * gridSize),
+        },
+        end: {
+          x: Math.floor(Math.random() * gridSize),
+          y: Math.floor(Math.random() * gridSize),
+        },
+      })
+    }
+  }
+  return lines
 }
 
 const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCount = 5000 }) => {
@@ -65,33 +78,11 @@ const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCoun
     const gridSize = 16
     const results: OptimizationMetrics[] = []
 
-    // Generate test lines
-    const generateLines = (count: number) => {
-      const lines: Array<{ start: Point; end: Point }> = []
-      for (let i = 0; i < count; i++) {
-        if (useRepeatedLines && i > 0 && i % 100 === 0) {
-          // Repeat first line periodically
-          lines.push(lines[0])
-        } else {
-          lines.push({
-            start: {
-              x: Math.floor(Math.random() * gridSize),
-              y: Math.floor(Math.random() * gridSize),
-            },
-            end: {
-              x: Math.floor(Math.random() * gridSize),
-              y: Math.floor(Math.random() * gridSize),
-            },
-          })
-        }
-      }
-      return lines
-    }
-
-    const lines = generateLines(displayLineCount)
+    // Generate main test lines once
+    const lines = generateTestLines(displayLineCount, gridSize, useRepeatedLines)
 
     // 1. Original Implementation
-    (() => {
+    {
       const start = performance.now()
       lines.forEach((line) => {
         bresenhamBixelLine(line.start.x, line.start.y, line.end.x, line.end.y)
@@ -103,14 +94,13 @@ const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCoun
         avgTime: time / displayLineCount,
         memoryEstimate: '~' + Math.round((displayLineCount * 24) / 1024) + 'KB',
       })
-    })()
+    }
 
     // 2. Bitwise Optimized Coordinate Conversion
-    (() => {
+    {
       const start = performance.now()
       lines.forEach((line) => {
         const result = bresenhamBixelLine(line.start.x, line.start.y, line.end.x, line.end.y)
-        // Use the fast bitwise functions
         result.points.forEach((p) => {
           pixelToBixelFast(p.x, p.y)
         })
@@ -122,10 +112,10 @@ const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCoun
         avgTime: time / displayLineCount,
         memoryEstimate: '~' + Math.round((displayLineCount * 24) / 1024) + 'KB',
       })
-    })()
+    }
 
     // 3. Flat Array Representation
-    (() => {
+    {
       const start = performance.now()
       lines.forEach((line) => {
         bresenhamBixelLineFlatArray(line.start.x, line.start.y, line.end.x, line.end.y)
@@ -137,10 +127,10 @@ const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCoun
         avgTime: time / displayLineCount,
         memoryEstimate: '~' + Math.round((displayLineCount * 16) / 1024) + 'KB',
       })
-    })()
+    }
 
     // 4. Memoized Version
-    (() => {
+    {
       const memoizer = createBixelMemoizer()
       const start = performance.now()
       lines.forEach((line) => {
@@ -154,15 +144,15 @@ const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCoun
         avgTime: time / displayLineCount,
         memoryEstimate: '~' + Math.round((stats.size * 24 * 15) / 1024) + 'KB cache',
       })
-    })()
+    }
 
-    // 5. Numeric Set vs String Set
-    (() => {
-      const start = performance.now()
+    // 5. Numeric Set vs String Set (on 100-line sample)
+    {
+      const sampleLines = generateTestLines(100, gridSize, false)
+
       const stringSetTime = (() => {
-        const lines_for_set = generateLines(100)
         const stringStart = performance.now()
-        lines_for_set.forEach((line) => {
+        sampleLines.forEach((line) => {
           const result = bresenhamBixelLine(line.start.x, line.start.y, line.end.x, line.end.y)
           const pixels = new Set<string>()
           result.points.forEach((p) => {
@@ -175,32 +165,28 @@ const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCoun
       })()
 
       const numericSetTime = (() => {
-        const lines_for_set = generateLines(100)
         const numStart = performance.now()
-        lines_for_set.forEach((line) => {
+        sampleLines.forEach((line) => {
           const result = bresenhamBixelLine(line.start.x, line.start.y, line.end.x, line.end.y)
-          pointsToNumericSet(
-            result.points.flatMap((p) => {
-              return getBixelPixels(p.x, p.y)
-            }),
-          )
+          const allPixels = result.points.flatMap((p) => getBixelPixels(p.x, p.y))
+          pointsToNumericSet(allPixels)
         })
         return performance.now() - numStart
       })()
 
-      const speedup = (stringSetTime / numericSetTime).toFixed(2)
+      const speedup = stringSetTime > 0 ? (stringSetTime / numericSetTime).toFixed(2) : '—'
       results.push({
         technique: `Numeric Set (${speedup}x faster)`,
         totalTime: numericSetTime,
         avgTime: numericSetTime / 100,
         memoryEstimate: '50% less overhead',
       })
-    })()
+    }
 
-    // 6. Bitmask for Large Grid
-    (() => {
+    // 6. Bitmask for Large Grid (on 100-line sample)
+    {
+      const sampleLines = generateTestLines(100, gridSize, false)
       const start = performance.now()
-      const sampleLines = generateLines(100)
       const bitmaskPixels = sampleLines.flatMap((line) => {
         const result = bresenhamBixelLine(line.start.x, line.start.y, line.end.x, line.end.y)
         return result.points.flatMap((p) => getBixelPixels(p.x, p.y))
@@ -213,7 +199,7 @@ const BixelOptimizationBenchmark: React.FC<{ lineCount?: number }> = ({ lineCoun
         avgTime: time / 100,
         memoryEstimate: '~' + Math.round(bitmask.length / 1024) + 'KB (90% savings)',
       })
-    })()
+    }
 
     return results
   }, [displayLineCount, useRepeatedLines])
