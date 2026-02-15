@@ -30,6 +30,51 @@
   font-weight: 600;
 }
 
+.bixel-interactive-demo .render-mode-controls {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.bixel-interactive-demo .render-mode-controls label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.bixel-interactive-demo .mode-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bixel-interactive-demo .mode-btn {
+  flex: 1;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  background: white;
+  color: #666;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.bixel-interactive-demo .mode-btn:hover {
+  border-color: #999;
+  color: #333;
+}
+
+.bixel-interactive-demo .mode-btn.active {
+  background: #4ecdc4;
+  color: white;
+  border-color: #4ecdc4;
+}
+
 .bixel-interactive-demo .instructions {
   margin: 0 0 1.5rem 0;
   padding: 0 0 0 1.5rem;
@@ -119,6 +164,16 @@
 .bixel-interactive-demo .line-pixel {
   fill: #4ecdc4;
   opacity: 0.8;
+}
+
+.bixel-interactive-demo .line-pixel.coarse {
+  fill: #4ecdc4;
+  opacity: 0.6;
+}
+
+.bixel-interactive-demo .line-pixel.precise {
+  fill: #ffd93d;
+  opacity: 0.9;
 }
 
 .bixel-interactive-demo .line-reference {

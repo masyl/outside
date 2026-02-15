@@ -14,9 +14,11 @@ interface DragState {
   isDragging: boolean
 }
 
+type RenderMode = 'coarse' | 'precise' | 'both'
+
 /**
  * Interactive bixel line drawing on a 16×16 tile grid
- * Click tiles to draw lines, drag endpoints to modify them
+ * Shows both coarse (tile-level) and precise (pixel-level) line rendering
  */
 export const BixelLineDrawingInteractive: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -24,6 +26,7 @@ export const BixelLineDrawingInteractive: React.FC = () => {
   const [selectedTile, setSelectedTile] = useState<Point | null>(null)
   const [dragState, setDragState] = useState<DragState | null>(null)
   const [hoveredTile, setHoveredTile] = useState<Point | null>(null)
+  const [renderMode, setRenderMode] = useState<RenderMode>('both')
 
   const GRID_SIZE = 16 // 16×16 tiles
   const TILE_SIZE = 16 // pixels per tile
@@ -122,8 +125,8 @@ export const BixelLineDrawingInteractive: React.FC = () => {
     setSelectedTile(null)
   }
 
-  // Compute all pixels for all lines
-  const allLinePixels = useMemo(() => {
+  // Compute coarse line pixels (tile-level)
+  const coarseLinePixels = useMemo(() => {
     const pixelMap = new Set<string>()
 
     lines.forEach((line) => {
@@ -143,6 +146,50 @@ export const BixelLineDrawingInteractive: React.FC = () => {
     return pixelMap
   }, [lines])
 
+  // Compute precise line pixels (pixel-level, 1px thick)
+  const preciseLinePixels = useMemo(() => {
+    const pixelMap = new Set<string>()
+
+    lines.forEach((line) => {
+      // Convert tile coordinates to pixel coordinates (at 4bx scale within the tile)
+      const startPixelX = line.start.x * TILE_SIZE + TILE_SIZE / 2
+      const startPixelY = line.start.y * TILE_SIZE + TILE_SIZE / 2
+      const endPixelX = line.end.x * TILE_SIZE + TILE_SIZE / 2
+      const endPixelY = line.end.y * TILE_SIZE + TILE_SIZE / 2
+
+      // Run bixel algorithm at pixel scale (4bx = 4 pixels)
+      const result = bresenhamBixelLine(
+        Math.floor(startPixelX / 4),
+        Math.floor(startPixelY / 4),
+        Math.floor(endPixelX / 4),
+        Math.floor(endPixelY / 4),
+      )
+
+      // Convert back to pixel coordinates
+      result.points.forEach((bixel) => {
+        for (let dy = 0; dy < 4; dy++) {
+          for (let dx = 0; dx < 4; dx++) {
+            const px = bixel.x * 4 + dx
+            const py = bixel.y * 4 + dy
+            if (px >= 0 && px < CANVAS_SIZE && py >= 0 && py < CANVAS_SIZE) {
+              pixelMap.add(`${px},${py}`)
+            }
+          }
+        }
+      })
+    })
+
+    return pixelMap
+  }, [lines])
+
+  // Select which pixels to render based on mode
+  const displayPixels = useMemo(() => {
+    if (renderMode === 'coarse') return coarseLinePixels
+    if (renderMode === 'precise') return preciseLinePixels
+    // Combine both with different styling
+    return null
+  }, [renderMode, coarseLinePixels, preciseLinePixels])
+
   return (
     <div className="bixel-interactive-demo">
       <div className="demo-controls">
@@ -160,21 +207,52 @@ export const BixelLineDrawingInteractive: React.FC = () => {
             </li>
           </ul>
 
+          <div className="render-mode-controls">
+            <label>Rendering Mode:</label>
+            <div className="mode-buttons">
+              <button
+                className={`mode-btn ${renderMode === 'coarse' ? 'active' : ''}`}
+                onClick={() => setRenderMode('coarse')}
+              >
+                Coarse
+              </button>
+              <button
+                className={`mode-btn ${renderMode === 'precise' ? 'active' : ''}`}
+                onClick={() => setRenderMode('precise')}
+              >
+                Precise
+              </button>
+              <button
+                className={`mode-btn ${renderMode === 'both' ? 'active' : ''}`}
+                onClick={() => setRenderMode('both')}
+              >
+                Both
+              </button>
+            </div>
+          </div>
+
           <div className="stats">
             <div className="stat-item">
               <span className="label">Lines:</span>
               <span className="value">{lines.length}</span>
             </div>
             {lines.length > 0 && (
-              <div className="stat-item">
-                <span className="label">Total Points:</span>
-                <span className="value">
-                  {lines.reduce((sum, line) => {
-                    const result = bresenhamBixelLine(line.start.x, line.start.y, line.end.x, line.end.y)
-                    return sum + result.points.length
-                  }, 0)}
-                </span>
-              </div>
+              <>
+                <div className="stat-item">
+                  <span className="label">Coarse Pixels:</span>
+                  <span className="value">{coarseLinePixels.size}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="label">Precise Pixels:</span>
+                  <span className="value">{preciseLinePixels.size}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="label">Difference:</span>
+                  <span className="value" style={{ color: coarseLinePixels.size > preciseLinePixels.size ? '#ff6b6b' : '#4ecdc4' }}>
+                    {Math.abs(coarseLinePixels.size - preciseLinePixels.size)} pixels
+                  </span>
+                </div>
+              </>
             )}
           </div>
 
@@ -229,20 +307,37 @@ export const BixelLineDrawingInteractive: React.FC = () => {
             </g>
           ))}
 
-          {/* Draw line pixels */}
-          {Array.from(allLinePixels).map((key) => {
-            const [x, y] = key.split(',').map(Number)
-            return (
-              <rect
-                key={`pixel-${key}`}
-                x={x}
-                y={y}
-                width="1"
-                height="1"
-                className="line-pixel"
-              />
-            )
-          })}
+          {/* Draw line pixels - coarse only */}
+          {(renderMode === 'coarse' || renderMode === 'both') &&
+            Array.from(coarseLinePixels).map((key) => {
+              const [x, y] = key.split(',').map(Number)
+              return (
+                <rect
+                  key={`coarse-pixel-${key}`}
+                  x={x}
+                  y={y}
+                  width="1"
+                  height="1"
+                  className={`line-pixel ${renderMode === 'both' ? 'coarse' : ''}`}
+                />
+              )
+            })}
+
+          {/* Draw line pixels - precise only */}
+          {(renderMode === 'precise' || renderMode === 'both') &&
+            Array.from(preciseLinePixels).map((key) => {
+              const [x, y] = key.split(',').map(Number)
+              return (
+                <rect
+                  key={`precise-pixel-${key}`}
+                  x={x}
+                  y={y}
+                  width="1"
+                  height="1"
+                  className={`line-pixel ${renderMode === 'both' ? 'precise' : ''}`}
+                />
+              )
+            })}
 
           {/* Draw line segments (for reference) */}
           {lines.map((line, idx) => {
