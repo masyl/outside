@@ -1,0 +1,198 @@
+.optimization-benchmark {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  background: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.optimization-benchmark .controls {
+  display: flex;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.optimization-benchmark .control-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.optimization-benchmark .control-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+}
+
+.optimization-benchmark input[type='range'] {
+  width: 250px;
+  cursor: pointer;
+}
+
+.optimization-benchmark input[type='checkbox'] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.optimization-benchmark .results-container {
+  background: white;
+  padding: 2rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.optimization-benchmark h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.3rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.optimization-benchmark .results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.optimization-benchmark .results-table thead {
+  background: #f9f9f9;
+  border-bottom: 2px solid #ddd;
+}
+
+.optimization-benchmark .results-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.optimization-benchmark .results-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.optimization-benchmark .results-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.optimization-benchmark .results-table tbody tr.baseline {
+  background: #f0f7ff;
+  font-weight: 600;
+}
+
+.optimization-benchmark .results-table tbody tr.fastest {
+  background: #f0fff4;
+}
+
+.optimization-benchmark .technique-name {
+  font-weight: 600;
+  color: #333;
+  position: relative;
+}
+
+.optimization-benchmark .badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: #cce5ff;
+  color: #0d47a1;
+}
+
+.optimization-benchmark .badge.fastest-badge {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+
+.optimization-benchmark .numeric {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  text-align: right;
+  color: #666;
+}
+
+.optimization-benchmark .numeric.speedup {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #4ecdc4;
+}
+
+.optimization-benchmark .memory {
+  font-size: 0.85rem;
+  color: #888;
+  font-family: monospace;
+}
+
+.optimization-benchmark .insights,
+.optimization-benchmark .recommendations {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.optimization-benchmark .insights {
+  border-left: 4px solid #4ecdc4;
+}
+
+.optimization-benchmark .recommendations {
+  border-left: 4px solid #ffd93d;
+}
+
+.optimization-benchmark h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.optimization-benchmark ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.optimization-benchmark li {
+  margin: 0.5rem 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+.optimization-benchmark strong {
+  color: #333;
+  font-weight: 600;
+}
+
+@media (max-width: 1200px) {
+  .optimization-benchmark .controls {
+    flex-direction: column;
+  }
+
+  .optimization-benchmark input[type='range'] {
+    width: 100%;
+  }
+
+  .optimization-benchmark .results-table {
+    font-size: 0.85rem;
+  }
+
+  .optimization-benchmark .results-table th,
+  .optimization-benchmark .results-table td {
+    padding: 0.75rem;
+  }
+}
