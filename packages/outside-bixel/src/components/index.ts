@@ -3,3 +3,4 @@ export type { BixelLineComparisonProps, LineConfig } from './BixelLineComparison
 export { BixelBenchmark } from './BixelBenchmark'
 export type { BixelBenchmarkProps } from './BixelBenchmark'
 export { BixelLineDrawingInteractive } from './BixelLineDrawingInteractive'
+export { BixelCachedLineDrawingInteractive } from './BixelCachedLineDrawingInteractive'

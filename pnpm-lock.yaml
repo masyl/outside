@@ -47,6 +47,25 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
 
+  packages/outside-bixel:
+    dependencies:
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/react':
+        specifier: ^18.2.0
+        version: 18.3.27
+      '@types/react-dom':
+        specifier: ^18.2.0
+        version: 18.3.7(@types/react@18.3.27)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   packages/outside-client:
     dependencies:
       '@outside/core':
@@ -106,7 +125,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.17
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/outside-core:
     devDependencies:
@@ -115,7 +134,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/outside-design:
     dependencies:
@@ -162,7 +181,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/outside-renderer:
     dependencies:
@@ -196,7 +215,7 @@ importers:
         version: 4.5.4(@types/node@25.0.9)(rollup@4.56.0)(typescript@5.9.3)(vite@6.4.1(@types/node@25.0.9)(tsx@4.21.0)(yaml@2.8.2))
       vitest:
         specifier: ^4.0.17
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/outside-server:
     dependencies:
@@ -252,10 +271,13 @@ importers:
         version: 4.5.4(@types/node@25.0.9)(rollup@4.56.0)(typescript@5.9.3)(vite@6.4.1(@types/node@25.0.9)(tsx@4.21.0)(yaml@2.8.2))
       vitest:
         specifier: ^4.0.17
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/outside-storybook:
     dependencies:
+      '@outside/bixel':
+        specifier: workspace:*
+        version: link:../outside-bixel
       '@outside/client':
         specifier: workspace:*
         version: link:../outside-client
@@ -337,7 +359,7 @@ importers:
         version: 6.4.1(@types/node@25.0.9)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/outside-test-player:
     dependencies:
@@ -368,7 +390,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/outside-utils:
     devDependencies:
@@ -377,7 +399,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.17
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/resourcePacks:
     devDependencies:
@@ -389,7 +411,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@25.0.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.9)(@vitest/ui@4.0.18)(jsdom@28.0.0)(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 
