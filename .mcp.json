@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "toolchain": {
+      "command": "node",
+      "args": ["./packages/toolchain-mcp/dist/index.js"]
+    }
+  }
+}
