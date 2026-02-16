@@ -46,7 +46,7 @@ Add a wave function collapse (WFC) dungeon generator to outside-storybook that r
 - [x] In [packages/outside-storybook/src/components/simulator/spawnCloud.ts](packages/outside-storybook/src/components/simulator/spawnCloud.ts): import `generateDungeonWFC` from the WFC module.
 - [x] Add `spawnDungeonWFCThenScattered(world, seed, entityCount)` using `generateDungeonWFC(80, 50, seed)` and the same floor/wall/entity loop as `spawnDungeonThenScattered`.
 - [x] Add `spawnDungeonWFCWithFood` and `spawnDungeonWFCWithFoodAndHero` by analogy with existing dungeon+food and dungeon+hero (call WFC generator, same layout and entity counts).
-- [x] In [packages/outside-storybook/src/stories/Simulator.stories.tsx](packages/outside-storybook/src/stories/Simulator.stories.tsx): add story **FloorGridDungeonWFC** with `spawnFn: spawnDungeonWFCThenScattered`; add **FloorGridDungeonWithFoodWFC** and **DungeonWithHeroWFC** using the new WFC spawn functions.
+- [x] In `packages/outside-storybook/src/stories/Simulator.stories.tsx`: add story **FloorGridDungeonWFC** with `spawnFn: spawnDungeonWFCThenScattered`; add **FloorGridDungeonWithFoodWFC** and **DungeonWithHeroWFC** using the new WFC spawn functions.
 
 ---
 

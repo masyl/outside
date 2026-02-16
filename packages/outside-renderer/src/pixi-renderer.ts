@@ -1,4 +1,4 @@
-import { Application, Container, type Sprite } from 'pixi.js';
+import { Application, Container, Graphics, type Sprite } from 'pixi.js';
 import { CRTFilter } from 'pixi-filters';
 import { DEFAULT_TILE_SIZE } from './constants';
 import { DEFAULT_ICON_URLS } from './icons';
@@ -6,6 +6,7 @@ import { PixiGridBackground } from './pixi/background';
 import { createRendererAssets, loadRendererAssets } from './pixi/assets';
 import { PixiViewController } from './pixi/view-controller';
 import { runRenderPass, type RenderDisplayState } from './pixi/render-pass';
+import { runMinimapRenderPass, type MinimapDisplayState } from './pixi/minimap-render-pass';
 import { RenderStreamController } from './pixi/stream-controller';
 import type { PixiRendererOptions } from './pixi/types';
 import type { RenderStreamPacket } from './render-world';
@@ -21,7 +22,8 @@ function setNodeLabel(node: { label?: string }, label: string): void {
  */
 export class PixiEcsRenderer {
   private readonly app: Application;
-  private readonly backgroundLayer: Container;
+  private readonly stageContainer: Container;
+  private readonly backgroundLayer: Container | null;
   private readonly root: Container;
   private readonly tileLayer: Container;
   private readonly entityLayer: Container;
@@ -29,8 +31,11 @@ export class PixiEcsRenderer {
   private readonly view: PixiViewController;
   private readonly rendererId: number;
   private readonly crtFilter: CRTFilter;
+  private readonly renderMode: 'default' | 'minimap';
+  private minimapSnapToGrid: boolean;
 
   private readonly displayState: RenderDisplayState;
+  private readonly minimapDisplayState: MinimapDisplayState;
   private readonly assets = createRendererAssets();
 
   private readonly assetBaseUrl: string;
@@ -46,11 +51,14 @@ export class PixiEcsRenderer {
   constructor(app: Application, options: PixiRendererOptions = {}) {
     this.app = app;
     this.rendererId = NEXT_RENDERER_ID++;
+    this.renderMode = options.renderMode ?? 'default';
+    this.minimapSnapToGrid = options.minimapSnapToGrid === true;
     this.assetBaseUrl = options.assetBaseUrl ?? '/sprites';
     this.iconUrls = {
       ...DEFAULT_ICON_URLS,
       ...options.iconUrls,
     };
+    this.stageContainer = options.stageContainer ?? this.app.stage;
 
     this.root = new Container();
     this.root.sortableChildren = true;
@@ -66,21 +74,30 @@ export class PixiEcsRenderer {
     this.root.addChild(this.tileLayer);
     this.root.addChild(this.entityLayer);
 
-    this.backgroundLayer = new Container();
-    this.backgroundLayer.zIndex = 0;
-    setNodeLabel(this.backgroundLayer, `renderer#${this.rendererId}:background-layer`);
+    const backgroundEnabled = options.backgroundEnabled !== false;
+    this.backgroundLayer = backgroundEnabled ? new Container() : null;
+    if (this.backgroundLayer) {
+      this.backgroundLayer.zIndex = 0;
+      setNodeLabel(this.backgroundLayer, `renderer#${this.rendererId}:background-layer`);
+    }
     this.root.zIndex = 1;
 
-    this.app.stage.sortableChildren = true;
-    setNodeLabel(this.app.stage, `renderer#${this.rendererId}:stage`);
-    this.app.stage.addChild(this.backgroundLayer);
-    this.app.stage.addChild(this.root);
+    this.stageContainer.sortableChildren = true;
+    if (this.stageContainer === this.app.stage) {
+      setNodeLabel(this.app.stage, `renderer#${this.rendererId}:stage`);
+    }
+    if (this.backgroundLayer) {
+      this.stageContainer.addChild(this.backgroundLayer);
+    }
+    this.stageContainer.addChild(this.root);
 
-    const background = new PixiGridBackground(
-      this.app.renderer,
-      this.backgroundLayer,
-      `renderer#${this.rendererId}:background`
-    );
+    const background = this.backgroundLayer
+      ? new PixiGridBackground(
+          this.app.renderer,
+          this.backgroundLayer,
+          `renderer#${this.rendererId}:background`
+        )
+      : null;
     this.view = new PixiViewController(
       this.app.renderer,
       this.root,
@@ -95,6 +112,10 @@ export class PixiEcsRenderer {
       displayKinds: new Map(),
       shadowIndex: new Map(),
     };
+    this.minimapDisplayState = {
+      displayIndex: new Map<number, Graphics>(),
+      displayKinds: new Map(),
+    };
 
     this.crtFilter = new CRTFilter({
       curvature: 2,
@@ -108,6 +129,9 @@ export class PixiEcsRenderer {
       time: 0,
       seed: 0,
     });
+    if (options.alpha != null) {
+      this.setOpacity(options.alpha);
+    }
     this.setCrtEnabled(options.crtEffectEnabled ?? false);
   }
 
@@ -120,6 +144,13 @@ export class PixiEcsRenderer {
     this.clearDisplayState();
     this.view.setTileSize(tileSize);
     this.render();
+  }
+
+  /**
+   * Returns current tile size in pixels.
+   */
+  getTileSize(): number {
+    return this.view.getTileSize();
   }
 
   /**
@@ -204,6 +235,33 @@ export class PixiEcsRenderer {
   }
 
   /**
+   * Sets renderer root alpha (0..1).
+   */
+  setOpacity(alpha: number): void {
+    const next = Number.isFinite(alpha) ? Math.max(0, Math.min(1, alpha)) : 1;
+    this.root.alpha = next;
+  }
+
+  /**
+   * Toggles visibility for renderer-owned layers.
+   */
+  setVisible(visible: boolean): void {
+    this.root.visible = visible;
+    if (this.backgroundLayer) {
+      this.backgroundLayer.visible = visible;
+    }
+    this.render();
+  }
+
+  /**
+   * Toggles tile snapping for minimap pixel rendering.
+   */
+  setMinimapSnapToGrid(enabled: boolean): void {
+    this.minimapSnapToGrid = enabled === true;
+    this.render();
+  }
+
+  /**
    * Toggles CRT post-processing on the full stage.
    *
    * @param enabled `boolean` true to enable CRT filter, false to disable.
@@ -218,16 +276,27 @@ export class PixiEcsRenderer {
    */
   render(): void {
     this.view.updateBackground();
-    runRenderPass(
-      this.app.renderer,
-      this.stream.getWorldState(),
-      this.assets,
-      this.view.getTileSize(),
-      this.tileLayer,
-      this.entityLayer,
-      this.displayState,
-      `renderer#${this.rendererId}`
-    );
+    if (this.renderMode === 'minimap') {
+      runMinimapRenderPass(
+        this.stream.getWorldState(),
+        this.view.getTileSize(),
+        this.entityLayer,
+        this.minimapDisplayState,
+        `renderer#${this.rendererId}`,
+        this.minimapSnapToGrid
+      );
+    } else {
+      runRenderPass(
+        this.app.renderer,
+        this.stream.getWorldState(),
+        this.assets,
+        this.view.getTileSize(),
+        this.tileLayer,
+        this.entityLayer,
+        this.displayState,
+        `renderer#${this.rendererId}`
+      );
+    }
 
     try {
       this.app.renderer.clear();
@@ -244,9 +313,9 @@ export class PixiEcsRenderer {
     this.clearDisplayState();
     this.view.destroy();
     this.root.removeFromParent();
-    this.backgroundLayer.removeFromParent();
+    this.backgroundLayer?.removeFromParent();
     this.root.destroy({ children: true });
-    this.backgroundLayer.destroy({ children: true });
+    this.backgroundLayer?.destroy({ children: true });
   }
 
   /**
@@ -264,6 +333,14 @@ export class PixiEcsRenderer {
       shadow.destroy();
     }
     this.displayState.shadowIndex.clear();
+
+    for (const pixel of this.minimapDisplayState.displayIndex.values()) {
+      pixel.removeFromParent();
+      pixel.destroy();
+    }
+    this.minimapDisplayState.displayIndex.clear();
+    this.minimapDisplayState.displayKinds.clear();
+
     this.tileLayer.removeChildren();
     this.entityLayer.removeChildren();
   }

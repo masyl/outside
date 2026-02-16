@@ -24,7 +24,7 @@ describe('jump stream roundtrip', () => {
     spawnFloorRect(simWorld, -4, -4, 4, 4, true);
     const heroEid = spawnHero(simWorld, { x: 0.5, y: 0.5 });
 
-    const snapshot = createSnapshotSerializer(simWorld, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshot = createSnapshotSerializer(simWorld, [...RENDER_SNAPSHOT_COMPONENTS]);
     const renderWorld = createRenderWorld();
 
     applyRenderStream(renderWorld, { kind: 'snapshot', buffer: snapshot(), tic: 0 });
@@ -73,7 +73,7 @@ describe('jump stream roundtrip', () => {
     spawnFloorRect(simWorld, -4, -4, 4, 4, true);
     const heroEid = spawnHero(simWorld, { x: 0.5, y: 0.5 });
 
-    const snapshot = createSnapshotSerializer(simWorld, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshot = createSnapshotSerializer(simWorld, [...RENDER_SNAPSHOT_COMPONENTS]);
     const observer = createRenderObserverSerializer(simWorld);
     const renderWorld = createRenderWorld();
 

@@ -1,0 +1,38 @@
+import { defineTestPlayerConfig } from '@outside/test-player';
+import { spawnDungeonWithFoodAndHero } from '../../components/simulator/spawnCloud';
+
+export const MINIMAP_TEST_PLAYER_CONFIG = defineTestPlayerConfig({
+  seed: 123,
+  ticsPerSecond: 30,
+  botCount: 12,
+  dogCount: 6,
+  catCount: 6,
+  foodCount: 14,
+  spawnFn: spawnDungeonWithFoodAndHero,
+  tileSize: 32,
+  waitForAssets: false,
+  useCrtEffect: false,
+  showInspectorOverlay: false,
+  showInspectorFollowLinks: false,
+  showInspectorVelocityVectors: false,
+  showInspectorCollisionTint: false,
+  showInspectorWallOutlines: false,
+  showInspectorPathfindingPaths: false,
+  showInspectorPhysicsShapes: false,
+  physics3dRuntimeMode: 'lua',
+  onClickAction: 'order-path',
+  showMinimap: true,
+  minimapShape: 'round',
+  minimapPlacement: 'bottom-right',
+  minimapZoomLevel: 2,
+  minimapOpacity: 0.5,
+  minimapSnapToGrid: false,
+  minimapSizeRatio: 0.2,
+  minimapPaddingXRatio: 0.025,
+  minimapPaddingYRatio: 0.025,
+  controller: {
+    enabled: true,
+    pollFps: 60,
+    showDeviceSelector: true,
+  },
+});

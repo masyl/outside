@@ -6,6 +6,8 @@ import { PixiGridBackground } from './background';
  */
 export class PixiViewController {
   private lastCenter: { x: number; y: number } | null = null;
+  private viewportWidth: number;
+  private viewportHeight: number;
 
   /**
    * @param renderer `Renderer` used for viewport dimensions.
@@ -16,10 +18,12 @@ export class PixiViewController {
   constructor(
     private readonly renderer: Renderer,
     private readonly root: Container,
-    private readonly background: PixiGridBackground,
+    private readonly background: PixiGridBackground | null,
     private tileSize: number
   ) {
-    this.updateBackground();
+    this.viewportWidth = this.renderer.width;
+    this.viewportHeight = this.renderer.height;
+    this.updateBackground(this.viewportWidth, this.viewportHeight);
   }
 
   /**
@@ -55,8 +59,8 @@ export class PixiViewController {
   } {
     this.lastCenter = { x: worldX, y: worldY };
 
-    const screenWidth = this.renderer.width;
-    const screenHeight = this.renderer.height;
+    const screenWidth = this.viewportWidth;
+    const screenHeight = this.viewportHeight;
 
     // Convert desired world-center into root translation so world point lands at screen midpoint.
     const rootX = screenWidth / 2 - worldX * this.tileSize;
@@ -90,6 +94,8 @@ export class PixiViewController {
    * @param height `number` viewport height in pixels.
    */
   setViewportSize(width: number, height: number): void {
+    this.viewportWidth = width;
+    this.viewportHeight = height;
     this.updateBackground(width, height);
     this.recenter();
   }
@@ -98,7 +104,7 @@ export class PixiViewController {
    * Destroys view-owned resources.
    */
   destroy(): void {
-    this.background.destroy();
+    this.background?.destroy();
   }
 
   /**
@@ -108,6 +114,7 @@ export class PixiViewController {
    * @param height optional `number` explicit viewport height in pixels.
    */
   updateBackground(width?: number, height?: number): void {
+    if (!this.background) return;
     const nextWidth = width ?? this.renderer.width;
     const nextHeight = height ?? this.renderer.height;
     this.background.update(this.tileSize, nextWidth, nextHeight);

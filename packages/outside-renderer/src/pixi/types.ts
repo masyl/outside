@@ -1,4 +1,4 @@
-import type { Texture } from 'pixi.js';
+import type { Container, Texture } from 'pixi.js';
 import type { ActorVariantAnimationLayout } from '@outside/resource-packs/paws-whiskers/meta';
 import type { DungeonTileTransformFlags } from '@outside/resource-packs';
 import type { DEFAULT_ICON_URLS } from '../icons';
@@ -23,6 +23,26 @@ export interface PixiRendererOptions {
    * Enables CRT post-processing filter on the stage.
    */
   crtEffectEnabled?: boolean;
+  /**
+   * Render mode. `default` draws textured sprites; `minimap` draws snapped solid pixels.
+   */
+  renderMode?: 'default' | 'minimap';
+  /**
+   * Optional host container for this renderer root (defaults to `app.stage`).
+   */
+  stageContainer?: Container;
+  /**
+   * Enables background layer rendering (grid + fill). Defaults to true.
+   */
+  backgroundEnabled?: boolean;
+  /**
+   * Root alpha applied to the renderer scene.
+   */
+  alpha?: number;
+  /**
+   * In minimap mode, snaps rendered pixels to tile coordinates when true.
+   */
+  minimapSnapToGrid?: boolean;
 }
 
 /**
@@ -63,6 +83,7 @@ export interface RendererAssets {
   pointerCursor?: Texture;
   pointerCursorBySpriteKey: Map<string, Texture>;
   foodTextureBySpriteKey: Map<string, Texture>;
+  uiTextureBySpriteKey: Map<string, Texture>;
   actorVariantSheetBySpriteKey: Map<string, ActorVariantSheet>;
   tileTextureByKind: {
     floor: TileTextureVariantPool;

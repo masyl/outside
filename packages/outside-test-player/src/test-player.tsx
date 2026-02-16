@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Application } from 'pixi.js';
 import { ControllerInputProcessor, type RawControllerSnapshot } from '@outside/controller-core';
-import { PixiEcsRenderer } from '@outside/renderer';
 import {
   InspectorOverlay,
   InspectorRenderer,
@@ -11,9 +10,12 @@ import {
   type InspectorFrame,
 } from '@outside/inspector-renderer';
 import { TestPlayerCanvas } from './pixi-container';
+import { RendererManager } from './renderer-manager';
+import type { StatusBarHit } from './renderer-manager';
 import { createStreamController } from './stream-controller';
 import type { TestPlayerProps } from './types';
 import { useScenarioRenderStream } from './use-scenario-render-stream';
+import { useStatusBarStream } from './use-status-bar-stream';
 
 const EMPTY_FRAME: InspectorFrame = {
   tiles: [],
@@ -60,13 +62,21 @@ export function TestPlayer({
   showInspectorPathfindingPaths = false,
   showInspectorPhysicsShapes = false,
   onClickAction = 'order-path',
+  showMinimap = false,
+  minimapShape = 'round',
+  minimapPlacement = 'bottom-right',
+  minimapZoomLevel = 2,
+  minimapOpacity = 0.5,
+  minimapSnapToGrid = false,
+  minimapSizeRatio = 0.2,
+  minimapPaddingXRatio = 0.025,
+  minimapPaddingYRatio = 0.025,
   physics3dRuntimeMode = 'lua',
   physics3dTuning,
   controller,
 }: TestPlayerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const rendererRef = useRef<PixiEcsRenderer | null>(null);
-  const rendererAppRef = useRef<Application | null>(null);
+  const rendererManagerRef = useRef<RendererManager | null>(null);
   const inspectorWorldRef = useRef(createInspectorRenderWorld());
   const streamControllerRef = useRef(createStreamController());
   const pointerWorldRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -94,6 +104,8 @@ export function TestPlayer({
     if (typeof window === 'undefined') return '/sprites';
     return new URL('./sprites', window.location.href).toString().replace(/\/$/, '');
   })();
+
+  const statusBarStream = useStatusBarStream();
 
   const stream = useScenarioRenderStream({
     mode: 'dynamic',
@@ -161,20 +173,45 @@ export function TestPlayer({
   }, [controllerEnabled]);
 
   const initRenderer = useCallback((app: Application) => {
-    if (rendererRef.current && rendererAppRef.current === app) return;
-    if (rendererRef.current) {
-      rendererRef.current.destroy();
-      rendererRef.current = null;
+    const minimapOptions = {
+      enabled: showMinimap,
+      shape: minimapShape,
+      placement: minimapPlacement,
+      zoomLevel: minimapZoomLevel,
+      opacity: minimapOpacity,
+      snapToGrid: minimapSnapToGrid,
+      sizeRatio: minimapSizeRatio,
+      paddingXRatio: minimapPaddingXRatio,
+      paddingYRatio: minimapPaddingYRatio,
+    } as const;
+
+    if (rendererManagerRef.current?.isBoundTo(app)) {
+      rendererManagerRef.current.setCrtEnabled(useCrtEffect);
+      return;
     }
-    const renderer = new PixiEcsRenderer(app, {
+    rendererManagerRef.current?.destroy();
+    rendererManagerRef.current = new RendererManager(app, {
       tileSize,
       assetBaseUrl,
+      minimap: minimapOptions,
     });
-    rendererRef.current = renderer;
-    rendererAppRef.current = app;
-    void renderer.loadAssets();
+    rendererManagerRef.current.setCrtEnabled(useCrtEffect);
+    void rendererManagerRef.current.loadAssets();
     setRendererReady((v) => v + 1);
-  }, []);
+  }, [
+    tileSize,
+    assetBaseUrl,
+    useCrtEffect,
+    showMinimap,
+    minimapShape,
+    minimapPlacement,
+    minimapZoomLevel,
+    minimapOpacity,
+    minimapSnapToGrid,
+    minimapSizeRatio,
+    minimapPaddingXRatio,
+    minimapPaddingYRatio,
+  ]);
 
   const applyWorldAction = useCallback(
     (worldX: number, worldY: number, _source: 'pointer' | 'controller') => {
@@ -217,14 +254,56 @@ export function TestPlayer({
     ]
   );
 
+  const handleStatusBarHit = useCallback(
+    (hit: StatusBarHit) => {
+      if (hit.kind === 'fullscreen') {
+        if (typeof document !== 'undefined') {
+          if (!document.fullscreenElement) {
+            void containerRef.current?.requestFullscreen();
+          } else {
+            void document.exitFullscreen();
+          }
+        }
+        return;
+      }
+      if (hit.kind === 'hero') {
+        const spriteKeys = stream.getControllableHeroSpriteKeys();
+        const targetIndex = hit.index;
+        if (targetIndex >= 0 && targetIndex < spriteKeys.length) {
+          // Reset focus to hero 0 (ensureControllerHeroActor picks the first candidate),
+          // then cycle 'next' targetIndex times to land on the desired hero.
+          stream.ensureControllerHeroActor();
+          for (let i = 0; i < targetIndex; i++) {
+            stream.cycleControllerHeroActor('next');
+          }
+        }
+      }
+    },
+    [stream.getControllableHeroSpriteKeys, stream.ensureControllerHeroActor, stream.cycleControllerHeroActor]
+  );
+
   const handlePointerDown = useCallback(
     (screenX: number, screenY: number) => {
+      const statusBarHit = rendererManagerRef.current?.handleStatusBarClick(
+        screenX,
+        screenY,
+        statusBarStream.heroCount
+      );
+      if (statusBarHit != null) {
+        handleStatusBarHit(statusBarHit);
+        return;
+      }
+      if (rendererManagerRef.current?.handleMinimapClick(screenX, screenY)) {
+        return;
+      }
       const worldX = stream.center.x + (screenX - viewportSize.width / 2) / tileSize;
       const worldY = stream.center.y - (screenY - viewportSize.height / 2) / tileSize;
       pointerWorldRef.current = { x: worldX, y: worldY };
       applyWorldAction(worldX, worldY, 'pointer');
     },
     [
+      statusBarStream.heroCount,
+      handleStatusBarHit,
       stream.center.x,
       stream.center.y,
       viewportSize.width,
@@ -281,18 +360,50 @@ export function TestPlayer({
   }, [tileSize, waitForAssets]);
 
   useEffect(() => {
-    const renderer = rendererRef.current;
-    if (!renderer || rendererReady === 0) return;
-    renderer.resetWorld();
-    renderer.setTileSize(tileSize);
+    const manager = rendererManagerRef.current;
+    if (!manager || rendererReady === 0) return;
+    manager.resetWorld();
+    manager.setTileSize(tileSize);
     streamControllerRef.current.replay('pixi');
   }, [rendererReady, tileSize, stream.streamKey]);
 
   useEffect(() => {
-    const renderer = rendererRef.current;
-    if (!renderer || rendererReady === 0) return;
-    renderer.setCrtEnabled(useCrtEffect);
+    const manager = rendererManagerRef.current;
+    if (!manager || rendererReady === 0) return;
+    manager.setCrtEnabled(useCrtEffect);
   }, [rendererReady, useCrtEffect]);
+
+  useEffect(() => {
+    const manager = rendererManagerRef.current;
+    if (!manager || rendererReady === 0) return;
+    const timer = window.setTimeout(() => {
+      manager.setMinimapOptions({
+        enabled: showMinimap,
+        shape: minimapShape,
+        placement: minimapPlacement,
+        zoomLevel: minimapZoomLevel,
+        opacity: minimapOpacity,
+        snapToGrid: minimapSnapToGrid,
+        sizeRatio: minimapSizeRatio,
+        paddingXRatio: minimapPaddingXRatio,
+        paddingYRatio: minimapPaddingYRatio,
+      });
+    }, 200);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [
+    rendererReady,
+    showMinimap,
+    minimapShape,
+    minimapPlacement,
+    minimapZoomLevel,
+    minimapOpacity,
+    minimapSnapToGrid,
+    minimapSizeRatio,
+    minimapPaddingXRatio,
+    minimapPaddingYRatio,
+  ]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -471,27 +582,27 @@ export function TestPlayer({
 
   useEffect(() => {
     const unsubscribe = streamControllerRef.current.subscribe('pixi', (packet) => {
-      const renderer = rendererRef.current;
-      if (!renderer) return;
+      const manager = rendererManagerRef.current;
+      if (!manager) return;
       const generation = applyGenerationRef.current;
 
       pixiApplyQueueRef.current = pixiApplyQueueRef.current.then(async () => {
         if (applyGenerationRef.current !== generation) {
           return;
         }
-        if (rendererRef.current !== renderer) {
+        if (rendererManagerRef.current !== manager) {
           return;
         }
-        if (waitForAssets && renderer.getAssetsReady()) {
-          await renderer.getAssetsReady();
+        if (waitForAssets && manager.getAssetsReady()) {
+          await manager.getAssetsReady();
         }
         if (applyGenerationRef.current !== generation) {
           return;
         }
-        if (rendererRef.current !== renderer) {
+        if (rendererManagerRef.current !== manager) {
           return;
         }
-        renderer.applyStream({
+        manager.applyStream({
           kind: packet.kind,
           tic: packet.tic,
           buffer: packet.buffer,
@@ -503,24 +614,47 @@ export function TestPlayer({
   }, [stream.streamKey, waitForAssets]);
 
   useEffect(() => {
-    const isPixiReady = rendererReady > 0 && rendererRef.current !== null;
+    const isPixiReady = rendererReady > 0 && rendererManagerRef.current !== null;
     streamControllerRef.current.setReady('pixi', isPixiReady);
     return () => {
       streamControllerRef.current.setReady('pixi', false);
     };
   }, [rendererReady, stream.streamKey]);
 
+  // Apply status bar stream packets to the renderer.
   useEffect(() => {
-    const renderer = rendererRef.current;
-    if (!renderer) return;
-    renderer.setViewCenter(stream.center.x, stream.center.y);
+    if (rendererReady === 0) return;
+    const manager = rendererManagerRef.current;
+    if (!manager) return;
+    const packet = statusBarStream.packet;
+    if (!packet) return;
+    manager.applyStatusBarStream({
+      kind: packet.kind,
+      tic: packet.tic,
+      buffer: packet.buffer,
+    });
+  }, [rendererReady, statusBarStream.packetVersion]);
+
+  // Sync hero sprites from main stream to status bar world once per second.
+  useEffect(() => {
+    const syncNow = () => {
+      statusBarStream.syncHeroes(stream.getControllableHeroSpriteKeys());
+    };
+    syncNow();
+    const intervalId = window.setInterval(syncNow, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [stream.streamKey, statusBarStream.syncHeroes]); // getControllableHeroSpriteKeys reads a ref — stable, omitted from deps
+
+  useEffect(() => {
+    const manager = rendererManagerRef.current;
+    if (!manager) return;
+    manager.setViewCenter(stream.center.x, stream.center.y);
   }, [rendererReady, stream.center.x, stream.center.y, stream.streamKey]);
 
   useEffect(() => {
     return () => {
-      rendererRef.current?.destroy();
-      rendererRef.current = null;
-      rendererAppRef.current = null;
+      rendererManagerRef.current?.destroy();
+      rendererManagerRef.current = null;
     };
   }, []);
 
@@ -547,7 +681,7 @@ export function TestPlayer({
   }, []);
 
   const handleResize = useCallback((_app: Application, nextWidth: number, nextHeight: number) => {
-    rendererRef.current?.setViewportSize(nextWidth, nextHeight);
+    rendererManagerRef.current?.setViewportSize(nextWidth, nextHeight);
   }, []);
 
   const controllerSelectionValue =

@@ -134,6 +134,14 @@ const meta: Meta<typeof TestPlayer> = {
       name: 'onClick',
       description: 'Mouse click action for zoo actors.',
     },
+    showMinimap: { table: { disable: true } },
+    minimapShape: { table: { disable: true } },
+    minimapPlacement: { table: { disable: true } },
+    minimapZoomLevel: { table: { disable: true } },
+    minimapOpacity: { table: { disable: true } },
+    minimapSizeRatio: { table: { disable: true } },
+    minimapPaddingXRatio: { table: { disable: true } },
+    minimapPaddingYRatio: { table: { disable: true } },
   },
 };
 

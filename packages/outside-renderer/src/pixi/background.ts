@@ -69,11 +69,7 @@ export class PixiGridBackground {
     g.rect(0, 0, tileSize, tileSize).fill(base);
     g.moveTo(0, 0).lineTo(tileSize, 0).stroke({ color: line, width: 1 });
     g.moveTo(0, 0).lineTo(0, tileSize).stroke({ color: line, width: 1 });
-    const texture = this.renderer.generateTexture(g, {
-      resolution: 1,
-      region: undefined,
-      antialias: false,
-    });
+    const texture = this.renderer.generateTexture(g);
     setNearestScale(texture);
     return texture;
   }

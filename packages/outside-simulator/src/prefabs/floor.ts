@@ -14,6 +14,7 @@ import {
   Observed,
   DefaultSpriteKey,
   VariantSpriteKey,
+  MinimapPixel,
 } from '../components';
 import type { SimulatorWorld } from '../world';
 
@@ -47,6 +48,8 @@ export function spawnFloorTile(
   setComponent(world, eid, DefaultSpriteKey, { value: 'tile.floor' });
   addComponent(world, eid, VariantSpriteKey);
   setComponent(world, eid, VariantSpriteKey, { value: '' });
+  addComponent(world, eid, MinimapPixel);
+  setComponent(world, eid, MinimapPixel, { r: 44, g: 44, b: 52 });
   if (walkable) {
     addComponent(world, eid, Walkable);
   }
@@ -80,6 +83,8 @@ export function spawnWall(
   setComponent(world, eid, DefaultSpriteKey, { value: 'tile.wall' });
   addComponent(world, eid, VariantSpriteKey);
   setComponent(world, eid, VariantSpriteKey, { value: '' });
+  addComponent(world, eid, MinimapPixel);
+  setComponent(world, eid, MinimapPixel, { r: 112, g: 112, b: 128 });
   return eid;
 }
 

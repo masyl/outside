@@ -30,6 +30,7 @@ import {
   Food,
   Hero,
   WanderPersistence,
+  MinimapPixel,
 } from './components';
 
 export const RENDER_COMPONENTS = [
@@ -58,6 +59,7 @@ export const RENDER_COMPONENTS = [
   Food,
   Hero,
   WanderPersistence,
+  MinimapPixel,
 ] as const;
 
 /**

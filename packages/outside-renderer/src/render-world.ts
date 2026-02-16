@@ -32,8 +32,8 @@ export type RenderStreamPacket = {
  */
 export function createRenderWorld(): RenderWorldState {
   const world = createWorld();
-  const observerDeserializer = createObserverDeserializer(world, Observed, RENDER_COMPONENTS);
-  const snapshotDeserializer = createSnapshotDeserializer(world, RENDER_SNAPSHOT_COMPONENTS);
+  const observerDeserializer = createObserverDeserializer(world, Observed, [...RENDER_COMPONENTS]);
+  const snapshotDeserializer = createSnapshotDeserializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
   return {
     world,
     observerDeserializer,
@@ -52,8 +52,8 @@ export function createRenderWorld(): RenderWorldState {
 function resetRenderWorld(renderWorld: RenderWorldState): void {
   const world = createWorld();
   renderWorld.world = world;
-  renderWorld.observerDeserializer = createObserverDeserializer(world, Observed, RENDER_COMPONENTS);
-  renderWorld.snapshotDeserializer = createSnapshotDeserializer(world, RENDER_SNAPSHOT_COMPONENTS);
+  renderWorld.observerDeserializer = createObserverDeserializer(world, Observed, [...RENDER_COMPONENTS]);
+  renderWorld.snapshotDeserializer = createSnapshotDeserializer(world, [...RENDER_SNAPSHOT_COMPONENTS]);
   renderWorld.lastTic = 0;
   renderWorld.lastAnimationTimeMs = null;
 }

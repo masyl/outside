@@ -58,9 +58,9 @@ Phase 1 targets only `physics3dSystem`: the simulation loop dispatches this syst
 
 ## Next Logical Pitches
 
-- [External System Script Hooks (System Scripting series: 2)](../pitches/external-system-script-hooks.md)
-- [Runtime Command Scripts in Lua (System Scripting series: 3)](../pitches/runtime-command-scripts-in-lua.md)
-- [Event Scripts for Engine Emitters (System Scripting series: 4)](../pitches/event-scripts-for-engine-emitters.md)
+- [External System Script Hooks (System Scripting series: 2)](../../pitches/external-system-script-hooks.md)
+- [Runtime Command Scripts in Lua (System Scripting series: 3)](../../pitches/runtime-command-scripts-in-lua.md)
+- [Event Scripts for Engine Emitters (System Scripting series: 4)](../../pitches/event-scripts-for-engine-emitters.md)
 
 ## Open Questions
 

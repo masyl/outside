@@ -16,7 +16,7 @@ function flattenElements(node: ReactNode, out: ReactElement[] = []): ReactElemen
   }
 
   out.push(node);
-  flattenElements(node.props.children, out);
+  flattenElements((node.props as any).children, out);
   return out;
 }
 
@@ -92,29 +92,29 @@ describe('InspectorPrimitivesLayer', () => {
     const followLines = elements.filter(
       (element) =>
         element.type === 'line' &&
-        element.props.stroke === '#1e90ff' &&
-        element.props.strokeDasharray == null
+        (element.props as any).stroke === '#1e90ff' &&
+        (element.props as any).strokeDasharray == null
     );
     expect(followLines.length).toBeGreaterThan(0);
 
     const vectorArrows = elements.filter(
-      (element) => element.type === 'polygon' && element.props.fill === '#1e90ff'
+      (element) => element.type === 'polygon' && (element.props as any).fill === '#1e90ff'
     );
     expect(vectorArrows.length).toBeGreaterThan(0);
 
     const wallTile = elements.find(
       (element) =>
         element.type === 'rect' &&
-        element.props['data-inspector-kind'] === 'wall' &&
-        element.props.fill === '#6af'
+        (element.props as any)['data-inspector-kind'] === 'wall' &&
+        (element.props as any).fill === '#6af'
     );
     expect(wallTile).toBeDefined();
 
     const botEntity = elements.find(
       (element) =>
         element.type === 'circle' &&
-        element.props['data-inspector-kind'] === 'bot' &&
-        element.props.fill === '#44f'
+        (element.props as any)['data-inspector-kind'] === 'bot' &&
+        (element.props as any).fill === '#44f'
     );
     expect(botEntity).toBeDefined();
   });
@@ -136,27 +136,27 @@ describe('InspectorPrimitivesLayer', () => {
     const followLines = elements.filter(
       (element) =>
         element.type === 'line' &&
-        element.props.stroke === '#1e90ff' &&
-        element.props.strokeDasharray == null
+        (element.props as any).stroke === '#1e90ff' &&
+        (element.props as any).strokeDasharray == null
     );
     expect(followLines).toHaveLength(0);
 
     const vectorArrows = elements.filter(
-      (element) => element.type === 'polygon' && element.props.fill === '#1e90ff'
+      (element) => element.type === 'polygon' && (element.props as any).fill === '#1e90ff'
     );
     expect(vectorArrows).toHaveLength(0);
 
     const wallTile = elements.find(
       (element) =>
-        element.type === 'rect' && element.props['data-inspector-kind'] === 'wall'
+        element.type === 'rect' && ((element.props as any) as any)['data-inspector-kind'] === 'wall'
     );
-    expect(wallTile?.props.fill).toBe('#888');
+    expect(((wallTile?.props as any) as any)?.fill).toBe('#888');
 
     const botEntity = elements.find(
       (element) =>
-        element.type === 'circle' && element.props['data-inspector-kind'] === 'bot'
+        element.type === 'circle' && ((element.props as any) as any)['data-inspector-kind'] === 'bot'
     );
-    expect(botEntity?.props.fill).toBe('#4a4');
+    expect(((botEntity?.props as any) as any)?.fill).toBe('#4a4');
   });
 
   it('uses outline-only shapes in overlay mode', () => {
@@ -171,20 +171,20 @@ describe('InspectorPrimitivesLayer', () => {
 
     const wallTile = elements.find(
       (element) =>
-        element.type === 'rect' && element.props['data-inspector-kind'] === 'wall'
+        element.type === 'rect' && ((element.props as any) as any)['data-inspector-kind'] === 'wall'
     );
-    expect(wallTile?.props.fill).toBe('none');
+    expect(((wallTile?.props as any) as any)?.fill).toBe('none');
 
     const botEntity = elements.find(
       (element) =>
-        element.type === 'circle' && element.props['data-inspector-kind'] === 'bot'
+        element.type === 'circle' && ((element.props as any) as any)['data-inspector-kind'] === 'bot'
     );
-    expect(botEntity?.props.fill).toBe('none');
+    expect(((botEntity?.props as any) as any)?.fill).toBe('none');
 
     const vectorArrowHead = elements.find(
-      (element) => element.type === 'polygon' && element.props.stroke === '#1e90ff'
+      (element) => element.type === 'polygon' && ((element.props as any) as any).stroke === '#1e90ff'
     );
-    expect(vectorArrowHead?.props.fill).toBe('none');
+    expect(((vectorArrowHead?.props as any) as any)?.fill).toBe('none');
   });
 
   it('renders pathfinding lines and physics overlays when enabled', () => {
@@ -199,12 +199,12 @@ describe('InspectorPrimitivesLayer', () => {
     const elements = flattenElements(tree);
 
     const pathLine = elements.find(
-      (element) => element.type === 'polyline' && element.props.stroke === '#fc0'
+      (element) => element.type === 'polyline' && ((element.props as any) as any).stroke === '#fc0'
     );
     expect(pathLine).toBeDefined();
 
     const physicsShape = elements.find(
-      (element) => (element.type === 'circle' || element.type === 'rect') && element.props.stroke === '#1e90ff'
+      (element) => (element.type === 'circle' || element.type === 'rect') && ((element.props as any) as any).stroke === '#1e90ff'
     );
     expect(physicsShape).toBeDefined();
   });
@@ -240,12 +240,12 @@ describe('InspectorPrimitivesLayer', () => {
     const elements = flattenElements(tree);
 
     const orderedPathLine = elements.find(
-      (element) => element.type === 'polyline' && element.props.stroke === '#fc0'
+      (element) => element.type === 'polyline' && ((element.props as any) as any).stroke === '#fc0'
     );
     expect(orderedPathLine).toBeDefined();
 
     const checkpointRects = elements.filter(
-      (element) => element.type === 'rect' && element.props.stroke === '#fc0'
+      (element) => element.type === 'rect' && ((element.props as any) as any).stroke === '#fc0'
     );
     expect(checkpointRects.length).toBeGreaterThan(0);
   });
@@ -261,12 +261,12 @@ describe('InspectorPrimitivesLayer', () => {
     const elements = flattenElements(tree);
 
     const zLiftVector = elements.find(
-      (element) => element.type === 'line' && element.props.stroke === '#ffd400' && element.props.strokeWidth === 3
+      (element) => element.type === 'line' && ((element.props as any) as any).stroke === '#ffd400' && ((element.props as any) as any).strokeWidth === 3
     );
     expect(zLiftVector).toBeDefined();
 
     const physicsCircle = elements.find(
-      (element) => element.type === 'circle' && element.props.stroke === '#1e90ff' && element.props.strokeDasharray === '2 2'
+      (element) => element.type === 'circle' && ((element.props as any) as any).stroke === '#1e90ff' && ((element.props as any) as any).strokeDasharray === '2 2'
     );
     expect(physicsCircle).toBeDefined();
   });
@@ -283,13 +283,13 @@ describe('InspectorPrimitivesLayer', () => {
     const miniPanelState = elements.find(
       (element) =>
         element.type === 'tspan' &&
-        element.props.children === 'running' &&
-        typeof element.props.x !== 'undefined'
+        ((element.props as any) as any).children === 'running' &&
+        typeof ((element.props as any) as any).x !== 'undefined'
     );
     expect(miniPanelState).toBeDefined();
 
     const standalonePaceLabel = elements.find(
-      (element) => element.type === 'text' && element.props.fill === '#ffe26a'
+      (element) => element.type === 'text' && ((element.props as any) as any).fill === '#ffe26a'
     );
     expect(standalonePaceLabel).toBeUndefined();
   });

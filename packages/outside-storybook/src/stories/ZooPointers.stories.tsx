@@ -91,6 +91,14 @@ const meta: Meta<typeof TestPlayer> = {
       options: [8, 12, 16, 24, 32, 48, 64],
       description: 'Tile size (pixels)',
     },
+    showMinimap: { table: { disable: true } },
+    minimapShape: { table: { disable: true } },
+    minimapPlacement: { table: { disable: true } },
+    minimapZoomLevel: { table: { disable: true } },
+    minimapOpacity: { table: { disable: true } },
+    minimapSizeRatio: { table: { disable: true } },
+    minimapPaddingXRatio: { table: { disable: true } },
+    minimapPaddingYRatio: { table: { disable: true } },
   },
 };
 

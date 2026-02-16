@@ -1,6 +1,12 @@
-# Software architecture
+# Software Architecture
 
-## Ongoing topics
+## Latest Decisions
+
+Recent architectural decisions made for the Outside project. These records capture context, rationale, and implications of major technical choices.
+
+<ADRsList :limit="5" />
+
+## Ongoing Topics
 
 - [Choosing an ECS Library](./choosing-ecs-library.md)
 - [Open Source Dependencies](./open-source-dependencies.md)

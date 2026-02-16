@@ -1,8 +1,29 @@
 import { defineConfig } from 'vitepress';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default defineConfig({
   title: 'Ȯutside Documentation',
   description: 'Documentation for the Ȯutside game plateform',
+
+  ignoreDeadLinks: [
+    // ADR pages are served from root docs directory
+    /^\/adr\//,
+    // Cross-document links that reference files outside the design docs
+    /^\.\.\//,
+    // Links to root docs directory files
+    /^\/\.\.\//,
+  ],
+
+  vite: {
+    fs: {
+      // Allow Vite to access files outside the docs directory (for ADRs)
+      allow: [resolve(__dirname, '../../../..')],
+    },
+  },
 
   markdown: {
     theme: {
@@ -62,6 +83,18 @@ export default defineConfig({
             { text: 'Ideation Phase', link: '/design-process/ideation' },
             { text: 'Pitch Phase', link: '/design-process/pitch-phase' },
             { text: 'Meaning of Design', link: '/design-process/meaning-of-design' },
+          ],
+        },
+      ],
+      '/architecture/': [
+        {
+          text: 'Architecture',
+          items: [
+            { text: 'Overview', link: '/architecture/' },
+            { text: 'Choosing an ECS Library', link: '/architecture/choosing-ecs-library' },
+            { text: 'TypeScript ECS Comparison', link: '/architecture/typescript-ecs-libraries-comparison' },
+            { text: 'Open Source Dependencies', link: '/architecture/open-source-dependencies' },
+            { text: 'Decision Records', link: '/architecture-decisions' },
           ],
         },
       ],

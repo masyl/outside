@@ -36,7 +36,7 @@ describe('render world eid mapping', () => {
     }
     const heroEid = spawnHero(sim, { x: 0.5, y: 0.5 });
 
-    const snapshot = createSnapshotSerializer(sim, RENDER_SNAPSHOT_COMPONENTS);
+    const snapshot = createSnapshotSerializer(sim, [...RENDER_SNAPSHOT_COMPONENTS]);
     const render = createRenderWorld();
     applyRenderStream(render, { kind: 'snapshot', buffer: snapshot(), tic: 0 });
 

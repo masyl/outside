@@ -1,10 +1,29 @@
 # Scratchpad
 
 Random notes taken during development.
+
 ### Next Pitch Blurb
 
+
+## Next Big Prompt
+
+* Bug: The cursor is still showing over the pointer
+
 ---
-Works nice. Commit.
+
+* Bug: We still have issues with entities bleeding or randomly appearing in weird places. Just now, I had a cheese following under my pointer... why ?
+
+---
+
+* Extrement Diegetics for a game Platform
+* Build an ecosystem that is fully separate from the html ecosystem
+
+---
+
+Always check the build state, document gen state, storybook state, running tests state before saying it's ready to test. Automate the automated checks and have them combine into a green/yellow/red glag
+...
+
+---
 
 Now, let's an another system related to the pointer style.
 
@@ -14,9 +33,10 @@ Now, let's an another system related to the pointer style.
 
 ---
 
-- Debug: A FPS counter
-- Debug: A TPS counter
-- Debug: A bandwidth counter for the renderer
+- Inspector: A FPS counter (with missed frame warnings)
+- Inspector: A Tics Per Seconds counter (with late tics warnings)
+- Debug: A transfer counter for stream comming out of the simulation with a history graph.
+- Debug: A latency monitor for the testPlayer
 
 ---
 
@@ -36,9 +56,6 @@ Create a common utiliy for using cardinal directions:
 * Then do a refactor pass to identify places where you referenced cardinal directions (such as sprite orientation).
 * Then add the resolved cardinal direction in the minidebugpanel for the vector in the inspector 
 
-## Next Big Prompt
-
-...
 
 ## BIG CONCEPT
 
