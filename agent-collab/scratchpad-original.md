@@ -1,29 +1,51 @@
 # Scratchpad
 
 Random notes taken during development.
-
 ### Next Pitch Blurb
 
 
-## Next Big Prompt
-
-* Bug: The cursor is still showing over the pointer
-
 ---
 
-* Bug: We still have issues with entities bleeding or randomly appearing in weird places. Just now, I had a cheese following under my pointer... why ?
 
+
+
+
+* Simulations are deterministic
+* The validity of a Simulation can be verified using a checksum mechanic called an "Ergo Sum"
+* 
+
+
+Remove the "new state" from storybook
+* Learn what's new in storybook
+* The tutorial and onboarding
+* 
+
+
+## Different level of POV Nodes
+
+When a POV node is observing a Simulation nodes, it can receive a partial view of the world.
+
+Why?
+
+
+What can be filtered ?
+
+1. Access to all or partial entities
+2. Access to systems scripts ?
+3. Access to all or partial components
+
+## Weird idead
+
+* System scripts are entities (loop upon itself)
+* Each step has an "ergo sum"
+* Once a simulation starts,
 ---
 
-* Extrement Diegetics for a game Platform
-* Build an ecosystem that is fully separate from the html ecosystem
+Radial UI for Console/Arcade gaming!
+Test it with arcade controle kits ?
 
 ---
-
-Always check the build state, document gen state, storybook state, running tests state before saying it's ready to test. Automate the automated checks and have them combine into a green/yellow/red glag
-...
-
----
+Works nice. Commit.
 
 Now, let's an another system related to the pointer style.
 
@@ -33,10 +55,9 @@ Now, let's an another system related to the pointer style.
 
 ---
 
-- Inspector: A FPS counter (with missed frame warnings)
-- Inspector: A Tics Per Seconds counter (with late tics warnings)
-- Debug: A transfer counter for stream comming out of the simulation with a history graph.
-- Debug: A latency monitor for the testPlayer
+- Debug: A FPS counter
+- Debug: A TPS counter
+- Debug: A bandwidth counter for the renderer
 
 ---
 
@@ -56,6 +77,9 @@ Create a common utiliy for using cardinal directions:
 * Then do a refactor pass to identify places where you referenced cardinal directions (such as sprite orientation).
 * Then add the resolved cardinal direction in the minidebugpanel for the vector in the inspector 
 
+## Next Big Prompt
+
+...
 
 ## BIG CONCEPT
 

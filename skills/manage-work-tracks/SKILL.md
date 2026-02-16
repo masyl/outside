@@ -5,15 +5,26 @@ description: Manages development tracks (worktree + track branch + related deliv
 
 # Manage Work Tracks – Ȯ
 
+Tracks are long running branches that are frequently rebased on `trunk` to stay up to date.
+
+They hold work context for a specific theme or initiative that may span multiple deliveries.
+
+Syncing with trunk is done often, sometimes multiple times a day.
+
+Never confuse syncing a track with closing a track. They are different operations.
+
 Defines the **Track** workflow:
 
 - One branch: `track/<slug>`
 - One worktree for that branch
 - One or more related deliveries
+- Tracks are frequently rebased on `trunk` to stay up to date, but they are not automatically integrated or closed when deliveries are completed.
+-
 
 A track is either:
 
 - `IN_PROGRESS` (ongoing)
+- `ABORTED` (ongoing)
 - `DONE` (completed and ready to close / closed)
 
 ## When to use
@@ -35,20 +46,20 @@ A track is either:
 Use when opening a new development lane.
 
 1. Ensure current workspace is clean (or explicitly committed/stashed).
-2. Sync main:
+2. Sync trunk:
    - `git fetch origin`
-   - `git switch main`
-   - `git pull --ff-only origin main`
+   - `git switch trunk`
+   - `git pull --ff-only origin trunk`
 3. Build names:
    - `track_slug=<kebab-slug>`
    - `track_branch=track/$track_slug`
    - `repo_name=$(basename "$PWD")`
    - `worktrees_root="$(cd .. && pwd)/${repo_name}.worktrees"`
    - `worktree_path="$worktrees_root/track-$track_slug"`
-4. Create worktree + branch from `main`:
+4. Create worktree + branch from `trunk`:
    - `mkdir -p "$worktrees_root"`
    - If branch does not exist:
-     - `git worktree add -b "$track_branch" "$worktree_path" main`
+     - `git worktree add -b "$track_branch" "$worktree_path" trunk`
    - If branch already exists:
      - `git worktree add "$worktree_path" "$track_branch"`
 5. Verify:
@@ -57,7 +68,7 @@ Use when opening a new development lane.
 Output summary with emoji:
 
 - `🟢 Track opened`
-- Include: branch, worktree path, base branch (`main`).
+- Include: branch, worktree path, base branch (`trunk`).
 
 ## 2) Tracks status (all active tracks)
 
@@ -84,7 +95,7 @@ For each active `track/<slug>`:
    - `🟡` if no delivery is linked yet
    - `⚠️` if naming mismatch or mixed/inconsistent status metadata
 4. Optional git signal:
-   - `git log --oneline main..track/<slug>` for ahead commits count
+   - `git log --oneline trunk..track/<slug>` for ahead commits count
 
 ### Report format
 
@@ -123,20 +134,72 @@ Report should include:
 - Worktree path
 - Naming check result
 - Linked deliveries and their statuses
-- Ahead/behind vs main (if needed): `git rev-list --left-right --count main...HEAD`
+- Ahead/behind vs main (if needed): `git rev-list --left-right --count trunk...HEAD`
 
-## 4) Close a track (when requested)
+## 4) Signal readiness for integration (when requested)
+
+Integration into trunk is **fully automated and async** via a GitHub Actions pipeline.
+No pull request is created. The agent signals readiness with a git tag; the pipeline handles the rest.
+
+### Tag signal protocol
+
+| Tag | Who sets it | Meaning |
+|---|---|---|
+| `ready/track/<slug>` | Agent | Triggers the integration pipeline |
+| `integrated/track/<slug>` | Pipeline | Squash commit landed on trunk (success) |
+| `closed/track/<slug>` | Pipeline | Branch tip preserved before deletion (success) |
+| `failed/track/<slug>` | Pipeline | Integration failed — message contains CI run link |
+
+### Prepare
+
+Before signaling, ensure the track is integration-ready:
+
+1. Rebase onto current trunk to surface conflicts now:
+   - `git fetch origin`
+   - `git rebase origin/trunk`
+2. Run quality gates locally:
+   - `pnpm lint && pnpm test`
+3. Organise commits into logical units if needed.
+
+### Trigger
+
+Push the `ready/track/<slug>` annotated tag with integration metadata as the message:
+
+```bash
+git tag -a "ready/track/<slug>" HEAD \
+  -m "Scope: <affected packages>
+Squash title: <type>(<scope>): <summary>
+Breaking: <yes|no>
+Notes: <optional context>"
+git push origin "ready/track/<slug>"
+```
+
+The pipeline will squash-merge to trunk, push result tags, and delete the branch.
+**The agent does not wait** — move on to other work.
+
+### Monitor result (optional)
+
+```bash
+git fetch --tags
+git tag -l "integrated/track/<slug>"   # landed?
+git tag -l "failed/track/<slug>"       # failed?
+git show "failed/track/<slug>"         # failure details + CI link
+```
+
+If the integration failed, fix the issue on the track branch and re-trigger.
+
+## 5) Close a track (when requested)
 
 Use only when user asks to close.
 
-1. Confirm linked deliveries are `DONE`.
-2. Ensure changes are merged/squashed as requested.
-3. Remove worktree:
+1. Closing a track is not the same as integrating or syncing a track.
+2. You MUST confirm with the user before doing this step on your own.
+3. Confirm linked deliveries are `DONE`.
+4. Confirm integration is complete: `integrated/track/<slug>` tag must exist on trunk.
+5. Remove worktree:
    - `git worktree remove <worktree-path>`
-4. Delete local branch (optional, user-confirmed):
+6. Delete local branch (if not already deleted by pipeline):
    - `git branch -d track/<slug>`
-5. Delete remote branch (optional, user-confirmed):
-   - `git push origin --delete track/<slug>`
 
 Output:
 

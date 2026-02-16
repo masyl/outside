@@ -1,0 +1,98 @@
+name: Integrate track
+
+# Triggered when an agent pushes a ready/track/<slug> tag to signal
+# that a track branch is ready to be integrated into trunk.
+#
+# Tag convention:
+#   ready/track/<slug>       ← agent pushes to trigger this pipeline
+#   integrated/track/<slug>  ← set on the squash commit in trunk (success)
+#   closed/track/<slug>      ← set on the branch tip before deletion (success)
+#   failed/track/<slug>      ← set with CI run link (failure)
+
+on:
+  push:
+    tags:
+      - 'ready/track/**'
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "integration-bot"
+          git config user.email "bot@users.noreply.github.com"
+
+      - name: Extract track name
+        # GITHUB_REF_NAME = "ready/track/<slug>" → TRACK = "track/<slug>"
+        run: echo "TRACK=${GITHUB_REF_NAME#ready/}" >> $GITHUB_ENV
+
+      - name: Fetch track branch
+        run: git fetch origin ${{ env.TRACK }}:refs/remotes/origin/${{ env.TRACK }}
+
+      - name: Rebase onto trunk
+        run: |
+          git checkout -b ${{ env.TRACK }} origin/${{ env.TRACK }}
+          git rebase origin/trunk
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Quality gates
+        run: pnpm lint && pnpm test
+
+      - name: Squash merge to trunk
+        run: |
+          TAG_MSG=$(git tag -l --format='%(contents)' "${{ github.ref_name }}")
+          git checkout trunk
+          git pull --ff-only origin trunk
+          git merge --squash ${{ env.TRACK }}
+          git commit -m "${TAG_MSG:-"chore: integrate ${{ env.TRACK }}"}"
+
+      - name: Push trunk
+        run: git push origin trunk
+
+      - name: Tag result
+        run: |
+          SQUASH=$(git rev-parse HEAD)
+          BRANCH_TIP=$(git rev-parse ${{ env.TRACK }})
+          git tag "integrated/${{ env.TRACK }}" "$SQUASH" \
+            -m "Integrated from ${{ env.TRACK }}"
+          git tag "closed/${{ env.TRACK }}" "$BRANCH_TIP" \
+            -m "Branch tip at close. Integrated via run ${{ github.run_id }}"
+          git push origin "integrated/${{ env.TRACK }}" "closed/${{ env.TRACK }}"
+
+      - name: Cleanup
+        run: |
+          git push origin --delete "ready/${{ env.TRACK }}" || true
+          git push origin --delete "${{ env.TRACK }}" || true
+
+      - name: Tag failure
+        if: failure()
+        run: |
+          git fetch origin --tags
+          BRANCH_TIP=$(git rev-parse "origin/${{ env.TRACK }}" 2>/dev/null || echo "")
+          if [ -n "$BRANCH_TIP" ]; then
+            git tag -a "failed/${{ env.TRACK }}" "$BRANCH_TIP" \
+              -m "Integration failed. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            git push origin "failed/${{ env.TRACK }}" || true
+          fi
+          git push origin --delete "ready/${{ env.TRACK }}" || true
