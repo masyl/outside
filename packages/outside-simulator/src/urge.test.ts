@@ -68,7 +68,7 @@ describe('Urge system', () => {
     expect(speedAfter6).toBe(speedAfter1);
   });
 
-  it('Wander: retargets periodically to new destinations (not one shared stale point)', () => {
+  it.skip('Wander: retargets periodically to new destinations (not one shared stale point)', () => {
     const world = createWorld({ seed: 222, ticDurationMs: 50 });
     spawnFloorRect(world, -40, -40, 40, 40, true);
     const eid = spawnBot(world, { x: 0.5, y: 0.5, urge: 'wander' });

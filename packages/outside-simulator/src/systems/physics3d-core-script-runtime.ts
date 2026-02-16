@@ -613,5 +613,6 @@ export function runPhysics3dSystemFromCoreScript(world: SimulatorWorld): Simulat
     totalMsByPhase[phaseId] = (totalMsByPhase[phaseId] ?? 0) + elapsed;
     luaApi.lua_settop(runtime.luaState, 0);
   }
+  world.physics3dRuntimeMetrics.ticCountMeasured += 1;
   return world;
 }

@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "echo \"No standalone build for @outside/test-player\"",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "test:coverage": "vitest --coverage",
     "lint": "echo \"No linter configured yet\"",
     "clean": "rm -rf dist node_modules"

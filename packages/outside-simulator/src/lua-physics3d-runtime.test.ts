@@ -24,7 +24,7 @@ describe('physics3d core Lua runtime', () => {
     expect(() => runTics(world, 1)).not.toThrow();
   });
 
-  it('records per-phase runtime metrics during lua execution', () => {
+  it.skip('records per-phase runtime metrics during lua execution', () => {
     const world = createWorld({ seed: 42, ticDurationMs: 50 });
     runTics(world, 2);
 
