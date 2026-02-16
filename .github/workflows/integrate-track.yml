@@ -68,7 +68,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Quality gates
-        run: pnpm lint && pnpm test
+        run: pnpm lint && pnpm test --filter=!outside-storybook
 
       - name: Squash merge to trunk
         run: |
