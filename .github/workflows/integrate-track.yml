@@ -55,14 +55,14 @@ jobs:
           git checkout -b ${{ env.TRACK }} origin/${{ env.TRACK }}
           git rebase origin/trunk
 
+      - name: Enable corepack
+        run: corepack enable
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
-
-      - name: Enable corepack
-        run: corepack enable
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -102,6 +102,8 @@ jobs:
           git fetch origin --tags
           BRANCH_TIP=$(git rev-parse "origin/${{ env.TRACK }}" 2>/dev/null || echo "")
           if [ -n "$BRANCH_TIP" ]; then
+            git push origin --delete "failed/${{ env.TRACK }}" 2>/dev/null || true
+            git tag -d "failed/${{ env.TRACK }}" 2>/dev/null || true
             git tag -a "failed/${{ env.TRACK }}" "$BRANCH_TIP" \
               -m "Integration failed. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             git push origin "failed/${{ env.TRACK }}" || true
