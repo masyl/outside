@@ -32,6 +32,7 @@ A track is either:
 - User asks to start a new track from a pitch/delivery theme.
 - User asks for status of active tracks.
 - User asks for current track status.
+- User asks to sync the track, merge with trunk, retrunk, or push to trunk.
 - User asks to close or clean up a completed track.
 
 ## Naming rules
@@ -134,9 +135,30 @@ Report should include:
 - Worktree path
 - Naming check result
 - Linked deliveries and their statuses
-- Ahead/behind vs main (if needed): `git rev-list --left-right --count trunk...HEAD`
+- Ahead/behind vs trunk (if needed): `git rev-list --left-right --count trunk...HEAD`
 
-## 4) Signal readiness for integration (when requested)
+## 4) Sync track with trunk
+
+Also known as: "merge with trunk", "retrunk", "push to trunk".
+
+Use when user asks to sync the current track with trunk.
+
+1. Fetch latest:
+   - `git fetch origin`
+2. Rebase onto trunk:
+   - `git rebase origin/trunk`
+3. If rebase has conflicts, stop and report to user. Do not force resolve.
+4. Force push the rebased branch:
+   - `git push --force-with-lease`
+5. Report ahead/behind:
+   - `git rev-list --left-right --count origin/trunk...HEAD`
+
+Output:
+
+- `🔄 Track synced` with ahead count vs trunk.
+- `⚠️ Sync failed — conflicts` if rebase had conflicts.
+
+## 5) Signal readiness for integration (when requested)
 
 Integration into trunk is **fully automated and async** via a GitHub Actions pipeline.
 No pull request is created. The agent signals readiness with a git tag; the pipeline handles the rest.
@@ -188,7 +210,7 @@ git show "failed/track/<slug>"         # failure details + CI link
 
 If the integration failed, fix the issue on the track branch and re-trigger.
 
-## 5) Close a track (when requested)
+## 6) Close a track (when requested)
 
 Use only when user asks to close.
 

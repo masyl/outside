@@ -45,6 +45,7 @@ description: One-line description of what this skill does and when to use it.
 ```
 
 **Rules for frontmatter:**
+
 - `name`: Must match the kebab-case directory name, followed by ` – Ȯ` (em-dash and special character)
 - `description`: Concise one-liner (50-100 chars) stating purpose and usage
 - Must use YAML format with three dashes before and after
@@ -95,6 +96,7 @@ Organize complex skills with clear subsections that guide agent behavior.
    - Document expected agent behavior
 
 2. **Create the directory**
+
    ```bash
    mkdir skills/[your-skill-name]
    ```
@@ -121,6 +123,7 @@ Organize complex skills with clear subsections that guide agent behavior.
 All skills must be created in: `/skills/[skill-name]/SKILL.md`
 
 Do NOT create skills in:
+
 - `.claude/skills/` (Claude vendor folder—auto-generated)
 - `.cursor/skills/` (Cursor vendor folder—auto-generated)
 - `.gemini/skills/` (Gemini vendor folder—auto-generated)
@@ -129,6 +132,7 @@ Do NOT create skills in:
 ## Examples
 
 See existing skills in `/skills/`:
+
 - `create-pitch/SKILL.md` – Formalized pitch creation
 - `code-and-test-carefully/SKILL.md` – Rigorous debugging workflow
 - `sync-vendor-skills/SKILL.md` – Syncing skills to vendors
@@ -149,11 +153,13 @@ Without this step, the skill will only exist in `/skills/` and won't be availabl
 ## Skill discovery
 
 Once synced, agents should be able to:
+
 - Discover the skill in their environment
 - See the skill name and description
 - Use it when the described conditions are met
 
 If an agent doesn't recognize your skill after syncing, the sync may have failed. Check:
+
 1. Directory and file names match conventions (kebab-case, `SKILL.md`)
 2. Frontmatter is valid YAML
 3. `pnpm run sync:skills` ran successfully
