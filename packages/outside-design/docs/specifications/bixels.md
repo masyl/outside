@@ -2,16 +2,17 @@
 
 ## Overview
 
-A **[Bixel](./glossary.md#bixel)** (short for "Bitmap Pixel") is the fundamental addressable element of a sprite rendering engine. Composed of a square uniform matrix of [bits](./glossary.md#bit), bixels are available in multiple sizes and are used to create game assets that are more composable and flexible than typical bitmap sprites. The modular size system allows developers to choose the right granularity for different asset types and performance requirements.
+A **[Bixel](./glossary.md#bixel)** (short for "Bitmap Pixel") is the fundamental addressable element of a sprite rendering engine. Composed of a rectangular matrix of [bits](./glossary.md#bit), bixels are available in multiple sizes and are used to create game assets that are more composable and flexible than typical bitmap sprites. While many bixels use a square aspect ratio (equal width and height), bixels may also have non-square dimensions. The modular size system allows developers to choose the right granularity for different asset types and performance requirements.
 
 ## Core Definition
 
-**Bixel**: The fundamental primitive unit in a sprite rendering system, representing a single bit in a binary matrix. A bixel is one addressable element of a square binary sprite, where each position contains a single bit representing an on/off pixel state.
+**Bixel**: The fundamental primitive unit in a sprite rendering system, representing a single bit in a binary matrix. A bixel is one addressable element of a rectangular binary sprite, where each position contains a single bit representing an on/off pixel state.
 
 ### Key Properties
-- **Resolution**: [Square](./glossary.md#square) matrix (n × n pixels per bixel, where n is [dimension](./glossary.md#dimension))
+- **Resolution**: Rectangular matrix (width × height pixels per bixel)
 - **Data**: [Binary](./glossary.md#binary) (1 [bit](./glossary.md#bit) per pixel)
-- **Uniformity**: [Square](./glossary.md#square) aspect ratio (width = height)
+- **Aspect Ratio**: Variable — many bixels are square (width = height), but non-square ratios are permitted
+- **Glyph Uniformity**: All bixels within a single [Glyph](./glossary.md#glyph) must share the same width and height
 - **Representation**: Black and white visual element
 - **[Composability](./glossary.md#composability)**: Multiple bixels can be assembled into larger, more complex sprites
 - **Flexibility**: Available in multiple standard sizes to suit different use cases
@@ -20,7 +21,7 @@ A **[Bixel](./glossary.md#bixel)** (short for "Bitmap Pixel") is the fundamental
 
 ### Bixel Sizes
 
-Bixels are available in multiple standard sizes, each following the formula: **Total Bits = Dimension²**. Bixel sizes are denoted using the **[bx](./glossary.md#bx)** unit, where the number indicates the [dimension](./glossary.md#dimension) (e.g., 16bx = 16×16).
+Bixels are available in multiple standard sizes. For square bixels, the total bits follow the formula **Total Bits = Dimension²**; for non-square bixels, **Total Bits = Width × Height**. Standard bixel sizes are denoted using the **[bx](./glossary.md#bx)** unit, where the number indicates the [dimension](./glossary.md#dimension) of the square variant (e.g., 16bx = 16×16).
 
 | Size Unit | Size Name | Dimension | Total Bits | Bytes | [Combinations](./glossary.md#combinations) | Use Cases |
 |-----------|-----------|-----------|-----------|-------|--------------|-----------|
@@ -30,28 +31,28 @@ Bixels are available in multiple standard sizes, each following the formula: **T
 | **[32bx](./glossary.md#large-bixel)** | [Large Bixel](./glossary.md#large-bixel) | 32×32 | 1024 bits | 128 | 2^1024 (astronomically large) | Large sprites, backgrounds, complex shapes |
 
 ### Data Structure (Example: Standard 16×16 Bixel)
-- **Dimensions**: 16×16 uniform square matrix
+- **Dimensions**: 16×16 matrix (square variant)
 - **Bit Depth**: 1 bit per pixel (binary: on/off)
 - **Total Size**: 256 bits (32 bytes)
 - **Storage**: Efficiently representable as 8× `uint32` or 16× `uint16`
 
 ### Generalized Storage Formula
 
-For an n×n bixel:
-- **Total Bits**: n²
-- **Total Bytes**: n² ÷ 8
+For a bixel with width `w` and height `h`:
+- **Total Bits**: w × h
+- **Total Bytes**: (w × h) ÷ 8
 - **Storage Options**:
-  - BitArray[n][n]: 2D array of bits
-  - uint32[(n² ÷ 32)]: Array of 32-bit integers
-  - uint16[(n² ÷ 16)]: Array of 16-bit integers
-  - Buffer: Raw binary buffer of (n² ÷ 8) bytes
+  - BitArray[h][w]: 2D array of bits
+  - uint32[((w × h) ÷ 32)]: Array of 32-bit integers
+  - uint16[((w × h) ÷ 16)]: Array of 16-bit integers
+  - Buffer: Raw binary buffer of ((w × h) ÷ 8) bytes
 
 ### Terminology Hierarchy
 
 | Level | Term | Definition |
 |-------|------|-----------|
 | Atomic | **[Bit](./glossary.md#bit)** | Individual on/off value in the matrix |
-| Primitive | **[Bixel](./glossary.md#bixel)** | [Square](./glossary.md#square) [binary](./glossary.md#binary) matrix (n×n pixels) |
+| Primitive | **[Bixel](./glossary.md#bixel)** | [Binary](./glossary.md#binary) matrix (width × height pixels; often square) |
 | Composite | **[Glyph](./glossary.md#glyph)** | Multiple bixels composed together to form a more complex visual entity |
 | Data Container | **[Bixel Atlas](./glossary.md#bixel-atlas)** | Complete collection of all bixel data used by glyphs in a [font](./glossary.md#font) |
 | Collection | **[Font](./glossary.md#font)** | Complete set of glyphs with a unified visual design, including a [bixel atlas](./glossary.md#bixel-atlas) for rendering |
@@ -75,7 +76,7 @@ For an n×n bixel:
 | **Composability** | Designed for composition into larger entities | Often treated as monolithic assets |
 | **Flexibility** | Multiple bixels combine with composition rules | Limited reusability across sprites |
 | **Storage** | Minimal (256 bits per unit) | Variable, often includes color data |
-| **Base Representation** | Always has black/white foundation layer | May lack this abstraction |
+| **Base Representation** | Always has black/white foundation channel | May lack this abstraction |
 | **Extension** | Color/effects added as separate concerns | Integral to sprite data |
 
 ## Composition System
@@ -83,6 +84,8 @@ For an n×n bixel:
 ### Glyphs: Composed Bixels
 
 A **[Glyph](./glossary.md#glyph)** is a visual entity composed of one or more bixels according to defined [composition](./glossary.md#composition) rules. Glyphs serve as the building blocks for complex game assets.
+
+> **Constraint**: All bixels within a single glyph must have the same width and height. A glyph may not mix bixels of different dimensions.
 
 **Example [Compositions](./glossary.md#composition)**:
 - Single 16×16 bixel = simple icon or tile
@@ -129,7 +132,7 @@ A **[Font](./glossary.md#font)** is a complete collection of glyphs with a unifi
 - **Efficient**: Minimal memory footprint for sprite data
 - **Deterministic**: Exact pixel definition for collision detection
 - **Scalable**: Clear composition rules enable complex hierarchies
-- **Layerable**: Black/white foundation allows effects and color as separate layers
+- **Multi-channel**: Black/white foundation allows effects and color as separate channels
 
 ## Data Representation
 
@@ -180,7 +183,7 @@ Binary representation:
 3. **uint16[(n² ÷ 16)]**: Array of 16-bit integers
 4. **Buffer/ArrayBuffer**: Raw binary buffer of (n² ÷ 8) bytes
 
-Where `n` is the bixel dimension (4, 8, 16, 32, etc.)
+Where `w` is the bixel width and `h` is the bixel height. For the standard square sizes (4, 8, 16, 32, …) w = h = n.
 
 ## Related Resources
 
@@ -202,15 +205,15 @@ Where `n` is the bixel dimension (4, 8, 16, 32, etc.)
 
 | Term | Definition |
 |------|-----------|
-| **Bixel** | Bitmap Pixel; square binary matrix available in multiple standard sizes |
+| **Bixel** | Bitmap Pixel; rectangular binary matrix available in multiple standard sizes; often square but non-square ratios are permitted |
 | **bx** | Bixel unit notation; indicates the dimension of a bixel (e.g., 16bx = 16×16) |
 | **Glyph** | Composed bixel(s) forming a visual entity; the basic unit of a font |
 | **Bixel Atlas** | Complete collection of all bixel data used by glyphs in a font; the resource container |
 | **Font** | Complete collection of glyphs with unified visual design, accompanied by a bixel atlas |
 | **Typeface** | The abstract design and aesthetic system of a font (can have multiple font instances) |
 | **Bit** | Single on/off value in the binary matrix |
-| **Square** | Having equal width and height (n×n is square) |
-| **Uniform** | Consistent across all instances |
+| **Square** | Having equal width and height (n×n); the most common bixel aspect ratio, but not required |
+| **Uniform** | Consistent across all instances; within a glyph, all bixels must share the same dimensions |
 | **Composability** | Ability to combine smaller units into larger structures |
 | **Deterministic** | Exact, reproducible pixel data |
 | **Dimension** | The edge length of a square bixel (n in n×n) |
