@@ -12,6 +12,7 @@ Welcome to the documentation for the **Outside** game platform.
 * [Development Process](./development-process/index.md) - Tooling, day-to-day workflows, and documentation build steps.
 * [API Documentation](./api/index.md) - Reference documentation for source code APIs and web service endpoints.
 * [Storybook](./storybook.md) - Interactive documentation for platform components.
+* [Credits](./credits.md) - Open source projects and contributors that Outside builds upon.
 
 ---
 

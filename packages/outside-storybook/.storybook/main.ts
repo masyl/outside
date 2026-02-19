@@ -8,6 +8,7 @@ const config: StorybookConfig = {
   stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y'],
   framework: '@storybook/react-vite',
+  staticDirs: [{ from: '../../..', to: '/' }],
   docs: {
     autodocs: 'tag',
   },
@@ -96,7 +97,7 @@ const config: StorybookConfig = {
       },
       server: {
         fs: {
-          allow: [resolve(rootDir, '..')],
+          allow: [resolve(rootDir, '..'), resolve(rootDir, '..', '..')],
         },
       },
     });

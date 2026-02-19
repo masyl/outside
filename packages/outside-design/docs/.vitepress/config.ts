@@ -59,6 +59,7 @@ export default defineConfig({
       { text: 'Dev', link: '/development-process/' },
       { text: 'API', link: '/api/' },
       { text: 'Storybook', link: '/storybook' },
+      { text: 'Credits', link: '/credits' },
     ],
 
     sidebar: {

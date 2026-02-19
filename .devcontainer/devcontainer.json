@@ -1,0 +1,30 @@
+{
+    "name": "Outside Development (Node 22)",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bullseye",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "22",
+            "pnpm": "latest"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "files.eol": "\n",
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "esbenp.prettier-vscode"
+            },
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "ms-playwright.playwright"
+            ]
+        }
+    },
+    "forwardPorts": [
+        5173,
+        6006
+    ],
+    "postCreateCommand": "pnpm install",
+    "remoteUser": "node"
+}

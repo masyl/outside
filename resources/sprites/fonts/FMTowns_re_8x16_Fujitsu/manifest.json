@@ -1,0 +1,2582 @@
+{
+  "name": "FMTowns_re_8x16",
+  "foundry": "Fujitsu",
+  "glyphWidth": 8,
+  "glyphHeight": 16,
+  "antiAliasing": false,
+  "toolVersion": "0.1.0",
+  "sources": [
+    {
+      "charset": "cp437",
+      "ttfFile": "Px437_FMTowns_re_8x16.ttf",
+      "generatedAt": "2026-02-18T21:05:34.863Z"
+    },
+    {
+      "charset": "plus",
+      "ttfFile": "Px437_FMTowns_re_8x16.ttf",
+      "generatedAt": "2026-02-18T21:05:35.136Z"
+    }
+  ],
+  "sprites": [
+    {
+      "codePoint": "U+0000",
+      "unicodeName": "<control-0000>",
+      "file": "U0000.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 0
+    },
+    {
+      "codePoint": "U+0001",
+      "unicodeName": "<control-0001>",
+      "file": "U0001.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0002",
+      "unicodeName": "<control-0002>",
+      "file": "U0002.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0003",
+      "unicodeName": "<control-0003>",
+      "file": "U0003.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0004",
+      "unicodeName": "<control-0004>",
+      "file": "U0004.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0005",
+      "unicodeName": "<control-0005>",
+      "file": "U0005.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0006",
+      "unicodeName": "<control-0006>",
+      "file": "U0006.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0007",
+      "unicodeName": "<control-0007>",
+      "file": "U0007.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0008",
+      "unicodeName": "<control-0008>",
+      "file": "U0008.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0009",
+      "unicodeName": "<control-0009>",
+      "file": "U0009.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+000A",
+      "unicodeName": "<control-000A>",
+      "file": "U000A.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+000B",
+      "unicodeName": "<control-000B>",
+      "file": "U000B.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+000C",
+      "unicodeName": "<control-000C>",
+      "file": "U000C.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+000D",
+      "unicodeName": "<control-000D>",
+      "file": "U000D.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+000E",
+      "unicodeName": "<control-000E>",
+      "file": "U000E.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+000F",
+      "unicodeName": "<control-000F>",
+      "file": "U000F.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0010",
+      "unicodeName": "<control-0010>",
+      "file": "U0010.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0011",
+      "unicodeName": "<control-0011>",
+      "file": "U0011.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0012",
+      "unicodeName": "<control-0012>",
+      "file": "U0012.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0013",
+      "unicodeName": "<control-0013>",
+      "file": "U0013.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0014",
+      "unicodeName": "<control-0014>",
+      "file": "U0014.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0015",
+      "unicodeName": "<control-0015>",
+      "file": "U0015.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0016",
+      "unicodeName": "<control-0016>",
+      "file": "U0016.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0017",
+      "unicodeName": "<control-0017>",
+      "file": "U0017.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0018",
+      "unicodeName": "<control-0018>",
+      "file": "U0018.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0019",
+      "unicodeName": "<control-0019>",
+      "file": "U0019.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+001A",
+      "unicodeName": "<control-001A>",
+      "file": "U001A.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+001B",
+      "unicodeName": "<control-001B>",
+      "file": "U001B.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+001C",
+      "unicodeName": "<control-001C>",
+      "file": "U001C.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+001D",
+      "unicodeName": "<control-001D>",
+      "file": "U001D.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+001E",
+      "unicodeName": "<control-001E>",
+      "file": "U001E.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+001F",
+      "unicodeName": "<control-001F>",
+      "file": "U001F.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+0020",
+      "unicodeName": "U+0020",
+      "file": "U0020.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 32
+    },
+    {
+      "codePoint": "U+0021",
+      "unicodeName": "U+0021",
+      "file": "U0021.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 33
+    },
+    {
+      "codePoint": "U+0022",
+      "unicodeName": "U+0022",
+      "file": "U0022.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 34
+    },
+    {
+      "codePoint": "U+0023",
+      "unicodeName": "U+0023",
+      "file": "U0023.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 35
+    },
+    {
+      "codePoint": "U+0024",
+      "unicodeName": "U+0024",
+      "file": "U0024.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 36
+    },
+    {
+      "codePoint": "U+0025",
+      "unicodeName": "U+0025",
+      "file": "U0025.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 37
+    },
+    {
+      "codePoint": "U+0026",
+      "unicodeName": "U+0026",
+      "file": "U0026.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 38
+    },
+    {
+      "codePoint": "U+0027",
+      "unicodeName": "U+0027",
+      "file": "U0027.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 39
+    },
+    {
+      "codePoint": "U+0028",
+      "unicodeName": "U+0028",
+      "file": "U0028.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 40
+    },
+    {
+      "codePoint": "U+0029",
+      "unicodeName": "U+0029",
+      "file": "U0029.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 41
+    },
+    {
+      "codePoint": "U+002A",
+      "unicodeName": "U+002A",
+      "file": "U002A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 42
+    },
+    {
+      "codePoint": "U+002B",
+      "unicodeName": "U+002B",
+      "file": "U002B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 43
+    },
+    {
+      "codePoint": "U+002C",
+      "unicodeName": "U+002C",
+      "file": "U002C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 44
+    },
+    {
+      "codePoint": "U+002D",
+      "unicodeName": "U+002D",
+      "file": "U002D.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 45
+    },
+    {
+      "codePoint": "U+002E",
+      "unicodeName": "U+002E",
+      "file": "U002E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 46
+    },
+    {
+      "codePoint": "U+002F",
+      "unicodeName": "U+002F",
+      "file": "U002F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 47
+    },
+    {
+      "codePoint": "U+0030",
+      "unicodeName": "U+0030",
+      "file": "U0030.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 48
+    },
+    {
+      "codePoint": "U+0031",
+      "unicodeName": "U+0031",
+      "file": "U0031.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 49
+    },
+    {
+      "codePoint": "U+0032",
+      "unicodeName": "U+0032",
+      "file": "U0032.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 50
+    },
+    {
+      "codePoint": "U+0033",
+      "unicodeName": "U+0033",
+      "file": "U0033.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 51
+    },
+    {
+      "codePoint": "U+0034",
+      "unicodeName": "U+0034",
+      "file": "U0034.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 52
+    },
+    {
+      "codePoint": "U+0035",
+      "unicodeName": "U+0035",
+      "file": "U0035.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 53
+    },
+    {
+      "codePoint": "U+0036",
+      "unicodeName": "U+0036",
+      "file": "U0036.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 54
+    },
+    {
+      "codePoint": "U+0037",
+      "unicodeName": "U+0037",
+      "file": "U0037.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 55
+    },
+    {
+      "codePoint": "U+0038",
+      "unicodeName": "U+0038",
+      "file": "U0038.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 56
+    },
+    {
+      "codePoint": "U+0039",
+      "unicodeName": "U+0039",
+      "file": "U0039.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 57
+    },
+    {
+      "codePoint": "U+003A",
+      "unicodeName": "U+003A",
+      "file": "U003A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 58
+    },
+    {
+      "codePoint": "U+003B",
+      "unicodeName": "U+003B",
+      "file": "U003B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 59
+    },
+    {
+      "codePoint": "U+003C",
+      "unicodeName": "U+003C",
+      "file": "U003C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 60
+    },
+    {
+      "codePoint": "U+003D",
+      "unicodeName": "U+003D",
+      "file": "U003D.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 61
+    },
+    {
+      "codePoint": "U+003E",
+      "unicodeName": "U+003E",
+      "file": "U003E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 62
+    },
+    {
+      "codePoint": "U+003F",
+      "unicodeName": "U+003F",
+      "file": "U003F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 63
+    },
+    {
+      "codePoint": "U+0040",
+      "unicodeName": "U+0040",
+      "file": "U0040.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 64
+    },
+    {
+      "codePoint": "U+0041",
+      "unicodeName": "U+0041",
+      "file": "U0041.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 65
+    },
+    {
+      "codePoint": "U+0042",
+      "unicodeName": "U+0042",
+      "file": "U0042.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 66
+    },
+    {
+      "codePoint": "U+0043",
+      "unicodeName": "U+0043",
+      "file": "U0043.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 67
+    },
+    {
+      "codePoint": "U+0044",
+      "unicodeName": "U+0044",
+      "file": "U0044.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 68
+    },
+    {
+      "codePoint": "U+0045",
+      "unicodeName": "U+0045",
+      "file": "U0045.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 69
+    },
+    {
+      "codePoint": "U+0046",
+      "unicodeName": "U+0046",
+      "file": "U0046.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 70
+    },
+    {
+      "codePoint": "U+0047",
+      "unicodeName": "U+0047",
+      "file": "U0047.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 71
+    },
+    {
+      "codePoint": "U+0048",
+      "unicodeName": "U+0048",
+      "file": "U0048.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 72
+    },
+    {
+      "codePoint": "U+0049",
+      "unicodeName": "U+0049",
+      "file": "U0049.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 73
+    },
+    {
+      "codePoint": "U+004A",
+      "unicodeName": "U+004A",
+      "file": "U004A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 74
+    },
+    {
+      "codePoint": "U+004B",
+      "unicodeName": "U+004B",
+      "file": "U004B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 75
+    },
+    {
+      "codePoint": "U+004C",
+      "unicodeName": "U+004C",
+      "file": "U004C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 76
+    },
+    {
+      "codePoint": "U+004D",
+      "unicodeName": "U+004D",
+      "file": "U004D.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 77
+    },
+    {
+      "codePoint": "U+004E",
+      "unicodeName": "U+004E",
+      "file": "U004E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 78
+    },
+    {
+      "codePoint": "U+004F",
+      "unicodeName": "U+004F",
+      "file": "U004F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 79
+    },
+    {
+      "codePoint": "U+0050",
+      "unicodeName": "U+0050",
+      "file": "U0050.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 80
+    },
+    {
+      "codePoint": "U+0051",
+      "unicodeName": "U+0051",
+      "file": "U0051.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 81
+    },
+    {
+      "codePoint": "U+0052",
+      "unicodeName": "U+0052",
+      "file": "U0052.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 82
+    },
+    {
+      "codePoint": "U+0053",
+      "unicodeName": "U+0053",
+      "file": "U0053.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 83
+    },
+    {
+      "codePoint": "U+0054",
+      "unicodeName": "U+0054",
+      "file": "U0054.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 84
+    },
+    {
+      "codePoint": "U+0055",
+      "unicodeName": "U+0055",
+      "file": "U0055.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 85
+    },
+    {
+      "codePoint": "U+0056",
+      "unicodeName": "U+0056",
+      "file": "U0056.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 86
+    },
+    {
+      "codePoint": "U+0057",
+      "unicodeName": "U+0057",
+      "file": "U0057.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 87
+    },
+    {
+      "codePoint": "U+0058",
+      "unicodeName": "U+0058",
+      "file": "U0058.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 88
+    },
+    {
+      "codePoint": "U+0059",
+      "unicodeName": "U+0059",
+      "file": "U0059.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 89
+    },
+    {
+      "codePoint": "U+005A",
+      "unicodeName": "U+005A",
+      "file": "U005A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 90
+    },
+    {
+      "codePoint": "U+005B",
+      "unicodeName": "U+005B",
+      "file": "U005B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 91
+    },
+    {
+      "codePoint": "U+005C",
+      "unicodeName": "U+005C",
+      "file": "U005C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 92
+    },
+    {
+      "codePoint": "U+005D",
+      "unicodeName": "U+005D",
+      "file": "U005D.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 93
+    },
+    {
+      "codePoint": "U+005E",
+      "unicodeName": "U+005E",
+      "file": "U005E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 94
+    },
+    {
+      "codePoint": "U+005F",
+      "unicodeName": "U+005F",
+      "file": "U005F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 95
+    },
+    {
+      "codePoint": "U+0060",
+      "unicodeName": "U+0060",
+      "file": "U0060.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 96
+    },
+    {
+      "codePoint": "U+0061",
+      "unicodeName": "U+0061",
+      "file": "U0061.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 97
+    },
+    {
+      "codePoint": "U+0062",
+      "unicodeName": "U+0062",
+      "file": "U0062.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 98
+    },
+    {
+      "codePoint": "U+0063",
+      "unicodeName": "U+0063",
+      "file": "U0063.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 99
+    },
+    {
+      "codePoint": "U+0064",
+      "unicodeName": "U+0064",
+      "file": "U0064.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 100
+    },
+    {
+      "codePoint": "U+0065",
+      "unicodeName": "U+0065",
+      "file": "U0065.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 101
+    },
+    {
+      "codePoint": "U+0066",
+      "unicodeName": "U+0066",
+      "file": "U0066.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 102
+    },
+    {
+      "codePoint": "U+0067",
+      "unicodeName": "U+0067",
+      "file": "U0067.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 103
+    },
+    {
+      "codePoint": "U+0068",
+      "unicodeName": "U+0068",
+      "file": "U0068.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 104
+    },
+    {
+      "codePoint": "U+0069",
+      "unicodeName": "U+0069",
+      "file": "U0069.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 105
+    },
+    {
+      "codePoint": "U+006A",
+      "unicodeName": "U+006A",
+      "file": "U006A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 106
+    },
+    {
+      "codePoint": "U+006B",
+      "unicodeName": "U+006B",
+      "file": "U006B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 107
+    },
+    {
+      "codePoint": "U+006C",
+      "unicodeName": "U+006C",
+      "file": "U006C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 108
+    },
+    {
+      "codePoint": "U+006D",
+      "unicodeName": "U+006D",
+      "file": "U006D.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 109
+    },
+    {
+      "codePoint": "U+006E",
+      "unicodeName": "U+006E",
+      "file": "U006E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 110
+    },
+    {
+      "codePoint": "U+006F",
+      "unicodeName": "U+006F",
+      "file": "U006F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 111
+    },
+    {
+      "codePoint": "U+0070",
+      "unicodeName": "U+0070",
+      "file": "U0070.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 112
+    },
+    {
+      "codePoint": "U+0071",
+      "unicodeName": "U+0071",
+      "file": "U0071.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 113
+    },
+    {
+      "codePoint": "U+0072",
+      "unicodeName": "U+0072",
+      "file": "U0072.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 114
+    },
+    {
+      "codePoint": "U+0073",
+      "unicodeName": "U+0073",
+      "file": "U0073.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 115
+    },
+    {
+      "codePoint": "U+0074",
+      "unicodeName": "U+0074",
+      "file": "U0074.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 116
+    },
+    {
+      "codePoint": "U+0075",
+      "unicodeName": "U+0075",
+      "file": "U0075.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 117
+    },
+    {
+      "codePoint": "U+0076",
+      "unicodeName": "U+0076",
+      "file": "U0076.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 118
+    },
+    {
+      "codePoint": "U+0077",
+      "unicodeName": "U+0077",
+      "file": "U0077.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 119
+    },
+    {
+      "codePoint": "U+0078",
+      "unicodeName": "U+0078",
+      "file": "U0078.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 120
+    },
+    {
+      "codePoint": "U+0079",
+      "unicodeName": "U+0079",
+      "file": "U0079.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 121
+    },
+    {
+      "codePoint": "U+007A",
+      "unicodeName": "U+007A",
+      "file": "U007A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 122
+    },
+    {
+      "codePoint": "U+007B",
+      "unicodeName": "U+007B",
+      "file": "U007B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 123
+    },
+    {
+      "codePoint": "U+007C",
+      "unicodeName": "U+007C",
+      "file": "U007C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 124
+    },
+    {
+      "codePoint": "U+007D",
+      "unicodeName": "U+007D",
+      "file": "U007D.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 125
+    },
+    {
+      "codePoint": "U+007E",
+      "unicodeName": "U+007E",
+      "file": "U007E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 126
+    },
+    {
+      "codePoint": "U+007F",
+      "unicodeName": "<control-007F>",
+      "file": "U007F.png",
+      "charsets": [
+        "plus"
+      ]
+    },
+    {
+      "codePoint": "U+00A0",
+      "unicodeName": "U+00A0",
+      "file": "U00A0.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 255
+    },
+    {
+      "codePoint": "U+00A1",
+      "unicodeName": "U+00A1",
+      "file": "U00A1.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 173
+    },
+    {
+      "codePoint": "U+00A2",
+      "unicodeName": "U+00A2",
+      "file": "U00A2.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 155
+    },
+    {
+      "codePoint": "U+00A3",
+      "unicodeName": "U+00A3",
+      "file": "U00A3.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 156
+    },
+    {
+      "codePoint": "U+00A5",
+      "unicodeName": "U+00A5",
+      "file": "U00A5.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 157
+    },
+    {
+      "codePoint": "U+00A7",
+      "unicodeName": "U+00A7",
+      "file": "U00A7.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 21
+    },
+    {
+      "codePoint": "U+00AA",
+      "unicodeName": "U+00AA",
+      "file": "U00AA.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 166
+    },
+    {
+      "codePoint": "U+00AB",
+      "unicodeName": "U+00AB",
+      "file": "U00AB.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 174
+    },
+    {
+      "codePoint": "U+00AC",
+      "unicodeName": "U+00AC",
+      "file": "U00AC.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 170
+    },
+    {
+      "codePoint": "U+00B0",
+      "unicodeName": "U+00B0",
+      "file": "U00B0.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 248
+    },
+    {
+      "codePoint": "U+00B1",
+      "unicodeName": "U+00B1",
+      "file": "U00B1.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 241
+    },
+    {
+      "codePoint": "U+00B2",
+      "unicodeName": "U+00B2",
+      "file": "U00B2.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 253
+    },
+    {
+      "codePoint": "U+00B5",
+      "unicodeName": "U+00B5",
+      "file": "U00B5.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 230
+    },
+    {
+      "codePoint": "U+00B6",
+      "unicodeName": "U+00B6",
+      "file": "U00B6.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 20
+    },
+    {
+      "codePoint": "U+00B7",
+      "unicodeName": "U+00B7",
+      "file": "U00B7.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 250
+    },
+    {
+      "codePoint": "U+00BA",
+      "unicodeName": "U+00BA",
+      "file": "U00BA.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 167
+    },
+    {
+      "codePoint": "U+00BB",
+      "unicodeName": "U+00BB",
+      "file": "U00BB.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 175
+    },
+    {
+      "codePoint": "U+00BC",
+      "unicodeName": "U+00BC",
+      "file": "U00BC.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 172
+    },
+    {
+      "codePoint": "U+00BD",
+      "unicodeName": "U+00BD",
+      "file": "U00BD.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 171
+    },
+    {
+      "codePoint": "U+00BF",
+      "unicodeName": "U+00BF",
+      "file": "U00BF.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 168
+    },
+    {
+      "codePoint": "U+00C4",
+      "unicodeName": "U+00C4",
+      "file": "U00C4.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 142
+    },
+    {
+      "codePoint": "U+00C5",
+      "unicodeName": "U+00C5",
+      "file": "U00C5.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 143
+    },
+    {
+      "codePoint": "U+00C6",
+      "unicodeName": "U+00C6",
+      "file": "U00C6.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 146
+    },
+    {
+      "codePoint": "U+00C7",
+      "unicodeName": "U+00C7",
+      "file": "U00C7.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 128
+    },
+    {
+      "codePoint": "U+00C9",
+      "unicodeName": "U+00C9",
+      "file": "U00C9.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 144
+    },
+    {
+      "codePoint": "U+00D1",
+      "unicodeName": "U+00D1",
+      "file": "U00D1.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 165
+    },
+    {
+      "codePoint": "U+00D6",
+      "unicodeName": "U+00D6",
+      "file": "U00D6.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 153
+    },
+    {
+      "codePoint": "U+00DC",
+      "unicodeName": "U+00DC",
+      "file": "U00DC.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 154
+    },
+    {
+      "codePoint": "U+00DF",
+      "unicodeName": "U+00DF",
+      "file": "U00DF.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 225
+    },
+    {
+      "codePoint": "U+00E0",
+      "unicodeName": "U+00E0",
+      "file": "U00E0.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 133
+    },
+    {
+      "codePoint": "U+00E1",
+      "unicodeName": "U+00E1",
+      "file": "U00E1.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 160
+    },
+    {
+      "codePoint": "U+00E2",
+      "unicodeName": "U+00E2",
+      "file": "U00E2.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 131
+    },
+    {
+      "codePoint": "U+00E4",
+      "unicodeName": "U+00E4",
+      "file": "U00E4.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 132
+    },
+    {
+      "codePoint": "U+00E5",
+      "unicodeName": "U+00E5",
+      "file": "U00E5.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 134
+    },
+    {
+      "codePoint": "U+00E6",
+      "unicodeName": "U+00E6",
+      "file": "U00E6.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 145
+    },
+    {
+      "codePoint": "U+00E7",
+      "unicodeName": "U+00E7",
+      "file": "U00E7.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 135
+    },
+    {
+      "codePoint": "U+00E8",
+      "unicodeName": "U+00E8",
+      "file": "U00E8.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 138
+    },
+    {
+      "codePoint": "U+00E9",
+      "unicodeName": "U+00E9",
+      "file": "U00E9.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 130
+    },
+    {
+      "codePoint": "U+00EA",
+      "unicodeName": "U+00EA",
+      "file": "U00EA.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 136
+    },
+    {
+      "codePoint": "U+00EB",
+      "unicodeName": "U+00EB",
+      "file": "U00EB.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 137
+    },
+    {
+      "codePoint": "U+00EC",
+      "unicodeName": "U+00EC",
+      "file": "U00EC.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 141
+    },
+    {
+      "codePoint": "U+00ED",
+      "unicodeName": "U+00ED",
+      "file": "U00ED.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 161
+    },
+    {
+      "codePoint": "U+00EE",
+      "unicodeName": "U+00EE",
+      "file": "U00EE.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 140
+    },
+    {
+      "codePoint": "U+00EF",
+      "unicodeName": "U+00EF",
+      "file": "U00EF.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 139
+    },
+    {
+      "codePoint": "U+00F1",
+      "unicodeName": "U+00F1",
+      "file": "U00F1.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 164
+    },
+    {
+      "codePoint": "U+00F2",
+      "unicodeName": "U+00F2",
+      "file": "U00F2.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 149
+    },
+    {
+      "codePoint": "U+00F3",
+      "unicodeName": "U+00F3",
+      "file": "U00F3.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 162
+    },
+    {
+      "codePoint": "U+00F4",
+      "unicodeName": "U+00F4",
+      "file": "U00F4.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 147
+    },
+    {
+      "codePoint": "U+00F6",
+      "unicodeName": "U+00F6",
+      "file": "U00F6.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 148
+    },
+    {
+      "codePoint": "U+00F7",
+      "unicodeName": "U+00F7",
+      "file": "U00F7.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 246
+    },
+    {
+      "codePoint": "U+00F9",
+      "unicodeName": "U+00F9",
+      "file": "U00F9.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 151
+    },
+    {
+      "codePoint": "U+00FA",
+      "unicodeName": "U+00FA",
+      "file": "U00FA.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 163
+    },
+    {
+      "codePoint": "U+00FB",
+      "unicodeName": "U+00FB",
+      "file": "U00FB.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 150
+    },
+    {
+      "codePoint": "U+00FC",
+      "unicodeName": "U+00FC",
+      "file": "U00FC.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 129
+    },
+    {
+      "codePoint": "U+00FF",
+      "unicodeName": "U+00FF",
+      "file": "U00FF.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 152
+    },
+    {
+      "codePoint": "U+0192",
+      "unicodeName": "U+0192",
+      "file": "U0192.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 159
+    },
+    {
+      "codePoint": "U+0393",
+      "unicodeName": "U+0393",
+      "file": "U0393.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 226
+    },
+    {
+      "codePoint": "U+0398",
+      "unicodeName": "U+0398",
+      "file": "U0398.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 233
+    },
+    {
+      "codePoint": "U+03A3",
+      "unicodeName": "U+03A3",
+      "file": "U03A3.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 228
+    },
+    {
+      "codePoint": "U+03A6",
+      "unicodeName": "U+03A6",
+      "file": "U03A6.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 232
+    },
+    {
+      "codePoint": "U+03A9",
+      "unicodeName": "U+03A9",
+      "file": "U03A9.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 234
+    },
+    {
+      "codePoint": "U+03B1",
+      "unicodeName": "U+03B1",
+      "file": "U03B1.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 224
+    },
+    {
+      "codePoint": "U+03B4",
+      "unicodeName": "U+03B4",
+      "file": "U03B4.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 235
+    },
+    {
+      "codePoint": "U+03B5",
+      "unicodeName": "U+03B5",
+      "file": "U03B5.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 238
+    },
+    {
+      "codePoint": "U+03C0",
+      "unicodeName": "U+03C0",
+      "file": "U03C0.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 227
+    },
+    {
+      "codePoint": "U+03C3",
+      "unicodeName": "U+03C3",
+      "file": "U03C3.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 229
+    },
+    {
+      "codePoint": "U+03C4",
+      "unicodeName": "U+03C4",
+      "file": "U03C4.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 231
+    },
+    {
+      "codePoint": "U+03C6",
+      "unicodeName": "U+03C6",
+      "file": "U03C6.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 237
+    },
+    {
+      "codePoint": "U+2022",
+      "unicodeName": "U+2022",
+      "file": "U2022.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 7
+    },
+    {
+      "codePoint": "U+203C",
+      "unicodeName": "U+203C",
+      "file": "U203C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 19
+    },
+    {
+      "codePoint": "U+207F",
+      "unicodeName": "U+207F",
+      "file": "U207F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 252
+    },
+    {
+      "codePoint": "U+20A7",
+      "unicodeName": "U+20A7",
+      "file": "U20A7.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 158
+    },
+    {
+      "codePoint": "U+2190",
+      "unicodeName": "U+2190",
+      "file": "U2190.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 27
+    },
+    {
+      "codePoint": "U+2191",
+      "unicodeName": "U+2191",
+      "file": "U2191.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 24
+    },
+    {
+      "codePoint": "U+2192",
+      "unicodeName": "U+2192",
+      "file": "U2192.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 26
+    },
+    {
+      "codePoint": "U+2193",
+      "unicodeName": "U+2193",
+      "file": "U2193.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 25
+    },
+    {
+      "codePoint": "U+2194",
+      "unicodeName": "U+2194",
+      "file": "U2194.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 29
+    },
+    {
+      "codePoint": "U+2195",
+      "unicodeName": "U+2195",
+      "file": "U2195.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 18
+    },
+    {
+      "codePoint": "U+21A8",
+      "unicodeName": "U+21A8",
+      "file": "U21A8.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 23
+    },
+    {
+      "codePoint": "U+2219",
+      "unicodeName": "U+2219",
+      "file": "U2219.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 249
+    },
+    {
+      "codePoint": "U+221A",
+      "unicodeName": "U+221A",
+      "file": "U221A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 251
+    },
+    {
+      "codePoint": "U+221E",
+      "unicodeName": "U+221E",
+      "file": "U221E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 236
+    },
+    {
+      "codePoint": "U+221F",
+      "unicodeName": "U+221F",
+      "file": "U221F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 28
+    },
+    {
+      "codePoint": "U+2229",
+      "unicodeName": "U+2229",
+      "file": "U2229.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 239
+    },
+    {
+      "codePoint": "U+2248",
+      "unicodeName": "U+2248",
+      "file": "U2248.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 247
+    },
+    {
+      "codePoint": "U+2261",
+      "unicodeName": "U+2261",
+      "file": "U2261.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 240
+    },
+    {
+      "codePoint": "U+2264",
+      "unicodeName": "U+2264",
+      "file": "U2264.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 243
+    },
+    {
+      "codePoint": "U+2265",
+      "unicodeName": "U+2265",
+      "file": "U2265.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 242
+    },
+    {
+      "codePoint": "U+2302",
+      "unicodeName": "U+2302",
+      "file": "U2302.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 127
+    },
+    {
+      "codePoint": "U+2310",
+      "unicodeName": "U+2310",
+      "file": "U2310.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 169
+    },
+    {
+      "codePoint": "U+2320",
+      "unicodeName": "U+2320",
+      "file": "U2320.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 244
+    },
+    {
+      "codePoint": "U+2321",
+      "unicodeName": "U+2321",
+      "file": "U2321.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 245
+    },
+    {
+      "codePoint": "U+2500",
+      "unicodeName": "U+2500",
+      "file": "U2500.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 196
+    },
+    {
+      "codePoint": "U+2502",
+      "unicodeName": "U+2502",
+      "file": "U2502.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 179
+    },
+    {
+      "codePoint": "U+250C",
+      "unicodeName": "U+250C",
+      "file": "U250C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 218
+    },
+    {
+      "codePoint": "U+2510",
+      "unicodeName": "U+2510",
+      "file": "U2510.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 191
+    },
+    {
+      "codePoint": "U+2514",
+      "unicodeName": "U+2514",
+      "file": "U2514.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 192
+    },
+    {
+      "codePoint": "U+2518",
+      "unicodeName": "U+2518",
+      "file": "U2518.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 217
+    },
+    {
+      "codePoint": "U+251C",
+      "unicodeName": "U+251C",
+      "file": "U251C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 195
+    },
+    {
+      "codePoint": "U+2524",
+      "unicodeName": "U+2524",
+      "file": "U2524.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 180
+    },
+    {
+      "codePoint": "U+252C",
+      "unicodeName": "U+252C",
+      "file": "U252C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 194
+    },
+    {
+      "codePoint": "U+2534",
+      "unicodeName": "U+2534",
+      "file": "U2534.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 193
+    },
+    {
+      "codePoint": "U+253C",
+      "unicodeName": "U+253C",
+      "file": "U253C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 197
+    },
+    {
+      "codePoint": "U+2550",
+      "unicodeName": "U+2550",
+      "file": "U2550.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 205
+    },
+    {
+      "codePoint": "U+2551",
+      "unicodeName": "U+2551",
+      "file": "U2551.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 186
+    },
+    {
+      "codePoint": "U+2552",
+      "unicodeName": "U+2552",
+      "file": "U2552.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 213
+    },
+    {
+      "codePoint": "U+2553",
+      "unicodeName": "U+2553",
+      "file": "U2553.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 214
+    },
+    {
+      "codePoint": "U+2554",
+      "unicodeName": "U+2554",
+      "file": "U2554.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 201
+    },
+    {
+      "codePoint": "U+2555",
+      "unicodeName": "U+2555",
+      "file": "U2555.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 184
+    },
+    {
+      "codePoint": "U+2556",
+      "unicodeName": "U+2556",
+      "file": "U2556.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 183
+    },
+    {
+      "codePoint": "U+2557",
+      "unicodeName": "U+2557",
+      "file": "U2557.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 187
+    },
+    {
+      "codePoint": "U+2558",
+      "unicodeName": "U+2558",
+      "file": "U2558.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 212
+    },
+    {
+      "codePoint": "U+2559",
+      "unicodeName": "U+2559",
+      "file": "U2559.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 211
+    },
+    {
+      "codePoint": "U+255A",
+      "unicodeName": "U+255A",
+      "file": "U255A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 200
+    },
+    {
+      "codePoint": "U+255B",
+      "unicodeName": "U+255B",
+      "file": "U255B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 190
+    },
+    {
+      "codePoint": "U+255C",
+      "unicodeName": "U+255C",
+      "file": "U255C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 189
+    },
+    {
+      "codePoint": "U+255D",
+      "unicodeName": "U+255D",
+      "file": "U255D.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 188
+    },
+    {
+      "codePoint": "U+255E",
+      "unicodeName": "U+255E",
+      "file": "U255E.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 198
+    },
+    {
+      "codePoint": "U+255F",
+      "unicodeName": "U+255F",
+      "file": "U255F.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 199
+    },
+    {
+      "codePoint": "U+2560",
+      "unicodeName": "U+2560",
+      "file": "U2560.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 204
+    },
+    {
+      "codePoint": "U+2561",
+      "unicodeName": "U+2561",
+      "file": "U2561.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 181
+    },
+    {
+      "codePoint": "U+2562",
+      "unicodeName": "U+2562",
+      "file": "U2562.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 182
+    },
+    {
+      "codePoint": "U+2563",
+      "unicodeName": "U+2563",
+      "file": "U2563.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 185
+    },
+    {
+      "codePoint": "U+2564",
+      "unicodeName": "U+2564",
+      "file": "U2564.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 209
+    },
+    {
+      "codePoint": "U+2565",
+      "unicodeName": "U+2565",
+      "file": "U2565.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 210
+    },
+    {
+      "codePoint": "U+2566",
+      "unicodeName": "U+2566",
+      "file": "U2566.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 203
+    },
+    {
+      "codePoint": "U+2567",
+      "unicodeName": "U+2567",
+      "file": "U2567.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 207
+    },
+    {
+      "codePoint": "U+2568",
+      "unicodeName": "U+2568",
+      "file": "U2568.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 208
+    },
+    {
+      "codePoint": "U+2569",
+      "unicodeName": "U+2569",
+      "file": "U2569.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 202
+    },
+    {
+      "codePoint": "U+256A",
+      "unicodeName": "U+256A",
+      "file": "U256A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 216
+    },
+    {
+      "codePoint": "U+256B",
+      "unicodeName": "U+256B",
+      "file": "U256B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 215
+    },
+    {
+      "codePoint": "U+256C",
+      "unicodeName": "U+256C",
+      "file": "U256C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 206
+    },
+    {
+      "codePoint": "U+2580",
+      "unicodeName": "U+2580",
+      "file": "U2580.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 223
+    },
+    {
+      "codePoint": "U+2584",
+      "unicodeName": "U+2584",
+      "file": "U2584.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 220
+    },
+    {
+      "codePoint": "U+2588",
+      "unicodeName": "U+2588",
+      "file": "U2588.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 219
+    },
+    {
+      "codePoint": "U+258C",
+      "unicodeName": "U+258C",
+      "file": "U258C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 221
+    },
+    {
+      "codePoint": "U+2590",
+      "unicodeName": "U+2590",
+      "file": "U2590.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 222
+    },
+    {
+      "codePoint": "U+2591",
+      "unicodeName": "U+2591",
+      "file": "U2591.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 176
+    },
+    {
+      "codePoint": "U+2592",
+      "unicodeName": "U+2592",
+      "file": "U2592.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 177
+    },
+    {
+      "codePoint": "U+2593",
+      "unicodeName": "U+2593",
+      "file": "U2593.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 178
+    },
+    {
+      "codePoint": "U+25A0",
+      "unicodeName": "U+25A0",
+      "file": "U25A0.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 254
+    },
+    {
+      "codePoint": "U+25AC",
+      "unicodeName": "U+25AC",
+      "file": "U25AC.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 22
+    },
+    {
+      "codePoint": "U+25B2",
+      "unicodeName": "U+25B2",
+      "file": "U25B2.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 30
+    },
+    {
+      "codePoint": "U+25BA",
+      "unicodeName": "U+25BA",
+      "file": "U25BA.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 16
+    },
+    {
+      "codePoint": "U+25BC",
+      "unicodeName": "U+25BC",
+      "file": "U25BC.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 31
+    },
+    {
+      "codePoint": "U+25C4",
+      "unicodeName": "U+25C4",
+      "file": "U25C4.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 17
+    },
+    {
+      "codePoint": "U+25CB",
+      "unicodeName": "U+25CB",
+      "file": "U25CB.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 9
+    },
+    {
+      "codePoint": "U+25D8",
+      "unicodeName": "U+25D8",
+      "file": "U25D8.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 8
+    },
+    {
+      "codePoint": "U+25D9",
+      "unicodeName": "U+25D9",
+      "file": "U25D9.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 10
+    },
+    {
+      "codePoint": "U+263A",
+      "unicodeName": "U+263A",
+      "file": "U263A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 1
+    },
+    {
+      "codePoint": "U+263B",
+      "unicodeName": "U+263B",
+      "file": "U263B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 2
+    },
+    {
+      "codePoint": "U+263C",
+      "unicodeName": "U+263C",
+      "file": "U263C.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 15
+    },
+    {
+      "codePoint": "U+2640",
+      "unicodeName": "U+2640",
+      "file": "U2640.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 12
+    },
+    {
+      "codePoint": "U+2642",
+      "unicodeName": "U+2642",
+      "file": "U2642.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 11
+    },
+    {
+      "codePoint": "U+2660",
+      "unicodeName": "U+2660",
+      "file": "U2660.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 6
+    },
+    {
+      "codePoint": "U+2663",
+      "unicodeName": "U+2663",
+      "file": "U2663.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 5
+    },
+    {
+      "codePoint": "U+2665",
+      "unicodeName": "U+2665",
+      "file": "U2665.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 3
+    },
+    {
+      "codePoint": "U+2666",
+      "unicodeName": "U+2666",
+      "file": "U2666.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 4
+    },
+    {
+      "codePoint": "U+266A",
+      "unicodeName": "U+266A",
+      "file": "U266A.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 13
+    },
+    {
+      "codePoint": "U+266B",
+      "unicodeName": "U+266B",
+      "file": "U266B.png",
+      "charsets": [
+        "cp437"
+      ],
+      "cp437Index": 14
+    }
+  ]
+}
