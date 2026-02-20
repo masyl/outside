@@ -61,4 +61,5 @@ Thumbs.db
 .cache/
 .temp/
 .tmp/
-
+.pnpm-store/
+.pnpm-store
