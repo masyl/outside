@@ -5,6 +5,10 @@ import type { StorybookConfig } from '@storybook/react-vite';
 const rootDir = process.cwd();
 
 const config: StorybookConfig = {
+  core: {
+    disableWhatsNewNotifications: true,
+    disableTelemetry: true,
+  },
   stories: ['../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
   addons: ['@storybook/addon-docs', '@storybook/addon-a11y'],
   framework: '@storybook/react-vite',
