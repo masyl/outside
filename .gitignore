@@ -63,3 +63,6 @@ Thumbs.db
 .tmp/
 .pnpm-store/
 .pnpm-store
+
+# Worktrees
+.tracks/
