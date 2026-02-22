@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev:proxy": "sudo caddy run --config Caddyfile",
     "dev": "turbo run dev",
     "doc": "pnpm --filter @outside/design dev",
     "build": "turbo run build",
