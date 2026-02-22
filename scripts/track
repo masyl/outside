@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+set -e
+
+# Directory to hold track worktrees
+TRACKS_DIR=".tracks"
+DEVCONTAINER_SOURCE=".devcontainer/devcontainer.json"
+
+function show_help {
+  echo "Usage: ./scripts/track <command> [slug]"
+  echo "Commands:"
+  echo "  open <slug>   - Creates a new track branch and git worktree in $TRACKS_DIR/<slug>, with dynamic devcontainer config."
+  echo "  close <slug>  - Removes the worktree and deletes the track branch locally."
+  echo "  list          - Lists active tracks."
+}
+
+function open_track {
+  local slug=$1
+  if [ -z "$slug" ]; then
+    echo "Error: You must provide a track slug."
+    show_help
+    exit 1
+  fi
+
+  local branch_name="track/$slug"
+  local target_dir="$TRACKS_DIR/$slug"
+
+  if [ -d "$target_dir" ]; then
+    echo "Track $slug is already open at $target_dir"
+    exit 1
+  fi
+
+  # Ensure tracks directory exists
+  mkdir -p "$TRACKS_DIR"
+
+  # Sync trunk
+  echo "Syncing trunk..."
+  git fetch origin
+  
+  if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+    echo "Branch $branch_name already exists locally."
+    # If it's already checked out somewhere else, worktree add will fail unless we use -f
+    if git worktree list | grep -q "$branch_name"; then
+      echo "Branch $branch_name is currently checked out in another worktree. Forcing creation..."
+      git worktree add -f "$target_dir" "$branch_name"
+    else
+      echo "Creating worktree..."
+      git worktree add "$target_dir" "$branch_name"
+    fi
+  elif git ls-remote --exit-code --heads origin "$branch_name" >/dev/null 2>&1; then
+    echo "Branch $branch_name exists on remote. Creating worktree tracking remote..."
+    git worktree add "$target_dir" -b "$branch_name" "origin/$branch_name"
+  else
+    echo "Creating new branch $branch_name from origin/trunk..."
+    git worktree add "$target_dir" -b "$branch_name" origin/trunk
+  fi
+
+  # Setup dynamic devcontainer
+  echo "Setting up Devcontainer specifically for track '$slug'..."
+  mkdir -p "$target_dir/.devcontainer"
+  
+  # Copy everything from .devcontainer template
+  cp -r .devcontainer/* "$target_dir/.devcontainer/"
+
+  # Inject dynamic slug into port forwarding/caddy labels
+  # Replacing *.outside.localhost with $slug.outside.localhost
+  # Also set the container name dynamically to avoid conflicts
+  sed -i "s/\*\.outside\.localhost/$slug.outside.localhost/g" "$target_dir/.devcontainer/devcontainer.json"
+  
+  # Ensure the container name is isolated
+  # Check if name exists, if so modify it, else add it
+  if grep -q '"name":' "$target_dir/.devcontainer/devcontainer.json"; then
+    sed -i "s/\"name\": \".*\"/\"name\": \"Outside Dev ($slug)\"/g" "$target_dir/.devcontainer/devcontainer.json"
+  fi
+
+  echo "🟢 Track '$slug' opened successfully in $target_dir"
+  echo "To launch: Open the folder '$target_dir' in VS Code and it will run your isolated '$slug' Devcontainer."
+}
+
+function close_track {
+  local slug=$1
+  if [ -z "$slug" ]; then
+    echo "Error: You must provide a track slug."
+    show_help
+    exit 1
+  fi
+
+  local branch_name="track/$slug"
+  local target_dir="$TRACKS_DIR/$slug"
+
+  if [ ! -d "$target_dir" ]; then
+    echo "Worktree $target_dir does not exist."
+    # We still try to delete the branch if asked
+  else
+    echo "Removing worktree $target_dir..."
+    git worktree remove "$target_dir" --force || true
+  fi
+
+  if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+    echo "Deleting local branch $branch_name..."
+    git branch -D "$branch_name" || true
+  fi
+
+  echo "✅ Track '$slug' closed locally."
+}
+
+function list_tracks {
+  echo "Active Track Worktrees:"
+  git worktree list | grep "$TRACKS_DIR" || echo "No active track worktrees found."
+}
+
+COMMAND=$1
+SLUG=$2
+
+case "$COMMAND" in
+  open)
+    open_track "$SLUG"
+    ;;
+  close)
+    close_track "$SLUG"
+    ;;
+  list)
+    list_tracks
+    ;;
+  *)
+    show_help
+    exit 1
+    ;;
+esac
