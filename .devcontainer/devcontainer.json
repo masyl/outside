@@ -7,6 +7,7 @@
             "pnpm": "latest"
         }
     },
+    "containerEnv": {},
     "customizations": {
         "vscode": {
             "settings": {
@@ -26,5 +27,10 @@
         6006
     ],
     "postCreateCommand": "pnpm install",
-    "remoteUser": "node"
+    "remoteUser": "node",
+    "runArgs": [
+        // load your .env.local into the container directly
+        "--env-file",
+        "${localWorkspaceFolder}/.env.local"
+    ]
 }
