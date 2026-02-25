@@ -7,10 +7,9 @@
       ]
     },
     "github": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
+        "./scripts/mcp-github.js"
       ]
     }
   }
