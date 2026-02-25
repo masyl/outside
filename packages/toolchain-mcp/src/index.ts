@@ -9,6 +9,22 @@ import {
 import { McpProxy } from "./proxy.js";
 import { servers } from "./servers.config.js";
 import { GITHUB_TOOLS, handleGithubTool } from "./github-tools.js";
+import { existsSync } from "fs";
+import { join, dirname } from "path";
+
+// Try to find the root directory where .env.local lives, looking up to 3 levels up
+let rootDir = process.cwd();
+for (let i = 0; i < 3; i++) {
+  if (existsSync(join(rootDir, '.env')) || existsSync(join(rootDir, '.env.local'))) {
+    break;
+  }
+  rootDir = dirname(rootDir);
+}
+if (existsSync(join(rootDir, '.env.local'))) {
+  process.loadEnvFile(join(rootDir, '.env.local'));
+} else if (existsSync(join(rootDir, '.env'))) {
+  process.loadEnvFile(join(rootDir, '.env'));
+}
 
 async function main() {
   console.error("[toolchain-mcp] Starting proxy server...");
