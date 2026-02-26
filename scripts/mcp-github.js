@@ -1,15 +1,15 @@
-#!/usr/bin/env node
-
-/**
- * Wrapper for the Github MCP server that loads local environment variables.
- * This ensures that GITHUB_PERSONAL_ACCESS_TOKEN is injected from .env.local 
- * without checking secrets into version control or crashing if the file is missing.
- */
 const { spawnSync } = require('child_process');
 const { existsSync } = require('fs');
-const { join } = require('path');
+const { join, resolve, dirname } = require('path');
 
-const projectRoot = join(process.cwd());
+// Try to find the root directory where .env.local lives, looking up to 3 levels up
+let projectRoot = process.cwd();
+for (let i = 0; i < 3; i++) {
+    if (existsSync(join(projectRoot, '.env')) || existsSync(join(projectRoot, '.env.local'))) {
+        break;
+    }
+    projectRoot = dirname(projectRoot);
+}
 
 // Safely load env files using native Node > 20.6 loadEnvFile if available
 const envLocal = join(projectRoot, '.env.local');

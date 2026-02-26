@@ -186,6 +186,10 @@ git push origin "ready/track/<slug>"
 The pipeline will squash-merge to trunk, push result tags, and delete the branch.
 **The agent does not wait** — move on to other work.
 
+**CRITICAL RULES:**
+- NEVER bypass the CI/CD pipeline when integrating a branch, even if you have no visibility.
+- If the CI/CD is either invisible to you or unresponsive, stop working and flag this to the user.
+
 ### Monitor result (optional)
 
 ```bash
