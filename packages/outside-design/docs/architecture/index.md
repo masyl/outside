@@ -10,6 +10,7 @@ Recent architectural decisions made for the Outside project. These records captu
 
 - [Choosing an ECS Library](./choosing-ecs-library.md)
 - [Open Source Dependencies](./open-source-dependencies.md)
+- [Self-Hosting and Bootstrapping](./self-hosting-and-bootstrapping.md)
 
 ## Ongoing Goals
 

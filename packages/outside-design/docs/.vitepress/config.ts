@@ -95,6 +95,7 @@ export default defineConfig({
             { text: 'Choosing an ECS Library', link: '/architecture/choosing-ecs-library' },
             { text: 'TypeScript ECS Comparison', link: '/architecture/typescript-ecs-libraries-comparison' },
             { text: 'Open Source Dependencies', link: '/architecture/open-source-dependencies' },
+            { text: 'Self-Hosting and Bootstrapping', link: '/architecture/self-hosting-and-bootstrapping' },
             { text: 'Decision Records', link: '/architecture-decisions' },
           ],
         },
