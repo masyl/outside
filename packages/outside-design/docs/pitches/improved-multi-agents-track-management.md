@@ -11,7 +11,7 @@ Finally, the track management relies on too much autonomy from the agents and no
 ## Solution
 
 1. Remove the requirement to use VS Code DevContainers, bypassing Docker entirely, and make the track environment setup natively utilize OrbStack's lightweight Linux machines for maximum performance.
-2. Build a basic local CLI tool (using Deno 2) for track management. The agent `.agent/skills` files will be updated to call into this CLI tool to ensure predictable and scripted environment controls.
+2. Build a basic local CLI tool (using Deno 2) for track management. The project `/skills` files will be updated to call into this CLI tool to ensure predictable and scripted environment controls.
 3. Manage port forwarding and track-specific hostnames through our existing setup instead of relying on the DevContainer ecosystem.
 4. Track lifecycles will provision the OrbStack machine at the beginning of the track and dispose of it at the end, ensuring environments remain short-lived and clean.
 
@@ -35,8 +35,7 @@ Finally, the track management relies on too much autonomy from the agents and no
 
 ## Suggested follow ups
 
-- Create detailed implementation plans for the new granular track management CLI scripts.
-- Update all agent vendor configuration templates to utilize the newly defined generic container setup.
+- Better documentation on the track management appraoch (the flow, trunk based inspirations, skills, the CLI tool, etc.)
 
 ## Gains
 
