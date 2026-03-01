@@ -8,6 +8,23 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { McpProxy } from "./proxy.js";
 import { servers } from "./servers.config.js";
+import { GITHUB_TOOLS, handleGithubTool } from "./github-tools.js";
+import { existsSync } from "fs";
+import { join, dirname } from "path";
+
+// Try to find the root directory where .env.local lives, looking up to 3 levels up
+let rootDir = process.cwd();
+for (let i = 0; i < 3; i++) {
+  if (existsSync(join(rootDir, '.env')) || existsSync(join(rootDir, '.env.local'))) {
+    break;
+  }
+  rootDir = dirname(rootDir);
+}
+if (existsSync(join(rootDir, '.env.local'))) {
+  process.loadEnvFile(join(rootDir, '.env.local'));
+} else if (existsSync(join(rootDir, '.env'))) {
+  process.loadEnvFile(join(rootDir, '.env'));
+}
 
 async function main() {
   console.error("[toolchain-mcp] Starting proxy server...");
@@ -22,11 +39,16 @@ async function main() {
 
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     const tools = await proxy.listTools();
-    return { tools };
+    return { tools: [...tools, ...GITHUB_TOOLS] };
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
+
+    if (GITHUB_TOOLS.some(t => t.name === name)) {
+      return await handleGithubTool(name, args);
+    }
+
     return (await proxy.callTool(name, args ?? {})) as {
       content: { type: string; text: string }[];
       isError?: boolean;

@@ -12,6 +12,7 @@ pnpm run sync:skills
 
 The script copies `skills/` into:
 
+- `.agent/skills/`
 - `.gemini/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`

@@ -16,10 +16,9 @@ Never confuse syncing a track with closing a track. They are different operation
 Defines the **Track** workflow:
 
 - One branch: `track/<slug>`
-- One worktree for that branch
+- Assumes development occurs inside the unified **Dev Container** (no worktrees)
 - One or more related deliveries
 - Tracks are frequently rebased on `trunk` to stay up to date, but they are not automatically integrated or closed when deliveries are completed.
--
 
 A track is either:
 
@@ -39,8 +38,13 @@ A track is either:
 
 - Track branch prefix: `track/`
 - Branch format: `track/<kebab-slug>`
-- Worktree directory format: `<repo>.worktrees/track-<kebab-slug>`
 - Track slug should be broader than a single pitch when future related deliveries are expected.
+
+## Dev Container Guidelines
+
+Instead of using git worktrees, this project relies on **Dev Containers**. All work happens on standard branches within the same workspace. If a track introduces significant dependency changes, agents/developers should:
+1. Run `pnpm install` after checking out the track branch.
+2. Recommend rebuilding the dev container if native dependencies (like Node versions or OS packages) change.
 
 ## 1) Start a new track
 
@@ -51,25 +55,15 @@ Use when opening a new development lane.
    - `git fetch origin`
    - `git switch trunk`
    - `git pull --ff-only origin trunk`
-3. Build names:
-   - `track_slug=<kebab-slug>`
-   - `track_branch=track/$track_slug`
-   - `repo_name=$(basename "$PWD")`
-   - `worktrees_root="$(cd .. && pwd)/${repo_name}.worktrees"`
-   - `worktree_path="$worktrees_root/track-$track_slug"`
-4. Create worktree + branch from `trunk`:
-   - `mkdir -p "$worktrees_root"`
-   - If branch does not exist:
-     - `git worktree add -b "$track_branch" "$worktree_path" trunk`
-   - If branch already exists:
-     - `git worktree add "$worktree_path" "$track_branch"`
-5. Verify:
-   - `git -C "$worktree_path" branch --show-current` must equal `track/<slug>`.
+3. Create and switch to the new branch:
+   - `git checkout -b track/<kebab-slug>`
+4. Verify:
+   - `git branch --show-current` must equal `track/<slug>`.
 
 Output summary with emoji:
 
 - `🟢 Track opened`
-- Include: branch, worktree path, base branch (`trunk`).
+- Include: branch name, base branch (`trunk`).
 
 ## 2) Tracks status (all active tracks)
 
@@ -77,8 +71,8 @@ Use when user asks for summary of open tracks.
 
 ### Discover active tracks
 
-1. Read worktrees: `git worktree list --porcelain`
-2. Keep entries where branch starts with `refs/heads/track/`.
+1. Read local branches: `git branch --list 'track/*'`
+2. Read remote branches if needed: `git branch -r --list 'origin/track/*'`
 
 ### Evaluate each track
 
@@ -86,7 +80,6 @@ For each active `track/<slug>`:
 
 1. Confirm naming consistency:
    - Branch should be `track/<slug>`
-   - Worktree path should end with `track-<slug>`
 2. Find related deliveries:
    - Scan `packages/outside-design/docs/deliveries/*/README.md`
    - Match `Branch: track/<slug>` in frontmatter/body
@@ -102,7 +95,7 @@ For each active `track/<slug>`:
 
 One line per track:
 
-- `<emoji> track/<slug> | worktree: <path> | deliveries: <count> | state: <state>`
+- `<emoji> track/<slug> | deliveries: <count> | state: <state>`
 
 Use emoji legend:
 
@@ -119,21 +112,15 @@ Use when user asks “current track status”.
    - `git branch --show-current`
 2. If branch is not `track/*`, report:
    - `⚪ Not on a track branch`
-3. If on `track/<slug>`, verify:
-   - Worktree exists for current branch (`git worktree list --porcelain`)
-   - Current worktree path name matches `track-<slug>`
-4. Resolve related deliveries:
+3. Resolve related deliveries:
    - `packages/outside-design/docs/deliveries/*/README.md` with `Branch: track/<slug>`
-5. Determine track status from delivery `Status` + branch signals:
+4. Determine track status from delivery `Status` + branch signals:
    - `🟢` active/in-progress
    - `✅` completed
-   - `⚠️` mismatch between docs and branch/worktree setup
 
 Report should include:
 
 - Branch
-- Worktree path
-- Naming check result
 - Linked deliveries and their statuses
 - Ahead/behind vs trunk (if needed): `git rev-list --left-right --count trunk...HEAD`
 
@@ -149,7 +136,7 @@ Use when user asks to sync the current track with trunk.
    - `git rebase origin/trunk`
 3. If rebase has conflicts, stop and report to user. Do not force resolve.
 4. Force push the rebased branch:
-   - `git push --force-with-lease`
+   - `git push --force-with-lease origin HEAD`
 5. Report ahead/behind:
    - `git rev-list --left-right --count origin/trunk...HEAD`
 
@@ -218,10 +205,9 @@ Use only when user asks to close.
 2. You MUST confirm with the user before doing this step on your own.
 3. Confirm linked deliveries are `DONE`.
 4. Confirm integration is complete: `integrated/track/<slug>` tag must exist on trunk.
-5. Remove worktree:
-   - `git worktree remove <worktree-path>`
-6. Delete local branch (if not already deleted by pipeline):
-   - `git branch -d track/<slug>`
+5. Search for branch and optionally delete:
+   - `git checkout trunk`
+   - `git branch -D track/<slug>`
 
 Output:
 

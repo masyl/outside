@@ -1,6 +1,6 @@
 ---
 name: sync-vendor-skills – Ȯ
-description: Syncs project skills into vendor-specific folders for Gemini, Claude, Cursor, and OpenAI Codex using scripts/sync-skills. Use when skills are added/updated and need to be recognized by agent vendors.
+description: Syncs project skills into vendor-specific folders for Antigravity, Gemini, Claude, Cursor, and OpenAI Codex using scripts/sync-skills. Use when skills are added/updated and need to be recognized by agent vendors.
 ---
 
 # Sync Vendor Skills – Ȯ
@@ -23,6 +23,7 @@ pnpm run sync:skills
 
 ## What it updates
 
+- `.agent/skills/`
 - `.gemini/skills/`
 - `.claude/skills/`
 - `.cursor/skills/`

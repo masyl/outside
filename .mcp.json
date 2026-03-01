@@ -2,7 +2,15 @@
   "mcpServers": {
     "toolchain": {
       "command": "node",
-      "args": ["./packages/toolchain-mcp/dist/index.js"]
+      "args": [
+        "./packages/toolchain-mcp/dist/index.js"
+      ]
+    },
+    "github": {
+      "command": "node",
+      "args": [
+        "./scripts/mcp-github.js"
+      ]
     }
   }
 }

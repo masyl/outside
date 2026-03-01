@@ -12,6 +12,7 @@ if [[ ! -d "$SOURCE_DIR" ]]; then
 fi
 
 TARGETS=(
+  ".agent/skills"
   ".gemini/skills"
   ".claude/skills"
   ".cursor/skills"

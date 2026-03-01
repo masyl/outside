@@ -18,6 +18,7 @@ pnpm run sync:skills
 
 This command mirrors skills to:
 
+- `.agent/skills`
 - `.gemini/skills`
 - `.claude/skills`
 - `.cursor/skills`
