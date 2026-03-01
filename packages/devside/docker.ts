@@ -9,6 +9,8 @@ export async function createTrackProxy(trackName: string): Promise<boolean> {
   // Start a tiny alpine container that sleeps forever, just to hold Caddy labels
   const command = new Deno.Command('docker', {
     args: [
+      '--context',
+      'orbstack',
       'run',
       '-d',
       '--name',
@@ -35,7 +37,7 @@ export async function destroyTrackProxy(trackName: string): Promise<boolean> {
   const containerName = `outside-proxy-${trackName}`;
   // We force remove it
   const command = new Deno.Command('docker', {
-    args: ['rm', '-f', containerName],
+    args: ['--context', 'orbstack', 'rm', '-f', containerName],
     stdout: 'inherit',
     stderr: 'inherit',
   });
