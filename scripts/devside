@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Runs the devside proxy and track orchestration CLI
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+deno run -A "$DIR/packages/devside/main.ts" "$@"

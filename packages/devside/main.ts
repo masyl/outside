@@ -67,7 +67,7 @@ const trackCommand = new Command()
 // Main CLI
 if (import.meta.main) {
   await new Command()
-    .name('outside-cli')
+    .name('devside')
     .version('0.1.0')
     .description('Outside project orchestration CLI')
     .action(function (this: Command) {

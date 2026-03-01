@@ -11,7 +11,7 @@ When working on multiple concurrent features, you need isolated, sandboxed envir
 We use **native OrbStack Linux machines** managed by a Deno CLI to provision this sandboxed isolation.
 
 1. **Opening a Track:**
-   Run `deno run -A packages/outside-cli/main.ts track create <slug>` (e.g., `feat-physics`).
+   Run `deno run -A packages/devside/main.ts track create <slug>` (e.g., `feat-physics`).
    This provisions a lightweight Linux machine in OrbStack and creates a hidden proxy container that registers the exact `feat-physics` slug with Caddy.
 
 2. **Starting the Environment:**
@@ -19,13 +19,13 @@ We use **native OrbStack Linux machines** managed by a Deno CLI to provision thi
    It will automatically claim routes like `doc.feat-physics.outside.localhost`.
 
 3. **Closing a Track:**
-   When finished, run `deno run -A packages/outside-cli/main.ts track destroy <slug>` to cleanly tear down the machine and the proxy container.
+   When finished, run `deno run -A packages/devside/main.ts track destroy <slug>` to cleanly tear down the machine and the proxy container.
 
 ## How the Routing Works Under the Hood
 
 When a track is created via the Deno CLI, it automatically spins up a lightweight Docker container attached to the `outside-proxy` Docker network. The sole purpose of this container is to hold `--label` arguments telling Caddy exactly which traffic to forward to the native OrbStack machine.
 
-An example dynamically generated configuration from the Docker launch in `packages/outside-cli/docker.ts`:
+An example dynamically generated configuration from the Docker launch in `packages/devside/docker.ts`:
 
 ```shell
 docker run -d --name outside-proxy-devops \
@@ -47,7 +47,7 @@ docker run -d --name outside-proxy-devops \
 
 If you create a new package or service and want to access it via a nice local domain, you must update the Deno CLI tool to proxy those ports:
 
-1. **Find the Template file:** Open `packages/outside-cli/docker.ts`.
+1. **Find the Template file:** Open `packages/devside/docker.ts`.
 2. **Locate the Docker Run Arguments:** Find the args array defining the proxy container launch flags.
 3. **Add new labels:** Add two new labels for your service. Increment the index number (e.g., if `caddy_1` is the highest, use `caddy_2`).
    ```typescript

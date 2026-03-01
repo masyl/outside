@@ -19,7 +19,7 @@ We will replace the current VS Code DevContainers track management approach with
 
 ### Checklist
 
-- [x] Initialize a new Deno Deno 2 project for the CLI tool (e.g., `packages/outside-cli`).
+- [x] Initialize a new Deno Deno 2 project for the CLI tool (e.g., `packages/devside`).
 - [x] Add `Cliffy` as a dependency for building the CLI interface.
 - [x] Scaffold the basic CLI command structure (e.g., `track create`, `track destroy`, `track list`).
 
