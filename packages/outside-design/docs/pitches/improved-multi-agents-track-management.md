@@ -10,21 +10,24 @@ Finally, the track management relies on too much autonomy from the agents and no
 
 ## Solution
 
-1. Remove the requirement to use VS Code DevContainers and make the container config more generic. Keep them usable as DevContainers if possible.
-2. Move container management to OrbStack instead of Docker, to gain speed when booting up a new track.
-3. Create better scripts to manage tracks by making them more granular and have better individual skill files for each.
+1. Remove the requirement to use VS Code DevContainers, bypassing Docker entirely, and make the track environment setup natively utilize OrbStack's lightweight Linux machines for maximum performance.
+2. Build a basic local CLI tool (using Deno 2) for track management. The agent `.agent/skills` files will be updated to call into this CLI tool to ensure predictable and scripted environment controls.
+3. Manage port forwarding and track-specific hostnames through our existing setup instead of relying on the DevContainer ecosystem.
+4. Track lifecycles will provision the OrbStack machine at the beginning of the track and dispose of it at the end, ensuring environments remain short-lived and clean.
 
 ## Inclusions
 
-- Replacing Docker with OrbStack for container management
-- Making dev container configuration IDE-agnostic
-- Replacing autonomous agent track management with explicit scripted commands
-- Updating track management skills (`manage-work-tracks`, etc.) to use the new scripts
+- Replacing Docker DevContainers with native OrbStack Linux machines for track management.
+- Creating a Deno 2 CLI tool for predictable track lifecycle scripts.
+- Replacing autonomous agent track management with explicit scripted CLI commands.
+- Updating track management skills (`manage-work-tracks`, etc.) to use the new scripts.
+- Porting over existing port-forwarding and hostname configurations for the track environments.
 
 ## Exclusions
 
 - Refactoring the entire CI/CD pipeline
 - Changing the underlying branching strategy (still using `track/*`)
+- Supporting Windows or native Linux human contributors in this initial iteration (support will be added later once the CLI is stable).
 
 ## Missing Prerequisites
 
@@ -34,19 +37,6 @@ Finally, the track management relies on too much autonomy from the agents and no
 
 - Create detailed implementation plans for the new granular track management CLI scripts.
 - Update all agent vendor configuration templates to utilize the newly defined generic container setup.
-
-## Open Questions
-
-- **OrbStack Integration:** ~~How exactly will OrbStack replace Docker in our current workflow? Are we using OrbStack's lightweight Linux machines or just its Docker drop-in replacement functionality?~~
-  - _Answer:_ We will use OrbStack's lightweight Linux machines natively, bypassing Docker entirely, as the project needs to compile to Linux distributions anyway (for handhelds and web hosting).
-- **DevContainer Compatibility:** ~~While making configs generic, do we still intend to support the `.devcontainer.json` standard for users who do want to use VS Code, or are we migrating to a completely custom script-based setup?~~
-  - _Answer:_ We are not attached to maintaining DevContainers if they prevent optimal performance. We will prioritize the custom OrbStack machine setup.
-- **CLI vs Skills:** For "predictable scripted commands", will we be writing a local CLI tool (e.g., in Node/Bash) that the skills simply call into, or will the scripts live entirely within the `.agent/skills` folder?
-- **Cross-Platform:** Does the move to OrbStack limit development exclusively to macOS environments for human contributors as well? (OrbStack is macOS only).
-  - _Downsides of OrbStack Machines to consider:_
-    1. **macOS Lock-in:** OrbStack is currently exclusively available for macOS. If any contributor (human or agent) is running on Windows or native Linux, they will not be able to use OrbStack machines or the CLI scripts that depend on `orb`.
-    2. **Loss of Ecosystem Tooling:** DevContainers come with a massive ecosystem of pre-built features (installing Node/Python, forwarding ports, setting up LSPs). With raw machines, we have to script all of this ourselves (e.g. bash scripts to install `nvm`, configure `pnpm`, etc.).
-    3. **State Management:** Docker containers are ephemeral and declarative (built from a Dockerfile). OrbStack machines act more like persistent VMs. Unless we write robust provisioning scripts that destroy and recreate the machine every time, state (like old global packages or stray files) can accumulate and cause "works on my machine" bugs.
 
 ## Gains
 
