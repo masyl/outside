@@ -37,10 +37,16 @@ Finally, the track management relies on too much autonomy from the agents and no
 
 ## Open Questions
 
-- **OrbStack Integration:** How exactly will OrbStack replace Docker in our current workflow? Are we using OrbStack's lightweight Linux machines or just its Docker drop-in replacement functionality?
-- **DevContainer Compatibility:** While making configs generic, do we still intend to support the `.devcontainer.json` standard for users who _do_ want to use VS Code, or are we migrating to a completely custom script-based setup?
+- **OrbStack Integration:** ~~How exactly will OrbStack replace Docker in our current workflow? Are we using OrbStack's lightweight Linux machines or just its Docker drop-in replacement functionality?~~
+  - _Answer:_ We will use OrbStack's lightweight Linux machines natively, bypassing Docker entirely, as the project needs to compile to Linux distributions anyway (for handhelds and web hosting).
+- **DevContainer Compatibility:** ~~While making configs generic, do we still intend to support the `.devcontainer.json` standard for users who do want to use VS Code, or are we migrating to a completely custom script-based setup?~~
+  - _Answer:_ We are not attached to maintaining DevContainers if they prevent optimal performance. We will prioritize the custom OrbStack machine setup.
 - **CLI vs Skills:** For "predictable scripted commands", will we be writing a local CLI tool (e.g., in Node/Bash) that the skills simply call into, or will the scripts live entirely within the `.agent/skills` folder?
-- **Cross-Platform:** Does the move to OrbStack limit development exclusively to macOS environments for human contributors as well?
+- **Cross-Platform:** Does the move to OrbStack limit development exclusively to macOS environments for human contributors as well? (OrbStack is macOS only).
+  - _Downsides of OrbStack Machines to consider:_
+    1. **macOS Lock-in:** OrbStack is currently exclusively available for macOS. If any contributor (human or agent) is running on Windows or native Linux, they will not be able to use OrbStack machines or the CLI scripts that depend on `orb`.
+    2. **Loss of Ecosystem Tooling:** DevContainers come with a massive ecosystem of pre-built features (installing Node/Python, forwarding ports, setting up LSPs). With raw machines, we have to script all of this ourselves (e.g. bash scripts to install `nvm`, configure `pnpm`, etc.).
+    3. **State Management:** Docker containers are ephemeral and declarative (built from a Dockerfile). OrbStack machines act more like persistent VMs. Unless we write robust provisioning scripts that destroy and recreate the machine every time, state (like old global packages or stray files) can accumulate and cause "works on my machine" bugs.
 
 ## Gains
 
