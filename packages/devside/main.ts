@@ -1,8 +1,8 @@
-import { Command } from '@cliffy/command';
+import { Command } from 'jsr:@cliffy/command@^1.0.0';
 import { DevsideInput } from './prompt.ts';
 import { join } from 'jsr:@std/path@1';
-import { Table } from '@cliffy/table';
-import { colors } from '@cliffy/ansi/colors';
+import { Table } from 'jsr:@cliffy/table@^1.0.0';
+import { colors } from 'jsr:@cliffy/ansi@^1.0.0/colors';
 import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
 import { createTrackProxy, destroyTrackProxy } from './docker.ts';
 import { createTrackWorktree, fixWorktree, fixBranch } from './git.ts';
@@ -180,7 +180,7 @@ async function runRepl() {
   globalThis.__DEVSIDE_REPL_ACTIVE__ = true;
   console.log("Welcome to the devside REPL! Type 'exit' to quit or '?' for help.");
   
-  let context: string[] = [];
+  let context: string[] = ['dev'];
   const historyFile = join(Deno.cwd(), '.devside_history');
   let history: string[] = [];
   try {
@@ -192,23 +192,25 @@ async function runRepl() {
 
   while (true) {
     const prefix = colors.green('Ȯ');
-    const promptMsg = context.length === 0 ? `${prefix} dev` : `${prefix} dev • ${context.join(' • ')}`;
+    const promptMsg = context.length === 0 ? `${prefix} • Outside` : `${prefix} • Outside • ${context.join(' • ')}`;
 
     // Build dynamic completions for this iteration
     let suggestions: string[] = [];
     if (context.length === 0) {
-      suggestions = ['tracks', 'help', 'exit'];
-    } else if (context.length === 1 && context[0] === 'tracks') {
+      suggestions = ['dev', 'help', 'exit'];
+    } else if (context.length === 1 && context[0] === 'dev') {
+      suggestions = ['tracks', 'help', 'exit', '..'];
+    } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
       try {
         const machines = await listMachines();
         suggestions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
       } catch { suggestions = ['create', 'destroy', 'list', 'help', '..']; }
-    } else if (context.length === 2 && context[0] === 'tracks') {
+    } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
       suggestions = ['status', 'fix', 'help', '..'];
-    } else if (context.length === 3 && context[2] === 'fix') {
+    } else if (context.length === 4 && context[0] === 'dev' && context[3] === 'fix') {
       try {
         const machines = await listMachines();
-        const m = machines.find(x => x.name === context[1]);
+        const m = machines.find(x => x.name === context[2]);
         const fixable: string[] = [];
         if (m) {
           if (m.andon.wt !== 'green') fixable.push('worktree');
@@ -255,31 +257,36 @@ async function runRepl() {
 
     // Global Help Command Interception
     if (args[0] === 'help' || args[0] === '?') {
-        console.log(`\nCurrent Context: ${context.length === 0 ? 'Root' : context.join('/')}`);
+        console.log(`\nCurrent Context: ${context.length === 0 ? 'Outside' : context.join('/')}`);
         console.log(`\nCommands:`);
         
         if (context.length === 0) {
-            console.log(`  tracks        : Enter tracks management context`);
+            console.log(`  dev           : Enter the 'dev' operations context`);
             console.log(`  help, ?       : Show this help message`);
             console.log(`  exit, quit    : Exit the REPL`);
-        } else if (context.length === 1 && context[0] === 'tracks') {
+        } else if (context.length === 1 && context[0] === 'dev') {
+            console.log(`  tracks        : Enter tracks management context`);
+            console.log(`  ..            : Go back to root context`);
+            console.log(`  help, ?       : Show this help message`);
+            console.log(`  exit, quit    : Exit the REPL`);
+        } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
             console.log(`  create <name> : Create a new track environment`);
-            console.log(`  destroy <name>: Destroy a track environment`);
-            console.log(`  list          : List all development tracks`);
-            console.log(`  ..            : Navigate up one context level`);
+            console.log(`  destroy <name>: Destroy an existing track environment`);
+            console.log(`  list          : Map of tracks connected to OrbStack machines`);
+            console.log(`  ..            : Go back to previous context`);
             console.log(`  help, ?       : Show this help message`);
             console.log(`\nSymbols:`);
-            console.log(`  {track name}  : Select this track as context`);
-        } else if (context.length === 2 && context[0] === 'tracks') {
-            console.log(`  status        : Show detailed Andon status for this track`);
-            console.log(`  fix           : Enter fix sub-context to repair broken andons`);
-            console.log(`  ..            : Navigate up one context level`);
+            console.log(`  <track_name>  : Enter the context of a specific track`);
+        } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
+            console.log(`  status        : Inspect the detailed health of this track`);
+            console.log(`  fix           : Auto-fix issues with this track (enters fix context)`);
+            console.log(`  ..            : Go back to previous context`);
             console.log(`  help, ?       : Show this help message`);
-        } else if (context.length === 3 && context[2] === 'fix') {
-            console.log(`  ..            : Navigate up one context level`);
+        } else if (context.length === 4 && context[0] === 'dev' && context[1] === 'tracks' && context[3] === 'fix') {
+            console.log(`  worktree      : Auto-fix missing local git worktree`);
+            console.log(`  branch        : Auto-fix missing local track branch`);
+            console.log(`  ..            : Go back to previous context`);
             console.log(`  help, ?       : Show this help message`);
-            console.log(`\nSymbols:`);
-            console.log(`  {problematic andon} : e.g. 'worktree' or 'branch' to automatically fix it`);
         }
         
         console.log();
@@ -295,17 +302,35 @@ async function runRepl() {
     }
 
     if (context.length === 0) {
+        if (args[0] === 'dev') {
+            context = ['dev'];
+            if (args.length > 1) {
+                if (args[1] === 'tracks') {
+                    context = ['dev', 'tracks'];
+                    if (args.length > 2) {
+                        mappedArgs = ['track', ...args.slice(2)];
+                    } else {
+                        continue;
+                    }
+                } else {
+                    mappedArgs = args.slice(1);
+                }
+            } else {
+                continue;
+            }
+        }
+    } else if (context.length === 1 && context[0] === 'dev') {
         if (args[0] === 'tracks') {
-            context = ['tracks'];
+            context = ['dev', 'tracks'];
             if (args.length > 1) {
                 mappedArgs = ['track', ...args.slice(1)];
             } else {
                 continue;
             }
         } else {
-            mappedArgs = [...args];
+            mappedArgs = args;
         }
-    } else if (context.length === 1 && context[0] === 'tracks') {
+    } else if (context.length >= 2 && context[0] === 'dev' && context[1] === 'tracks') {
         if (['create', 'destroy', 'list'].includes(args[0])) {
             mappedArgs = ['track', ...args];
         } else {

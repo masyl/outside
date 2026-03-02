@@ -1,6 +1,8 @@
 import { ensureDir } from 'https://deno.land/std@0.224.0/fs/ensure_dir.ts';
+import { $, type ShellPromise } from "npm:execa";
+import { resolve } from "jsr:@std/path@1";
 import { join } from 'https://deno.land/std@0.224.0/path/mod.ts';
-import { Select } from '@cliffy/prompt';
+import { Select } from 'jsr:@cliffy/prompt@^1.0.0';
 
 /**
  * Checks if a specific branch exists locally.
