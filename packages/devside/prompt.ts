@@ -71,8 +71,9 @@ export class DevsideInput extends Input {
       return;
     }
 
-    // 2. Control+Key Shorthands Support
-    if ((event as any).ctrlKey && typeof that.inputValue === 'string' && that.inputValue === '') {
+    // 2. Alt+Key Shorthands Support (Alt often maps to metaKey in JS environments, so check both)
+    const isAlt = (event as any).altKey || (event as any).metaKey;
+    if (isAlt && typeof that.inputValue === 'string' && that.inputValue === '') {
       const char = event.char?.toLowerCase();
       const validShorthands = ['t', 's', 'f', 'w', 'b'];
       

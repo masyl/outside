@@ -192,7 +192,10 @@ async function runRepl() {
 
   while (true) {
     const prefix = colors.green('Ȯ');
-    const promptMsg = context.length === 0 ? `${prefix}` : `${prefix} • ${context.join(' • ')}`;
+    const separator = colors.dim(' • ');
+    const contextStr = context.length === 0 ? '' : `${separator}${colors.dim(context.join(' • '))}`;
+    const arrow = colors.bold(colors.dim('›'));
+    const promptMsg = `${prefix}${contextStr}\n${arrow} `;
 
     // Build dynamic completions for this iteration
     let suggestions: string[] = [];
@@ -238,17 +241,6 @@ async function runRepl() {
     const trimmed = input.trim();
     if (!trimmed) continue;
     
-    // Add to history and keep last 20
-    history.push(trimmed);
-    if (history.length > 20) {
-      history = history.slice(-20);
-    }
-    try {
-      await Deno.writeTextFile(historyFile, history.join('\n'));
-    } catch {
-      // Ignore
-    }
-    
     if (trimmed === 'exit' || trimmed === 'quit') break;
 
     const args = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(arg => {
@@ -265,8 +257,9 @@ async function runRepl() {
             console.log(`  help, ?       : Show this help message`);
             console.log(`  exit, quit    : Exit the REPL`);
         } else if (context.length === 1 && context[0] === 'dev') {
-            console.log(`  tracks        : Enter tracks management context`);
+            console.log(`  tracks (t)    : Enter tracks management context`);
             console.log(`  ..            : Go back to root context`);
+            console.log(`  /             : Return immediately to root context`);
             console.log(`  help, ?       : Show this help message`);
             console.log(`  exit, quit    : Exit the REPL`);
         } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
@@ -274,22 +267,30 @@ async function runRepl() {
             console.log(`  destroy <name>: Destroy an existing track environment`);
             console.log(`  list          : Map of tracks connected to OrbStack machines`);
             console.log(`  ..            : Go back to previous context`);
+            console.log(`  /             : Return immediately to root context`);
             console.log(`  help, ?       : Show this help message`);
             console.log(`\nSymbols:`);
             console.log(`  <track_name>  : Enter the context of a specific track`);
         } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
-            console.log(`  status        : Inspect the detailed health of this track`);
-            console.log(`  fix           : Auto-fix issues with this track (enters fix context)`);
+            console.log(`  status (s)    : Inspect the detailed health of this track`);
+            console.log(`  fix (f)       : Auto-fix issues with this track (enters fix context)`);
             console.log(`  ..            : Go back to previous context`);
+            console.log(`  /             : Return immediately to root context`);
             console.log(`  help, ?       : Show this help message`);
         } else if (context.length === 4 && context[0] === 'dev' && context[1] === 'tracks' && context[3] === 'fix') {
-            console.log(`  worktree      : Auto-fix missing local git worktree`);
-            console.log(`  branch        : Auto-fix missing local track branch`);
+            console.log(`  worktree (w)  : Auto-fix missing local git worktree`);
+            console.log(`  branch (b)    : Auto-fix missing local track branch`);
             console.log(`  ..            : Go back to previous context`);
+            console.log(`  /             : Return immediately to root context`);
             console.log(`  help, ?       : Show this help message`);
         }
         
         console.log();
+        
+        // Add help requests to history so the user can recall them
+        history.push(trimmed);
+        if (history.length > 20) history = history.slice(-20);
+        await Deno.writeTextFile(historyFile, history.join('\n')).catch(() => {});
         continue;
     }
 
@@ -301,6 +302,21 @@ async function runRepl() {
         if (localArgs[0] === '..') {
             context.pop();
             localArgs.shift();
+            
+            // Add to history here since it's a valid navigation move that skips parsing
+            history.push('..');
+            if (history.length > 20) history = history.slice(-20);
+            await Deno.writeTextFile(historyFile, history.join('\n')).catch(() => {});
+            continue;
+        }
+
+        if (localArgs[0] === '/') {
+            context = [];
+            localArgs.shift();
+            
+            history.push('/');
+            if (history.length > 20) history = history.slice(-20);
+            await Deno.writeTextFile(historyFile, history.join('\n')).catch(() => {});
             continue;
         }
 
@@ -314,7 +330,7 @@ async function runRepl() {
                 break;
             }
         } else if (context.length === 1 && context[0] === 'dev') {
-            if (localArgs[0] === 'tracks') {
+            if (localArgs[0] === 'tracks' || localArgs[0] === 't') {
                 context = ['dev', 'tracks'];
                 localArgs.shift();
                 continue;
@@ -340,10 +356,10 @@ async function runRepl() {
             }
         } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
             const trackName = context[2];
-            if (localArgs[0] === 'status') {
+            if (localArgs[0] === 'status' || localArgs[0] === 's') {
                 mappedArgs = ['track-status', trackName];
                 break;
-            } else if (localArgs[0] === 'fix') {
+            } else if (localArgs[0] === 'fix' || localArgs[0] === 'f') {
                 context.push('fix');
                 localArgs.shift();
                 continue;
@@ -353,8 +369,8 @@ async function runRepl() {
             }
         } else if (context.length === 4 && context[0] === 'dev' && context[1] === 'tracks' && context[3] === 'fix') {
             const trackName = context[2];
-            if (localArgs[0] === 'worktree') mappedArgs = ['track-fix-worktree', trackName];
-            else if (localArgs[0] === 'branch') mappedArgs = ['track-fix-branch', trackName];
+            if (localArgs[0] === 'worktree' || localArgs[0] === 'w') mappedArgs = ['track-fix-worktree', trackName];
+            else if (localArgs[0] === 'branch' || localArgs[0] === 'b') mappedArgs = ['track-fix-branch', trackName];
             else mappedArgs = [localArgs[0], trackName, ...localArgs.slice(1)];
             break;
         } else {
@@ -369,6 +385,17 @@ async function runRepl() {
 
     try {
       await buildApp().parse(mappedArgs);
+      
+      // Since it did not throw, save it successfully to history
+      history.push(trimmed);
+      if (history.length > 20) {
+        history = history.slice(-20);
+      }
+      try {
+        await Deno.writeTextFile(historyFile, history.join('\n'));
+      } catch {
+        // Ignore write failures silently
+      }
     } catch (error: any) {
       if (error.message) {
         console.error(`Error: ${error.message}`);
