@@ -1,5 +1,7 @@
 import { Command } from '@cliffy/command';
 import { Input } from '@cliffy/prompt';
+import { Table } from '@cliffy/table';
+import { colors } from '@cliffy/ansi/colors';
 import { createMachine, destroyMachine, listMachines } from './orb.ts';
 import { createTrackProxy, destroyTrackProxy } from './docker.ts';
 
@@ -45,7 +47,22 @@ function buildApp() {
     .action(async () => {
       console.log('Listing active track environments...');
       const machines = await listMachines();
-      console.table(machines);
+      
+      const table = new Table()
+        .header(['State', 'Name', 'Branch', 'Status'])
+        .body(
+          machines.map((m) => {
+            let stateStr = m.state;
+            if (m.state === 'ontrack') stateStr = colors.green(m.state);
+            else if (m.state === 'offtrack') stateStr = colors.yellow(m.state);
+            else if (m.state === 'stopped') stateStr = colors.gray(m.state);
+
+            return [stateStr, m.name, m.branch, m.status];
+          })
+        )
+        .padding(2)
+        .border(true);
+      table.render();
     });
 
   const trackCommand = new Command()

@@ -3,9 +3,10 @@
  */
 
 export interface OrbMachine {
-  state: 'running' | 'stopped' | 'creating' | string;
+  state: 'stopped' | 'ontrack' | 'offtrack' | string;
   name: string;
   branch: string;
+  status: string;
 }
 
 export async function createMachine(name: string): Promise<boolean> {
@@ -41,26 +42,63 @@ export async function listMachines(): Promise<OrbMachine[]> {
   const text = new TextDecoder().decode(stdout);
   const rawMachines = JSON.parse(text) as any[];
 
-  // Fetch branches to see if any match the track name
+  // Fetch branches from git worktree list
   const gitCommand = new Deno.Command('git', {
-    args: ['branch', '--list', 'track/*'],
+    args: ['worktree', 'list', '--porcelain'],
     stdout: 'piped',
   });
   const gitOutput = await gitCommand.output();
   const branchesText = new TextDecoder().decode(gitOutput.stdout);
   
-  // Extract just the track names from the `track/*` branch listing
-  // Example output: "  track/devops\n* track/simulator"
-  const activeBranches = branchesText
-    .split('\n')
-    .map(line => line.replace(/^[*\s]+track\//, '').trim())
-    .filter(name => !!name);
+  const trackBranches: Record<string, string> = {};
+  let currentWorktreeName: string | null = null;
+
+  for (const line of branchesText.split('\n')) {
+    if (line.startsWith('worktree ')) {
+      const wtPath = line.substring(9).trim();
+      const match = wtPath.match(/\.tracks\/([^/]+)$/);
+      if (match) {
+        currentWorktreeName = match[1];
+      } else {
+        currentWorktreeName = null;
+      }
+    } else if (line.startsWith('branch refs/heads/') && currentWorktreeName) {
+      trackBranches[currentWorktreeName] = line.substring(18).trim();
+    }
+  }
 
   return rawMachines.map((m) => {
+    let state = 'stopped';
+    let status = '';
+    const activeBranch = trackBranches[m.name];
+    const branch = activeBranch || '<none>';
+
+    if (m.state === 'running') {
+      if (!activeBranch) {
+        state = 'offtrack';
+        status = 'Missing worktree';
+      } else {
+        if (activeBranch === `track/${m.name}` || activeBranch.startsWith(`track/${m.name}/`)) {
+          state = 'ontrack';
+          status = 'OK';
+        } else {
+          state = 'offtrack';
+          status = 'Invalid branch name';
+        }
+      }
+    } else if (m.state === 'stopped') {
+      state = 'stopped';
+      status = 'Container is not running';
+    } else {
+      state = 'offtrack';
+      status = `OrbStack state: ${m.state}`;
+    }
+
     return {
-      state: m.state,
+      state,
       name: m.name,
-      branch: activeBranches.includes(m.name) ? `track/${m.name}` : '<none>',
+      branch,
+      status,
     };
   });
 }
