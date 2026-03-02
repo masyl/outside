@@ -11,6 +11,7 @@
     "proxy:stop": "docker compose -f tools/local-proxy/docker-compose.yml down",
     "proxy:logs": "docker compose -f tools/local-proxy/docker-compose.yml logs -f",
     "dev": "turbo run dev",
+    "devside": "deno run -A packages/devside/main.ts",
     "doc": "pnpm --filter @outside/design dev",
     "build": "turbo run build",
     "test": "turbo run test",
