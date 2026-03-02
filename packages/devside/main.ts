@@ -1,5 +1,5 @@
 import { Command } from '@cliffy/command';
-import { Input } from '@cliffy/prompt';
+import { DevsideInput } from './prompt.ts';
 import { Table } from '@cliffy/table';
 import { colors } from '@cliffy/ansi/colors';
 import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
@@ -211,15 +211,15 @@ async function runRepl() {
 
     let input: string;
     try {
-      input = await Input.prompt({
+      input = await DevsideInput.prompt({
         message: promptMsg,
         prefix: '',
         suggestions,
-        list: true,
+        list: false,
       });
     } catch (_e) {
       // User pressed Ctrl+C or similar
-      console.log();
+      console.error('PROMPT ERROR:', _e);
       break;
     }
 
