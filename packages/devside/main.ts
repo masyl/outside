@@ -131,7 +131,7 @@ function buildApp() {
         const symbolStr = formatAndon(comp.symbol, color);
         const colorData = ANDON_COLORS[color];
         
-        let colorLabel = colorData.label;
+        let colorLabel: string = colorData.label;
         if (color === 'green') colorLabel = colors.green(colorLabel);
         else if (color === 'red') colorLabel = colors.red(colorLabel);
         else if (color === 'yellow') colorLabel = colors.yellow(colorLabel);
@@ -192,7 +192,7 @@ async function runRepl() {
 
   while (true) {
     const prefix = colors.green('Ȯ');
-    const promptMsg = context.length === 0 ? `${prefix} • Outside` : `${prefix} • Outside • ${context.join(' • ')}`;
+    const promptMsg = context.length === 0 ? `${prefix}` : `${prefix} • ${context.join(' • ')}`;
 
     // Build dynamic completions for this iteration
     let suggestions: string[] = [];
@@ -257,7 +257,7 @@ async function runRepl() {
 
     // Global Help Command Interception
     if (args[0] === 'help' || args[0] === '?') {
-        console.log(`\nCurrent Context: ${context.length === 0 ? 'Outside' : context.join('/')}`);
+        console.log(`\nCurrent Context: ${context.length === 0 ? 'Root' : context.join('/')}`);
         console.log(`\nCommands:`);
         
         if (context.length === 0) {
@@ -295,92 +295,76 @@ async function runRepl() {
 
     // Context Navigation and Mapping
     let mappedArgs: string[] | null = null;
+    const localArgs = [...args];
 
-    if (args[0] === '..') {
-        context.pop();
-        continue;
-    }
+    while (localArgs.length > 0) {
+        if (localArgs[0] === '..') {
+            context.pop();
+            localArgs.shift();
+            continue;
+        }
 
-    if (context.length === 0) {
-        if (args[0] === 'dev') {
-            context = ['dev'];
-            if (args.length > 1) {
-                if (args[1] === 'tracks') {
-                    context = ['dev', 'tracks'];
-                    if (args.length > 2) {
-                        mappedArgs = ['track', ...args.slice(2)];
-                    } else {
-                        continue;
-                    }
-                } else {
-                    mappedArgs = args.slice(1);
+        if (context.length === 0) {
+            if (localArgs[0] === 'dev') {
+                context = ['dev'];
+                localArgs.shift();
+                continue;
+            } else {
+                mappedArgs = localArgs;
+                break;
+            }
+        } else if (context.length === 1 && context[0] === 'dev') {
+            if (localArgs[0] === 'tracks') {
+                context = ['dev', 'tracks'];
+                localArgs.shift();
+                continue;
+            } else {
+                mappedArgs = localArgs;
+                break;
+            }
+        } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
+            if (['create', 'destroy', 'list'].includes(localArgs[0])) {
+                mappedArgs = ['track', ...localArgs];
+                break;
+            } else {
+                // It's a track name
+                const trackName = localArgs[0];
+                context.push(trackName);
+                localArgs.shift();
+                
+                if (localArgs.length === 0) {
+                    mappedArgs = ['track-status', trackName];
+                    break;
                 }
-            } else {
                 continue;
             }
-        }
-    } else if (context.length === 1 && context[0] === 'dev') {
-        if (args[0] === 'tracks') {
-            context = ['dev', 'tracks'];
-            if (args.length > 1) {
-                mappedArgs = ['track', ...args.slice(1)];
-            } else {
+        } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
+            const trackName = context[2];
+            if (localArgs[0] === 'status') {
+                mappedArgs = ['track-status', trackName];
+                break;
+            } else if (localArgs[0] === 'fix') {
+                context.push('fix');
+                localArgs.shift();
                 continue;
+            } else {
+                mappedArgs = [localArgs[0], trackName, ...localArgs.slice(1)];
+                break;
             }
+        } else if (context.length === 4 && context[0] === 'dev' && context[1] === 'tracks' && context[3] === 'fix') {
+            const trackName = context[2];
+            if (localArgs[0] === 'worktree') mappedArgs = ['track-fix-worktree', trackName];
+            else if (localArgs[0] === 'branch') mappedArgs = ['track-fix-branch', trackName];
+            else mappedArgs = [localArgs[0], trackName, ...localArgs.slice(1)];
+            break;
         } else {
-            mappedArgs = args;
+            mappedArgs = localArgs;
+            break;
         }
-    } else if (context.length >= 2 && context[0] === 'dev' && context[1] === 'tracks') {
-        if (['create', 'destroy', 'list'].includes(args[0])) {
-            mappedArgs = ['track', ...args];
-        } else {
-            // It's a track name
-            context.push(args[0]);
-            if (args.length > 1) {
-                const subCmd = args[1];
-                if (subCmd === 'status') {
-                    mappedArgs = ['track-status', args[0]];
-                } else if (subCmd === 'fix') {
-                    context.push('fix');
-                    if (args.length > 2) {
-                        if (args[2] === 'worktree') mappedArgs = ['track-fix-worktree', args[0]];
-                        else if (args[2] === 'branch') mappedArgs = ['track-fix-branch', args[0]];
-                        else mappedArgs = [args[2], args[0], ...args.slice(3)]; // fallback
-                    } else {
-                        continue;
-                    }
-                } else {
-                    mappedArgs = [subCmd, args[0], ...args.slice(2)];
-                }
-            } else {
-                continue;
-            }
-        }
-    } else if (context.length === 2 && context[0] === 'tracks') {
-        const trackName = context[1];
-        if (args[0] === 'status') {
-            mappedArgs = ['track-status', trackName];
-        } else if (args[0] === 'fix') {
-            context.push('fix');
-            if (args.length > 1) {
-                if (args[1] === 'worktree') mappedArgs = ['track-fix-worktree', trackName];
-                else if (args[1] === 'branch') mappedArgs = ['track-fix-branch', trackName];
-                else mappedArgs = [args[1], trackName, ...args.slice(2)];
-            } else {
-                continue;
-            }
-        } else {
-            mappedArgs = [args[0], trackName, ...args.slice(1)];
-        }
-    } else if (context.length === 3 && context[2] === 'fix') {
-        const trackName = context[1];
-        if (args[0] === 'worktree') mappedArgs = ['track-fix-worktree', trackName];
-        else if (args[0] === 'branch') mappedArgs = ['track-fix-branch', trackName];
-        else mappedArgs = [args[0], trackName, ...args.slice(1)];
     }
 
     if (!mappedArgs) {
-        mappedArgs = [...args];
+        continue;
     }
 
     try {
