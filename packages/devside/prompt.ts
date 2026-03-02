@@ -71,12 +71,27 @@ export class DevsideInput extends Input {
       return;
     }
 
-    // 2. Submit the currently highlighted suggestion on Enter immediately
+    // 2. Control+Key Shorthands Support
+    if ((event as any).ctrlKey && typeof that.inputValue === 'string' && that.inputValue === '') {
+      const char = event.char?.toLowerCase();
+      const validShorthands = ['t', 's', 'f', 'w', 'b'];
+      
+      if (char && validShorthands.includes(char)) {
+        that.inputValue = char;
+        that.inputIndex = 1;
+        if (typeof that.render === 'function') that.render();
+        
+        // Dispatch synthetic Enter event to execute immediately
+        await super.handleEvent({ name: 'enter' } as KeyCode);
+        return;
+      }
+    }
+
+    // 3. Submit the currently highlighted suggestion on Enter immediately
     if (event.name === 'enter' || event.name === 'return') {
       if (that.settings.list && that.suggestions.length > 0 && that.suggestionsIndex >= 0) {
         const suggestion = that.suggestions[that.suggestionsIndex]?.toString();
         if (suggestion) {
-          // Set internal value so when it submits, it uses this exact word
           that.inputValue = suggestion;
           that.inputIndex = that.inputValue.length;
         }
