@@ -1,5 +1,6 @@
 import { ensureDir } from 'https://deno.land/std@0.224.0/fs/ensure_dir.ts';
 import { join } from 'https://deno.land/std@0.224.0/path/mod.ts';
+import { Select } from '@cliffy/prompt';
 
 /**
  * Checks if a specific branch exists locally.
@@ -86,5 +87,98 @@ export async function createTrackWorktree(trackName: string): Promise<boolean> {
   });
   
   const { code } = await command.output();
+  return code === 0;
+}
+
+export async function getTrackBranches(trackName: string): Promise<string[]> {
+  const command = new Deno.Command('git', {
+    args: ['branch', '--list', `track/${trackName}*`, '--format=%(refname:short)'],
+    stdout: 'piped',
+  });
+  const { code, stdout } = await command.output();
+  if (code !== 0) return [];
+  const text = new TextDecoder().decode(stdout).trim();
+  if (!text) return [];
+  return text.split('\n').map(b => b.trim());
+}
+
+async function selectTargetBranch(trackName: string, message: string): Promise<string> {
+  const branches = await getTrackBranches(trackName);
+  let targetBranch = `track/${trackName}`;
+
+  if (branches.length === 0) {
+    // No branches exist, we'll return the base to be created
+    return targetBranch;
+  } else if (branches.includes(targetBranch)) {
+    // Root branch exists, naturally prefer it
+    return targetBranch;
+  } else if (branches.length === 1) {
+    // Only one sub-branch exists, default to it
+    return branches[0];
+  } else {
+    // Multiple exist, no root. Prompt user.
+    return await Select.prompt({
+      message,
+      options: branches,
+    });
+  }
+}
+
+export async function fixWorktree(trackName: string): Promise<boolean> {
+  const worktreePath = `.tracks/${trackName}`;
+  const hasWorktree = await worktreeExists(worktreePath);
+  if (hasWorktree) {
+    console.log(`Worktree ${worktreePath} already exists and is valid.`);
+    return true;
+  }
+
+  const branches = await getTrackBranches(trackName);
+  const targetBranch = await selectTargetBranch(trackName, 'Multiple matching track branches found. Select one for the new worktree:');
+
+  const args = ['worktree', 'add'];
+  if (branches.length === 0) {
+    args.push('-b', targetBranch);
+  }
+  args.push(worktreePath, targetBranch);
+
+  const cmd = new Deno.Command('git', {
+    args,
+    stdout: 'inherit',
+    stderr: 'inherit',
+  });
+  const { code } = await cmd.output();
+  if (code === 0) {
+    console.log(`Successfully fixed worktree for track '${trackName}' at ${worktreePath} -> branch ${targetBranch}`);
+  }
+  return code === 0;
+}
+
+export async function fixBranch(trackName: string): Promise<boolean> {
+  const worktreePath = `.tracks/${trackName}`;
+  const hasWorktree = await worktreeExists(worktreePath);
+  if (!hasWorktree) {
+    console.error(`Worktree ${worktreePath} does not exist. Please run 'fix worktree' first.`);
+    return false;
+  }
+
+  const branches = await getTrackBranches(trackName);
+  const targetBranch = await selectTargetBranch(trackName, 'Multiple matching track branches found. Select one to checkout:');
+
+  const args = ['-C', worktreePath, 'checkout'];
+  if (branches.length === 0) {
+    args.push('-b', targetBranch);
+  } else {
+    args.push(targetBranch);
+  }
+
+  const cmd = new Deno.Command('git', {
+    args,
+    stdout: 'inherit',
+    stderr: 'inherit',
+  });
+  const { code } = await cmd.output();
+  if (code === 0) {
+    console.log(`Successfully fixed branch for track '${trackName}' in worktree -> ${targetBranch}`);
+  }
   return code === 0;
 }
