@@ -48,8 +48,18 @@ function buildApp() {
       console.log('Listing active track environments...');
       const machines = await listMachines();
       
+      function formatAndon(label: string, color: string): string {
+        switch (color) {
+          case 'red': return colors.bgRed.white(` ${label} `);
+          case 'green': return colors.bgGreen.white(` ${label} `);
+          case 'yellow': return colors.bgYellow.black(` ${label} `);
+          case 'blue': return colors.bgBlue.white(` ${label} `);
+          default: return ` ${label} `;
+        }
+      }
+
       const table = new Table()
-        .header(['State', 'Name', 'Branch', 'Status'])
+        .header(['State', 'Name', 'Andon', 'Branch', 'Status'])
         .body(
           machines.map((m) => {
             let stateStr = m.state;
@@ -57,7 +67,14 @@ function buildApp() {
             else if (m.state === 'offtrack') stateStr = colors.yellow(m.state);
             else if (m.state === 'stopped') stateStr = colors.gray(m.state);
 
-            return [stateStr, m.name, m.branch, m.status];
+            const andonStr = [
+              formatAndon('Tr', m.andon.tr),
+              formatAndon('Co', m.andon.co),
+              formatAndon('Br', m.andon.br),
+              formatAndon('Wt', m.andon.wt),
+            ].join(' ');
+
+            return [stateStr, m.name, andonStr, m.branch, m.status];
           })
         )
         .padding(2)
