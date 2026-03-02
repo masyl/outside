@@ -1,5 +1,4 @@
 import { Command } from '@cliffy/command';
-import { Input } from '@cliffy/prompt';
 import { Table } from '@cliffy/table';
 import { colors } from '@cliffy/ansi/colors';
 import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
@@ -175,45 +174,31 @@ function buildApp() {
     .command('track-fix-branch', trackFixBranchCommand);
 }
 
+async function readLine(): Promise<string | null> {
+  const buf = new Uint8Array(1024);
+  const n = await Deno.stdin.read(buf);
+  if (n === null) return null;
+  return new TextDecoder().decode(buf.subarray(0, n)).trim();
+}
+
 async function runRepl() {
   globalThis.__DEVSIDE_REPL_ACTIVE__ = true;
-  console.log("Welcome to the devside REPL! Type 'exit' to quit or 'help' for commands.");
+  console.log("Welcome to the devside REPL! Type 'exit' to quit or '?' for help.");
   
   let context: string[] = [];
 
   while (true) {
-    let promptMsg = 'devside';
-    if (context.length > 0) {
-      promptMsg += ' ' + context.join('/');
-    }
-    promptMsg += '>';
+    const prefix = colors.green('Ȯ');
+    const promptStr = context.length === 0 ? `${prefix} dev › ` : `${prefix} dev • ${context.join(' • ')} › `;
 
-    let suggestions: string[] = [];
-    if (context.length === 0) {
-        suggestions = ['tracks', 'help', 'exit'];
-    } else if (context.length === 1 && context[0] === 'tracks') {
-        const machines = await listMachines();
-        suggestions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
-    } else if (context.length === 2 && context[0] === 'tracks') {
-        suggestions = ['status', 'fix', 'help', '..'];
-    } else if (context.length === 3 && context[2] === 'fix') {
-        const machines = await listMachines();
-        const m = machines.find(x => x.name === context[1]);
-        if (m) {
-            if (m.andon.wt !== 'green') suggestions.push('worktree');
-            if (m.andon.br !== 'green') suggestions.push('branch');
-        }
-        suggestions.push('help', '..');
-    }
+    // Write prompt directly to stdout (no cliffy interference)
+    await Deno.stdout.write(new TextEncoder().encode(promptStr));
 
-    let input: string;
+    let input: string | null;
     try {
-      input = await Input.prompt({
-        message: promptMsg,
-        suggestions,
-      });
-    } catch (e) {
-      // User likely pressed Ctrl+C or similar
+      input = await readLine();
+      if (input === null) break;
+    } catch (_e) {
       console.log();
       break;
     }
@@ -279,7 +264,7 @@ async function runRepl() {
             mappedArgs = [...args];
         }
     } else if (context.length === 1 && context[0] === 'tracks') {
-        if (['create', 'destroy', 'list', 'status', 'help'].includes(args[0])) {
+        if (['create', 'destroy', 'list'].includes(args[0])) {
             mappedArgs = ['track', ...args];
         } else {
             // It's a track name
