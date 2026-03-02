@@ -3,9 +3,9 @@
  */
 
 export interface OrbMachine {
-  name: string;
   state: 'running' | 'stopped' | 'creating' | string;
-  ip?: string;
+  name: string;
+  branch: string;
 }
 
 export async function createMachine(name: string): Promise<boolean> {
@@ -39,5 +39,28 @@ export async function listMachines(): Promise<OrbMachine[]> {
     throw new Error('Failed to list machines. Is OrbStack running?');
   }
   const text = new TextDecoder().decode(stdout);
-  return JSON.parse(text) as OrbMachine[];
+  const rawMachines = JSON.parse(text) as any[];
+
+  // Fetch branches to see if any match the track name
+  const gitCommand = new Deno.Command('git', {
+    args: ['branch', '--list', 'track/*'],
+    stdout: 'piped',
+  });
+  const gitOutput = await gitCommand.output();
+  const branchesText = new TextDecoder().decode(gitOutput.stdout);
+  
+  // Extract just the track names from the `track/*` branch listing
+  // Example output: "  track/devops\n* track/simulator"
+  const activeBranches = branchesText
+    .split('\n')
+    .map(line => line.replace(/^[*\s]+track\//, '').trim())
+    .filter(name => !!name);
+
+  return rawMachines.map((m) => {
+    return {
+      state: m.state,
+      name: m.name,
+      branch: activeBranches.includes(m.name) ? `track/${m.name}` : '<none>',
+    };
+  });
 }
