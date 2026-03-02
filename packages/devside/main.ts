@@ -174,11 +174,64 @@ function buildApp() {
     .command('track-fix-branch', trackFixBranchCommand);
 }
 
-async function readLine(): Promise<string | null> {
-  const buf = new Uint8Array(1024);
-  const n = await Deno.stdin.read(buf);
-  if (n === null) return null;
-  return new TextDecoder().decode(buf.subarray(0, n)).trim();
+import * as readline from 'node:readline';
+import process from 'node:process';
+
+/**
+ * Compute completions for the REPL based on current context.
+ * Inspired by yllibed/repl's AutocompleteResolver delegate pattern.
+ */
+function getSuggestions(context: string[]): string[] {
+  // Note: this returns static suggestions. Dynamic ones (track names, andon states)
+  // are resolved inside the REPL loop before creating the readline interface.
+  if (context.length === 0) {
+    return ['tracks', 'help', 'exit'];
+  } else if (context.length === 1 && context[0] === 'tracks') {
+    return ['create', 'destroy', 'list', 'help', '..'];
+  } else if (context.length === 2 && context[0] === 'tracks') {
+    return ['status', 'fix', 'help', '..'];
+  } else if (context.length === 3 && context[2] === 'fix') {
+    return ['help', '..'];
+  }
+  return [];
+}
+
+/**
+ * Prompt the user for one line of input using node:readline.
+ * Provides line editing, history (arrow keys), and tab completion —
+ * modelled after yllibed/repl's ConsoleLineReader.
+ */
+function promptLine(promptStr: string, completions: string[], history: string[]): Promise<string | null> {
+  return new Promise((resolve) => {
+    let resolved = false;
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      terminal: true,
+      history,
+      historySize: 100,
+      completer: (line: string) => {
+        const hits = completions.filter(c => c.startsWith(line));
+        return [hits.length ? hits : completions, line];
+      },
+    });
+
+    rl.question(promptStr, (answer: string) => {
+      if (!resolved) {
+        resolved = true;
+        rl.close();
+        resolve(answer);
+      }
+    });
+
+    rl.on('close', () => {
+      if (!resolved) {
+        resolved = true;
+        resolve(null);
+      }
+    });
+  });
 }
 
 async function runRepl() {
@@ -186,25 +239,43 @@ async function runRepl() {
   console.log("Welcome to the devside REPL! Type 'exit' to quit or '?' for help.");
   
   let context: string[] = [];
+  const history: string[] = [];
 
   while (true) {
     const prefix = colors.green('Ȯ');
     const promptStr = context.length === 0 ? `${prefix} dev › ` : `${prefix} dev • ${context.join(' • ')} › `;
 
-    // Write prompt directly to stdout (no cliffy interference)
-    await Deno.stdout.write(new TextEncoder().encode(promptStr));
-
-    let input: string | null;
-    try {
-      input = await readLine();
-      if (input === null) break;
-    } catch (_e) {
-      console.log();
-      break;
+    // Build dynamic completions for this iteration
+    let completions = getSuggestions(context);
+    
+    // Enrich with dynamic data (track names, problematic andons)
+    if (context.length === 1 && context[0] === 'tracks') {
+      try {
+        const machines = await listMachines();
+        completions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
+      } catch { /* keep static suggestions */ }
+    } else if (context.length === 3 && context[2] === 'fix') {
+      try {
+        const machines = await listMachines();
+        const m = machines.find(x => x.name === context[1]);
+        const fixable: string[] = [];
+        if (m) {
+          if (m.andon.wt !== 'green') fixable.push('worktree');
+          if (m.andon.br !== 'green') fixable.push('branch');
+        }
+        completions = [...fixable, 'help', '..'];
+      } catch { /* keep static suggestions */ }
     }
+
+    const input = await promptLine(promptStr, completions, history);
+    if (input === null) break;
 
     const trimmed = input.trim();
     if (!trimmed) continue;
+    
+    // Add to history
+    history.push(trimmed);
+    
     if (trimmed === 'exit' || trimmed === 'quit') break;
 
     const args = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(arg => {
