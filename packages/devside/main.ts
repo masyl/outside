@@ -229,10 +229,32 @@ async function runRepl() {
     // Global Help Command Interception
     if (args[0] === 'help' || args[0] === '?') {
         console.log(`\nCurrent Context: ${context.length === 0 ? 'Root' : context.join('/')}`);
-        console.log(`Available commands and autocompletions:`);
-        for (const s of suggestions) {
-            console.log(`  - ${s}`);
+        console.log(`\nCommands:`);
+        
+        if (context.length === 0) {
+            console.log(`  tracks        : Enter tracks management context`);
+            console.log(`  help, ?       : Show this help message`);
+            console.log(`  exit, quit    : Exit the REPL`);
+        } else if (context.length === 1 && context[0] === 'tracks') {
+            console.log(`  create <name> : Create a new track environment`);
+            console.log(`  destroy <name>: Destroy a track environment`);
+            console.log(`  list          : List all development tracks`);
+            console.log(`  ..            : Navigate up one context level`);
+            console.log(`  help, ?       : Show this help message`);
+            console.log(`\nSymbols:`);
+            console.log(`  {track name}  : Select this track as context`);
+        } else if (context.length === 2 && context[0] === 'tracks') {
+            console.log(`  status        : Show detailed Andon status for this track`);
+            console.log(`  fix           : Enter fix sub-context to repair broken andons`);
+            console.log(`  ..            : Navigate up one context level`);
+            console.log(`  help, ?       : Show this help message`);
+        } else if (context.length === 3 && context[2] === 'fix') {
+            console.log(`  ..            : Navigate up one context level`);
+            console.log(`  help, ?       : Show this help message`);
+            console.log(`\nSymbols:`);
+            console.log(`  {problematic andon} : e.g. 'worktree' or 'branch' to automatically fix it`);
         }
+        
         console.log();
         continue;
     }
