@@ -1,5 +1,6 @@
 import { Command } from '@cliffy/command';
 import { DevsideInput } from './prompt.ts';
+import { join } from 'jsr:@std/path@1';
 import { Table } from '@cliffy/table';
 import { colors } from '@cliffy/ansi/colors';
 import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
@@ -180,7 +181,14 @@ async function runRepl() {
   console.log("Welcome to the devside REPL! Type 'exit' to quit or '?' for help.");
   
   let context: string[] = [];
-  const history: string[] = [];
+  const historyFile = join(Deno.cwd(), '.devside_history');
+  let history: string[] = [];
+  try {
+    const content = await Deno.readTextFile(historyFile);
+    history = content.split('\n').filter(Boolean);
+  } catch {
+    // Ignore if not present
+  }
 
   while (true) {
     const prefix = colors.green('Ȯ');
@@ -228,8 +236,16 @@ async function runRepl() {
     const trimmed = input.trim();
     if (!trimmed) continue;
     
-    // Add to history
+    // Add to history and keep last 20
     history.push(trimmed);
+    if (history.length > 20) {
+      history = history.slice(-20);
+    }
+    try {
+      await Deno.writeTextFile(historyFile, history.join('\n'));
+    } catch {
+      // Ignore
+    }
     
     if (trimmed === 'exit' || trimmed === 'quit') break;
 

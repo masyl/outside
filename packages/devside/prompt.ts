@@ -28,9 +28,47 @@ export class DevsideInput extends Input {
       return;
     }
 
-    // 1. Show list only on down arrow if it's currently hidden
-    if (event.name === 'down' && !that.settings.list) {
+    // Initialize history cursor on first event if we have history
+    if (that.settings.history && that.historyIndex === undefined) {
+      that.historyIndex = that.settings.history.length;
+    }
+
+    if (event.name === 'up') {
+      if (!that.settings.list && that.settings.history && that.settings.history.length > 0) {
+        if (that.historyIndex > 0) {
+          that.historyIndex--;
+          that.inputValue = that.settings.history[that.historyIndex];
+          that.inputIndex = that.inputValue.length;
+          if (typeof that.render === 'function') that.render();
+        }
+      } else {
+        await super.handleEvent(event);
+      }
+      return;
+    }
+
+    if (event.name === 'down') {
+      if (that.settings.list) {
+        await super.handleEvent(event);
+        return;
+      }
+      // If we are currently navigating history, go down to newer entries
+      if (that.settings.history && that.historyIndex < that.settings.history.length) {
+        that.historyIndex++;
+        if (that.historyIndex >= that.settings.history.length) {
+          that.inputValue = '';
+          that.inputIndex = 0;
+        } else {
+          that.inputValue = that.settings.history[that.historyIndex];
+          that.inputIndex = that.inputValue.length;
+        }
+        if (typeof that.render === 'function') that.render();
+        return;
+      }
+      // If we are at the bottom of history (neutral), down arrow opens the menu
       that.settings.list = true;
+      await super.handleEvent(event);
+      return;
     }
 
     // 2. Submit the currently highlighted suggestion on Enter immediately
