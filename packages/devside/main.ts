@@ -1,4 +1,5 @@
 import { Command } from '@cliffy/command';
+import { Input } from '@cliffy/prompt';
 import { Table } from '@cliffy/table';
 import { colors } from '@cliffy/ansi/colors';
 import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
@@ -174,86 +175,27 @@ function buildApp() {
     .command('track-fix-branch', trackFixBranchCommand);
 }
 
-import * as readline from 'node:readline';
-import process from 'node:process';
-
-/**
- * Compute completions for the REPL based on current context.
- * Inspired by yllibed/repl's AutocompleteResolver delegate pattern.
- */
-function getSuggestions(context: string[]): string[] {
-  // Note: this returns static suggestions. Dynamic ones (track names, andon states)
-  // are resolved inside the REPL loop before creating the readline interface.
-  if (context.length === 0) {
-    return ['tracks', 'help', 'exit'];
-  } else if (context.length === 1 && context[0] === 'tracks') {
-    return ['create', 'destroy', 'list', 'help', '..'];
-  } else if (context.length === 2 && context[0] === 'tracks') {
-    return ['status', 'fix', 'help', '..'];
-  } else if (context.length === 3 && context[2] === 'fix') {
-    return ['help', '..'];
-  }
-  return [];
-}
-
-/**
- * Prompt the user for one line of input using node:readline.
- * Provides line editing, history (arrow keys), and tab completion —
- * modelled after yllibed/repl's ConsoleLineReader.
- */
-function promptLine(promptStr: string, completions: string[], history: string[]): Promise<string | null> {
-  return new Promise((resolve) => {
-    let resolved = false;
-
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      terminal: true,
-      history,
-      historySize: 100,
-      completer: (line: string) => {
-        const hits = completions.filter(c => c.startsWith(line));
-        return [hits.length ? hits : completions, line];
-      },
-    });
-
-    rl.question(promptStr, (answer: string) => {
-      if (!resolved) {
-        resolved = true;
-        rl.close();
-        resolve(answer);
-      }
-    });
-
-    rl.on('close', () => {
-      if (!resolved) {
-        resolved = true;
-        resolve(null);
-      }
-    });
-  });
-}
-
 async function runRepl() {
   globalThis.__DEVSIDE_REPL_ACTIVE__ = true;
   console.log("Welcome to the devside REPL! Type 'exit' to quit or '?' for help.");
   
   let context: string[] = [];
-  const history: string[] = [];
 
   while (true) {
     const prefix = colors.green('Ȯ');
-    const promptStr = context.length === 0 ? `${prefix} dev › ` : `${prefix} dev • ${context.join(' • ')} › `;
+    const promptMsg = context.length === 0 ? `${prefix} dev` : `${prefix} dev • ${context.join(' • ')}`;
 
     // Build dynamic completions for this iteration
-    let completions = getSuggestions(context);
-    
-    // Enrich with dynamic data (track names, problematic andons)
-    if (context.length === 1 && context[0] === 'tracks') {
+    let suggestions: string[] = [];
+    if (context.length === 0) {
+      suggestions = ['tracks', 'help', 'exit'];
+    } else if (context.length === 1 && context[0] === 'tracks') {
       try {
         const machines = await listMachines();
-        completions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
-      } catch { /* keep static suggestions */ }
+        suggestions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
+      } catch { suggestions = ['create', 'destroy', 'list', 'help', '..']; }
+    } else if (context.length === 2 && context[0] === 'tracks') {
+      suggestions = ['status', 'fix', 'help', '..'];
     } else if (context.length === 3 && context[2] === 'fix') {
       try {
         const machines = await listMachines();
@@ -263,19 +205,26 @@ async function runRepl() {
           if (m.andon.wt !== 'green') fixable.push('worktree');
           if (m.andon.br !== 'green') fixable.push('branch');
         }
-        completions = [...fixable, 'help', '..'];
-      } catch { /* keep static suggestions */ }
+        suggestions = [...fixable, 'help', '..'];
+      } catch { suggestions = ['help', '..']; }
     }
 
-    const input = await promptLine(promptStr, completions, history);
-    if (input === null) break;
+    let input: string;
+    try {
+      input = await Input.prompt({
+        message: promptMsg,
+        prefix: '',
+        suggestions,
+        list: true,
+      });
+    } catch (_e) {
+      // User pressed Ctrl+C or similar
+      console.log();
+      break;
+    }
 
     const trimmed = input.trim();
     if (!trimmed) continue;
-    
-    // Add to history
-    history.push(trimmed);
-    
     if (trimmed === 'exit' || trimmed === 'quit') break;
 
     const args = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(arg => {
