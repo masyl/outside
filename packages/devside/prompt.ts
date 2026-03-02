@@ -71,14 +71,32 @@ export class DevsideInput extends Input {
       return;
     }
 
-    // 2. Alt+Key Shorthands Support (Alt often maps to metaKey in JS environments, so check both)
+    // 2. Alt/Option+Key Shorthands Support
+    // On macOS, terminals often swallow the Alt/Option key to produce special characters
+    // (e.g., Alt+t = †). We check for these explicit characters as well as the standard altKey.
+    const macOptionMap: Record<string, string> = {
+      '†': 't', // Alt + t
+      'ß': 's', // Alt + s
+      'ƒ': 'f', // Alt + f
+      '∑': 'w', // Alt + w
+      '∫': 'b', // Alt + b
+    };
+
     const isAlt = (event as any).altKey || (event as any).metaKey;
-    if (isAlt && typeof that.inputValue === 'string' && that.inputValue === '') {
-      const char = event.char?.toLowerCase();
+    const rawChar = event.sequence || event.char || '';
+    
+    let shorthandTrigger = '';
+    if (isAlt && event.char) {
+        shorthandTrigger = event.char.toLowerCase();
+    } else if (macOptionMap[rawChar]) {
+        shorthandTrigger = macOptionMap[rawChar];
+    }
+
+    if (shorthandTrigger && typeof that.inputValue === 'string' && that.inputValue === '') {
       const validShorthands = ['t', 's', 'f', 'w', 'b'];
       
-      if (char && validShorthands.includes(char)) {
-        that.inputValue = char;
+      if (validShorthands.includes(shorthandTrigger)) {
+        that.inputValue = shorthandTrigger;
         that.inputIndex = 1;
         if (typeof that.render === 'function') that.render();
         
