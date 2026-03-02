@@ -6,6 +6,7 @@ export class DevsideInput extends Input {
     return new this(options).prompt();
   }
 
+  // 1. Shorthand/History Interceptor
   protected override async handleEvent(event: KeyCode): Promise<void> {
     const that = this as any;
 

@@ -195,7 +195,7 @@ async function runRepl() {
     const separator = colors.dim(' • ');
     const contextStr = context.length === 0 ? '' : `${separator}${context.join(separator)}`;
     const pathMsg = `${prefix}${contextStr}`;
-    const cursorMsg = colors.bold('›');
+    const cursorMsg = `${colors.bold('›')} `;
 
     // Build dynamic completions for this iteration
     let suggestions: string[] = [];
@@ -229,7 +229,8 @@ async function runRepl() {
       console.log(pathMsg); // Print the path text on its own line
       input = await DevsideInput.prompt({
         message: cursorMsg,
-        prefix: ' ',
+        prefix: '',
+        pointer: '',
         suggestions,
         list: false,
         history,
