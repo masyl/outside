@@ -178,7 +178,7 @@ function buildApp() {
 
 async function runRepl() {
   globalThis.__DEVSIDE_REPL_ACTIVE__ = true;
-  console.log("Welcome to the devside REPL! Type 'exit' to quit or '?' for help.");
+  console.log("\nWelcome Ȯutside! Type 'exit' to quit or '?' for help.\n");
   
   let context: string[] = ['dev'];
   const historyFile = join(Deno.cwd(), '.devside_history');
@@ -193,31 +193,31 @@ async function runRepl() {
   while (true) {
     const prefix = colors.green('Ȯ');
     const separator = colors.dim(' • ');
-    const contextStr = context.length === 0 ? '' : `${separator}${colors.dim(context.join(' • '))}`;
-    const arrow = colors.bold(colors.dim('›'));
-    const promptMsg = `${prefix}${contextStr}\n${arrow} `;
+    const contextStr = context.length === 0 ? '' : `${separator}${context.join(separator)}`;
+    const pathMsg = `${prefix}${contextStr}`;
+    const cursorMsg = colors.bold('›');
 
     // Build dynamic completions for this iteration
     let suggestions: string[] = [];
     if (context.length === 0) {
       suggestions = ['dev', 'help', 'exit'];
     } else if (context.length === 1 && context[0] === 'dev') {
-      suggestions = ['tracks', 'help', 'exit', '..'];
+      suggestions = ['tracks [t]', 'help', 'exit', '..'];
     } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
       try {
         const machines = await listMachines();
         suggestions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
       } catch { suggestions = ['create', 'destroy', 'list', 'help', '..']; }
     } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
-      suggestions = ['status', 'fix', 'help', '..'];
+      suggestions = ['status [s]', 'fix [f]', 'help', '..'];
     } else if (context.length === 4 && context[0] === 'dev' && context[3] === 'fix') {
       try {
         const machines = await listMachines();
         const m = machines.find(x => x.name === context[2]);
         const fixable: string[] = [];
         if (m) {
-          if (m.andon.wt !== 'green') fixable.push('worktree');
-          if (m.andon.br !== 'green') fixable.push('branch');
+          if (m.andon.wt !== 'green') fixable.push('worktree [w]');
+          if (m.andon.br !== 'green') fixable.push('branch [b]');
         }
         suggestions = [...fixable, 'help', '..'];
       } catch { suggestions = ['help', '..']; }
@@ -225,9 +225,11 @@ async function runRepl() {
 
     let input: string;
     try {
+      console.log(); // Blank line between blocks
+      console.log(pathMsg); // Print the path text on its own line
       input = await DevsideInput.prompt({
-        message: promptMsg,
-        prefix: '',
+        message: cursorMsg,
+        prefix: ' ',
         suggestions,
         list: false,
         history,
@@ -243,8 +245,16 @@ async function runRepl() {
     
     if (trimmed === 'exit' || trimmed === 'quit') break;
 
+    // Map the suggestion formatting cleanly before navigation intercepts to match full command root,
+    // e.g., 'tracks [t]' -> 'tracks' so `localArgs[0]` mapping matches neatly.
     const args = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(arg => {
-        return arg.startsWith('"') && arg.endsWith('"') ? arg.slice(1, -1) : arg;
+        let clean = arg.startsWith('"') && arg.endsWith('"') ? arg.slice(1, -1) : arg;
+        if (clean === 'tracks [t]') clean = 'tracks';
+        else if (clean === 'status [s]') clean = 'status';
+        else if (clean === 'fix [f]') clean = 'fix';
+        else if (clean === 'worktree [w]') clean = 'worktree';
+        else if (clean === 'branch [b]') clean = 'branch';
+        return clean;
     }) || [];
 
     // Global Help Command Interception
@@ -299,12 +309,12 @@ async function runRepl() {
     const localArgs = [...args];
 
     while (localArgs.length > 0) {
-        if (localArgs[0] === '..') {
+        if (localArgs[0] === '..' || localArgs[0] === '.') {
             context.pop();
-            localArgs.shift();
+            const popped = localArgs.shift();
             
             // Add to history here since it's a valid navigation move that skips parsing
-            history.push('..');
+            history.push(popped!);
             if (history.length > 20) history = history.slice(-20);
             await Deno.writeTextFile(historyFile, history.join('\n')).catch(() => {});
             continue;
