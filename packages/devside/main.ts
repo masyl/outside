@@ -2,7 +2,7 @@ import { Command } from '@cliffy/command';
 import { Input } from '@cliffy/prompt';
 import { Table } from '@cliffy/table';
 import { colors } from '@cliffy/ansi/colors';
-import { createMachine, destroyMachine, listMachines } from './orb.ts';
+import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
 import { createTrackProxy, destroyTrackProxy } from './docker.ts';
 import { createTrackWorktree, fixWorktree, fixBranch } from './git.ts';
 
@@ -115,16 +115,30 @@ function buildApp() {
         }
       }
 
-      const andons = [
-        formatAndon('Tr', m.andon.tr),
-        formatAndon('Co', m.andon.co),
-        formatAndon('Br', m.andon.br),
-        formatAndon('Wt', m.andon.wt)
-      ].join(' ');
-
       console.log(`\nTrack: ${m.name}`);
       console.log(`Status: ${m.status}`);
-      console.log(`Andons: ${andons}\n`);
+      console.log(`Andons:`);
+      
+      const components = [
+        { key: 'tr', comp: ANDON_COMPONENTS.tr, color: m.andon.tr },
+        { key: 'co', comp: ANDON_COMPONENTS.co, color: m.andon.co },
+        { key: 'br', comp: ANDON_COMPONENTS.br, color: m.andon.br },
+        { key: 'wt', comp: ANDON_COMPONENTS.wt, color: m.andon.wt },
+      ];
+
+      for (const { comp, color } of components) {
+        const symbolStr = formatAndon(comp.symbol, color);
+        const colorData = ANDON_COLORS[color];
+        
+        let colorLabel = colorData.label;
+        if (color === 'green') colorLabel = colors.green(colorLabel);
+        else if (color === 'red') colorLabel = colors.red(colorLabel);
+        else if (color === 'yellow') colorLabel = colors.yellow(colorLabel);
+        else if (color === 'blue') colorLabel = colors.blue(colorLabel);
+
+        console.log(`  ${symbolStr}  ${comp.label.padEnd(10)} : ${colorLabel.padEnd(20)} - ${colorData.description}`);
+      }
+      console.log();
     });
 
   const trackFixWorktreeCommand = new Command()
@@ -179,9 +193,9 @@ async function runRepl() {
         suggestions = ['tracks', 'help', 'exit'];
     } else if (context.length === 1 && context[0] === 'tracks') {
         const machines = await listMachines();
-        suggestions = ['create', 'destroy', 'list', ...machines.map(m => m.name), '..'];
+        suggestions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
     } else if (context.length === 2 && context[0] === 'tracks') {
-        suggestions = ['status', 'fix', '..'];
+        suggestions = ['status', 'fix', 'help', '..'];
     } else if (context.length === 3 && context[2] === 'fix') {
         const machines = await listMachines();
         const m = machines.find(x => x.name === context[1]);
@@ -189,7 +203,7 @@ async function runRepl() {
             if (m.andon.wt !== 'green') suggestions.push('worktree');
             if (m.andon.br !== 'green') suggestions.push('branch');
         }
-        suggestions.push('..');
+        suggestions.push('help', '..');
     }
 
     let input: string;
@@ -212,46 +226,87 @@ async function runRepl() {
         return arg.startsWith('"') && arg.endsWith('"') ? arg.slice(1, -1) : arg;
     }) || [];
 
-    // Context Navigation
-    if (args.length === 1 && args[0] === '..') {
+    // Global Help Command Interception
+    if (args[0] === 'help' || args[0] === '?') {
+        console.log(`\nCurrent Context: ${context.length === 0 ? 'Root' : context.join('/')}`);
+        console.log(`Available commands and autocompletions:`);
+        for (const s of suggestions) {
+            console.log(`  - ${s}`);
+        }
+        console.log();
+        continue;
+    }
+
+    // Context Navigation and Mapping
+    let mappedArgs: string[] | null = null;
+
+    if (args[0] === '..') {
         context.pop();
         continue;
     }
-    if (args.length === 1 && args[0] === 'tracks') {
-        context = ['tracks'];
-        continue;
-    }
-    
-    // Changing context within tracks
-    if (context.length === 1 && context[0] === 'tracks' && args.length === 1) {
-        // If it's a known subcommand, don't change context
-        if (!['create', 'destroy', 'list', 'status', 'help'].includes(args[0])) {
-            context.push(args[0]);
-            continue;
+
+    if (context.length === 0) {
+        if (args[0] === 'tracks') {
+            context = ['tracks'];
+            if (args.length > 1) {
+                mappedArgs = ['track', ...args.slice(1)];
+            } else {
+                continue;
+            }
+        } else {
+            mappedArgs = [...args];
         }
+    } else if (context.length === 1 && context[0] === 'tracks') {
+        if (['create', 'destroy', 'list', 'status', 'help'].includes(args[0])) {
+            mappedArgs = ['track', ...args];
+        } else {
+            // It's a track name
+            context.push(args[0]);
+            if (args.length > 1) {
+                const subCmd = args[1];
+                if (subCmd === 'status') {
+                    mappedArgs = ['track-status', args[0]];
+                } else if (subCmd === 'fix') {
+                    context.push('fix');
+                    if (args.length > 2) {
+                        if (args[2] === 'worktree') mappedArgs = ['track-fix-worktree', args[0]];
+                        else if (args[2] === 'branch') mappedArgs = ['track-fix-branch', args[0]];
+                        else mappedArgs = [args[2], args[0], ...args.slice(3)]; // fallback
+                    } else {
+                        continue;
+                    }
+                } else {
+                    mappedArgs = [subCmd, args[0], ...args.slice(2)];
+                }
+            } else {
+                continue;
+            }
+        }
+    } else if (context.length === 2 && context[0] === 'tracks') {
+        const trackName = context[1];
+        if (args[0] === 'status') {
+            mappedArgs = ['track-status', trackName];
+        } else if (args[0] === 'fix') {
+            context.push('fix');
+            if (args.length > 1) {
+                if (args[1] === 'worktree') mappedArgs = ['track-fix-worktree', trackName];
+                else if (args[1] === 'branch') mappedArgs = ['track-fix-branch', trackName];
+                else mappedArgs = [args[1], trackName, ...args.slice(2)];
+            } else {
+                continue;
+            }
+        } else {
+            mappedArgs = [args[0], trackName, ...args.slice(1)];
+        }
+    } else if (context.length === 3 && context[2] === 'fix') {
+        const trackName = context[1];
+        if (args[0] === 'worktree') mappedArgs = ['track-fix-worktree', trackName];
+        else if (args[0] === 'branch') mappedArgs = ['track-fix-branch', trackName];
+        else mappedArgs = [args[0], trackName, ...args.slice(1)];
     }
 
-    // Changing context to fix mode
-    if (context.length === 2 && context[0] === 'tracks' && args.length === 1 && args[0] === 'fix') {
-        context.push('fix');
-        continue;
-    }
-
-    // Map contextual args to root commands
-    let mappedArgs = [...args];
-    if (context.length === 1 && context[0] === 'tracks') {
-       mappedArgs = ['track', ...args];
-    } else if (context.length >= 2 && context[0] === 'tracks') {
-       const trackName = context[1];
-       if (context.length === 2 && args[0] === 'status') {
-           mappedArgs = ['track-status', trackName];
-       } else if (context.length === 3 && context[2] === 'fix' && args.length === 1) {
-           if (args[0] === 'worktree') mappedArgs = ['track-fix-worktree', trackName];
-           else if (args[0] === 'branch') mappedArgs = ['track-fix-branch', trackName];
-       } else {
-           // Provide fallback for unexpected commands in context
-           mappedArgs = [args[0], trackName, ...args.slice(1)];
-       }
+    if (!mappedArgs) {
+        mappedArgs = [...args];
     }
 
     try {
