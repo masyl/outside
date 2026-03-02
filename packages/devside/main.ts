@@ -180,6 +180,7 @@ async function runRepl() {
   console.log("Welcome to the devside REPL! Type 'exit' to quit or '?' for help.");
   
   let context: string[] = [];
+  const history: string[] = [];
 
   while (true) {
     const prefix = colors.green('Ȯ');
@@ -216,6 +217,7 @@ async function runRepl() {
         prefix: '',
         suggestions,
         list: false,
+        history,
       });
     } catch (_e) {
       // User pressed Ctrl+C or similar
@@ -225,6 +227,10 @@ async function runRepl() {
 
     const trimmed = input.trim();
     if (!trimmed) continue;
+    
+    // Add to history
+    history.push(trimmed);
+    
     if (trimmed === 'exit' || trimmed === 'quit') break;
 
     const args = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(arg => {

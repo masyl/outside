@@ -9,8 +9,27 @@ export class DevsideInput extends Input {
   protected override async handleEvent(event: KeyCode): Promise<void> {
     const that = this as any;
 
-    // 1. Show list only on up/down arrow if it's currently hidden
-    if ((event.name === 'down' || event.name === 'up') && !that.settings.list) {
+    // 0. Return to neutral on Escape (hide list, clear input)
+    if (event.name === 'escape') {
+      let changed = false;
+      if (that.settings.list) {
+        that.settings.list = false;
+        changed = true;
+      }
+      if (typeof that.inputValue === 'string' && that.inputValue.length > 0) {
+        that.inputValue = '';
+        that.inputIndex = 0;
+        changed = true;
+      }
+      
+      if (changed && typeof that.render === 'function') {
+        that.render();
+      }
+      return;
+    }
+
+    // 1. Show list only on down arrow if it's currently hidden
+    if (event.name === 'down' && !that.settings.list) {
       that.settings.list = true;
     }
 
