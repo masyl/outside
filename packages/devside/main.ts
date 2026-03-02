@@ -4,6 +4,7 @@ import { Table } from '@cliffy/table';
 import { colors } from '@cliffy/ansi/colors';
 import { createMachine, destroyMachine, listMachines } from './orb.ts';
 import { createTrackProxy, destroyTrackProxy } from './docker.ts';
+import { createTrackWorktree } from './git.ts';
 
 declare global {
   var __DEVSIDE_REPL_ACTIVE__: boolean | undefined;
@@ -14,6 +15,12 @@ function buildApp() {
     .description('Create a new native OrbStack tracking environment for a track')
     .arguments('<name:string>')
     .action(async (_options: void | Record<string, unknown>, name: string) => {
+      console.log(`Setting up git worktree and branch for '${name}'...`);
+      const gitSuccess = await createTrackWorktree(name);
+      if (!gitSuccess) {
+        throw new Error(`Failed to create git worktree for '${name}'`);
+      }
+
       console.log(`Creating track environment for '${name}'...`);
       const success = await createMachine(name);
       if (!success) {

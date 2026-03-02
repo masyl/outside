@@ -34,6 +34,13 @@ export interface OrbMachine {
 }
 
 export async function createMachine(name: string): Promise<boolean> {
+  // Check if it already exists
+  const existing = await listMachines();
+  if (existing.some((m) => m.name === name)) {
+    console.log(`OrbStack machine '${name}' already exists.`);
+    return true;
+  }
+
   const command = new Deno.Command('orb', {
     args: ['create', 'ubuntu', name],
     stdout: 'inherit',

@@ -6,6 +6,24 @@ export async function createTrackProxy(trackName: string): Promise<boolean> {
   const containerName = `outside-proxy-${trackName}`;
   const orbHostname = `${trackName}.orb.local`;
 
+  // Check if it already exists
+  const checkCmd = new Deno.Command('docker', {
+    args: ['--context', 'orbstack', 'ps', '-a', '--format', '{{.Names}}'],
+    stdout: 'piped',
+  });
+  const checkOut = await checkCmd.output();
+  const existingNames = new TextDecoder().decode(checkOut.stdout).split('\n');
+  if (existingNames.includes(containerName)) {
+    console.log(`Proxy container '${containerName}' already exists. Starting it...`);
+    const startCmd = new Deno.Command('docker', {
+      args: ['--context', 'orbstack', 'start', containerName],
+      stdout: 'inherit',
+      stderr: 'inherit',
+    });
+    const { code } = await startCmd.output();
+    return code === 0;
+  }
+
   // Start a tiny alpine container that sleeps forever, just to hold Caddy labels
   const command = new Deno.Command('docker', {
     args: [
