@@ -200,16 +200,16 @@ async function runRepl() {
     // Build dynamic completions for this iteration
     let suggestions: string[] = [];
     if (context.length === 0) {
-      suggestions = ['dev', 'help', 'exit'];
+      suggestions = ['dev', 'help [h]', 'exit [q]'];
     } else if (context.length === 1 && context[0] === 'dev') {
-      suggestions = ['tracks [t]', 'help', 'exit', '..'];
+      suggestions = ['tracks [t]', 'help [h]', 'exit [q]', '..'];
     } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
       try {
         const machines = await listMachines();
-        suggestions = ['create', 'destroy', 'list', ...machines.map(m => m.name), 'help', '..'];
-      } catch { suggestions = ['create', 'destroy', 'list', 'help', '..']; }
+        suggestions = ['create [c]', 'destroy [d]', 'list [l]', ...machines.map(m => m.name), 'help [h]', '..'];
+      } catch { suggestions = ['create [c]', 'destroy [d]', 'list [l]', 'help [h]', '..']; }
     } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
-      suggestions = ['status [s]', 'fix [f]', 'help', '..'];
+      suggestions = ['status [s]', 'fix [f]', 'help [h]', '..'];
     } else if (context.length === 4 && context[0] === 'dev' && context[3] === 'fix') {
       try {
         const machines = await listMachines();
@@ -219,8 +219,8 @@ async function runRepl() {
           if (m.andon.wt !== 'green') fixable.push('worktree [w]');
           if (m.andon.br !== 'green') fixable.push('branch [b]');
         }
-        suggestions = [...fixable, 'help', '..'];
-      } catch { suggestions = ['help', '..']; }
+        suggestions = [...fixable, 'help [h]', '..'];
+      } catch { suggestions = ['help [h]', '..']; }
     }
 
     let input: string;
@@ -246,16 +246,9 @@ async function runRepl() {
     
     if (trimmed === 'exit' || trimmed === 'quit') break;
 
-    // Map the suggestion formatting cleanly before navigation intercepts to match full command root,
-    // e.g., 'tracks [t]' -> 'tracks' so `localArgs[0]` mapping matches neatly.
+    // `prompt.ts` automatically strips autocomplete brackets like `[t]` upon enter natively
     const args = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(arg => {
-        let clean = arg.startsWith('"') && arg.endsWith('"') ? arg.slice(1, -1) : arg;
-        if (clean === 'tracks [t]') clean = 'tracks';
-        else if (clean === 'status [s]') clean = 'status';
-        else if (clean === 'fix [f]') clean = 'fix';
-        else if (clean === 'worktree [w]') clean = 'worktree';
-        else if (clean === 'branch [b]') clean = 'branch';
-        return clean;
+        return arg.startsWith('"') && arg.endsWith('"') ? arg.slice(1, -1) : arg;
     }) || [];
 
     // Global Help Command Interception

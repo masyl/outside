@@ -81,6 +81,11 @@ export class DevsideInput extends Input {
       'ƒ': 'f', // Alt + f
       '∑': 'w', // Alt + w
       '∫': 'b', // Alt + b
+      '˙': 'h', // Alt + h
+      'œ': 'q', // Alt + q
+      'ç': 'c', // Alt + c
+      '∂': 'd', // Alt + d
+      '¬': 'l', // Alt + l
     };
 
     const isAlt = (event as any).altKey || (event as any).metaKey;
@@ -94,7 +99,7 @@ export class DevsideInput extends Input {
     }
 
     if (shorthandTrigger && typeof that.inputValue === 'string' && that.inputValue === '') {
-      const validShorthands = ['t', 's', 'f', 'w', 'b'];
+      const validShorthands = ['t', 's', 'f', 'w', 'b', 'h', 'q', 'c', 'd', 'l'];
       
       if (validShorthands.includes(shorthandTrigger)) {
         that.inputValue = shorthandTrigger;
@@ -112,7 +117,9 @@ export class DevsideInput extends Input {
       if (that.settings.list && that.suggestions.length > 0 && that.suggestionsIndex >= 0) {
         const suggestion = that.suggestions[that.suggestionsIndex]?.toString();
         if (suggestion) {
-          that.inputValue = suggestion;
+          // Clean off the "[key]" shorthand so the autocomplete buffer matches the raw command globally
+          const cleanSuggestion = suggestion.replace(/\s\[[a-z]\]$/, '');
+          that.inputValue = cleanSuggestion;
           that.inputIndex = that.inputValue.length;
         }
       }
