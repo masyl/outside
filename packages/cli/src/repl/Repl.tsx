@@ -174,10 +174,10 @@ export function Repl() {
 
   return (
     <Box flexDirection="column" height={Deno.consoleSize().rows - 1} width="100%">
-      {/* Main output area */}
+      {/* Main output area - sliced to only show the latest logs that fit on screen */}
       <Box flexGrow={1} flexDirection="column" borderStyle="single" paddingX={1} overflowY="hidden">
-        {logs.map((log: string, index: number) => (
-          <React.Fragment key={`log-${index}`}>
+        {logs.slice(-Math.max(1, Deno.consoleSize().rows - 8)).map((log: string, index: number) => (
+          <React.Fragment key={`log-${logs.length - index}`}>
             <Text>{log}</Text>
           </React.Fragment>
         ))}
