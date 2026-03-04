@@ -1,134 +1,83 @@
-/**
- * Defines a Command execution blueprint.
- */
-export interface CommandExecution {
-  command: string;     // e.g. 'track-list', 'track-create'
-  args: string[];      // positional arguments
-  options: Record<string, string | boolean>; // parsed flags
-}
+import { createRouter, RadixRouter } from "npm:radix3";
+import { IContext, CommandExecution } from "./contexts/types.ts";
+import { RootContext } from "./contexts/RootContext.ts";
+import { DevContext } from "./contexts/DevContext.ts";
+import { DevTracksContext } from "./contexts/DevTracksContext.ts";
+import { TrackContext } from "./contexts/TrackContext.ts";
+import { TrackFixContext } from "./contexts/TrackFixContext.ts";
 
-/**
- * Defines an autocomplete pre-fetcher contract for a context.
- */
-export interface ContextAutocomplete {
-  fetchSubEntities: (params: Record<string, string>) => Promise<string[]>;
-}
+// Re-export CommandExecution to avoid breaking Executor imports
+export type { CommandExecution };
 
-export interface RouteDefinition {
-  pattern: string;
-  // What commands are available to run or cd into from this context
-  availableCommands: string[];
-  // Given user input inside this context, translate into an execution plan
-  translateInput?: (inputTokens: string[], params: Record<string, string>) => CommandExecution | null;
-  autocomplete?: ContextAutocomplete;
+export interface RouteHandler {
+  context: IContext;
   autorun?: string;
 }
 
-/**
- * ContextRouter maps logical URL-like contexts to physical CLI commands.
- */
 export class ContextRouter {
-  private routes: { pattern: URLPattern; def: RouteDefinition }[] = [];
+  private router: RadixRouter<RouteHandler>;
   private currentPath: string = "/";
 
   constructor() {
-    // Base standard routes
-    this.register({
-      pattern: "/",
-      availableCommands: ["dev", "mesh", "help", "quit", "clear"],
-      translateInput: (tokens) => {
-        if (tokens.length === 0) return null;
-        if (["dev", "mesh"].includes(tokens[0])) {
-           return { command: "cd", args: [tokens[0]], options: {} };
-        }
-        // At root, commands are basically 1:1
-        return { command: tokens[0], args: tokens.slice(1), options: {} };
-      }
-    });
+    this.router = createRouter<RouteHandler>();
 
-    this.register({
-      pattern: "/dev",
-      availableCommands: ["tracks"],
-      translateInput: (tokens) => {
-        if (tokens.length === 0) return null;
-        if (tokens[0] === "tracks") {
-           return { command: "cd", args: ["tracks"], options: {} };
-        }
-        // For anything else that might have made it
-        return { command: tokens[0], args: tokens.slice(1), options: {} };
-      }
-    });
+    // Instantiate context instances
+    const rootCtx = new RootContext();
+    const devCtx = new DevContext();
+    const devTracksCtx = new DevTracksContext();
+    const trackCtx = new TrackContext();
+    const trackFixCtx = new TrackFixContext();
 
-    this.register({
-      pattern: "/dev/tracks",
-      availableCommands: ["list", "create", "destroy"],
-      translateInput: (tokens) => {
-        if (tokens.length === 0) return null;
-        // If they type a track name directly, implicit cd to that track
-        if (!["list", "create", "destroy"].includes(tokens[0])) {
-           return { command: "cd", args: [`/dev/tracks/${tokens[0]}`], options: {} };
-        }
-        // From /dev/tracks, running "list" translates to "track list"
-        return { command: "track", args: [tokens[0], ...tokens.slice(1)], options: {} };
-      },
-      autocomplete: {
-        fetchSubEntities: async () => {
-          // In a full implementation, we might call 'track list --json' to get these
-          // For now, return dynamic placeholder logic
-          return ["my-track", "devops"];
-        }
-      }
-    });
-
-    this.register({
-      pattern: "/dev/tracks/:trackName",
-      availableCommands: ["status", "destroy", "fix"],
-      autorun: "status",
-      translateInput: (tokens, params) => {
-        if (tokens.length === 0) return null;
-        if (tokens[0] === "destroy") {
-           return { command: "track", args: ["destroy", params.trackName], options: {} };
-        }
-        if (tokens[0] === "status") {
-           return { command: "track", args: ["status", params.trackName], options: {} };
-        }
-        if (tokens[0] === "fix") {
-           return { command: "cd", args: [`/dev/tracks/${params.trackName}/fix`], options: {} };
-        }
-        // Fallback for any unknown subcommand on a track
-        return { command: "track", args: [tokens[0], params.trackName, ...tokens.slice(1)], options: {} };
-      }
-    });
-
-    this.register({
-      pattern: "/dev/tracks/:trackName/fix",
-      availableCommands: ["worktree", "branch", "proxy"],
-      translateInput: (tokens, params) => {
-        if (tokens.length === 0) return null;
-        if (["worktree", "branch", "proxy"].includes(tokens[0])) {
-           return { command: `track-fix-${tokens[0]}`, args: [params.trackName], options: {} };
-        }
-        return null;
-      }
-    });
-  }
-
-  public getAutorun(): string | null {
-    const route = this.matchRoute(this.currentPath);
-    return route?.def.autorun || null;
-  }
-
-  public register(def: RouteDefinition) {
-    // We use a dummy base URL since URLPattern requires a base for absolute path string matching
-    const pattern = new URLPattern({ pathname: def.pattern });
-    this.routes.push({ pattern, def });
+    // Map URL routes to specific context instances
+    this.router.insert("/", { context: rootCtx });
+    this.router.insert("/dev", { context: devCtx });
+    this.router.insert("/dev/tracks", { context: devTracksCtx });
+    this.router.insert("/dev/tracks/:trackName", { context: trackCtx, autorun: "status" });
+    this.router.insert("/dev/tracks/:trackName/fix", { context: trackFixCtx });
   }
 
   /**
-   * Attempts to change context based on string input (e.g. 'cd track/foo')
+   * Retrieves the currently matched route handler, including parsed variables
+   */
+  private getMatch(path: string) {
+    return this.router.lookup(path);
+  }
+
+  public getAutorun(): string | null {
+    const match = this.getMatch(this.currentPath);
+    return match?.autorun || null;
+  }
+
+  public getAvailableCommands(): string[] {
+    const match = this.getMatch(this.currentPath);
+    if (!match || !match.context) return [];
+    return match.context.getAvailableCommands();
+  }
+
+  public async getAutocomplete(input: string): Promise<string[]> {
+    const match = this.getMatch(this.currentPath);
+    if (!match || !match.context) return [];
+    
+    // We pass empty tokens array basically letting context dictate logic
+    const tokens = input.split(" ").filter(Boolean);
+    const result = await match.context.getAutocomplete(tokens, match.params || {});
+    return result;
+  }
+
+  public translate(input: string): CommandExecution | null {
+    const tokens = input.split(" ").filter(Boolean);
+    if (tokens.length === 0) return null;
+
+    const match = this.getMatch(this.currentPath);
+    if (!match || !match.context) return null;
+
+    return match.context.translateInput(tokens, match.params || {});
+  }
+
+  /**
+   * Attempts to cd based on relative or absolute bash logic.
    */
   public cd(path: string): boolean {
-    // Resolve path similar to bash cd
     let newPath = this.currentPath;
     if (path.startsWith("/")) {
       newPath = path;
@@ -142,12 +91,11 @@ export class ContextRouter {
       }
     }
 
-    // Ensure it's clean
     if (!newPath.startsWith("/")) newPath = "/" + newPath;
     if (newPath.length > 1 && newPath.endsWith("/")) newPath = newPath.slice(0, -1);
 
-    // Validate if it matches a valid route
-    const match = this.matchRoute(newPath);
+    // Validate if it matches a valid route inside radix3
+    const match = this.getMatch(newPath);
     if (!match) return false;
 
     this.currentPath = newPath;
@@ -156,36 +104,5 @@ export class ContextRouter {
 
   public getCurrentPath(): string {
     return this.currentPath;
-  }
-
-  public getAvailableCommands(): string[] {
-    const route = this.matchRoute(this.currentPath);
-    return route ? route.def.availableCommands : [];
-  }
-
-  public translate(input: string): CommandExecution | null {
-    const tokens = input.trim().split(/\s+/).filter(Boolean);
-    if (tokens.length === 0) return null;
-
-    if (tokens[0] === "cd" && tokens[1]) {
-      // cd is handled internally by the REPL, but we can emit a distinct execution for it
-      return { command: "cd", args: [tokens[1]], options: {} };
-    }
-
-    const route = this.matchRoute(this.currentPath);
-    if (!route || !route.def.translateInput) return null;
-
-    return route.def.translateInput(tokens, route.match.pathname.groups as Record<string, string>);
-  }
-
-  private matchRoute(path: string) {
-    const fakeUrl = `http://dummy.com${path}`;
-    for (const route of this.routes) {
-      const match = route.pattern.exec(fakeUrl);
-      if (match) {
-        return { match, def: route.def };
-      }
-    }
-    return null;
   }
 }

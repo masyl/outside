@@ -82,15 +82,22 @@ export function Repl() {
 
   // Update suggestions whenever input or path changes
   useEffect(() => {
-    const available = router.getAvailableCommands();
-    const inputTrim = input.trim();
-    if (inputTrim === "") {
-      setSuggestions(available);
-    } else {
-      const matches = available.filter(cmd => cmd.startsWith(input));
-      setSuggestions(matches);
+    let canceled = false;
+    async function fetchSuggestions() {
+      const available = await router.getAutocomplete(input);
+      if (canceled) return;
+      
+      const inputTrim = input.trim();
+      if (inputTrim === "") {
+        setSuggestions(available);
+      } else {
+        const matches = available.filter((cmd: string) => cmd.startsWith(input));
+        setSuggestions(matches);
+      }
+      setSuggestionIdx(-1);
     }
-    setSuggestionIdx(-1);
+    fetchSuggestions();
+    return () => { canceled = true; };
   }, [input, currentPath, router]);
 
   const activeSuggestion = suggestionIdx >= 0 ? suggestions[suggestionIdx] : (input.trim() !== "" && suggestions.length === 1 ? suggestions[0] : null);
@@ -120,16 +127,6 @@ export function Repl() {
       if (!trimmed) return;
 
       history.push(trimmed);
-      
-      if (trimmed === "quit" || trimmed === "exit") {
-        exit();
-        return;
-      }
-      if (trimmed === "clear") {
-         setLogs([]);
-         setInput("");
-         return;
-      }
 
       const handleCommandEvent = (event: ExecutionEvent) => {
         if (event.type === "stdout" || event.type === "stderr") {
@@ -157,22 +154,36 @@ export function Repl() {
         return;
       }
 
-      if (execPlan.command === "cd") {
-         if (router.cd(execPlan.args[0])) {
-            const newPath = router.getCurrentPath();
-            setCurrentPath(newPath);
+      if (execPlan.isInternal) {
+         if (execPlan.command === "cd") {
+            if (router.cd(execPlan.args[0])) {
+               const newPath = router.getCurrentPath();
+               setCurrentPath(newPath);
 
-            const autoCmdStr = router.getAutorun();
-            if (autoCmdStr) {
-               const autoExec = router.translate(autoCmdStr);
-               if (autoExec) {
-                  setLogs((prev: any[]) => [...prev, buildCommandHeading(autoCmdStr, newPath)]);
-                  setIsExecuting(true);
-                  executeCommand(autoExec, handleCommandEvent);
+               const autoCmdStr = router.getAutorun();
+               if (autoCmdStr) {
+                  const autoExec = router.translate(autoCmdStr);
+                  if (autoExec) {
+                     setLogs((prev: any[]) => [...prev, buildCommandHeading(autoCmdStr, newPath)]);
+                     setIsExecuting(true);
+                     executeCommand(autoExec, handleCommandEvent);
+                  }
                }
+            } else {
+               setLogs((prev: any[]) => [...prev, `Cannot cd into '${execPlan.args[0]}': No such context.`]);
             }
-         } else {
-            setLogs((prev: any[]) => [...prev, `Cannot cd into '${execPlan.args[0]}': No such context.`]);
+         } else if (execPlan.command === "help") {
+            const cmds = router.getAvailableCommands();
+            setLogs((prev: any[]) => [
+               ...prev,
+               `Context Help: ${currentPath}`,
+               `Available Commands: ${cmds.join(" \u2022 ")}`,
+               `Navigation: Use 'cd <path>' to move, 'cd ..' to go up, or type a known sub-context name.`
+            ]);
+         } else if (execPlan.command === "clear") {
+            setLogs([]);
+         } else if (execPlan.command === "quit" || execPlan.command === "exit") {
+            exit();
          }
          return;
       }

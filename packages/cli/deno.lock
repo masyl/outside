@@ -21,6 +21,7 @@
     "npm:fullscreen-ink@0.1": "0.1.0_@types+react@19.2.14_react@18.3.1",
     "npm:ink-scroll-view@~0.3.6": "0.3.6_ink@5.2.1__@types+react@19.2.14__react@18.3.1_react@18.3.1_@types+react@19.2.14",
     "npm:ink@^5.0.1": "5.2.1_@types+react@19.2.14_react@18.3.1",
+    "npm:radix3@*": "1.1.2",
     "npm:react@^18.2.0": "18.3.1"
   },
   "jsr": {
@@ -314,6 +315,9 @@
     },
     "path-key@4.0.0": {
       "integrity": "sha512-haREypq7xkM7ErfgIyA0z+Bj4AGKlMSdlQE2jvJo6huWD1EdkKYV+G/T4nq0YEF2vgTT8kqMFKo1uHn950r4SQ=="
+    },
+    "radix3@1.1.2": {
+      "integrity": "sha512-b484I/7b8rDEdSDKckSSBA8knMpcdsXudlE/LNL639wFoHKwLbEkQFZHWEYwDC0wa0FKUcCY+GAF73Z7wxNVFA=="
     },
     "react-reconciler@0.29.2_react@18.3.1": {
       "integrity": "sha512-zZQqIiYgDCTP/f1N/mAR10nJGrPD2ZR+jDSEsKWJHYC7Cm2wodlwbR3upZRdC3cjIjSlTLNVyO7Iu0Yy7t2AYg==",

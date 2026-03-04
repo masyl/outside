@@ -35,9 +35,9 @@ Deno.test("ContextRouter - Command Translation at Root", () => {
     assertEquals(translate1?.command, "help");
     assertEquals(translate1?.args, []);
 
-    const translate2 = router.translate("track list --json");
-    assertEquals(translate2?.command, "track");
-    assertEquals(translate2?.args, ["list", "--json"]);
+    const translate2 = router.translate("dev");
+    assertEquals(translate2?.command, "cd");
+    assertEquals(translate2?.args, ["dev"]);
 });
 
 Deno.test("ContextRouter - Command Translation in Context", () => {
