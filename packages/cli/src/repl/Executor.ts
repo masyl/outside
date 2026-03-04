@@ -40,7 +40,6 @@ export async function executeCommand(
       scriptPath,
       ...exec.args
     ];
-
     const cmd = new Deno.Command(Deno.execPath(), {
       args,
       stdout: "piped",
