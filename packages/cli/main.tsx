@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "ink";
+import { withFullScreen } from "fullscreen-ink";
 import { Repl } from "./src/repl/Repl.tsx";
 
-render(<Repl />);
+withFullScreen(<Repl />).start();

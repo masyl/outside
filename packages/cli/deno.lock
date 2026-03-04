@@ -12,10 +12,13 @@
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/path@1": "1.1.4",
     "jsr:@std/path@^1.1.4": "1.1.4",
+    "jsr:@std/semver@^1.0.8": "1.0.8",
     "jsr:@std/text@^1.0.17": "1.0.17",
     "npm:@types/node@*": "25.3.3",
     "npm:@types/react@*": "19.2.14",
     "npm:execa@8": "8.0.1",
+    "npm:fullscreen-ink@0.1": "0.1.0_@types+react@19.2.14_react@18.3.1",
+    "npm:ink-scroll-view@~0.3.6": "0.3.6_ink@5.2.1__@types+react@19.2.14__react@18.3.1_react@18.3.1_@types+react@19.2.14",
     "npm:ink@^5.0.1": "5.2.1_@types+react@19.2.14_react@18.3.1",
     "npm:react@^18.2.0": "18.3.1"
   },
@@ -27,6 +30,7 @@
         "jsr:@cliffy/internal",
         "jsr:@cliffy/table",
         "jsr:@std/fmt@^1.0.9",
+        "jsr:@std/semver",
         "jsr:@std/text"
       ]
     },
@@ -70,6 +74,9 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    },
+    "@std/semver@1.0.8": {
+      "integrity": "dc830e8b8b6a380c895d53fbfd1258dc253704ca57bbe1629ac65fd7830179b7"
     },
     "@std/text@1.0.17": {
       "integrity": "4b2c4ef67ae5b6c1dfd447c81c83a43718f52e3c7e748d8b33f694aba9895f95"
@@ -175,6 +182,13 @@
         "strip-final-newline"
       ]
     },
+    "fullscreen-ink@0.1.0_@types+react@19.2.14_react@18.3.1": {
+      "integrity": "sha512-GkyPG5Y8YxRT6i1Q8mZ0BCMSpgQjdBY+C39DnCUMswBpSypTk0G80rAYs6FoEp6Da2gzAwygXbJbju6GahbrFQ==",
+      "dependencies": [
+        "ink",
+        "react"
+      ]
+    },
     "get-east-asian-width@1.5.0": {
       "integrity": "sha512-CQ+bEO+Tva/qlmw24dCejulK5pMzVnUOFOijVogd3KQs07HnRIgp8TGipvCCRT06xeYEbpbgwaCxglFyiuIcmA=="
     },
@@ -186,6 +200,13 @@
     },
     "indent-string@5.0.0": {
       "integrity": "sha512-m6FAo/spmsW2Ab2fU35JTYwtOKa2yAwXSwgjSv1TJzh4Mh7mC3lzAOVLBprb72XsTrgkEIsl7YrFNAiDiRhIGg=="
+    },
+    "ink-scroll-view@0.3.6_ink@5.2.1__@types+react@19.2.14__react@18.3.1_react@18.3.1_@types+react@19.2.14": {
+      "integrity": "sha512-XqLkmFFCA5Ow2lVyvv7q0aVHzB78XojIM8gZMQ3//lvy8ZDpJsXWtTRwsCEsdQHnwvMCDCnKCzgF4xkkzoN8mQ==",
+      "dependencies": [
+        "ink",
+        "react"
+      ]
     },
     "ink@5.2.1_@types+react@19.2.14_react@18.3.1": {
       "integrity": "sha512-BqcUyWrG9zq5HIwW6JcfFHsIYebJkWWb4fczNah1goUO0vv5vneIlfwuS85twyJ5hYR/y18FlAYUxrO9ChIWVg==",
@@ -405,6 +426,8 @@
       "jsr:@std/fmt@1",
       "npm:@types/node@*",
       "npm:@types/react@*",
+      "npm:fullscreen-ink@0.1",
+      "npm:ink-scroll-view@~0.3.6",
       "npm:ink@^5.0.1",
       "npm:react@^18.2.0"
     ]

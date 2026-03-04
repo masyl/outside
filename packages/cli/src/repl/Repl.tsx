@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { render, Box, Text, useInput, useApp } from "ink";
+import { ScrollView, ScrollViewRef } from "ink-scroll-view";
 import { ContextRouter } from "./Router.ts";
 import { executeCommand, ExecutionEvent } from "./Executor.ts";
 import { CommandHistory } from "./History.ts";
@@ -13,6 +14,15 @@ export function Repl() {
   const [logs, setLogs] = useState<string[]>(["Outside CLI v0.1.0 initialized."]);
   const [isExecuting, setIsExecuting] = useState(false);
   const [progress, setProgress] = useState<{ phase?: string; value?: number; message?: string } | null>(null);
+  const scrollRef = useRef<ScrollViewRef>(null);
+
+  // Auto-scroll to bottom when logs change
+  useEffect(() => {
+    // A small timeout ensures measuring happens after render
+    setTimeout(() => {
+      scrollRef.current?.scrollToBottom();
+    }, 10);
+  }, [logs.length]);
   
   const router = useMemo(() => new ContextRouter(), []);
   const history = useMemo(() => new CommandHistory(), []);
@@ -130,6 +140,12 @@ export function Repl() {
            setProgress(null);
         }
       });
+    } else if (key.pageUp) {
+      const height = scrollRef.current?.getViewportHeight() || 1;
+      scrollRef.current?.scrollBy(-height);
+    } else if (key.pageDown) {
+      const height = scrollRef.current?.getViewportHeight() || 1;
+      scrollRef.current?.scrollBy(height);
     } else if (key.tab) {
       if (suggestions.length > 0) {
         if (suggestionIdx === -1) {
@@ -173,14 +189,14 @@ export function Repl() {
   });
 
   return (
-    <Box flexDirection="column" height={Deno.consoleSize().rows - 1} width="100%">
-      {/* Main output area - sliced to only show the latest logs that fit on screen */}
+    <Box flexDirection="column" flexGrow={1} width="100%">
+      {/* Main output area using ScrollView */}
       <Box flexGrow={1} flexDirection="column" borderStyle="single" paddingX={1} overflowY="hidden">
-        {logs.slice(-Math.max(1, Deno.consoleSize().rows - 8)).map((log: string, index: number) => (
-          <React.Fragment key={`log-${logs.length - index}`}>
-            <Text>{log}</Text>
-          </React.Fragment>
-        ))}
+        <ScrollView ref={scrollRef}>
+          {logs.map((log: string, index: number) => (
+            <Text key={`log-${index}`}>{log}</Text>
+          ))}
+        </ScrollView>
       </Box>
 
       {/* Status Bar */}
