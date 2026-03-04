@@ -1,0 +1,8 @@
+import { Input } from 'jsr:@cliffy/prompt@^1.0.0';
+import { colors } from 'jsr:@cliffy/ansi@^1.0.0/colors';
+
+const p = await Input.prompt({
+    message: '',
+    prefix: colors.bold('› '),
+});
+console.log("Got:", p);

@@ -6,13 +6,12 @@
     "jsr:@cliffy/command@1": "1.0.0",
     "jsr:@cliffy/flags@1.0.0": "1.0.0",
     "jsr:@cliffy/internal@1.0.0": "1.0.0",
+    "jsr:@cliffy/keycode@*": "1.0.0",
     "jsr:@cliffy/keycode@1": "1.0.0",
     "jsr:@cliffy/keycode@1.0.0": "1.0.0",
-    "jsr:@cliffy/prompt@*": "1.0.0",
     "jsr:@cliffy/prompt@1": "1.0.0",
     "jsr:@cliffy/table@1": "1.0.0",
     "jsr:@cliffy/table@1.0.0": "1.0.0",
-    "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.18": "1.0.19",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/fmt@1": "1.0.9",
@@ -21,9 +20,7 @@
     "jsr:@std/io@~0.225.3": "0.225.3",
     "jsr:@std/path@1": "1.1.4",
     "jsr:@std/path@^1.1.4": "1.1.4",
-    "jsr:@std/semver@^1.0.8": "1.0.8",
-    "jsr:@std/text@^1.0.17": "1.0.17",
-    "npm:execa@*": "9.6.1"
+    "jsr:@std/text@^1.0.17": "1.0.17"
   },
   "jsr": {
     "@cliffy/ansi@1.0.0": {
@@ -42,7 +39,6 @@
         "jsr:@cliffy/internal",
         "jsr:@cliffy/table@1.0.0",
         "jsr:@std/fmt@^1.0.9",
-        "jsr:@std/semver",
         "jsr:@std/text"
       ]
     },
@@ -65,7 +61,7 @@
         "jsr:@cliffy/ansi@1.0.0",
         "jsr:@cliffy/internal",
         "jsr:@cliffy/keycode@1.0.0",
-        "jsr:@std/assert@^1.0.18",
+        "jsr:@std/assert",
         "jsr:@std/fmt@^1.0.9",
         "jsr:@std/io",
         "jsr:@std/path@^1.1.4",
@@ -79,10 +75,7 @@
       ]
     },
     "@std/assert@1.0.19": {
-      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
-      "dependencies": [
-        "jsr:@std/internal"
-      ]
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e"
     },
     "@std/encoding@1.0.10": {
       "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
@@ -102,122 +95,8 @@
         "jsr:@std/internal"
       ]
     },
-    "@std/semver@1.0.8": {
-      "integrity": "dc830e8b8b6a380c895d53fbfd1258dc253704ca57bbe1629ac65fd7830179b7"
-    },
     "@std/text@1.0.17": {
       "integrity": "4b2c4ef67ae5b6c1dfd447c81c83a43718f52e3c7e748d8b33f694aba9895f95"
-    }
-  },
-  "npm": {
-    "@sec-ant/readable-stream@0.4.1": {
-      "integrity": "sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg=="
-    },
-    "@sindresorhus/merge-streams@4.0.0": {
-      "integrity": "sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ=="
-    },
-    "cross-spawn@7.0.6": {
-      "integrity": "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==",
-      "dependencies": [
-        "path-key@3.1.1",
-        "shebang-command",
-        "which"
-      ]
-    },
-    "execa@9.6.1": {
-      "integrity": "sha512-9Be3ZoN4LmYR90tUoVu2te2BsbzHfhJyfEiAVfz7N5/zv+jduIfLrV2xdQXOHbaD6KgpGdO9PRPM1Y4Q9QkPkA==",
-      "dependencies": [
-        "@sindresorhus/merge-streams",
-        "cross-spawn",
-        "figures",
-        "get-stream",
-        "human-signals",
-        "is-plain-obj",
-        "is-stream",
-        "npm-run-path",
-        "pretty-ms",
-        "signal-exit",
-        "strip-final-newline",
-        "yoctocolors"
-      ]
-    },
-    "figures@6.1.0": {
-      "integrity": "sha512-d+l3qxjSesT4V7v2fh+QnmFnUWv9lSpjarhShNTgBOfA0ttejbQUAlHLitbjkoRiDulW0OPoQPYIGhIC8ohejg==",
-      "dependencies": [
-        "is-unicode-supported"
-      ]
-    },
-    "get-stream@9.0.1": {
-      "integrity": "sha512-kVCxPF3vQM/N0B1PmoqVUqgHP+EeVjmZSQn+1oCRPxd2P21P2F19lIgbR3HBosbB1PUhOAoctJnfEn2GbN2eZA==",
-      "dependencies": [
-        "@sec-ant/readable-stream",
-        "is-stream"
-      ]
-    },
-    "human-signals@8.0.1": {
-      "integrity": "sha512-eKCa6bwnJhvxj14kZk5NCPc6Hb6BdsU9DZcOnmQKSnO1VKrfV0zCvtttPZUsBvjmNDn8rpcJfpwSYnHBjc95MQ=="
-    },
-    "is-plain-obj@4.1.0": {
-      "integrity": "sha512-+Pgi+vMuUNkJyExiMBt5IlFoMyKnr5zhJ4Uspz58WOhBF5QoIZkFyNHIbBAtHwzVAgk5RtndVNsDRN61/mmDqg=="
-    },
-    "is-stream@4.0.1": {
-      "integrity": "sha512-Dnz92NInDqYckGEUJv689RbRiTSEHCQ7wOVeALbkOz999YpqT46yMRIGtSNl2iCL1waAZSx40+h59NV/EwzV/A=="
-    },
-    "is-unicode-supported@2.1.0": {
-      "integrity": "sha512-mE00Gnza5EEB3Ds0HfMyllZzbBrmLOX3vfWoj9A9PEnTfratQ/BcaJOuMhnkhjXvb2+FkY3VuHqtAGpTPmglFQ=="
-    },
-    "isexe@2.0.0": {
-      "integrity": "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="
-    },
-    "npm-run-path@6.0.0": {
-      "integrity": "sha512-9qny7Z9DsQU8Ou39ERsPU4OZQlSTP47ShQzuKZ6PRXpYLtIFgl/DEBYEXKlvcEa+9tHVcK8CF81Y2V72qaZhWA==",
-      "dependencies": [
-        "path-key@4.0.0",
-        "unicorn-magic"
-      ]
-    },
-    "parse-ms@4.0.0": {
-      "integrity": "sha512-TXfryirbmq34y8QBwgqCVLi+8oA3oWx2eAnSn62ITyEhEYaWRlVZ2DvMM9eZbMs/RfxPu/PK/aBLyGj4IrqMHw=="
-    },
-    "path-key@3.1.1": {
-      "integrity": "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q=="
-    },
-    "path-key@4.0.0": {
-      "integrity": "sha512-haREypq7xkM7ErfgIyA0z+Bj4AGKlMSdlQE2jvJo6huWD1EdkKYV+G/T4nq0YEF2vgTT8kqMFKo1uHn950r4SQ=="
-    },
-    "pretty-ms@9.3.0": {
-      "integrity": "sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==",
-      "dependencies": [
-        "parse-ms"
-      ]
-    },
-    "shebang-command@2.0.0": {
-      "integrity": "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==",
-      "dependencies": [
-        "shebang-regex"
-      ]
-    },
-    "shebang-regex@3.0.0": {
-      "integrity": "sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A=="
-    },
-    "signal-exit@4.1.0": {
-      "integrity": "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="
-    },
-    "strip-final-newline@4.0.0": {
-      "integrity": "sha512-aulFJcD6YK8V1G7iRB5tigAP4TsHBZZrOV8pjV++zdUwmeV8uzbY7yn6h9MswN62adStNZFuCIx4haBnRuMDaw=="
-    },
-    "unicorn-magic@0.3.0": {
-      "integrity": "sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA=="
-    },
-    "which@2.0.2": {
-      "integrity": "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==",
-      "dependencies": [
-        "isexe"
-      ],
-      "bin": true
-    },
-    "yoctocolors@2.1.2": {
-      "integrity": "sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug=="
     }
   },
   "remote": {
@@ -304,13 +183,203 @@
     "https://deno.land/std@0.224.0/path/windows/to_namespaced_path.ts": "4ffa4fb6fae321448d5fe810b3ca741d84df4d7897e61ee29be961a6aac89a4c"
   },
   "workspace": {
-    "dependencies": [
-      "jsr:@cliffy/ansi@1",
-      "jsr:@cliffy/command@1",
-      "jsr:@cliffy/keycode@1",
-      "jsr:@cliffy/prompt@1",
-      "jsr:@cliffy/table@1",
-      "jsr:@std/assert@1"
-    ]
+    "packageJson": {
+      "dependencies": [
+        "npm:@smithery/cli@4",
+        "npm:@vitest/coverage-v8@^4.0.18",
+        "npm:@vitest/ui@^4.0.18",
+        "npm:c8@^10.1.3",
+        "npm:esbuild@0.27.3",
+        "npm:jsdom@^25.0.1",
+        "npm:mermaid@^11.12.2",
+        "npm:prettier@^3.8.1",
+        "npm:turbo@^2.8.9",
+        "npm:typescript@^5.9.3",
+        "npm:vitest@^4.0.18"
+      ]
+    },
+    "members": {
+      "packages/bixelizer": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@napi-rs/canvas@~0.1.68",
+            "npm:@types/node@^25.2.3",
+            "npm:@types/pngjs@^6.0.5",
+            "npm:opentype.js@^1.3.4",
+            "npm:pngjs@7",
+            "npm:tsx@^4.19.3",
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.18"
+          ]
+        }
+      },
+      "packages/outside-client": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@pixi/react@^8.0.5",
+            "npm:@pixi/ui@^2.3.2",
+            "npm:@types/react-dom@^19.2.3",
+            "npm:@types/react@^19.2.9",
+            "npm:immer@^11.1.4",
+            "npm:jsdom@28",
+            "npm:motion@^12.34.0",
+            "npm:pixi.js@^8.16.0",
+            "npm:react-dom@19.2.3",
+            "npm:react@19.2.3",
+            "npm:typescript@^5.3.3",
+            "npm:vite@^6.0.1",
+            "npm:vitest@^4.0.18"
+          ]
+        }
+      },
+      "packages/outside-controller-core": {
+        "packageJson": {
+          "dependencies": [
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.17"
+          ]
+        }
+      },
+      "packages/outside-core": {
+        "packageJson": {
+          "dependencies": [
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.18"
+          ]
+        }
+      },
+      "packages/outside-design": {
+        "packageJson": {
+          "dependencies": [
+            "npm:gray-matter@^4.0.3",
+            "npm:typescript@^5.3.3",
+            "npm:vitepress@2.0.0-alpha.15",
+            "npm:vue@^3.5.28"
+          ]
+        }
+      },
+      "packages/outside-doc": {
+        "packageJson": {
+          "dependencies": [
+            "npm:typescript@^5.3.3"
+          ]
+        }
+      },
+      "packages/outside-inspector-renderer": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@types/react@^19.2.14",
+            "npm:bitecs@0.4",
+            "npm:react@^19.2.4",
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.18"
+          ]
+        }
+      },
+      "packages/outside-renderer": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@hackernoon/pixel-icon-library@^1.0.6",
+            "npm:bitecs@0.4",
+            "npm:pixi-filters@^6.1.5",
+            "npm:pixi.js@^8.16.0",
+            "npm:typescript@^5.3.3",
+            "npm:vite-plugin-dts@^4.3.0",
+            "npm:vite@^6.0.1",
+            "npm:vitest@^4.0.17"
+          ]
+        }
+      },
+      "packages/outside-server": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@types/express@^5.0.6",
+            "npm:@types/ws@^8.5.10",
+            "npm:express@^5.2.1",
+            "npm:tsx@^4.7.0",
+            "npm:typescript@^5.3.3",
+            "npm:ws@^8.16.0"
+          ]
+        }
+      },
+      "packages/outside-simulator": {
+        "packageJson": {
+          "dependencies": [
+            "npm:bitecs@0.4",
+            "npm:cannon-es@0.20",
+            "npm:fengari@~0.1.5",
+            "npm:typescript@^5.3.3",
+            "npm:vite-plugin-dts@^4.3.0",
+            "npm:vite@^6.0.1",
+            "npm:vitest@^4.0.17"
+          ]
+        }
+      },
+      "packages/outside-storybook": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@pixi/devtools@^2.0.1",
+            "npm:@playwright/test@^1.50.0",
+            "npm:@storybook/addon-a11y@10.2.8",
+            "npm:@storybook/addon-docs@10.2.8",
+            "npm:@storybook/react-vite@10.2.8",
+            "npm:@storybook/react@10.2.8",
+            "npm:@types/react-dom@^18.2.0",
+            "npm:@types/react@^18.2.0",
+            "npm:@vitejs/plugin-react@^4.3.0",
+            "npm:cannon-es@0.20",
+            "npm:esbuild@0.27.3",
+            "npm:pixi.js@^8.16.0",
+            "npm:react-dom@^18.2.0",
+            "npm:react@^18.2.0",
+            "npm:storybook@10.2.8",
+            "npm:typescript@^5.3.3",
+            "npm:vite@^6.0.1",
+            "npm:vitest@^4.0.18",
+            "npm:wavefunctioncollapse@^2.1.0"
+          ]
+        }
+      },
+      "packages/outside-test-player": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@types/react@^19.2.14",
+            "npm:pixi.js@^8.16.0",
+            "npm:react@^19.2.4",
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.18"
+          ]
+        }
+      },
+      "packages/outside-utils": {
+        "packageJson": {
+          "dependencies": [
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.17"
+          ]
+        }
+      },
+      "packages/resourcePacks": {
+        "packageJson": {
+          "dependencies": [
+            "npm:pngjs@7",
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.18"
+          ]
+        }
+      },
+      "packages/toolchain-mcp": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@modelcontextprotocol/sdk@^1.26.0",
+            "npm:@types/node@22",
+            "npm:tsx@^4.7.0",
+            "npm:typescript@^5.3.3",
+            "npm:vitest@^4.0.17",
+            "npm:zod@^3.25.0"
+          ]
+        }
+      }
+    }
   }
 }

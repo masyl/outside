@@ -2,7 +2,7 @@ import { Command } from 'jsr:@cliffy/command@^1.0.0';
 import { DevsideInput } from './prompt.ts';
 import { join } from 'jsr:@std/path@1';
 import { Table } from 'jsr:@cliffy/table@^1.0.0';
-import { colors } from 'jsr:@cliffy/ansi@^1.0.0/colors';
+import * as colors from 'jsr:@std/fmt@1/colors';
 import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
 import { createTrackProxy, destroyTrackProxy } from './docker.ts';
 import { createTrackWorktree, fixWorktree, fixBranch } from './git.ts';
@@ -58,10 +58,10 @@ function buildApp() {
       
       function formatAndon(label: string, color: string): string {
         switch (color) {
-          case 'red': return colors.bgRed.white(` ${label} `);
-          case 'green': return colors.bgGreen.white(` ${label} `);
-          case 'yellow': return colors.bgYellow.black(` ${label} `);
-          case 'blue': return colors.bgBlue.white(` ${label} `);
+          case 'red': return colors.white(colors.bgRed(` ${label} `));
+          case 'green': return colors.white(colors.bgGreen(` ${label} `));
+          case 'yellow': return colors.black(colors.bgYellow(` ${label} `));
+          case 'blue': return colors.white(colors.bgBlue(` ${label} `));
           default: return ` ${label} `;
         }
       }
@@ -108,10 +108,10 @@ function buildApp() {
 
       function formatAndon(label: string, color: string): string {
         switch (color) {
-          case 'red': return colors.bgRed.white(` ${label} `);
-          case 'green': return colors.bgGreen.white(` ${label} `);
-          case 'yellow': return colors.bgYellow.black(` ${label} `);
-          case 'blue': return colors.bgBlue.white(` ${label} `);
+          case 'red': return colors.white(colors.bgRed(` ${label} `));
+          case 'green': return colors.white(colors.bgGreen(` ${label} `));
+          case 'yellow': return colors.black(colors.bgYellow(` ${label} `));
+          case 'blue': return colors.white(colors.bgBlue(` ${label} `));
           default: return ` ${label} `;
         }
       }

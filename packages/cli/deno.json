@@ -1,0 +1,21 @@
+{
+  "name": "@outside/cli",
+  "version": "0.1.0",
+  "exports": "./main.tsx",
+  "compilerOptions": {
+    "jsx": "react",
+    "types": [
+      "npm:@types/react",
+      "npm:@types/node"
+    ]
+  },
+  "imports": {
+    "@cliffy/command": "jsr:@cliffy/command@^1.0.0",
+    "@std/fmt": "jsr:@std/fmt@1",
+    "ink": "npm:ink@^5.0.1",
+    "react": "npm:react@^18.2.0"
+  },
+  "tasks": {
+    "dev": "deno run -A --unstable-react main.tsx"
+  }
+}
