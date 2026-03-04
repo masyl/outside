@@ -21,6 +21,7 @@ export interface RouteDefinition {
   // Given user input inside this context, translate into an execution plan
   translateInput?: (inputTokens: string[], params: Record<string, string>) => CommandExecution | null;
   autocomplete?: ContextAutocomplete;
+  autorun?: string;
 }
 
 /**
@@ -37,6 +38,10 @@ export class ContextRouter {
       availableCommands: ["track", "help", "quit", "clear"],
       translateInput: (tokens) => {
         if (tokens.length === 0) return null;
+        // If they type `track <name>`, it's an implicit cd to the track context
+        if (tokens[0] === "track" && tokens.length > 1 && !["list", "create", "destroy"].includes(tokens[1])) {
+           return { command: "cd", args: [`/track/${tokens[1]}`], options: {} };
+        }
         // At root, commands are basically 1:1
         return { command: tokens[0], args: tokens.slice(1), options: {} };
       }
@@ -47,6 +52,10 @@ export class ContextRouter {
       availableCommands: ["list", "create", "destroy"],
       translateInput: (tokens) => {
         if (tokens.length === 0) return null;
+        // If they type a track name directly, implicit cd to that track
+        if (!["list", "create", "destroy"].includes(tokens[0])) {
+           return { command: "cd", args: [`/track/${tokens[0]}`], options: {} };
+        }
         // From /track, running "list" translates to "track list"
         return { command: "track", args: [tokens[0], ...tokens.slice(1)], options: {} };
       },
@@ -62,6 +71,7 @@ export class ContextRouter {
     this.register({
       pattern: "/track/:trackName",
       availableCommands: ["destroy", "fix", "status"],
+      autorun: "status",
       translateInput: (tokens, params) => {
         if (tokens.length === 0) return null;
         if (tokens[0] === "destroy") {
@@ -74,6 +84,11 @@ export class ContextRouter {
         return { command: "track", args: [tokens[0], params.trackName, ...tokens.slice(1)], options: {} };
       }
     });
+  }
+
+  public getAutorun(): string | null {
+    const route = this.matchRoute(this.currentPath);
+    return route?.def.autorun || null;
   }
 
   public register(def: RouteDefinition) {

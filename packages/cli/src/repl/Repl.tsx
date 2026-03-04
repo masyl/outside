@@ -10,6 +10,16 @@ import { AndonService } from "../andon/Service.ts";
 import { AndonPanel } from "../andon/components.tsx";
 import { OrbMachine } from "../core/orb.ts";
 
+const buildCommandHeading = (commandStr: string, currentPath: string) => (
+  <Box flexDirection="row" paddingY={1} key={`heading-${Date.now()}-${Math.random()}`}>
+    <Text color="#444444">{"\u2500\u2524  "}</Text>
+    <Text color="white" bold>{"❯ " + commandStr + "  "}</Text>
+    <Text color="#444444">{"\u251C\u2500\u2500\u2524  "}</Text>
+    <Text color="#666666">{"\u022e " + currentPath + "  "}</Text>
+    <Text color="#444444">{"\u251C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"}</Text>
+  </Box>
+);
+
 export function Repl() {
   const { exit } = useApp();
   const { height } = useScreenSize();
@@ -121,16 +131,24 @@ export function Repl() {
          return;
       }
 
-      const commandHeading = (
-        <Box flexDirection="row" paddingY={1} key={`heading-${Date.now()}`}>
-          <Text color="#444444">{"\u2500\u2524  "}</Text>
-          <Text color="white" bold>{"❯ " + trimmed + "  "}</Text>
-          <Text color="#444444">{"\u251C\u2500\u2500\u2524  "}</Text>
-          <Text color="#666666">{"\u022e " + currentPath + "  "}</Text>
-          <Text color="#444444">{"\u251C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"}</Text>
-        </Box>
-      );
-      setLogs((prev: any[]) => [...prev, commandHeading]);
+      const handleCommandEvent = (event: ExecutionEvent) => {
+        if (event.type === "stdout" || event.type === "stderr") {
+           if (event.message) setLogs((prev: any[]) => [...prev, event.message!.trim()]);
+        } else if (event.type === "progress") {
+           setProgress({ phase: event.phase, value: event.progress, message: event.message });
+        } else if (event.type === "error") {
+           setLogs((prev: any[]) => [...prev, `Error: ${event.message}`]);
+           setIsExecuting(false);
+           setProgress(null);
+        } else if (event.type === "done") {
+           // Provide an empty line padding after command completes
+           setLogs((prev: any[]) => [...prev, ``]);
+           setIsExecuting(false);
+           setProgress(null);
+        }
+      };
+
+      setLogs((prev: any[]) => [...prev, buildCommandHeading(trimmed, currentPath)]);
       setInput("");
 
       const execPlan = router.translate(trimmed);
@@ -141,7 +159,18 @@ export function Repl() {
 
       if (execPlan.command === "cd") {
          if (router.cd(execPlan.args[0])) {
-            setCurrentPath(router.getCurrentPath());
+            const newPath = router.getCurrentPath();
+            setCurrentPath(newPath);
+
+            const autoCmdStr = router.getAutorun();
+            if (autoCmdStr) {
+               const autoExec = router.translate(autoCmdStr);
+               if (autoExec) {
+                  setLogs((prev: any[]) => [...prev, buildCommandHeading(autoCmdStr, newPath)]);
+                  setIsExecuting(true);
+                  executeCommand(autoExec, handleCommandEvent);
+               }
+            }
          } else {
             setLogs((prev: any[]) => [...prev, `Cannot cd into '${execPlan.args[0]}': No such context.`]);
          }
@@ -155,23 +184,7 @@ export function Repl() {
 
       // Execute external command
       setIsExecuting(true);
-      executeCommand(execPlan, (event: ExecutionEvent) => {
-        if (event.type === "stdout" || event.type === "stderr") {
-           if (event.message) setLogs((prev: any[]) => [...prev, event.message!.trim()]);
-        } else if (event.type === "progress") {
-           setProgress({ phase: event.phase, value: event.progress, message: event.message });
-           // Optionally, also log it if you want history, but usually progress bars are ephemeral
-        } else if (event.type === "error") {
-           setLogs((prev: any[]) => [...prev, `Error: ${event.message}`]);
-           setIsExecuting(false);
-           setProgress(null);
-        } else if (event.type === "done") {
-           // Provide an empty line padding after command completes
-           setLogs((prev: any[]) => [...prev, ``]);
-           setIsExecuting(false);
-           setProgress(null);
-        }
-      });
+      executeCommand(execPlan, handleCommandEvent);
     } else if (key.pageUp) {
       const height = scrollRef.current?.getViewportHeight() || 1;
       scrollRef.current?.scrollBy(-height);
