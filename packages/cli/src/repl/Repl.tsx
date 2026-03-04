@@ -93,7 +93,7 @@ export function Repl() {
     setSuggestionIdx(-1);
   }, [input, currentPath, router]);
 
-  const activeSuggestion = suggestionIdx >= 0 ? suggestions[suggestionIdx] : (suggestions.length === 1 ? suggestions[0] : null);
+  const activeSuggestion = suggestionIdx >= 0 ? suggestions[suggestionIdx] : (input.trim() !== "" && suggestions.length === 1 ? suggestions[0] : null);
 
   useInput((inputChar, key) => {
     if (isExecuting) {
