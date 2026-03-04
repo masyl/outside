@@ -40,10 +40,13 @@ export function Repl() {
   // Update suggestions whenever input or path changes
   useEffect(() => {
     const available = router.getAvailableCommands();
-    // For now, only top-level command name autocomplete
-    const matches = available.filter(cmd => cmd.startsWith(input));
-    if (input.trim() === "") setSuggestions([]);
-    else setSuggestions(matches);
+    const inputTrim = input.trim();
+    if (inputTrim === "") {
+      setSuggestions(available);
+    } else {
+      const matches = available.filter(cmd => cmd.startsWith(input));
+      setSuggestions(matches);
+    }
     setSuggestionIdx(-1);
   }, [input, currentPath, router]);
 
@@ -143,11 +146,29 @@ export function Repl() {
       if (prev !== null) setInput(prev);
     } else if (key.downArrow) {
       const next = history.getNextCommand();
-      if (next !== null) setInput(next);
+      if (next !== null && next !== "") {
+        setInput(next);
+      } else if (input.trim() === "") {
+        // At bottom of history and neutral state: cycle available commands
+        if (suggestions.length > 0) {
+          const nextIdx = suggestionIdx === -1 ? 0 : (suggestionIdx + 1) % suggestions.length;
+          setInput(suggestions[nextIdx]);
+          setSuggestionIdx(nextIdx);
+        } else {
+          setInput("");
+        }
+      } else {
+        setInput("");
+      }
     } else if (key.backspace || key.delete) {
       setInput((prev: string) => prev.slice(0, -1));
+    } else if (key.escape) {
+      setInput("");
+      setSuggestionIdx(-1);
     } else {
-      if (inputChar) setInput((prev: string) => prev + inputChar);
+      if (inputChar && inputChar !== "\t" && inputChar !== "\r" && inputChar !== "\n") {
+        setInput((prev: string) => prev + inputChar);
+      }
     }
   });
 

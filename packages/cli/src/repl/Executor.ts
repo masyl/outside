@@ -38,8 +38,7 @@ export async function executeCommand(
     const args = [
       "run", "-A",
       scriptPath,
-      ...exec.args,
-      "--json" // We always enforce JSON outputs for CLI consumption
+      ...exec.args
     ];
 
     const cmd = new Deno.Command(Deno.execPath(), {
