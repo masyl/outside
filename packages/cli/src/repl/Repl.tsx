@@ -14,7 +14,7 @@ export function Repl() {
   const { exit } = useApp();
   const { height } = useScreenSize();
   const [input, setInput] = useState("");
-  const [logs, setLogs] = useState<string[]>(["Outside CLI v0.1.0 initialized."]);
+  const [logs, setLogs] = useState<any[]>(["Outside CLI v0.1.0 initialized."]);
   const [isExecuting, setIsExecuting] = useState(false);
   const [progress, setProgress] = useState<{ phase?: string; value?: number; message?: string } | null>(null);
   const scrollRef = useRef<ScrollViewRef>(null);
@@ -35,9 +35,9 @@ export function Repl() {
     setIsExecuting(true);
     executeCommand(execPlan, (event: ExecutionEvent) => {
       if (event.type === "stdout" || event.type === "stderr") {
-        if (event.message) setLogs((prev: string[]) => [...prev, event.message!.trim()]);
+        if (event.message) setLogs((prev: any[]) => [...prev, event.message!.trim()]);
       } else if (event.type === "done") {
-        setLogs((prev: string[]) => [...prev, ``]);
+        setLogs((prev: any[]) => [...prev, ``]);
         setIsExecuting(false);
       }
     });
@@ -92,7 +92,7 @@ export function Repl() {
         // For now, we just pretend it stopped so the UI unlocks
         setIsExecuting(false);
         setProgress(null);
-        setLogs((prev: string[]) => [...prev, `> Command aborted by user.`]);
+        setLogs((prev: any[]) => [...prev, `> Command aborted by user.`]);
       }
       return; // Ignore regular input while executing
     }
@@ -121,12 +121,21 @@ export function Repl() {
          return;
       }
 
-      setLogs((prev: string[]) => [...prev, `> ${trimmed}`]);
+      const commandHeading = (
+        <Box flexDirection="row" paddingY={1} key={`heading-${Date.now()}`}>
+          <Text color="#444444">{"\u2500\u2524  "}</Text>
+          <Text color="white" bold>{"❯ " + trimmed + "  "}</Text>
+          <Text color="#444444">{"\u251C\u2500\u2500\u2524  "}</Text>
+          <Text color="#666666">{"\u022e " + currentPath + "  "}</Text>
+          <Text color="#444444">{"\u251C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"}</Text>
+        </Box>
+      );
+      setLogs((prev: any[]) => [...prev, commandHeading]);
       setInput("");
 
       const execPlan = router.translate(trimmed);
       if (!execPlan) {
-        setLogs((prev: string[]) => [...prev, `Command not recognized in context ${currentPath}`]);
+        setLogs((prev: any[]) => [...prev, `Command not recognized in context ${currentPath}`]);
         return;
       }
 
@@ -134,7 +143,7 @@ export function Repl() {
          if (router.cd(execPlan.args[0])) {
             setCurrentPath(router.getCurrentPath());
          } else {
-            setLogs((prev: string[]) => [...prev, `Cannot cd into '${execPlan.args[0]}': No such context.`]);
+            setLogs((prev: any[]) => [...prev, `Cannot cd into '${execPlan.args[0]}': No such context.`]);
          }
          return;
       }
@@ -148,17 +157,17 @@ export function Repl() {
       setIsExecuting(true);
       executeCommand(execPlan, (event: ExecutionEvent) => {
         if (event.type === "stdout" || event.type === "stderr") {
-           if (event.message) setLogs((prev: string[]) => [...prev, event.message!.trim()]);
+           if (event.message) setLogs((prev: any[]) => [...prev, event.message!.trim()]);
         } else if (event.type === "progress") {
            setProgress({ phase: event.phase, value: event.progress, message: event.message });
            // Optionally, also log it if you want history, but usually progress bars are ephemeral
         } else if (event.type === "error") {
-           setLogs((prev: string[]) => [...prev, `Error: ${event.message}`]);
+           setLogs((prev: any[]) => [...prev, `Error: ${event.message}`]);
            setIsExecuting(false);
            setProgress(null);
         } else if (event.type === "done") {
            // Provide an empty line padding after command completes
-           setLogs((prev: string[]) => [...prev, ``]);
+           setLogs((prev: any[]) => [...prev, ``]);
            setIsExecuting(false);
            setProgress(null);
         }
@@ -225,8 +234,10 @@ export function Repl() {
           >
             {/* Spacer block pushes sparse logs strictly to the bottom */}
             <Box height={Math.max(0, height - 5 - logs.length)} flexDirection="column" />
-            {logs.map((log: string, index: number) => (
-              <Text key={`log-${index}`}>{log}</Text>
+            {logs.map((log: any, index: number) => (
+              <React.Fragment key={`log-${index}`}>
+                {typeof log === "string" ? <Text>{log || " "}</Text> : log}
+              </React.Fragment>
             ))}
           </ScrollView>
         </Box>
@@ -237,13 +248,13 @@ export function Repl() {
             contentHeight={contentHeight}
             viewportHeight={viewportHeight}
             scrollOffset={scrollOffset}
-            autoHide
+            autoHide={true}
           />
         </Box>
       </Box>  
 
       {/* Input Prompt or Progress Bar */}
-      <Box paddingX={1} flexDirection="column">
+      <Box padding={1} flexDirection="column">
         {isExecuting && progress && (
           <Box flexDirection="row">
              <Text color="magenta" bold>{`[${progress.phase || "working"}] `}</Text>
