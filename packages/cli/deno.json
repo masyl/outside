@@ -10,6 +10,7 @@
     ]
   },
   "imports": {
+    "@byteland/ink-scroll-bar": "npm:@byteland/ink-scroll-bar@^1.0.0",
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0",
     "@std/fmt": "jsr:@std/fmt@1",
     "fullscreen-ink": "npm:fullscreen-ink@^0.1.0",

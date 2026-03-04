@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { render, Box, Text, useInput, useApp } from "ink";
 import { ScrollView, ScrollViewRef } from "ink-scroll-view";
+import { ScrollBar } from "@byteland/ink-scroll-bar";
+import { useScreenSize } from "fullscreen-ink";
 import { ContextRouter } from "./Router.ts";
 import { executeCommand, ExecutionEvent } from "./Executor.ts";
 import { CommandHistory } from "./History.ts";
@@ -10,11 +12,36 @@ import { OrbMachine } from "../core/orb.ts";
 
 export function Repl() {
   const { exit } = useApp();
+  const { height } = useScreenSize();
   const [input, setInput] = useState("");
   const [logs, setLogs] = useState<string[]>(["Outside CLI v0.1.0 initialized."]);
   const [isExecuting, setIsExecuting] = useState(false);
   const [progress, setProgress] = useState<{ phase?: string; value?: number; message?: string } | null>(null);
   const scrollRef = useRef<ScrollViewRef>(null);
+
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+
+  const router = useMemo(() => new ContextRouter(), []);
+  const history = useMemo(() => new CommandHistory(), []);
+  const andonService = useMemo(() => new AndonService(), []);
+
+  // Initial help command trigger
+  useEffect(() => {
+    const execPlan = router.translate("help");
+    if (!execPlan) return;
+    
+    setIsExecuting(true);
+    executeCommand(execPlan, (event: ExecutionEvent) => {
+      if (event.type === "stdout" || event.type === "stderr") {
+        if (event.message) setLogs((prev: string[]) => [...prev, event.message!.trim()]);
+      } else if (event.type === "done") {
+        setLogs((prev: string[]) => [...prev, ``]);
+        setIsExecuting(false);
+      }
+    });
+  }, [router]);
 
   // Auto-scroll to bottom when logs change
   useEffect(() => {
@@ -23,10 +50,6 @@ export function Repl() {
       scrollRef.current?.scrollToBottom();
     }, 10);
   }, [logs.length]);
-  
-  const router = useMemo(() => new ContextRouter(), []);
-  const history = useMemo(() => new CommandHistory(), []);
-  const andonService = useMemo(() => new AndonService(), []);
 
   const [currentPath, setCurrentPath] = useState(router.getCurrentPath());
   
@@ -190,35 +213,34 @@ export function Repl() {
 
   return (
     <Box flexDirection="column" flexGrow={1} width="100%">
-      {/* Main output area using ScrollView */}
-      <Box flexGrow={1} flexDirection="column" borderStyle="single" paddingX={1} overflowY="hidden">
-        <ScrollView ref={scrollRef}>
-          {logs.map((log: string, index: number) => (
-            <Text key={`log-${index}`}>{log}</Text>
-          ))}
-        </ScrollView>
-      </Box>
-
-      {/* Status Bar */}
-      <Box borderStyle="single" borderTop={false} paddingX={1} justifyContent="space-between">
-        <Text color="blue">ctx: {currentPath}</Text>
-        {(() => {
-           // Extract track context if available
-           const match = currentPath.match(/^\/track\/([^/]+)/);
-           if (match) {
-             const trackName = match[1];
-             const machine = andonData.find(m => m.name === trackName);
-             return <AndonPanel status={machine?.andon} isPolling={andonState === "polling"} />;
-           }
-           return (
-             <Box flexDirection="row">
-               <Text color={andonState === "polling" ? "blue" : "gray"}>
-                 {`Andon Service: ${andonState}`}
-               </Text>
-             </Box>
-           );
-        })()}
-      </Box>
+      {/* Main output area using ScrollView. 5 terminal rows reserved for borders and UI. */}
+      <Box flexGrow={1} flexDirection="row" borderStyle="single" paddingLeft={3} paddingRight={1} overflowY="hidden">
+        <Box flexGrow={1} flexDirection="column" overflowY="hidden">
+          <ScrollView
+            ref={scrollRef}
+            height={Math.max(1, height - 5)}
+            onScroll={setScrollOffset}
+            onContentHeightChange={setContentHeight}
+            onViewportSizeChange={(layout: any) => setViewportHeight(layout.height)}
+          >
+            {/* Spacer block pushes sparse logs strictly to the bottom */}
+            <Box height={Math.max(0, height - 5 - logs.length)} flexDirection="column" />
+            {logs.map((log: string, index: number) => (
+              <Text key={`log-${index}`}>{log}</Text>
+            ))}
+          </ScrollView>
+        </Box>
+        <Box marginLeft={1}>
+          <ScrollBar
+            placement="inset"
+            style="dots"
+            contentHeight={contentHeight}
+            viewportHeight={viewportHeight}
+            scrollOffset={scrollOffset}
+            autoHide
+          />
+        </Box>
+      </Box>  
 
       {/* Input Prompt or Progress Bar */}
       <Box paddingX={1} flexDirection="column">
@@ -242,6 +264,28 @@ export function Repl() {
           </Box>
         )}
       </Box>
+
+      {/* Status Bar */}
+      <Box borderStyle="single" borderTop={true} paddingX={1} justifyContent="space-between" borderColor="#444444">
+        <Text color="blue">Ȯ {currentPath}</Text>
+        {(() => {
+           // Extract track context if available
+           const match = currentPath.match(/^\/track\/([^/]+)/);
+           if (match) {
+             const trackName = match[1];
+             const machine = andonData.find(m => m.name === trackName);
+             return <AndonPanel status={machine?.andon} isPolling={andonState === "polling"} />;
+           }
+           return (
+             <Box flexDirection="row">
+               <Text color={andonState === "polling" ? "blue" : "gray"}>
+                 {`Andon Service: ${andonState}`}
+               </Text>
+             </Box>
+           );
+        })()}
+      </Box>
+
     </Box>
   );
 }

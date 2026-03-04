@@ -14,6 +14,7 @@
     "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@std/semver@^1.0.8": "1.0.8",
     "jsr:@std/text@^1.0.17": "1.0.17",
+    "npm:@byteland/ink-scroll-bar@1": "1.0.0_ink@5.2.1__@types+react@19.2.14__react@18.3.1_react@18.3.1_@types+react@19.2.14",
     "npm:@types/node@*": "25.3.3",
     "npm:@types/react@*": "19.2.14",
     "npm:execa@8": "8.0.1",
@@ -88,6 +89,13 @@
       "dependencies": [
         "ansi-styles",
         "is-fullwidth-code-point@4.0.0"
+      ]
+    },
+    "@byteland/ink-scroll-bar@1.0.0_ink@5.2.1__@types+react@19.2.14__react@18.3.1_react@18.3.1_@types+react@19.2.14": {
+      "integrity": "sha512-5wfUK9H6iQI3v66uk7nQ3mJIahooA2oYpVKc5PtXMb68+z8EbWFT15wxVSJ9/x8an8oGgeGvdJcLCKdv9bjVdg==",
+      "dependencies": [
+        "ink",
+        "react"
       ]
     },
     "@types/node@25.3.3": {
@@ -424,6 +432,7 @@
     "dependencies": [
       "jsr:@cliffy/command@1",
       "jsr:@std/fmt@1",
+      "npm:@byteland/ink-scroll-bar@1",
       "npm:@types/node@*",
       "npm:@types/react@*",
       "npm:fullscreen-ink@0.1",
