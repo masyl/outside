@@ -35,12 +35,11 @@ export class ContextRouter {
     // Base standard routes
     this.register({
       pattern: "/",
-      availableCommands: ["track", "help", "quit", "clear"],
+      availableCommands: ["dev", "mesh", "help", "quit", "clear"],
       translateInput: (tokens) => {
         if (tokens.length === 0) return null;
-        // If they type `track <name>`, it's an implicit cd to the track context
-        if (tokens[0] === "track" && tokens.length > 1 && !["list", "create", "destroy"].includes(tokens[1])) {
-           return { command: "cd", args: [`/track/${tokens[1]}`], options: {} };
+        if (["dev", "mesh"].includes(tokens[0])) {
+           return { command: "cd", args: [tokens[0]], options: {} };
         }
         // At root, commands are basically 1:1
         return { command: tokens[0], args: tokens.slice(1), options: {} };
@@ -48,15 +47,28 @@ export class ContextRouter {
     });
 
     this.register({
-      pattern: "/track",
+      pattern: "/dev",
+      availableCommands: ["tracks"],
+      translateInput: (tokens) => {
+        if (tokens.length === 0) return null;
+        if (tokens[0] === "tracks") {
+           return { command: "cd", args: ["tracks"], options: {} };
+        }
+        // For anything else that might have made it
+        return { command: tokens[0], args: tokens.slice(1), options: {} };
+      }
+    });
+
+    this.register({
+      pattern: "/dev/tracks",
       availableCommands: ["list", "create", "destroy"],
       translateInput: (tokens) => {
         if (tokens.length === 0) return null;
         // If they type a track name directly, implicit cd to that track
         if (!["list", "create", "destroy"].includes(tokens[0])) {
-           return { command: "cd", args: [`/track/${tokens[0]}`], options: {} };
+           return { command: "cd", args: [`/dev/tracks/${tokens[0]}`], options: {} };
         }
-        // From /track, running "list" translates to "track list"
+        // From /dev/tracks, running "list" translates to "track list"
         return { command: "track", args: [tokens[0], ...tokens.slice(1)], options: {} };
       },
       autocomplete: {
@@ -69,19 +81,34 @@ export class ContextRouter {
     });
 
     this.register({
-      pattern: "/track/:trackName",
-      availableCommands: ["destroy", "fix", "status"],
+      pattern: "/dev/tracks/:trackName",
+      availableCommands: ["status", "destroy", "fix"],
       autorun: "status",
       translateInput: (tokens, params) => {
         if (tokens.length === 0) return null;
         if (tokens[0] === "destroy") {
            return { command: "track", args: ["destroy", params.trackName], options: {} };
         }
-        if (tokens[0] === "fix" && tokens[1]) {
-           // track-fix-worktree or track-fix-branch
-           return { command: `track-fix-${tokens[1]}`, args: [params.trackName], options: {} };
+        if (tokens[0] === "status") {
+           return { command: "track", args: ["status", params.trackName], options: {} };
         }
+        if (tokens[0] === "fix") {
+           return { command: "cd", args: [`/dev/tracks/${params.trackName}/fix`], options: {} };
+        }
+        // Fallback for any unknown subcommand on a track
         return { command: "track", args: [tokens[0], params.trackName, ...tokens.slice(1)], options: {} };
+      }
+    });
+
+    this.register({
+      pattern: "/dev/tracks/:trackName/fix",
+      availableCommands: ["worktree", "branch", "proxy"],
+      translateInput: (tokens, params) => {
+        if (tokens.length === 0) return null;
+        if (["worktree", "branch", "proxy"].includes(tokens[0])) {
+           return { command: `track-fix-${tokens[0]}`, args: [params.trackName], options: {} };
+        }
+        return null;
       }
     });
   }

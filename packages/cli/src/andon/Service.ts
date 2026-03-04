@@ -86,4 +86,14 @@ export class AndonService {
   public getStaticData() {
     return this.latestData;
   }
+
+  public stop() {
+    this.stopPolling();
+    if (this.timeoutId !== null) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+    this.state = "stopped";
+    this.emit();
+  }
 }
