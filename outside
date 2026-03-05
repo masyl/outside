@@ -4,4 +4,15 @@
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR" || exit 1
 
-pnpm console "$@"
+DENO_FLAGS="-A"
+SCRIPT_ARGS=()
+
+for arg in "$@"; do
+  if [ "$arg" = "--watch" ]; then
+    DENO_FLAGS="$DENO_FLAGS --watch"
+  else
+    SCRIPT_ARGS+=("$arg")
+  fi
+done
+
+deno run $DENO_FLAGS packages/cli/main.tsx "${SCRIPT_ARGS[@]}"
