@@ -8,9 +8,9 @@ export class CommandHistory {
 
   constructor() {
     // Determine user config path. Normally we put this in home dir or project dir.
-    // The spec says project root for config, let's use `.outside_cli_history` in CWD 
     // or fallback to $HOME.
-    this.historyFile = join(Deno.cwd(), ".outside_cli_history");
+    const cliDir = join(Deno.cwd(), ".outside_cli");
+    this.historyFile = join(cliDir, "history.txt");
   }
 
   public async load() {
@@ -42,6 +42,7 @@ export class CommandHistory {
     this.pointer = this.memory.length;
 
     try {
+      await ensureDir(join(Deno.cwd(), ".outside_cli"));
       await Deno.writeTextFile(this.historyFile, this.memory.join("\n") + "\n");
     } catch (err) {
       // Ignore if can't write
