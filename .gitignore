@@ -65,3 +65,6 @@ Thumbs.db
 
 # Worktrees for agentic development tracks
 .tracks/
+
+# State for the Outside CLI
+.outside_cli/
