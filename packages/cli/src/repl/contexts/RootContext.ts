@@ -1,25 +1,15 @@
-import { IContext, CommandExecution } from "./types.ts";
+import { BaseContext } from "./BaseContext.ts";
+import { CommandExecution } from "./types.ts";
 
-export class RootContext implements IContext {
-  getAvailableCommands(): string[] {
-    return ["dev", "mesh", "help", "quit", "clear"];
+export class RootContext extends BaseContext {
+  getContextCommands(): string[] {
+    return ["dev", "mesh"];
   }
 
-  getAutocomplete(tokens: string[], routeParams: Record<string, string>): string[] {
-    return this.getAvailableCommands();
-  }
-
-  translateInput(tokens: string[], routeParams: Record<string, string>): CommandExecution | null {
-    if (tokens.length === 0) return null;
-
+  translateContextInput(tokens: string[], routeParams: Record<string, string>): CommandExecution | null {
     if (["dev", "mesh"].includes(tokens[0])) {
       return { isInternal: true, command: "cd", args: [tokens[0]], options: {} };
     }
-
-    if (["help", "quit", "clear", "cd"].includes(tokens[0])) {
-      return { isInternal: true, command: tokens[0], args: tokens.slice(1), options: {} };
-    }
-
     return null;
   }
 }
