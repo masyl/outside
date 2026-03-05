@@ -1,6 +1,6 @@
 {
   "name": "@outside/cli",
-  "version": "0.1.0+3",
+  "version": "0.1.0+4",
   "exports": "./main.tsx",
   "compilerOptions": {
     "jsx": "react",
