@@ -16,7 +16,7 @@ Never confuse syncing a track with closing a track. They are different operation
 Defines the **Track** workflow:
 
 - One branch: `track/<slug>`
-- Assumes development occurs inside the unified **Dev Container** (no worktrees)
+- Assumes development occurs inside natively provisioned **OrbStack machines** rather than DevContainers
 - One or more related deliveries
 - Tracks are frequently rebased on `trunk` to stay up to date, but they are not automatically integrated or closed when deliveries are completed.
 
@@ -40,11 +40,13 @@ A track is either:
 - Branch format: `track/<kebab-slug>`
 - Track slug should be broader than a single pitch when future related deliveries are expected.
 
-## Dev Container Guidelines
+## Track Environment Guidelines
 
-Instead of using git worktrees, this project relies on **Dev Containers**. All work happens on standard branches within the same workspace. If a track introduces significant dependency changes, agents/developers should:
-1. Run `pnpm install` after checking out the track branch.
-2. Recommend rebuilding the dev container if native dependencies (like Node versions or OS packages) change.
+Instead of using git worktrees and Dev Containers, this project now relies on **OrbStack Native Linux Machines**. All work happens on standard branches, but the environment is isolated per-track using the Deno orchestration CLI.
+When creating or changing tracks, agents/developers should:
+
+1. Ensure the track machine is provisioned: `deno run -A packages/devside/main.ts track create <slug>`.
+2. Run standard installation commands (`pnpm install`) inside the provisioned environment instead of locally when dependencies change.
 
 ## 1) Start a new track
 
@@ -55,9 +57,11 @@ Use when opening a new development lane.
    - `git fetch origin`
    - `git switch trunk`
    - `git pull --ff-only origin trunk`
-3. Create and switch to the new branch:
+3. Create and switch to the new track branch:
    - `git checkout -b track/<kebab-slug>`
-4. Verify:
+4. Provision the track environment using the Deno CLI:
+   - `deno run -A packages/devside/main.ts track create <slug>`
+5. Verify:
    - `git branch --show-current` must equal `track/<slug>`.
 
 Output summary with emoji:
@@ -152,12 +156,12 @@ No pull request is created. The agent signals readiness with a git tag; the pipe
 
 ### Tag signal protocol
 
-| Tag | Who sets it | Meaning |
-|---|---|---|
-| `ready/track/<slug>` | Agent | Triggers the integration pipeline |
-| `integrated/track/<slug>` | Pipeline | Squash commit landed on trunk (success) |
-| `closed/track/<slug>` | Pipeline | Branch tip preserved before deletion (success) |
-| `failed/track/<slug>` | Pipeline | Integration failed — message contains CI run link |
+| Tag                       | Who sets it | Meaning                                           |
+| ------------------------- | ----------- | ------------------------------------------------- |
+| `ready/track/<slug>`      | Agent       | Triggers the integration pipeline                 |
+| `integrated/track/<slug>` | Pipeline    | Squash commit landed on trunk (success)           |
+| `closed/track/<slug>`     | Pipeline    | Branch tip preserved before deletion (success)    |
+| `failed/track/<slug>`     | Pipeline    | Integration failed — message contains CI run link |
 
 ### Prepare
 
@@ -187,6 +191,7 @@ The pipeline will squash-merge to trunk, push result tags, and delete the branch
 **The agent does not wait** — move on to other work.
 
 **CRITICAL RULES:**
+
 - NEVER bypass the CI/CD pipeline when integrating a branch, even if you have no visibility.
 - If the CI/CD is either invisible to you or unresponsive, stop working and flag this to the user.
 
@@ -212,6 +217,8 @@ Use only when user asks to close.
 5. Search for branch and optionally delete:
    - `git checkout trunk`
    - `git branch -D track/<slug>`
+6. Tear down the track environment:
+   - `deno run -A packages/devside/main.ts track destroy <slug>`
 
 Output:
 

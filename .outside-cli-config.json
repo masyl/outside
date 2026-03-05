@@ -1,0 +1,4 @@
+{
+  "andonPollingIntervalMs": 5000,
+  "andonExpirationMs": 15000
+}

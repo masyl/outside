@@ -1,32 +1,171 @@
 # Scratchpad
 
 Random notes taken during development.
-### Next Pitch Blurb
 
+## Next Prompt - DONT DO THESE FEATURE YET - WAIT FOR ME TO GIVE THEM TO YOU!
 
 ---
 
+---
 
+Bug:
+When I type "cd" without arguments, the app crashes.
 
+Proposition:
 
+- The typical default cd behavior is to go to the user home directory.
+- We don't have a home directory or context.
+- For now, the "home" will be the root context
 
-* Simulations are deterministic
-* The validity of a Simulation can be verified using a checksum mechanic called an "Ergo Sum"
-* 
+## Command Headings
 
+- When calling a command, add a heading above the output with the context path and the command name.
+- Use this layout:
 
-Remove the "new state" from storybook
-* Learn what's new in storybook
-* The tutorial and onboarding
-* 
+```
 
+─┤  ❯ status  ├──┤  Ȯ / dev  ├─────────────
+
+```
+
+- The is a blank line on top and bottom of the ascii line.
+- The ascii line should be #444444
+- The command name should be bold and white
+- The context path should be normal and #666666
+
+Extras
+
+- If I type multiple commands, they should be queued and executed one after the other.
+- If the command I'm trying to run does not exist, I want a friendly error message. I don't want some raw output with mentions of a module not found.
+- The prefix of the context path should be the Ȯ and not ctx:
+- You invented an internal "cd" command I did not ask for and if I just type cd, it just crashes.
+- The global commands should be show when cycling through the commands with the down arrow. But place them in lower priority.
+- Remove the "exit" command.
+
+---
+
+I have written a new requirements document for the CLI tool. It is located at .tracks/devops/packages/devside/devside_requirements.md
+
+- This is your new target implementation.
+- The current implementation is a mess and needs to be rewritten from scratch.
+- Work in a new package called "cli"
+- Don't try to fix the current implementation, just start fresh with the new requirements. And use the original implementation only as a reference for the commands that should exist.
+- Use cliffy to code the individual commands, but not for the REPL.
+- Use the https://github.com/vadimdemedes/ink library for the REPLUI and do not code feature manually if they alresdy exist in the library.
+- The new implementation should be split into multiple files, each file representing a command.
+- Each command should be a separate deno script.
+- Each command should have a metadata file that describes the command.
+- Each command should have a help file that describes the command.
+- Create a real architecture and not a fucking jumble of confusing if statements.
+- Still run everything using "deno 2"
+- Each modules should be in it's own file.
+- Each modules should have a proper TS Doc header with documented arguments and return types.
+- Document your intent in the code using TS Doc comments.
+- Do not use local constants or structs for values that should be defined Globally orin configuration files.
+- Keep the same color coding as the original implementation.
+- Respect POSIX standards for command line arguments.
+- Commands should be able to be run in two ways:
+  - Interactively, using the REPL.
+  - Non-interactively, using the command line.
+- Commands should be able to be run, with proxy, in two ways:
+  - Interactively, using the REPL.
+  - Non-interactively, using the command line.
+  - The non interactive way should accept a context path as an argument and use the same context routing logic as the REPL for which commands are available and what arguments they accept.
+- The individual underlying commands should be written in Deno and be vanilla CLI commands, without any routing logic.
+
+---
+
+I want the REPL to be usefull even in narrow window sizes. So lets put the context path in it's own line, over the actual cursor prompt.
+
+Currently:
+
+```
+Ȯ • dev • tracks ›
+```
+
+Change to:
+
+```
+Ȯ • dev • tracks
+›
+```
+
+- Lets add a hint line under the prompt showing the available commands and symbols available as numbered shortkeys.
+
+Currently:
+
+```
+Ȯ • dev • tracks
+›
+```
+
+Expected:
+
+```
+Ȯ • dev • tracks
+›
+
+commands: status [s] | create [c] | destroy [d] | help [h]
+tracks: banana [1] | banana/doc [2] | devops [3] |
+```
+
+- Don't forget the blank line between the prompt and the hint line.
+
+## Review
+
+There seems to be a few small bugs:
+
+- The cursor does not appear at the right spot. It's on the same line as the context path and it's too much to the right by about 8 chars
+- I now see two "›" prompt character
+
+In a separate commit:
+
+- Add a blank line after the welcome message
+- Add a blank line between the prompt line and the menu
+
+* Change the welcome message to : Welcome Ȯutside! Type 'exit' to quit or '?' for help.
+
+In a separate commit:
+
+- When showing the menu, add the shortkey in bracket, like so: ❯ tracks [t]
+
+* Add a "." shortkey for the ".." command to go back up one level.
+
+---
+
+A few simple changes:
+
+- The ctrl key is not well detected on many terminal, use the "alt" key instead.
+- make the "Ȯ" green
+- make the dot separators and ">" prompt grey by default
+- make the ">" prompt bold
+
+---
+
+- Only add successful commands to the history
+- Add "/" as a way to go back to the root context
+- Add shorthands for some commands:
+  - t : track
+  - s : status
+  - f : fix
+  - w : worktree
+  - b : branch
+- In the help message, add the shorthands in parentheses next to the full command name.
+- When the prompt is empty, if the user holds control key while pressing a shorthand, it should execute the command immediately, for fast navigation.
+
+### Next Pitch Blurb
+
+- Simulations are deterministic
+- The validity of a Simulation can be verified using a checksum mechanic called an "Ergo Sum"
 
 ## Different level of POV Nodes
 
 When a POV node is observing a Simulation nodes, it can receive a partial view of the world.
 
-Why?
+Possible parrents:
 
+- Probe: One node sends a probe to another node to get a partial view of the world.
+- Relationship: Two nodes negotiate a bidirectionnal link bewtween each other.
 
 What can be filtered ?
 
@@ -34,24 +173,26 @@ What can be filtered ?
 2. Access to systems scripts ?
 3. Access to all or partial components
 
-## Weird idead
+## Weird idea
 
-* System scripts are entities (loop upon itself)
-* Each step has an "ergo sum"
-* Once a simulation starts,
+- System scripts are entities (loop upon itself)
+- Each step has an "ergo sum"
+- Once a simulation starts,
+
 ---
 
 Radial UI for Console/Arcade gaming!
 Test it with arcade controle kits ?
 
 ---
+
 Works nice. Commit.
 
 Now, let's an another system related to the pointer style.
 
-* Add a "pointerKind" component.
-* When an entity is being pointed at, it overrides the pointer style, and return to the previous pointer once it is not pointed at anymore.
-* In the Pointers story, Add this component for each cursor displayed.
+- Add a "pointerKind" component.
+- When an entity is being pointed at, it overrides the pointer style, and return to the previous pointer once it is not pointed at anymore.
+- In the Pointers story, Add this component for each cursor displayed.
 
 ---
 
@@ -71,11 +212,12 @@ When I said they should face south, you made them face north.
 I'd like for the concept of the 8 cardinal directions to be a core part of the engine.
 
 Create a common utiliy for using cardinal directions:
-* Add all 8 types
-* Add labels for each types to be able to translate them later.
-* As an example, this will be used later to parse text commands such as "Move north 8 tiles".
-* Then do a refactor pass to identify places where you referenced cardinal directions (such as sprite orientation).
-* Then add the resolved cardinal direction in the minidebugpanel for the vector in the inspector 
+
+- Add all 8 types
+- Add labels for each types to be able to translate them later.
+- As an example, this will be used later to parse text commands such as "Move north 8 tiles".
+- Then do a refactor pass to identify places where you referenced cardinal directions (such as sprite orientation).
+- Then add the resolved cardinal direction in the minidebugpanel for the vector in the inspector
 
 ## Next Big Prompt
 
@@ -83,7 +225,7 @@ Create a common utiliy for using cardinal directions:
 
 ## BIG CONCEPT
 
-* A tool for pixel art asset creators to feature their asset packs
+- A tool for pixel art asset creators to feature their asset packs
 
 ## Pitch Prompt
 
@@ -93,10 +235,9 @@ https://www.reddit.com/r/godot/comments/1k7id1b/pixelperfect_fake_2d_in_3d_my_jo
 Integrate this:
 https://www.reddit.com/r/godot/comments/1k6nzj7/comment/mos2msb/
 
-* Replace the word "Bot" everywhere in the code for Actor
+- Replace the word "Bot" everywhere in the code for Actor
 
-* Remove the concept of waitForAssets	
-
+- Remove the concept of waitForAssets
 
 ## Review and Debugging Session - Food Collisions
 
@@ -112,6 +253,7 @@ https://www.reddit.com/r/godot/comments/1k6nzj7/comment/mos2msb/
 
 You should commit before moving on to more bug fixes
 Other bugs:
+
 1. In the Hero and Food, there is a lot of bots that are rendered using the apple.
 2. I don't know if it's normal, but the Pixi ECS Default is only showing bots. There is not walls or Floor tiles
 3. When changing the tile size, the background is still not redraw. You should render some default grid and have a black fill for the whole canvas.
@@ -121,8 +263,6 @@ Other bugs:
 7. the Walls only is missing 2 tiles ot the bottom of the left and right side. I see similar glitches on the rooms your drawing in the Zoo Showcase
 8. The Mixed Sizes is a mess of bugs, missing wall tiles, just a fruit in the middle, the weird avatar icons appears on the bottom right
 9. I don't know what the Render Kind Palette is supposed to be, but all I see is a black apple icon on a very dark gre background.
-
-
 
 ## Definitions
 
@@ -140,13 +280,12 @@ Other bugs:
 - Proper full size viewport: Remove width/height controls and update on resize like in the original inspector and POC
 - Architecture: Would the concept of a POV help with both renderer behaving the same ?
 
-
 - Highlight the patch number of packages in the Storybook
 - HAVE HIME COMPARE THE NUMBER OF ENTITIES IN BOT SIDES OF THE REMOTING/SYNC
 - Find a method of instrumenting the running app in a way that works accross each agent vendor and is also "human friendly" to allow collaboration. Then bake it into a skill.
 - Add Context7 as a "look up documentation" skill and MCP config
 
-- 
+-
 - Make the routine of bumping the patch version a skill they use
 - I need a skill for bug intake with questionning, clarifications, logging and triage that is quick and efficient.
 - Add LibP2P to some pitch: https://github.com/libp2p/js-libp2p
@@ -159,7 +298,7 @@ Other bugs:
   - Put reccurent "Math" operations into utilities (global or local) instead of re-writing each time. Will help for documenting and testing them.
     - Example: const dist = Math.hypot(pos.x - centerX, pos.y - centerY); -> Should be distanceBetween(pos.x, pos.y,centerX, centerY)
   - Identiy potential problematic hardcoding of type or entities by name (ex.: export type ResolveEntityKind = 'empty' | 'floor' | 'wall' | 'bot';)
-  - Identify coupling of concerns. Example: resolveEntityAt 
+  - Identify coupling of concerns. Example: resolveEntityAt
 - The code lacks a lot of documentation:
   - tsdoc on modules and methods
   - inline comment on intent
@@ -177,7 +316,7 @@ Other bugs:
 - Update: Why is the project not on the latest typescript version ?
 - Add: Need to add a linter to the whole project
 - Add: Check for cyclomatic complexity
-- Lookup: meaning of : "@outside/utils": "workspace:*"
+- Lookup: meaning of : "@outside/utils": "workspace:\*"
 - Refactor: Put each components in components.ts into their own file.
 - Refator: Put the distance function of the collision detection into the utilities
 - Validate: Why do systems functions return the "world" ?
@@ -188,33 +327,31 @@ Other bugs:
 - Improve: Make the pipeline more opinionated by adding "phases", so that systems can be loaded dynamically.
 - There is a need for a documentation agent mode.
 
-
 ## Yak Stack
 
 [ ] Layered Floor System (aka Ground, TileMap, Terrain). To track where entities are allowed to spawn and move.
 
 ## Pitch Ideas
 
-* Soccer ball prefab
-  * Create a pixelated tileset from this project: https://github.com/mustitz/ballgen
-  * The image is here: https://raw.githubusercontent.com/mustitz/ballgen/master/examples/blue-ball.all.png
-  * Read the spritesheet structure from the github repo.
-  * Create a prefab
-  * Add a sprite animation mechanic that is hooked on a sphere in the physics engine so that the ball looks like it's rolling.
-  * When bots get near a ball, they kick it reflexivly
-  * Add components for kicker and klickable
-  * Add a component to add bounciness to simplify the effect without having tweak a lot of different components
-  * If a bot get hit by a ball moving fast, they should feel some recoil.
-* Cats vs Dogs
+- Soccer ball prefab
+  - Create a pixelated tileset from this project: https://github.com/mustitz/ballgen
+  - The image is here: https://raw.githubusercontent.com/mustitz/ballgen/master/examples/blue-ball.all.png
+  - Read the spritesheet structure from the github repo.
+  - Create a prefab
+  - Add a sprite animation mechanic that is hooked on a sphere in the physics engine so that the ball looks like it's rolling.
+  - When bots get near a ball, they kick it reflexivly
+  - Add components for kicker and klickable
+  - Add a component to add bounciness to simplify the effect without having tweak a lot of different components
+  - If a bot get hit by a ball moving fast, they should feel some recoil.
+- Cats vs Dogs
   - Cats are enemies of dogs and they fight
   - Bots are neutral
   - The push each others hard and they bounce
   - Weaponless brawl
-* Points of interest entities for wandering
-* 
-- 
+- Points of interest entities for wandering
+-
 
-
+*
 
 ## DX & Velocity
 
@@ -226,10 +363,10 @@ Other bugs:
 
 - Before adding more UI, I should add the PixiJS React library to cut up the app in reusable parts.
 - Gradually convert parts of the application into React components:
-    1. The level rendering.
-    2. The debug panel, which is currently in HTML, should be brought back into the pixi rendering.
-    3. The keystroke help window.
-    4. The timeline.
+  1. The level rendering.
+  2. The debug panel, which is currently in HTML, should be brought back into the pixi rendering.
+  3. The keystroke help window.
+  4. The timeline.
 - Remove the animations completely before starting over.
 
 ## Brain dump
@@ -246,7 +383,7 @@ Other bugs:
   - Should the project distance itself from the "web-o-sphere" ?
   - If it's more than for "hosting" a game... should it be a "community" server ?
   - Should it show hosts ?
-  - 
+  -
 
 ## Sessions
 
@@ -317,4 +454,4 @@ The major changes to the coordinate system from the last few days was completed.
 
 This also means that the world center is 0,0 and can go into any cardinal directions, be it positive or negative.
 
-**This was a needed change to allow for a revamp of the bots movement animations that will soon use real vectors and lock in their movements very precisely with the discreet game ticks.
+\*\*This was a needed change to allow for a revamp of the bots movement animations that will soon use real vectors and lock in their movements very precisely with the discreet game ticks.
