@@ -1,0 +1,421 @@
+import { Command } from 'jsr:@cliffy/command@^1.0.0';
+import { DevsideInput } from './prompt.ts';
+import { join } from 'jsr:@std/path@1';
+import { Table } from 'jsr:@cliffy/table@^1.0.0';
+import * as colors from 'jsr:@std/fmt@1/colors';
+import { createMachine, destroyMachine, listMachines, ANDON_COMPONENTS, ANDON_COLORS } from './orb.ts';
+import { createTrackProxy, destroyTrackProxy } from './docker.ts';
+import { createTrackWorktree, fixWorktree, fixBranch } from './git.ts';
+
+declare global {
+  var __DEVSIDE_REPL_ACTIVE__: boolean | undefined;
+}
+
+function buildApp() {
+  const createCommand = new Command()
+    .description('Create a new native OrbStack tracking environment for a track')
+    .arguments('<name:string>')
+    .action(async (_options: void | Record<string, unknown>, name: string) => {
+      console.log(`Setting up git worktree and branch for '${name}'...`);
+      const gitSuccess = await createTrackWorktree(name);
+      if (!gitSuccess) {
+        throw new Error(`Failed to create git worktree for '${name}'`);
+      }
+
+      console.log(`Creating track environment for '${name}'...`);
+      const success = await createMachine(name);
+      if (!success) {
+        throw new Error(`Failed to create machine '${name}'`);
+      }
+      const proxySuccess = await createTrackProxy(name);
+      if (!proxySuccess) {
+        throw new Error(`Failed to create proxy container for '${name}'`);
+      }
+      console.log(`Track environment '${name}' created successfully.`);
+    });
+
+  const destroyCommand = new Command()
+    .description('Destroy the native OrbStack tracking environment for a track')
+    .arguments('<name:string>')
+    .action(async (_options: void | Record<string, unknown>, name: string) => {
+      console.log(`Destroying track environment for '${name}'...`);
+      
+      // Destroy proxy first
+      await destroyTrackProxy(name);
+
+      const success = await destroyMachine(name);
+      if (!success) {
+        throw new Error(`Failed to destroy machine '${name}'`);
+      }
+      console.log(`Track environment '${name}' destroyed successfully.`);
+    });
+
+  const listCommand = new Command()
+    .description('List all active native OrbStack track environments')
+    .action(async () => {
+      console.log('Listing active track environments...');
+      const machines = await listMachines();
+      
+      function formatAndon(label: string, color: string): string {
+        switch (color) {
+          case 'red': return colors.white(colors.bgRed(` ${label} `));
+          case 'green': return colors.white(colors.bgGreen(` ${label} `));
+          case 'yellow': return colors.black(colors.bgYellow(` ${label} `));
+          case 'blue': return colors.white(colors.bgBlue(` ${label} `));
+          default: return ` ${label} `;
+        }
+      }
+
+      const table = new Table()
+        .header(['Name', 'Andon', 'Branch', 'Status'])
+        .body(
+          machines.map((m) => {
+            const andonStr = [
+              formatAndon('Tr', m.andon.tr),
+              formatAndon('Co', m.andon.co),
+              formatAndon('Br', m.andon.br),
+              formatAndon('Wt', m.andon.wt),
+            ].join(' ');
+
+            return [m.name, andonStr, m.branch, m.status];
+          })
+        )
+        .padding(2)
+        .border(true);
+      table.render();
+    });
+
+  const trackCommand = new Command()
+    .description('Manage development tracks (provisioning, destruction, Caddy routing)')
+    .action(function (this: Command) {
+      this.showHelp();
+    })
+    .command('create', createCommand)
+    .command('destroy', destroyCommand)
+    .command('list', listCommand);
+
+  const trackStatusCommand = new Command()
+    .description('Hidden contextual status command')
+    .arguments('<name:string>')
+    .hidden()
+    .action(async (_options: void | Record<string, unknown>, name: string) => {
+      const machines = await listMachines();
+      const m = machines.find(x => x.name === name);
+      if (!m) {
+        console.log(`Track '${name}' not found.`);
+        return;
+      }
+
+      function formatAndon(label: string, color: string): string {
+        switch (color) {
+          case 'red': return colors.white(colors.bgRed(` ${label} `));
+          case 'green': return colors.white(colors.bgGreen(` ${label} `));
+          case 'yellow': return colors.black(colors.bgYellow(` ${label} `));
+          case 'blue': return colors.white(colors.bgBlue(` ${label} `));
+          default: return ` ${label} `;
+        }
+      }
+
+      console.log(`\nTrack: ${m.name}`);
+      console.log(`Status: ${m.status}`);
+      console.log(`Andons:`);
+      
+      const components = [
+        { key: 'tr', comp: ANDON_COMPONENTS.tr, color: m.andon.tr },
+        { key: 'co', comp: ANDON_COMPONENTS.co, color: m.andon.co },
+        { key: 'br', comp: ANDON_COMPONENTS.br, color: m.andon.br },
+        { key: 'wt', comp: ANDON_COMPONENTS.wt, color: m.andon.wt },
+      ];
+
+      for (const { comp, color } of components) {
+        const symbolStr = formatAndon(comp.symbol, color);
+        const colorData = ANDON_COLORS[color];
+        
+        let colorLabel: string = colorData.label;
+        if (color === 'green') colorLabel = colors.green(colorLabel);
+        else if (color === 'red') colorLabel = colors.red(colorLabel);
+        else if (color === 'yellow') colorLabel = colors.yellow(colorLabel);
+        else if (color === 'blue') colorLabel = colors.blue(colorLabel);
+
+        console.log(`  ${symbolStr}  ${comp.label.padEnd(10)} : ${colorLabel.padEnd(20)} - ${colorData.description}`);
+      }
+      console.log();
+    });
+
+  const trackFixWorktreeCommand = new Command()
+    .description('Hidden contextual fix worktree command')
+    .arguments('<name:string>')
+    .hidden()
+    .action(async (_options: void | Record<string, unknown>, name: string) => {
+      await fixWorktree(name);
+    });
+
+  const trackFixBranchCommand = new Command()
+    .description('Hidden contextual fix branch command')
+    .arguments('<name:string>')
+    .hidden()
+    .action(async (_options: void | Record<string, unknown>, name: string) => {
+      await fixBranch(name);
+    });
+
+  return new Command()
+    .name('devside')
+    .version('0.1.0')
+    .description('Outside project orchestration CLI')
+    .noExit()
+    .action(async function (this: Command) {
+      if (!globalThis.__DEVSIDE_REPL_ACTIVE__) {
+        await runRepl();
+      } else {
+        this.showHelp();
+      }
+    })
+    .command('track', trackCommand)
+    .command('track-status', trackStatusCommand)
+    .command('track-fix-worktree', trackFixWorktreeCommand)
+    .command('track-fix-branch', trackFixBranchCommand);
+}
+
+async function runRepl() {
+  globalThis.__DEVSIDE_REPL_ACTIVE__ = true;
+  console.log("\nWelcome Ȯutside! Type 'exit' to quit or '?' for help.\n");
+  
+  let context: string[] = ['dev'];
+  const historyFile = join(Deno.cwd(), '.devside_history');
+  let history: string[] = [];
+  try {
+    const content = await Deno.readTextFile(historyFile);
+    history = content.split('\n').filter(Boolean);
+  } catch {
+    // Ignore if not present
+  }
+
+  while (true) {
+    const prefix = colors.green('Ȯ');
+    const separator = colors.dim(' • ');
+    const contextStr = context.length === 0 ? '' : `${separator}${context.join(separator)}`;
+    const pathMsg = `${prefix}${contextStr}`;
+    const cursorMsg = `${colors.bold('›')} `;
+
+    // Build dynamic completions for this iteration
+    let suggestions: string[] = [];
+    if (context.length === 0) {
+      suggestions = ['dev', 'help [h]', 'exit [q]'];
+    } else if (context.length === 1 && context[0] === 'dev') {
+      suggestions = ['tracks [t]', 'help [h]', 'exit [q]', '..'];
+    } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
+      try {
+        const machines = await listMachines();
+        suggestions = ['create [c]', 'destroy [d]', 'list [l]', ...machines.map(m => m.name), 'help [h]', '..'];
+      } catch { suggestions = ['create [c]', 'destroy [d]', 'list [l]', 'help [h]', '..']; }
+    } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
+      suggestions = ['status [s]', 'fix [f]', 'help [h]', '..'];
+    } else if (context.length === 4 && context[0] === 'dev' && context[3] === 'fix') {
+      try {
+        const machines = await listMachines();
+        const m = machines.find(x => x.name === context[2]);
+        const fixable: string[] = [];
+        if (m) {
+          if (m.andon.wt !== 'green') fixable.push('worktree [w]');
+          if (m.andon.br !== 'green') fixable.push('branch [b]');
+        }
+        suggestions = [...fixable, 'help [h]', '..'];
+      } catch { suggestions = ['help [h]', '..']; }
+    }
+
+    let input: string;
+    try {
+      console.log(); // Blank line between blocks
+      console.log(pathMsg); // Print the path text on its own line
+      input = await DevsideInput.prompt({
+        message: cursorMsg,
+        prefix: '',
+        pointer: '',
+        suggestions,
+        list: false,
+        history,
+      });
+    } catch (_e) {
+      // User pressed Ctrl+C or similar
+      console.error('PROMPT ERROR:', _e);
+      break;
+    }
+
+    const trimmed = input.trim();
+    if (!trimmed) continue;
+    
+    if (trimmed === 'exit' || trimmed === 'quit') break;
+
+    // `prompt.ts` automatically strips autocomplete brackets like `[t]` upon enter natively
+    const args = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g)?.map(arg => {
+        return arg.startsWith('"') && arg.endsWith('"') ? arg.slice(1, -1) : arg;
+    }) || [];
+
+    // Global Help Command Interception
+    if (args[0] === 'help' || args[0] === '?') {
+        console.log(`\nCurrent Context: ${context.length === 0 ? 'Root' : context.join('/')}`);
+        console.log(`\nCommands:`);
+        
+        if (context.length === 0) {
+            console.log(`  dev           : Enter the 'dev' operations context`);
+            console.log(`  help, ?       : Show this help message`);
+            console.log(`  exit, quit    : Exit the REPL`);
+        } else if (context.length === 1 && context[0] === 'dev') {
+            console.log(`  tracks (t)    : Enter tracks management context`);
+            console.log(`  ..            : Go back to root context`);
+            console.log(`  /             : Return immediately to root context`);
+            console.log(`  help, ?       : Show this help message`);
+            console.log(`  exit, quit    : Exit the REPL`);
+        } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
+            console.log(`  create <name> : Create a new track environment`);
+            console.log(`  destroy <name>: Destroy an existing track environment`);
+            console.log(`  list          : Map of tracks connected to OrbStack machines`);
+            console.log(`  ..            : Go back to previous context`);
+            console.log(`  /             : Return immediately to root context`);
+            console.log(`  help, ?       : Show this help message`);
+            console.log(`\nSymbols:`);
+            console.log(`  <track_name>  : Enter the context of a specific track`);
+        } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
+            console.log(`  status (s)    : Inspect the detailed health of this track`);
+            console.log(`  fix (f)       : Auto-fix issues with this track (enters fix context)`);
+            console.log(`  ..            : Go back to previous context`);
+            console.log(`  /             : Return immediately to root context`);
+            console.log(`  help, ?       : Show this help message`);
+        } else if (context.length === 4 && context[0] === 'dev' && context[1] === 'tracks' && context[3] === 'fix') {
+            console.log(`  worktree (w)  : Auto-fix missing local git worktree`);
+            console.log(`  branch (b)    : Auto-fix missing local track branch`);
+            console.log(`  ..            : Go back to previous context`);
+            console.log(`  /             : Return immediately to root context`);
+            console.log(`  help, ?       : Show this help message`);
+        }
+        
+        console.log();
+        
+        // Add help requests to history so the user can recall them
+        history.push(trimmed);
+        if (history.length > 20) history = history.slice(-20);
+        await Deno.writeTextFile(historyFile, history.join('\n')).catch(() => {});
+        continue;
+    }
+
+    // Context Navigation and Mapping
+    let mappedArgs: string[] | null = null;
+    const localArgs = [...args];
+
+    while (localArgs.length > 0) {
+        if (localArgs[0] === '..' || localArgs[0] === '.') {
+            context.pop();
+            const popped = localArgs.shift();
+            
+            // Add to history here since it's a valid navigation move that skips parsing
+            history.push(popped!);
+            if (history.length > 20) history = history.slice(-20);
+            await Deno.writeTextFile(historyFile, history.join('\n')).catch(() => {});
+            continue;
+        }
+
+        if (localArgs[0] === '/') {
+            context = [];
+            localArgs.shift();
+            
+            history.push('/');
+            if (history.length > 20) history = history.slice(-20);
+            await Deno.writeTextFile(historyFile, history.join('\n')).catch(() => {});
+            continue;
+        }
+
+        if (context.length === 0) {
+            if (localArgs[0] === 'dev') {
+                context = ['dev'];
+                localArgs.shift();
+                continue;
+            } else {
+                mappedArgs = localArgs;
+                break;
+            }
+        } else if (context.length === 1 && context[0] === 'dev') {
+            if (localArgs[0] === 'tracks' || localArgs[0] === 't') {
+                context = ['dev', 'tracks'];
+                localArgs.shift();
+                continue;
+            } else {
+                mappedArgs = localArgs;
+                break;
+            }
+        } else if (context.length === 2 && context[0] === 'dev' && context[1] === 'tracks') {
+            if (['create', 'destroy', 'list'].includes(localArgs[0])) {
+                mappedArgs = ['track', ...localArgs];
+                break;
+            } else {
+                // It's a track name
+                const trackName = localArgs[0];
+                context.push(trackName);
+                localArgs.shift();
+                
+                if (localArgs.length === 0) {
+                    mappedArgs = ['track-status', trackName];
+                    break;
+                }
+                continue;
+            }
+        } else if (context.length === 3 && context[0] === 'dev' && context[1] === 'tracks') {
+            const trackName = context[2];
+            if (localArgs[0] === 'status' || localArgs[0] === 's') {
+                mappedArgs = ['track-status', trackName];
+                break;
+            } else if (localArgs[0] === 'fix' || localArgs[0] === 'f') {
+                context.push('fix');
+                localArgs.shift();
+                continue;
+            } else {
+                mappedArgs = [localArgs[0], trackName, ...localArgs.slice(1)];
+                break;
+            }
+        } else if (context.length === 4 && context[0] === 'dev' && context[1] === 'tracks' && context[3] === 'fix') {
+            const trackName = context[2];
+            if (localArgs[0] === 'worktree' || localArgs[0] === 'w') mappedArgs = ['track-fix-worktree', trackName];
+            else if (localArgs[0] === 'branch' || localArgs[0] === 'b') mappedArgs = ['track-fix-branch', trackName];
+            else mappedArgs = [localArgs[0], trackName, ...localArgs.slice(1)];
+            break;
+        } else {
+            mappedArgs = localArgs;
+            break;
+        }
+    }
+
+    if (!mappedArgs) {
+        continue;
+    }
+
+    try {
+      await buildApp().parse(mappedArgs);
+      
+      // Since it did not throw, save it successfully to history
+      history.push(trimmed);
+      if (history.length > 20) {
+        history = history.slice(-20);
+      }
+      try {
+        await Deno.writeTextFile(historyFile, history.join('\n'));
+      } catch {
+        // Ignore write failures silently
+      }
+    } catch (error: any) {
+      if (error.message) {
+        console.error(`Error: ${error.message}`);
+      }
+    }
+  }
+}
+
+// Main CLI
+if (import.meta.main) {
+  try {
+    await buildApp().parse(Deno.args);
+  } catch (error: any) {
+    if (error.message) {
+      console.error(`Error: ${error.message}`);
+    }
+    Deno.exit(1);
+  }
+}

@@ -108,6 +108,7 @@ export default defineConfig({
             { text: 'Quick Start', link: '/development-process/quick-start' },
             { text: 'Skills Sync', link: '/development-process/skills-sync' },
             { text: 'Storybook Component Testing', link: '/storybook' },
+            { text: 'Local Proxy & Ports', link: '/development-process/local-proxy' },
           ],
         },
       ],
