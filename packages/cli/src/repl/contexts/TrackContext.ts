@@ -3,7 +3,7 @@ import { CommandExecution } from "./types.ts";
 
 export class TrackContext extends BaseContext {
   getContextCommands(): string[] {
-    return ["status", "destroy", "fix"];
+    return ["andon", "destroy", "fix"];
   }
 
   translateContextInput(tokens: string[], routeParams: Record<string, string>): CommandExecution | null {
@@ -11,7 +11,7 @@ export class TrackContext extends BaseContext {
       return { isInternal: false, command: "track", args: ["destroy", routeParams.trackName || ""], options: {} };
     }
 
-    if (tokens[0] === "status") {
+    if (tokens[0] === "status" || tokens[0] === "andon") {
       return { isInternal: false, command: "track", args: ["status", routeParams.trackName || ""], options: {} };
     }
 

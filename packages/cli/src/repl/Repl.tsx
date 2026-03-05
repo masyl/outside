@@ -18,11 +18,15 @@ const CLI_DIR = join(Deno.cwd(), ".outside_cli");
 const STATE_FILE = join(CLI_DIR, "state.json");
 const OUTPUT_FILE = join(CLI_DIR, "output.txt");
 
-export function Repl() {
+interface ReplProps {
+  version?: string;
+}
+
+export function Repl({ version = "0.1.0" }: ReplProps) {
   const { exit } = useApp();
   const { height } = useScreenSize();
   const [input, setInput] = useState("");
-  const [logs, setLogs] = useState<any[]>(["Outside CLI v0.1.0 initialized."]);
+  const [logs, setLogs] = useState<any[]>([`Outside CLI v${version} initialized.`]);
   const [isExecuting, setIsExecuting] = useState(false);
   const [progress, setProgress] = useState<{ phase?: string; value?: number; message?: string } | null>(null);
   const scrollRef = useRef<ScrollViewRef>(null);
@@ -274,7 +278,7 @@ export function Repl() {
             setLogs([]);
          } else if (execPlan.command === "quit" || execPlan.command === "exit") {
             exit();
-         } else if (execPlan.command === "reboot") {
+          } else if (execPlan.command === "reboot") {
             setLogs((prev: any[]) => [...prev, `REBOOTING CONSOLE...`]);
             
             // Unmount ink gracefully before spawning new instance
@@ -302,11 +306,28 @@ export function Repl() {
               
               Deno.exit(0);
             }, 100);
+         } else if (execPlan.command === "andon") {
+            andonService.requestRefresh();
+            
+            const match = currentPath.match(/^\/track\/([^/]+)/);
+            if (match) {
+              const trackName = match[1];
+              setLogs((prev: any[]) => [...prev, `[ANDON] Contextual status for track: ${trackName}`]);
+            } else if (currentPath === "/dev/tracks" || currentPath === "/") {
+               setLogs((prev: any[]) => [...prev, `[ANDON] Overall system status`]);
+            } else {
+               setLogs((prev: any[]) => [
+                  ...prev, 
+                  `No contextual andons available. Here is the default andon instead:`,
+                  ``,
+                  `[ANDON] Overall system status`
+               ]);
+            }
          }
          return;
       }
 
-      if (trimmed === "list" || trimmed === "ls" || trimmed === "status") {
+      if (trimmed === "list" || trimmed === "ls") {
          andonService.requestRefresh();
       }
 
@@ -384,6 +405,7 @@ export function Repl() {
         currentPath={currentPath}
         andonData={andonData}
         andonState={andonState}
+        version={version}
       />
     </Box>
   );

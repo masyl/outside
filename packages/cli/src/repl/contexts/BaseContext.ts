@@ -8,7 +8,7 @@ export abstract class BaseContext implements IContext {
   abstract getContextCommands(): string[];
 
   getAvailableCommands(): string[] {
-    const globals = ["list", "ls", "chdir", "cd", "help", "quit", "clear", "status", "reboot"];
+    const globals = ["list", "ls", "chdir", "cd", "help", "quit", "clear", "andon", "status", "reboot"];
     const locals = this.getContextCommands();
     // Use a Set to avoid duplicates if a local command overrides a global (though unlikely for now)
     return Array.from(new Set([...globals, ...locals]));
@@ -45,8 +45,8 @@ export abstract class BaseContext implements IContext {
       return { isInternal: false, command: "list", args: tokens.slice(1), options: {} };
     }
 
-    if (command === "status") {
-      return { isInternal: false, command: "status", args: tokens.slice(1), options: {} };
+    if (command === "status" || command === "andon") {
+      return { isInternal: false, command: "andon", args: tokens.slice(1), options: {} };
     }
 
     return null;
