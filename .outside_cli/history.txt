@@ -10,3 +10,7 @@ edhl
 help
 reboot
 clear
+s
+ls
+andon
+reboot
