@@ -8,7 +8,7 @@ export abstract class BaseContext implements IContext {
   abstract getContextCommands(): string[];
 
   getAvailableCommands(): string[] {
-    const globals = ["list", "ls", "chdir", "cd", "help", "quit", "clear", "andon", "status", "reboot"];
+    const globals = ["list", "ls", "chdir", "cd", "help", "quit", "clear", "andon", "status", "reboot", "track"];
     const locals = this.getContextCommands();
     // Use a Set to avoid duplicates if a local command overrides a global (though unlikely for now)
     return Array.from(new Set([...globals, ...locals]));
@@ -39,13 +39,20 @@ export abstract class BaseContext implements IContext {
       return { isInternal: true, command: internalCmd, args: tokens.slice(1), options: {} };
     }
 
-    if (command === "list" || command === "ls") {
-      // By default, list might not do much at root, but we can map it to a 'list' command
-      // Contexts can override translateContextInput to customize 'list' behavior
-      return { isInternal: false, command: "list", args: tokens.slice(1), options: {} };
+    if (command === "list" || command === "ls" || command === "track") {
+      const isList = command === "list" || command === "ls";
+      const actualCommand = isList ? "track" : command;
+      const actualArgs = isList ? ["list", ...tokens.slice(1)] : tokens.slice(1);
+      
+      return { 
+        isInternal: false, 
+        command: actualCommand, 
+        args: actualArgs, 
+        options: {} 
+      };
     }
 
-    if (command === "status" || command === "andon") {
+    if (tokens[0] === "status" || tokens[0] === "andon") {
       return { isInternal: true, command: "andon", args: tokens.slice(1), options: {} };
     }
 

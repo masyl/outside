@@ -1,5 +1,6 @@
-import { CommandExecution } from "./Router.ts";
 import { exists } from "jsr:@std/fs@1";
+import { fromFileUrl } from "jsr:@std/path@1";
+import { CommandExecution } from "./Router.ts";
 
 export interface ExecutionEvent {
   type: "stdout" | "stderr" | "progress" | "done" | "error";
@@ -14,23 +15,15 @@ export async function executeCommand(
   onEvent: (event: ExecutionEvent) => void
 ) {
   try {
-    // In our architecture, commands are Deno scripts.
-    // E.g. command 'track' -> `deno run -A src/commands/track.ts` 
-    // Wait, the plan says every command is a standalone script but currently we only
-    // put track list/create/destroy in src/commands/track/list.ts etc.
-    // For now, since we have an entrypoint, we can just run the specific script.
-    
-    // Simplest approach: run the command binary using Deno.
-    // If command is 'track', we need a track.ts router command, or we directly invoke `src/commands/...`
-    // Let's assume the router maps `track-list` instead of `track list` or we just call bin.ts
-    // For now, let's just mock the resolution or assume the CLI exposes `outside-cli track list`
-    
-    const scriptPath = `src/commands/${exec.command.replaceAll("-", "/")}.ts`;
-    
+    // Commands are scripts in src/commands/
+    // We resolve them relative to this file to be robust against CWD changes
+    const scriptUrl = new URL(`../commands/${exec.command.replaceAll("-", "/")}.ts`, import.meta.url);
+    const scriptPath = fromFileUrl(scriptUrl);
+
     // Check if script exists gracefully before spawning Deno to avoid raw module not found errors
     const scriptExists = await exists(scriptPath);
     if (!scriptExists) {
-      onEvent({ type: "error", message: `Command module not found: ${scriptPath}` });
+      onEvent({ type: "error", message: `Command module not found for '${exec.command}': ${scriptPath}` });
       onEvent({ type: "done", code: 1 });
       return;
     }

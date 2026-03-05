@@ -307,11 +307,18 @@ export function Repl({ version = "0.1.0" }: ReplProps) {
               Deno.exit(0);
             }, 100);
          } else if (execPlan.command === "andon") {
-            const fallbackPlan = router.translate("track list");
-            if (!fallbackPlan) {
-              setLogs((prev: any[]) => [...prev, `[ANDON] Error: Fallback andon (track list) not found.`]);
+            // First, try to find a contextual andon
+            const match = currentPath.match(/^\/track\/([^/]+)/);
+            if (match) {
+              const trackName = match[1];
+              // Execute track status <name>
+              setIsExecuting(true);
+              executeCommand({ isInternal: false, command: "track", args: ["status", trackName], options: {} }, handleCommandEvent);
               return;
             }
+            
+            // If in tracks context or root, or anywhere else, use 'track list'
+            const fallbackPlan: CommandExecution = { isInternal: false, command: "track", args: ["list"], options: {} };
 
             if (currentPath === "/dev/tracks" || currentPath === "/") {
                setIsExecuting(true);

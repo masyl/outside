@@ -11,3 +11,14 @@ help
 reboot
 clear
 reboot
+andom
+andon
+help
+reboot
+andon
+clear
+andon
+cd tr
+cd tracks
+ls
+list
