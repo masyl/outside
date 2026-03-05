@@ -35,27 +35,29 @@ export function StatusTray({ currentPath, andonData, andonState, version = "0.1.
     <Box borderStyle="single" borderTop={true} paddingX={1} justifyContent="space-between" borderColor="#444444">
       <Box flexDirection="row">
         <Text color="blue">Ȯ {currentPath}</Text>
+      </Box>
+
+      <Box flexDirection="row">
+        {(() => {
+          // 1. Andon Part
+          const match = currentPath.match(/^\/track\/([^/]+)/);
+          if (match) {
+            const trackName = match[1];
+            const machine = andonData.find(m => m.name === trackName);
+            return <AndonPanel status={machine?.andon} isPolling={andonState === "polling"} />;
+          }
+          return (
+            <Text color={andonState === "polling" ? "blue" : "gray"}>
+              {`Andon Service: ${andonState}`}
+            </Text>
+          );
+        })()}
+
         <Text color="gray"> | </Text>
         <Text color="cyan">◈ v{version}</Text>
         <Text color="gray"> | </Text>
         <Text color="yellow">⧖ {formatUptime(uptime)}</Text>
       </Box>
-      {(() => {
-        // Extract track context if available
-        const match = currentPath.match(/^\/track\/([^/]+)/);
-        if (match) {
-          const trackName = match[1];
-          const machine = andonData.find(m => m.name === trackName);
-          return <AndonPanel status={machine?.andon} isPolling={andonState === "polling"} />;
-        }
-        return (
-          <Box flexDirection="row">
-            <Text color={andonState === "polling" ? "blue" : "gray"}>
-              {`Andon Service: ${andonState}`}
-            </Text>
-          </Box>
-        );
-      })()}
     </Box>
   );
 }

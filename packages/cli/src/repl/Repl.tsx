@@ -307,21 +307,23 @@ export function Repl({ version = "0.1.0" }: ReplProps) {
               Deno.exit(0);
             }, 100);
          } else if (execPlan.command === "andon") {
-            andonService.requestRefresh();
-            
-            const match = currentPath.match(/^\/track\/([^/]+)/);
-            if (match) {
-              const trackName = match[1];
-              setLogs((prev: any[]) => [...prev, `[ANDON] Contextual status for track: ${trackName}`]);
-            } else if (currentPath === "/dev/tracks" || currentPath === "/") {
-               setLogs((prev: any[]) => [...prev, `[ANDON] Overall system status`]);
+            const fallbackPlan = router.translate("track list");
+            if (!fallbackPlan) {
+              setLogs((prev: any[]) => [...prev, `[ANDON] Error: Fallback andon (track list) not found.`]);
+              return;
+            }
+
+            if (currentPath === "/dev/tracks" || currentPath === "/") {
+               setIsExecuting(true);
+               executeCommand(fallbackPlan, handleCommandEvent);
             } else {
                setLogs((prev: any[]) => [
                   ...prev, 
                   `No contextual andons available. Here is the default andon instead:`,
-                  ``,
-                  `[ANDON] Overall system status`
+                  ``
                ]);
+               setIsExecuting(true);
+               executeCommand(fallbackPlan, handleCommandEvent);
             }
          }
          return;

@@ -10,3 +10,4 @@ edhl
 help
 reboot
 clear
+reboot

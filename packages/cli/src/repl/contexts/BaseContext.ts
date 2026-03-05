@@ -46,7 +46,7 @@ export abstract class BaseContext implements IContext {
     }
 
     if (command === "status" || command === "andon") {
-      return { isInternal: false, command: "andon", args: tokens.slice(1), options: {} };
+      return { isInternal: true, command: "andon", args: tokens.slice(1), options: {} };
     }
 
     return null;
