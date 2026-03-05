@@ -1,0 +1,12 @@
+reboot
+help
+reboot
+help
+reboot
+cd dev
+reboot
+rhl
+edhl
+help
+reboot
+clear
