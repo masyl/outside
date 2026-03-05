@@ -156,7 +156,8 @@ export function Repl() {
 
       if (execPlan.isInternal) {
          if (execPlan.command === "cd") {
-            if (router.cd(execPlan.args[0])) {
+            const targetDir = execPlan.args[0] || "/";
+            if (router.cd(targetDir)) {
                const newPath = router.getCurrentPath();
                setCurrentPath(newPath);
 
