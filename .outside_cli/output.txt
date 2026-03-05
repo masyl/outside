@@ -1,7 +1,0 @@
-Outside CLI v0.1.0 initialized.
-[HEADING] s
-Command not recognized in context /dev
-[HEADING] ls
-Error: Command module not found: src/commands/list.ts
-[HEADING] andon
-Command not recognized in context /dev
