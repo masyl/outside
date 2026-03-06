@@ -6,6 +6,11 @@ export class TrackContext extends BaseContext {
     return ["destroy"];
   }
 
+  async getListData(routeParams: Record<string, string>): Promise<Record<string, string[]>> {
+    const base = await super.getListData(routeParams);
+    return { ...base, "Directories": ["fix"] };
+  }
+
   translateContextInput(tokens: string[], routeParams: Record<string, string>): CommandExecution | null {
     if (tokens[0] === "destroy") {
       return { isInternal: false, command: "track", args: ["destroy", routeParams.trackName || ""], options: {} };

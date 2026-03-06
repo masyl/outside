@@ -18,6 +18,11 @@ export abstract class BaseContext implements IContext {
     return this.getAvailableCommands();
   }
 
+  async getListData(routeParams: Record<string, string>): Promise<Record<string, string[]>> {
+    const commands = this.getContextCommands().sort();
+    return commands.length > 0 ? { "Commands": commands } : {};
+  }
+
   /**
    * Subclasses should override this to handle their specific logic.
    * If it returns null, BaseContext handles global commands.
@@ -39,15 +44,20 @@ export abstract class BaseContext implements IContext {
       return { isInternal: true, command: internalCmd, args: tokens.slice(1), options: {} };
     }
 
-    if (command === "list" || command === "ls" || command === "track") {
-      const isList = command === "list" || command === "ls";
-      const actualCommand = isList ? "track" : command;
-      const actualArgs = isList ? ["list", ...tokens.slice(1)] : tokens.slice(1);
-      
+    if (command === "list" || command === "ls") {
+      return { 
+        isInternal: true, 
+        command: "list", 
+        args: tokens.slice(1), 
+        options: {} 
+      };
+    }
+
+    if (command === "track") {
       return { 
         isInternal: false, 
-        command: actualCommand, 
-        args: actualArgs, 
+        command: "track", 
+        args: tokens.slice(1), 
         options: {} 
       };
     }

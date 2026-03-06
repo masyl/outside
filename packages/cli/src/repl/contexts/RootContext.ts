@@ -6,6 +6,11 @@ export class RootContext extends BaseContext {
     return [];
   }
 
+  async getListData(routeParams: Record<string, string>): Promise<Record<string, string[]>> {
+    const base = await super.getListData(routeParams);
+    return { ...base, "Directories": ["dev", "mesh"] };
+  }
+
   translateContextInput(tokens: string[], routeParams: Record<string, string>): CommandExecution | null {
     return null;
   }

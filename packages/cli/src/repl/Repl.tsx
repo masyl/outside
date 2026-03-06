@@ -278,6 +278,26 @@ export function Repl({ version = "0.1.0" }: ReplProps) {
             setLogs([]);
          } else if (execPlan.command === "quit" || execPlan.command === "exit") {
             exit();
+         } else if (execPlan.command === "list") {
+            router.getListData().then((data: Record<string, string[]>) => {
+              const outputLines: string[] = [];
+              let isFirst = true;
+
+              for (const [category, items] of Object.entries(data)) {
+                if (items.length > 0) {
+                  if (!isFirst) outputLines.push("");
+                  outputLines.push(`${category}:`);
+                  items.forEach(item => outputLines.push(item));
+                  isFirst = false;
+                }
+              }
+
+              if (outputLines.length === 0) {
+                outputLines.push("[empty]");
+              }
+
+              setLogs((prev: any[]) => [...prev, ...outputLines]);
+            });
           } else if (execPlan.command === "reboot") {
             setLogs((prev: any[]) => [...prev, `REBOOTING CONSOLE...`]);
             

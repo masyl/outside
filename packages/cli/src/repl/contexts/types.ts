@@ -9,4 +9,5 @@ export interface IContext {
   getAvailableCommands(): string[];
   translateInput(tokens: string[], routeParams: Record<string, string>): CommandExecution | null;
   getAutocomplete(tokens: string[], routeParams: Record<string, string>): Promise<string[]> | string[];
+  getListData(routeParams: Record<string, string>): Promise<Record<string, string[]>> | Record<string, string[]>;
 }

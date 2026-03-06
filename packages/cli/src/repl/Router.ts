@@ -64,6 +64,15 @@ export class ContextRouter {
     return result;
   }
 
+  public async getListData(): Promise<Record<string, string[]>> {
+    const match = this.getMatch(this.currentPath);
+    if (!match || !match.context) return {};
+    if (match.context.getListData) {
+      return await match.context.getListData(match.params || {});
+    }
+    return {};
+  }
+
   public translate(input: string): CommandExecution | null {
     const tokens = input.split(" ").filter(Boolean);
     if (tokens.length === 0) return null;
