@@ -3,7 +3,7 @@ import { CommandExecution } from "./types.ts";
 
 export class DevTracksContext extends BaseContext {
   getContextCommands(): string[] {
-    return ["list", "ls", "create", "destroy", "andon"];
+    return ["create", "destroy"];
   }
 
   translateContextInput(tokens: string[], routeParams: Record<string, string>): CommandExecution | null {
@@ -16,10 +16,6 @@ export class DevTracksContext extends BaseContext {
       return { isInternal: false, command: "track", args: ["list", ...tokens.slice(1)], options: {} };
     }
 
-    // Implicit cd into a track (assumed to be a trackName input instead of a command)
-    // Only if it doesn't look like a global command
-    const globals = ["help", "quit", "clear", "cd", "chdir", "status", "andon"];
-    if (globals.includes(tokens[0])) return null;
-    return { isInternal: true, command: "cd", args: [`/dev/tracks/${tokens[0]}`], options: {} };
+    return null;
   }
 }
